@@ -156,10 +156,10 @@ src/locales/              # 자동 생성 (직접 수정 금지)
 | Repository | Description |
 |------------|-------------|
 | [그루](https://github.com/lshdainty/groo) | 통합 레포지토리 (서비스 소개) |
-| [porest-hr-back](https://github.com/lshdainty/porest-hr-back) | HR 백엔드 |
+| [porest-hr-back](https://github.com/lshdainty/groo-ieum-back) | HR 백엔드 |
 | [groo-core](https://github.com/lshdainty/groo-core) | 공통 라이브러리 |
-| [porest-sso-back](https://github.com/lshdainty/porest-sso-back) | SSO 백엔드 |
-| [porest-sso-front](https://github.com/lshdainty/porest-sso-front) | SSO 프론트엔드 |
+| [porest-sso-back](https://github.com/lshdainty/groo-sso-back) | SSO 백엔드 |
+| [porest-sso-front](https://github.com/lshdainty/groo-sso-front) | SSO 프론트엔드 |
 
 ---
 
