@@ -40,6 +40,7 @@ import { toast } from 'sonner'
 import dayjs from 'dayjs'
 import { HolidayEditDialog } from './HolidayEditDialog'
 import { HolidayDeleteDialog } from './HolidayDeleteDialog'
+import { claimFailure } from '@/shared/api/failure'
 
 interface BulkGenerateHolidayDialogProps {
   trigger?: React.ReactNode
@@ -232,7 +233,9 @@ const BulkGenerateHolidayDialog = ({
           onSuccess?.()
         },
         onError: (error) => {
-          toast.error(error.message || t('holiday.bulkSaveError'))
+          // 서버 글 · axios 영어 글은 쓰지 않고 고정 글로
+          claimFailure(error)
+          toast.error(t('holiday.bulkSaveError'))
         },
       }
     )

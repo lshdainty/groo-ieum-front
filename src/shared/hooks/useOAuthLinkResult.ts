@@ -1,6 +1,6 @@
 'use client'
 
-import { toast } from '@/shared/ui/shadcn/sonner'
+import { useSnackbar } from '@/shared/ds/snackbar'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams, useNavigate } from 'react-router-dom'
@@ -14,6 +14,7 @@ export const useOAuthLinkResult = (options?: UseOAuthLinkResultOptions) => {
   const { t } = useTranslation('user')
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const snackbar = useSnackbar()
   const processedRef = useRef(false)
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export const useOAuthLinkResult = (options?: UseOAuthLinkResultOptions) => {
     processedRef.current = true
 
     if (oauthLinkResult === 'success') {
-      toast.success(t('oauthLink.success'))
+      snackbar.show({ message: t('oauthLink.success'), tone: 'positive' })
       options?.onSuccess?.()
     } else if (oauthLinkResult === 'error') {
       let errorMessage = t('oauthLink.error')
@@ -41,7 +42,7 @@ export const useOAuthLinkResult = (options?: UseOAuthLinkResultOptions) => {
         errorMessage = t('oauthLink.userNotFound')
       }
 
-      toast.error(errorMessage)
+      snackbar.show({ message: errorMessage, tone: 'critical' })
       options?.onError?.(errorCode || 'unknown')
     }
 
@@ -54,5 +55,5 @@ export const useOAuthLinkResult = (options?: UseOAuthLinkResultOptions) => {
     const newPath = window.location.pathname + (newSearch ? `?${newSearch}` : '')
 
     navigate(newPath, { replace: true })
-  }, [searchParams, navigate, t, options])
+  }, [searchParams, navigate, t, options, snackbar])
 }

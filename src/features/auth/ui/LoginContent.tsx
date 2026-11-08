@@ -4,7 +4,7 @@ import LogoDark from '@/shared/assets/img/groo_dark.svg';
 import { Button } from '@/shared/ui/shadcn/button';
 import { Card, CardContent } from '@/shared/ui/shadcn/card';
 import { Spinner } from '@/shared/ui/shadcn/spinner';
-import { useTheme } from '@/shared/ui/shadcn/themeProvider';
+import { useTheme } from '@/shared/ui/theme/theme-context';
 import { config } from '@/shared/config'
 import { cn } from '@/shared/lib'
 import { generateCodeVerifier, codeChallenge, generateState, savePkce } from '@/features/auth/lib/pkce';
@@ -50,7 +50,7 @@ const LoginContent = ({ className, ...props }: LoginContentProps) => {
  */
 const LoginForm = () => {
   const { t } = useTranslation('login');
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   // SSO로 리다이렉트 (PKCE 인가코드 흐름)

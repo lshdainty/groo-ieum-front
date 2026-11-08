@@ -3,7 +3,7 @@ import LogoDark from '@/shared/assets/img/groo_dark.svg';
 import { Button } from '@/shared/ui/shadcn/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/shadcn/card';
 import { Spinner } from '@/shared/ui/shadcn/spinner';
-import { useTheme } from '@/shared/ui/shadcn/themeProvider';
+import { useTheme } from '@/shared/ui/theme/theme-context';
 import { config } from '@/shared/config'
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
  */
 const SignUpContent = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const { t } = useTranslation('login');
   const [isRedirecting, setIsRedirecting] = useState(false);
 

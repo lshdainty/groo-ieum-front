@@ -21,6 +21,7 @@ import { useEffect } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
+import { claimFailure } from '@/shared/api/failure'
 
 const createFormSchema = (t: (key: string) => string) =>
   z.object({
@@ -84,7 +85,9 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
           onOpenChange(false);
         },
         onError: (error) => {
-          toast.error(error.message || t('passwordChangeError'));
+          // 서버 글 · axios 영어 글은 쓰지 않고 고정 글로
+          claimFailure(error);
+          toast.error(t('passwordChangeError'));
         },
       }
     );

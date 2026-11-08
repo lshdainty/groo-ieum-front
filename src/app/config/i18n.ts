@@ -116,4 +116,11 @@ i18n
     }
   })
 
+// 문서 언어를 화면 언어에 맞춘다(낭독기 · 하이픈 · 글꼴 선택) — index.html 의 lang 은 한국어가 기본값
+const syncDocumentLang = (lng: string | undefined) => {
+  document.documentElement.lang = lng?.startsWith('en') ? 'en' : 'ko'
+}
+syncDocumentLang(i18n.resolvedLanguage)
+i18n.on('languageChanged', syncDocumentLang)
+
 export default i18n

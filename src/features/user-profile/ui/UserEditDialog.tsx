@@ -33,6 +33,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
+import { claimFailure } from '@/shared/api/failure'
 
 const createFormSchema = (t: (key: string) => string, tc: (key: string) => string) => z.object({
   user_name: z.string().min(1, { message: t('edit.nameRequired') }),
@@ -179,7 +180,9 @@ const UserEditDialog = ({ open, onOpenChange, user, onSave }: UserEditDialogProp
       setTimeout(() => setUploadSuccess(false), 3000);
       
     } catch (error) {
-      setUploadError(error instanceof Error ? error.message : tc('unknownError'));
+      // 서버 글 · axios 영어 글은 쓰지 않고 고정 글로
+      claimFailure(error);
+      setUploadError(tc('failure.write'));
     } finally {
       // 파일 입력 초기화
       if (fileInputRef.current) {

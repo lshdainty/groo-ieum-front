@@ -1,7 +1,7 @@
-import { toast } from '@/shared/ui/shadcn/sonner'
 import { config } from '@/shared/config'
-import axios, { type AxiosError, type AxiosResponse } from 'axios'
+import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import type { ApiErrorResponse } from '@/shared/types/api'
+import { beginAttempt, endChain } from '@/shared/api/request-budget'
 
 const baseURL = config.apiBaseUrl
 
@@ -14,12 +14,15 @@ export const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use(
-  (config: any) => {
+  (config: InternalAxiosRequestConfig) => {
     // i18n 언어 설정을 Accept-Language 헤더로 전달 (서버 다국어 지원)
     const language = localStorage.getItem('i18nextLng')
     if (language) {
       config.headers['Accept-Language'] = language
     }
+
+    // 불러오기는 처음 요청부터 다시 시도까지 합쳐 10초 안에 끝낸다(request-budget.ts)
+    beginAttempt(config)
 
     return config
   },
@@ -28,15 +31,20 @@ apiClient.interceptors.request.use(
   }
 )
 
+/*
+ * 응답 인터셉터 — 알림을 띄우지 않는다(전역 서버 원문 토스트 없음, DESIGN.hr.md 전역 오류 토스트 걷기).
+ *  - 401 은 /login 으로 보낸다(세션 만료).
+ *  - 그 밖의 실패는 그대로 호출처에 던진다. 읽기(GET)는 그 화면이 자리에서 말하고, 쓰기(POST · PUT · PATCH · DELETE)는
+ *    호출처가 자기 고정 글로 알리거나, 아무도 안 알렸으면 QueryProvider 의 쓰기 실패 안내(고정 글 Snackbar)가 맡는다.
+ *  - 서버 글 · axios 영어 글은 화면에 그리지 않는다.
+ */
 apiClient.interceptors.response.use(
   (resp: AxiosResponse) => {
+    endChain(resp.config)
     // 성공 응답은 그대로 data 부분만 반환
     return resp.data
   },
   async (err: AxiosError<ApiErrorResponse>) => {
-    const message = err.response?.data?.message || err.message || 'An unknown error occurred.'
-    toast.error(message)
-
     // 401 Unauthorized 에러 발생 시 로그인 페이지로 리다이렉트
     if (err.response?.status === 401) {
       // 현재 페이지가 로그인/콜백 페이지가 아닐 때만 리다이렉트

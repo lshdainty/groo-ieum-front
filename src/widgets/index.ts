@@ -1,10 +1,7 @@
 // Widgets - Root Public API
 
 // Layout
-export { Layout, LayoutHeader } from '@/widgets/layout'
-
-// Sidebar
-export { AppSidebar } from '@/widgets/sidebar'
+export { Layout, NotFoundScreen, ScreenBody, ScreenTitleRow } from '@/widgets/layout'
 
 // Notice Popup
 export { NoticePopupContainer, NoticePopup } from '@/widgets/notice-popup'

@@ -27,6 +27,7 @@ import {
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { claimFailure } from '@/shared/api/failure'
 
 const ReportContent = () => {
   const { t } = useTranslation('work');
@@ -170,6 +171,7 @@ const ReportContent = () => {
       setEditData(null);
     } catch (error) {
       console.error('Save failed:', error);
+      claimFailure(error);
       toast.error(t('report.saveFailed'));
     }
   };
@@ -236,6 +238,7 @@ const ReportContent = () => {
       setSelectedRows([]);
     } catch (error) {
       console.error('Duplicate failed:', error);
+      claimFailure(error);
       toast.error(t('report.duplicateFailed'));
     }
   };
@@ -261,6 +264,7 @@ const ReportContent = () => {
       setDeleteTarget(null);
     } catch (error) {
       console.error('Delete failed:', error);
+      claimFailure(error);
       toast.error(t('report.deleteFailed'));
     }
   };
@@ -274,6 +278,7 @@ const ReportContent = () => {
       await refetchWorkHistories();
     } catch (error) {
       console.error('Batch register failed:', error);
+      claimFailure(error);
       toast.error(t('report.batchRegisterFailed'));
     }
   };
@@ -295,6 +300,7 @@ const ReportContent = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Excel download failed:', error);
+      claimFailure(error);
       toast.error(t('report.excelDownloadFailed'));
     }
   };

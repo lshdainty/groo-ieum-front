@@ -12,6 +12,7 @@ import {
 import { toast } from '@/shared/ui/shadcn/sonner'
 import { Spinner } from '@/shared/ui/shadcn/spinner'
 import { useTranslation } from 'react-i18next'
+import { claimFailure } from '@/shared/api/failure'
 
 interface UserPasswordResetDialogProps {
   open: boolean
@@ -31,7 +32,8 @@ const UserPasswordResetDialog = ({ open, onOpenChange, userId, userName }: UserP
       toast.success(t('user.passwordResetSuccess'))
       onOpenChange(false)
     } catch (error) {
-      toast.error((error as Error).message || t('user.passwordResetError'))
+      claimFailure(error)
+      toast.error(t('user.passwordResetError'))
     }
   }
 

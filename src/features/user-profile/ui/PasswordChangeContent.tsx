@@ -6,7 +6,7 @@ import { Field, FieldError, FieldLabel } from '@/shared/ui/shadcn/field';
 import { Input } from '@/shared/ui/shadcn/input';
 import { toast } from '@/shared/ui/shadcn/sonner';
 import { Spinner } from '@/shared/ui/shadcn/spinner';
-import { useTheme } from '@/shared/ui/shadcn/themeProvider';
+import { useTheme } from '@/shared/ui/theme/theme-context';
 import { PasswordRequirements } from '@/shared/ui/password-requirements/PasswordRequirements';
 import { PasswordMatch } from '@/shared/ui/password-requirements/PasswordMatch';
 import { useUser } from '@/entities/session';
@@ -18,6 +18,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
+import { claimFailure } from '@/shared/api/failure'
 
 interface PasswordChangeContentProps extends React.ComponentProps<'div'> {}
 
@@ -54,7 +55,7 @@ const PasswordChangeForm = () => {
   const { t } = useTranslation('user');
   const { t: tc } = useTranslation('common');
   const navigate = useNavigate();
-  const { theme } = useTheme();
+  const { resolvedTheme: theme } = useTheme();
   const { refreshUser, logout } = useUser();
   const changePasswordMutation = useChangePasswordMutation();
 
@@ -84,7 +85,9 @@ const PasswordChangeForm = () => {
           navigate('/dashboard');
         },
         onError: (error) => {
-          toast.error(error.message || t('passwordChangeError'));
+          // 서버 글 · axios 영어 글은 쓰지 않고 고정 글로
+          claimFailure(error);
+          toast.error(t('passwordChangeError'));
         },
       }
     );

@@ -19,6 +19,7 @@ import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { claimFailure } from '@/shared/api/failure'
 
 interface RoleManagementPanelInnerProps {
   roles: RoleResp[];
@@ -141,6 +142,7 @@ const RoleManagementPanelInner = ({ roles, authorities }: RoleManagementPanelInn
         toast.success(t('authority.roleDeleted'));
       } catch (error) {
         console.error("Failed to delete role:", error);
+        claimFailure(error);
         toast.error(t('authority.roleDeleteFailed'));
       }
     }
@@ -196,6 +198,7 @@ const RoleManagementPanelInner = ({ roles, authorities }: RoleManagementPanelInn
       await refetchRoles();
     } catch (error) {
       console.error("Failed to save role:", error);
+      claimFailure(error);
       toast.error(t('authority.roleSaveFailed'));
     }
   };
@@ -233,6 +236,7 @@ const RoleManagementPanelInner = ({ roles, authorities }: RoleManagementPanelInn
       await refetchRoles();
     } catch (error) {
       console.error("Failed to save permissions:", error);
+      claimFailure(error);
       toast.error(t('authority.permissionsSaveFailed'));
     }
   };

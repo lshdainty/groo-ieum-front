@@ -1,33 +1,95 @@
-import {
-  SidebarInset,
-  SidebarProvider,
-} from '@/shared/ui/shadcn/sidebar';
-import { AppSidebar } from '@/widgets/sidebar';
-import { LayoutHeader } from '@/widgets/layout/ui/LayoutHeader';
-import { NoticePopupContainer } from '@/widgets/notice-popup';
-import { useOAuthLinkResult } from '@/shared/hooks/useOAuthLinkResult'
-import { Outlet } from 'react-router-dom';
+import { useEffect, useRef } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
-export function Layout() {
+import { focusScreenTitle, TopNavigationProvider, useScreenTitle } from '@/shared/ds/top-navigation'
+import { usePermission } from '@/entities/session'
+import { useOAuthLinkResult } from '@/shared/hooks/useOAuthLinkResult'
+import { NoticePopupContainer } from '@/widgets/notice-popup'
+import { useDesktop } from '../lib/use-desktop'
+import { buildNav, screenTitleKeyOf } from '../model/nav'
+import { AccountDialogsProvider } from './AccountDialogs'
+import { HrSidebar } from './HrSidebar'
+import { PhoneFrame } from './PhoneFrame'
+
+/**
+ * 화면을 옮길 때의 틀 몫 — 문서 제목 "{화면 제목} - 그루 이음" 과, 옮긴 뒤 본문 맨 위 + 제목에 초점(그루 담다 `AppLayout.tsx` ScreenEffects 와 같다).
+ * TopNavigationProvider 안에 둔다(제품 이름을 거기서 읽는다). 처음 열 때는 초점을 훔치지 않는다.
+ */
+function ScreenEffects() {
+  const { t } = useTranslation('sidebar')
+  const { t: tc } = useTranslation('common')
+  const { pathname } = useLocation()
+  const titleKey = screenTitleKeyOf(pathname)
+  // 메뉴에 없는 주소(404)는 "페이지를 찾을 수 없어요 - 그루 이음"
+  useScreenTitle(titleKey ? t(titleKey) : tc('notFound.title'))
+  const last = useRef(pathname)
+  useEffect(() => {
+    if (last.current === pathname) return
+    last.current = pathname
+    // 새 화면이 그려진 다음 프레임에 — 제목(data-screen-title)이 DOM 에 있어야 초점이 간다
+    const frame = requestAnimationFrame(() => focusScreenTitle())
+    return () => cancelAnimationFrame(frame)
+  }, [pathname])
+  return null
+}
+
+/** 화면 맨 앞 "본문 바로가기" — 키보드 초점이 오면 보이고, 누르면 main 으로 간다(랜드마크) */
+function SkipLink() {
+  const { t } = useTranslation('sidebar')
+  return (
+    <a
+      href='#main'
+      onClick={(e) => {
+        e.preventDefault()
+        document.getElementById('main')?.focus()
+      }}
+      className='sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-x4 focus-visible:top-x4 focus-visible:z-(--z-modal-content) focus-visible:rounded-r3 focus-visible:bg-bg-layer-floating focus-visible:px-x4 focus-visible:py-x3 focus-visible:text-t4 focus-visible:font-bold focus-visible:text-fg-neutral focus-visible:shadow-(--shadow-s3) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring'
+    >
+      {t('skipToMain')}
+    </a>
+  )
+}
+
+/**
+ * 앱 틀(I-22 D 22 · 23) — 768 이상: 사이드바(240 / 56) + 오른쪽 본문(회색 바닥, 본문만 스크롤). 미만: 상단 바 + ☰ 옆 패널, 하단 탭 없음.
+ * 머리 · 빵부스러기 · 머리 테마 단추는 없다(HR 은 데스크톱 머리를 두지 않는다). 본문 여백 · 제목 줄은 화면이 ScreenBody · ScreenTitleRow 로 둔다.
+ */
+function Shell() {
+  const desktop = useDesktop()
+  const { hasAnyPermission } = usePermission()
+  const groups = buildNav(hasAnyPermission)
+
   // OAuth 연동 결과 처리 (URL 파라미터 감지)
-  useOAuthLinkResult();
+  useOAuthLinkResult()
 
   return (
-    <SidebarProvider
-      className='h-screen overflow-hidden'
-      style={{
-        '--sidebar-width': 'calc(var(--spacing) * 72)',
-        '--header-height': 'calc(var(--spacing) * 12)',
-      } as React.CSSProperties}
-    >
-      <AppSidebar variant='inset' />
-      <SidebarInset className='overflow-hidden'>
-        <LayoutHeader />
-        <div className='flex-1 overflow-auto'>
-          <Outlet/>
-        </div>
-      </SidebarInset>
+    <div className='flex h-svh'>
+      <SkipLink />
+      {desktop && <HrSidebar groups={groups} />}
+      <div className='flex min-w-0 flex-1 flex-col overflow-hidden bg-bg-layer-basement'>
+        {!desktop && <PhoneFrame groups={groups} />}
+        {/* 머리는 main 밖이다(banner) — 본문만 스크롤한다 */}
+        <main
+          id='main'
+          tabIndex={-1}
+          className='relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-[env(safe-area-inset-bottom)] outline-none'
+        >
+          <Outlet />
+        </main>
+      </div>
       <NoticePopupContainer />
-    </SidebarProvider>
+    </div>
+  )
+}
+
+export function Layout() {
+  return (
+    <TopNavigationProvider product='그루 이음'>
+      <ScreenEffects />
+      <AccountDialogsProvider>
+        <Shell />
+      </AccountDialogsProvider>
+    </TopNavigationProvider>
   )
 }
