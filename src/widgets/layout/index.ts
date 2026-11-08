@@ -1,2 +1,3 @@
 export { Layout } from '@/widgets/layout/ui/Layout'
-export { LayoutHeader } from '@/widgets/layout/ui/LayoutHeader'
+export { NotFoundScreen } from '@/widgets/layout/ui/NotFoundScreen'
+export { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'

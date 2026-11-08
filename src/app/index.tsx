@@ -1,10 +1,13 @@
 import { EnvWatermark } from '@/shared/ui/env-watermark/EnvWatermark'
 import { Toaster } from '@/shared/ui/shadcn/sonner'
-import { ThemeProvider } from '@/shared/ui/shadcn/themeProvider'
+import { ThemeProvider } from '@/shared/ui/theme/theme-provider'
+import { LoadingAnnouncer } from '@/shared/ds/skeleton'
+import { SnackbarProvider } from '@/shared/ds/snackbar'
+import { TooltipProvider } from '@/shared/ds/tooltip'
 import { PermissionProvider } from '@/entities/session'
 import { UserProvider } from '@/entities/session'
 import { apiClient } from '@/shared/api'
-import { QueryProvider } from '@/app/providers'
+import { QueryProvider, WriteFailureBridge } from '@/app/providers'
 import { AppRouter } from '@/app/router'
 import { BrowserRouter } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
@@ -32,17 +35,25 @@ export function App() {
   }
 
   return (
-    <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
+    <ThemeProvider defaultTheme='system' storageKey='vite-ui-theme'>
       <EnvWatermark />
       <Toaster position="top-center" />
       <QueryProvider>
-        <BrowserRouter basename='/'>
-          <UserProvider>
-            <PermissionProvider>
-              <AppRouter />
-            </PermissionProvider>
-          </UserProvider>
-        </BrowserRouter>
+        <SnackbarProvider>
+          <TooltipProvider>
+            {/* 불러오는 중 상태 글 — 앱 맨 위에 한 번(skeleton.md). 스켈레톤이 마운트하며 여기에 알린다 */}
+            <LoadingAnnouncer>
+              <WriteFailureBridge />
+              <BrowserRouter basename='/'>
+                <UserProvider>
+                  <PermissionProvider>
+                    <AppRouter />
+                  </PermissionProvider>
+                </UserProvider>
+              </BrowserRouter>
+            </LoadingAnnouncer>
+          </TooltipProvider>
+        </SnackbarProvider>
       </QueryProvider>
     </ThemeProvider>
   )

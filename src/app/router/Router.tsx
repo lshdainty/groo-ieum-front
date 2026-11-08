@@ -3,7 +3,7 @@ import Loading from '@/shared/ui/loading/Loading'
 import { useUser } from '@/entities/session'
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 
-import { Layout } from '@/widgets/layout'
+import { Layout, NotFoundScreen } from '@/widgets/layout'
 import NotFound from '@/shared/ui/not-found/NotFound'
 import { AuthCallbackPage } from '@/pages/auth-callback'
 import { LoginPage } from '@/pages/login'
@@ -83,6 +83,9 @@ export function AppRouter() {
   // 비밀번호 변경 필요 여부
   const requiresPasswordChange = loginUser?.password_change_required === 'Y'
 
+  // 틀을 그리는 사람 — 로그인했고 비밀번호 변경이 필요 없는 사람
+  const framed = isAuthenticated && !requiresPasswordChange
+
   const flattenedRoutes = flattenRoutes(routesConfig)
   const routeElements = generateRouteElements(flattenedRoutes)
 
@@ -120,9 +123,12 @@ export function AppRouter() {
         <Layout/>
       }>
         {routeElements}
+        {/* 로그인한 사람의 404 는 틀 안에서(H-A14 A) */}
+        {framed && <Route path='*' element={<NotFoundScreen/>} />}
       </Route>
 
-      <Route path='/*' element={<NotFound/>} />
+      {/* 로그인 전 404 — 흰 면(22-2 가 옮긴다) */}
+      {!framed && <Route path='/*' element={<NotFound/>} />}
     </Routes>
   )
 }

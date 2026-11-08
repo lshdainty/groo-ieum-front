@@ -1526,7 +1526,7 @@ common,failure.code.workStarted,이미 시작한 근무예요.,Work has already 
 common,failure.code.workEnded,이미 끝난 근무예요.,Work has already ended.
 common,failure.code.workTime,시작 시간과 끝 시간을 확인해주세요.,Check the start and end times.
 common,failure.code.workCodeDuplicate,이미 있는 업무 코드예요.,This work code already exists.
-common,failure.code.workCodeParent,올바르지 않은 상위 업무 코드예요.,The parent work code is not valid.
+common,failure.code.workCodeParent,고를 수 없는 상위 업무 코드예요.,The parent work code is not valid.
 common,failure.code.workCodeRequired,업무 코드를 입력해주세요.,Enter a work code.
 common,failure.code.yearMonth,연도와 월을 골라주세요.,Select a year and month.
 common,failure.code.deptExists,이미 있는 부서예요.,This department already exists.
