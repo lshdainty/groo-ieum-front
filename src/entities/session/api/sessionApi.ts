@@ -40,7 +40,9 @@ export const sessionApi = {
   getLoginCheck: async (): Promise<GetLoginCheck> => {
     const resp: ApiResponse<GetLoginCheck> = await apiClient.request({
       method: 'get',
-      url: `/login/check`
+      url: `/login/check`,
+      // 세션 확인의 401 은 "로그인 안 됨" 이라는 답이다 — 앱이 복귀 경로를 붙여 /login 으로 보낸다
+      skipAuthRedirect: true,
     })
 
     if (!resp.success) throw new Error(resp.message)

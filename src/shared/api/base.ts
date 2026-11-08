@@ -2,6 +2,14 @@ import { config } from '@/shared/config'
 import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import type { ApiErrorResponse } from '@/shared/types/api'
 import { beginAttempt, endChain } from '@/shared/api/request-budget'
+import { loginPathFor } from '@/shared/lib/return-path'
+
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    /** 401 이어도 /login 으로 보내지 않는다 — 세션 확인(/login/check)은 호출처가 복귀 경로를 붙여 보낸다 */
+    skipAuthRedirect?: boolean
+  }
+}
 
 const baseURL = config.apiBaseUrl
 
@@ -45,11 +53,11 @@ apiClient.interceptors.response.use(
     return resp.data
   },
   async (err: AxiosError<ApiErrorResponse>) => {
-    // 401 Unauthorized 에러 발생 시 로그인 페이지로 리다이렉트
-    if (err.response?.status === 401) {
+    // 401 Unauthorized(세션 만료) 에러 발생 시 로그인 페이지로 리다이렉트 — 열려 있던 화면을 복귀 경로로 싣는다
+    if (err.response?.status === 401 && !err.config?.skipAuthRedirect) {
       // 현재 페이지가 로그인/콜백 페이지가 아닐 때만 리다이렉트
       if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/auth/callback')) {
-        window.location.href = '/login'
+        window.location.href = loginPathFor(`${window.location.pathname}${window.location.search}${window.location.hash}`)
       }
     }
     return Promise.reject(err)

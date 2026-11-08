@@ -1,7 +1,7 @@
 import PermissionGuard from '@/shared/ui/require-permission/PermissionGuard'
-import Loading from '@/shared/ui/loading/Loading'
 import { useUser } from '@/entities/session'
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 import { Layout, NotFoundScreen } from '@/widgets/layout'
 import NotFound from '@/shared/ui/not-found/NotFound'
@@ -9,6 +9,8 @@ import { AuthCallbackPage } from '@/pages/auth-callback'
 import { LoginPage } from '@/pages/login'
 import { PasswordChangePage } from '@/pages/password-change'
 import { SignUpPage } from '@/pages/signup'
+import { ResultScreen, WaitingScreen } from '@/widgets/outside'
+import { loginPathFor, safeReturnPath } from '@/shared/lib/return-path'
 
 // 설정 파일에서 import
 import { RouteConfig, flattenRoutes, routesConfig } from '@/app/config/routes.config'
@@ -73,12 +75,31 @@ const generateRouteElements = (routes: RouteConfig[], parentPath = ''): React.Re
 }
 
 export function AppRouter() {
-  const { isLoading, isAuthenticated, loginUser } = useUser()
+  const { sessionStatus, isAuthenticated, loginUser, retrySession, isRetrying } = useUser()
+  const { t } = useTranslation('common')
+  const location = useLocation()
 
-  // 초기 세션 확인 중
-  if (isLoading) {
-    return <Loading />
+  // 세션 확인 중 — 앱 틀을 그리지 않는다. 1초 안에는 아무것도 그리지 않고, 1초부터 원, 5초에 "평소보다 오래 걸리고 있어요."(I-22 G 33)
+  if (sessionStatus === 'checking') {
+    return <WaitingScreen label={t('session.checking')} />
   }
+
+  // 세션을 확인하지 못했다(5xx · 네트워크 · 시간 초과) — 로그인 안 됨이 아니므로 로그인으로 보내지 않고 다시 시도하게 한다
+  if (sessionStatus === 'error') {
+    return (
+      <ResultScreen
+        kind='failure'
+        title={t('session.failedTitle')}
+        description={t('session.failedDescription')}
+        action={{ label: t('session.retry'), onClick: retrySession, loading: isRetrying }}
+      />
+    )
+  }
+
+  // 로그인 안 됨이면 /login 으로 — 원래 열려던 주소를 복귀 경로(?next=)로 싣는다(같은 출처 경로만 · return-path.ts)
+  const returnTo = `${location.pathname}${location.search}${location.hash}`
+  // 이미 로그인한 사람이 /login?next= 로 오면 그 자리로, 없으면 /dashboard
+  const afterLogin = safeReturnPath(new URLSearchParams(location.search).get('next')) ?? '/dashboard'
 
   // 비밀번호 변경 필요 여부
   const requiresPasswordChange = loginUser?.password_change_required === 'Y'
@@ -91,10 +112,10 @@ export function AppRouter() {
 
   return (
     <Routes>
-      {/* 로그인 - 이미 인증된 경우 대시보드로 리다이렉트 */}
+      {/* 로그인 - 이미 인증된 경우 돌아갈 자리(없으면 대시보드)로 리다이렉트 */}
       <Route
         path='/login'
-        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage/>}
+        element={isAuthenticated ? <Navigate to={afterLogin} replace /> : <LoginPage/>}
       />
       {/* SSO 인증 콜백 */}
       <Route
@@ -118,7 +139,7 @@ export function AppRouter() {
 
       {/* 보호된 라우트 - 인증 안된 경우 로그인으로, 비밀번호 변경 필요시 비밀번호 변경 페이지로 리다이렉트 */}
       <Route element={
-        !isAuthenticated ? <Navigate to="/login" replace /> :
+        !isAuthenticated ? <Navigate to={loginPathFor(returnTo)} replace /> :
         requiresPasswordChange ? <Navigate to="/password-change" replace /> :
         <Layout/>
       }>

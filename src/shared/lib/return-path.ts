@@ -28,7 +28,7 @@ export const safeReturnPath = (raw: string | null | undefined): string | null =>
 /** `/login` 주소 — 돌아갈 자리가 있으면 `?next=` 로 싣는다 */
 export const loginPathFor = (returnTo: string | null | undefined): string => {
   const safe = safeReturnPath(returnTo)
-  return safe && safe !== '/' ? `/login?next=${encodeURIComponent(safe)}` : '/login'
+  return safe && safe !== '/' && safe !== '/dashboard' ? `/login?next=${encodeURIComponent(safe)}` : '/login'
 }
 
 /** 로그인 화면이 SSO 로 떠나기 전에 보관한다(없으면 이전 값을 지운다) */
