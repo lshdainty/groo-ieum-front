@@ -1493,3 +1493,5 @@ ds,attachment.defaultName,파일 {{suffix}},"Files, {{suffix}}"
 ds,attachment.dropHere,파일을 여기로 끌어다 놓으세요,Drag files here
 ds,attachment.pick,파일 선택,Choose files
 ds,topNavigation.searchTitle,검색,Search
+ds,iconPicker.emptyTitle,"""{{query}}""에 대한 아이콘이 없어요","No icons for ""{{query}}"""
+ds,searchableList.emptyFor,"""{{query}}""에 대한 검색 결과가 없어요","No results for ""{{query}}"""
