@@ -1267,8 +1267,6 @@ login,resetPassword.emailInvalid,올바른 이메일 형식을 입력해주세�
 login,idRequired,아이디를 입력해주세요.,Please enter your ID.
 login,passwordRequired,비밀번호를 입력해주세요.,Please enter your password.
 login,tab.login,로그인,Login
-user,passwordChangeRequired,비밀번호 변경이 필요합니다,Password Change Required
-user,passwordChangeRequiredDescription,임시 비밀번호를 사용 중입니다. 보안을 위해 새 비밀번호로 변경해주세요.,You are using a temporary password. Please change to a new password for security.
 user,oauthLink.title,소셜 계정 연동,Social Account Link
 user,oauthLink.description,소셜 계정을 연동하면 해당 계정으로도 로그인할 수 있습니다.,Link your social account to enable login with that account.
 user,oauthLink.google,Google 계정 연동,Link Google Account
@@ -1281,7 +1279,6 @@ user,oauthLink.userNotFound,세션이 만료되었습니다. 다시 로그인해
 user,oauthLink.unlink,연동 해제,Unlink
 user,oauthLink.unlinkSuccess,소셜 계정 연동이 해제되었습니다.,Social account has been unlinked.
 user,oauthLink.unlinkError,소셜 계정 연동 해제에 실패했습니다.,Failed to unlink social account.
-common,or,또는,or
 common,logout,로그아웃,Log out
 ds,common.close,닫기,Close
 ds,common.news,새 소식,New activity
@@ -1489,3 +1486,23 @@ auth,callback.finishing,로그인 마무리 중,Finishing sign-in
 login,sso.description,그루 계정으로 로그인해주세요.,Sign in with your 그루 account.
 login,sso.login,그루 계정으로 로그인,Sign in with 그루
 login,sso.failed,로그인을 시작하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't start sign-in. Please try again in a moment.
+user,pwForce.title,비밀번호를 바꿔주세요,Change your password
+user,pwForce.description,임시 비밀번호로 로그인했어요. 계속 쓰려면 새 비밀번호로 바꿔주세요.,"You signed in with a temporary password. To keep using 그루 이음, change it to a new password."
+user,pwForce.docTitle,비밀번호 바꾸기,Change password
+user,pwForce.current,임시 비밀번호,Temporary password
+user,pwForce.currentPlaceholder,메일로 받은 비밀번호,The password from your email
+user,pwForce.new,새 비밀번호,New password
+user,pwForce.confirm,새 비밀번호 확인,Confirm new password
+user,pwForce.confirmPlaceholder,한 번 더 입력해주세요,Enter it once more
+user,pwForce.submit,비밀번호 바꾸기,Change password
+user,pwForce.logout,로그아웃,Log out
+user,pwForce.done,비밀번호를 바꿨어요.,Your password has been changed.
+user,pwForce.error.currentRequired,임시 비밀번호를 입력해주세요.,Enter your temporary password.
+user,pwForce.error.newRequired,새 비밀번호를 입력해주세요.,Enter a new password.
+user,pwForce.error.confirmRequired,새 비밀번호를 한 번 더 입력해주세요.,Enter the new password once more.
+user,pwForce.error.tooShort,비밀번호는 8자 이상이어야 해요.,The password must be at least 8 characters.
+user,pwForce.error.noSpecial,비밀번호에 특수문자를 1자 이상 넣어주세요.,Include at least 1 special character.
+user,pwForce.error.same,임시 비밀번호와 다른 비밀번호를 넣어주세요.,Use a password different from the temporary one.
+user,pwForce.error.mismatch,비밀번호가 서로 달라요.,The passwords do not match.
+user,pwForce.failed.invalid,비밀번호를 바꾸지 못했어요. 임시 비밀번호를 다시 확인해주세요.,Couldn't change your password. Check your temporary password again.
+user,pwForce.failed.later,비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't change your password. Please try again in a moment.
