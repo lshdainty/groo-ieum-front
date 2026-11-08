@@ -3,6 +3,7 @@ import { useUpdateDashboardMutation } from '@/entities/user';
 import i18n from '@/app/config/i18n';
 import { createContext, ReactNode, useCallback, useContext, useRef, useState } from 'react';
 import { defaultLayouts } from '@/features/dashboard/lib/constants';
+import { claimFailure } from '@/shared/api/failure'
 
 interface DashboardContextType {
   layouts: any;
@@ -135,7 +136,8 @@ export const DashboardProvider = ({ children, userId, initialDashboard }: { chil
           setIsToolboxOpen(false);
           setTimeout(() => setIsEditingState(false), 300);
         },
-        onError: () => {
+        onError: (error) => {
+          claimFailure(error);
           toast.error(i18n.t('dashboard:saveError'));
         }
       }

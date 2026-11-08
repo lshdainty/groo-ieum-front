@@ -20,6 +20,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
+import { claimFailure } from '@/shared/api/failure'
 
 interface RoleManagementEmptyProps {
   className?: string;
@@ -68,6 +69,7 @@ const RoleManagementEmpty = ({ className }: RoleManagementEmptyProps) => {
       refetch();
     } catch (error) {
       console.error("Failed to create role:", error);
+      claimFailure(error);
       toast.error(t('authority.roleSaveFailed'));
     }
   };

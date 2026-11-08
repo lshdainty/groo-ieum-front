@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DuesTableContent, EditableDuesData } from '@/features/culture-dues/ui/DuesTableContent';
+import { claimFailure } from '@/shared/api/failure'
 
 interface DuesTableProps {
   yearDues?: GetYearDuesResp[];
@@ -60,6 +61,7 @@ const DuesTable = ({ yearDues = [] }: DuesTableProps) => {
         },
         onError: (error) => {
           console.error('Dues delete failed:', error);
+          claimFailure(error);
           toast.error(t('dues.deleteError'));
         }
       });
@@ -120,6 +122,7 @@ const DuesTable = ({ yearDues = [] }: DuesTableProps) => {
         },
         onError: (error) => {
           console.error('Dues create failed:', error);
+          claimFailure(error);
           toast.error(tc('saveFailed'));
         }
       });
@@ -132,6 +135,7 @@ const DuesTable = ({ yearDues = [] }: DuesTableProps) => {
         },
         onError: (error) => {
           console.error('Dues update failed:', error);
+          claimFailure(error);
           toast.error(tc('saveFailed'));
         }
       });

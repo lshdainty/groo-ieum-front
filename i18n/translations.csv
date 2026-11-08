@@ -61,38 +61,38 @@ login,passwordPlaceholder,비밀번호를 입력해주세요,Enter your password
 login,loginButton,로그인,Sign In
 login,forgotPassword,비밀번호를 잊으셨나요?,Forgot password?
 login,rememberMe,로그인 상태 유지,Remember me
-sidebar,group.skc,SKC,SKC
-sidebar,group.admin,관리자,Admin
-sidebar,menu.home,홈,Home
-sidebar,menu.dashboard,대시보드,Dashboard
+sidebar,menu.dashboard,홈,Home
 sidebar,menu.calendar,캘린더,Calendar
 sidebar,menu.vacation,휴가,Vacation
 sidebar,menu.vacationHistory,휴가 현황,History
 sidebar,menu.vacationApplication,휴가 신청,Application
 sidebar,menu.work,업무,Work
 sidebar,menu.workReport,업무 보고,Report
-sidebar,menu.workSchedule,일정 관리,Schedule
+sidebar,menu.workSchedule,근무 일정,Work schedule
 sidebar,menu.culture,조직문화,Culture
 sidebar,menu.cultureDues,회비,Dues
 sidebar,menu.cultureRegulation,규정,Regulation
-sidebar,menu.admin,관리자,Admin
 sidebar,menu.adminCompany,회사 관리,Company
-sidebar,menu.adminUsers,사용자 관리,Users
-sidebar,menu.adminUsersManagement,초대 및 관리,Invite & Management
-sidebar,menu.adminUsersDepartment,부서 관리,Department
-sidebar,menu.adminVacation,휴가 관리,Vacation
-sidebar,menu.adminVacationApproval,승인 및 부여,Approval & Grant
+sidebar,menu.adminUsersManagement,사용자 관리,Users
+sidebar,menu.adminUsersDepartment,부서 배치,Department members
+sidebar,menu.adminVacationApproval,구성원 휴가,Team leave
 sidebar,menu.adminVacationPolicy,휴가 정책,Policy
 sidebar,menu.adminVacationPlan,휴가 플랜,Plan
 sidebar,menu.adminAuthority,역할 및 권한,Role & Authority
 sidebar,menu.adminHoliday,공휴일 관리,Holiday
 sidebar,menu.adminWork,업무 코드,Work Code
-sidebar,menu.adminNotice,공지사항 관리,Notice
+sidebar,menu.adminNotice,공지사항 관리,Manage notices
 sidebar,menu.notice,공지사항,Notice
-sidebar,footer.account,계정,Account
-sidebar,footer.changePassword,비밀번호 변경,Change Password
+sidebar,footer.account,내 정보,My info
+sidebar,footer.changePassword,비밀번호 바꾸기,Change password
 sidebar,footer.logout,로그아웃,Log out
-sidebar,footer.loggingOut,로그아웃 중...,Logging out...
+sidebar,footer.theme,화면 테마,Theme
+sidebar,footer.accountMenu,{{name}} 계정 메뉴,{{name}} account menu
+sidebar,theme.system,기기 설정,System
+sidebar,theme.light,라이트,Light
+sidebar,theme.dark,다크,Dark
+sidebar,group.manage,관리,Management
+sidebar,skipToMain,본문 바로가기,Skip to main content
 sidebar,footer.oauthLink,소셜 계정 연동,Social Account Link
 admin,company.title,회사 정보,Company Info
 admin,company.editTitle,회사 정보 수정,Edit Company Info
@@ -1251,7 +1251,7 @@ admin,notice.addFirst,첫 번째 공지사항 추가,Add First Notice
 admin,notice.addBtn,추가,Add
 admin,notice.searchPlaceholder,제목으로 검색...,Search by title...
 sidebar,menu.notice,공지사항,Notice
-sidebar,menu.adminNotice,공지사항,Notice
+sidebar,menu.adminNotice,공지사항 관리,Manage notices
 notice,title,공지사항,Notice
 notice,description,중요 공지사항을 확인하세요,Check important notices
 notice,noNotices,등록된 공지사항이 없습니다,No notices available
@@ -1495,3 +1495,58 @@ ds,attachment.pick,파일 선택,Choose files
 ds,topNavigation.searchTitle,검색,Search
 ds,iconPicker.emptyTitle,"""{{query}}""에 대한 아이콘이 없어요","No icons for ""{{query}}"""
 ds,searchableList.emptyFor,"""{{query}}""에 대한 검색 결과가 없어요","No results for ""{{query}}"""
+common,failure.write,저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save. Please try again in a moment.
+common,failure.unconfirmed,저장됐는지 확인하지 못했어요. 목록을 확인한 뒤 다시 시도해주세요.,Could not confirm that it was saved. Check the list and try again.
+common,failure.read,불러오지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not load. Please try again in a moment.
+common,failure.forbidden,이 일을 할 권한이 없어요.,You do not have permission to do this.
+common,app.title,그루 이음,그루 이음
+common,notFound.title,페이지를 찾을 수 없어요,Page not found
+common,notFound.description,주소가 바뀌었거나 지워진 페이지예요. 주소를 다시 확인해주세요.,The address may have changed or the page was removed. Check the address.
+common,notFound.home,홈으로,Go home
+common,notFound.topBar,페이지 없음,Page not found
+common,failure.code.alreadyUser,이미 있는 사용자예요.,This user already exists.
+common,failure.code.invalidPassword,현재 비밀번호가 맞지 않아요.,The current password is incorrect.
+common,failure.code.duplicateEmail,이미 쓰는 이메일이에요.,This email is already in use.
+common,failure.code.emailMismatch,이메일이 맞지 않아요.,The email does not match.
+common,failure.code.confirmMismatch,새 비밀번호와 확인 값이 달라요.,The new password and its confirmation do not match.
+common,failure.code.samePassword,이전과 다른 비밀번호를 입력해주세요.,Enter a password different from the previous one.
+common,failure.code.insufficient,남은 휴가가 모자라요.,Not enough leave remaining.
+common,failure.code.vacationDate,휴가 날짜를 확인해주세요.,Check the leave dates.
+common,failure.code.alreadyApproved,이미 승인된 휴가예요.,This leave is already approved.
+common,failure.code.alreadyRejected,이미 반려된 휴가예요.,This leave is already rejected.
+common,failure.code.cannotCancel,취소할 수 없는 휴가예요.,This leave cannot be canceled.
+common,failure.code.approverCount,결재자 수가 맞지 않아요.,The number of approvers does not match.
+common,failure.code.duplicateApprover,이미 들어 있는 결재자예요.,This approver is already added.
+common,failure.code.selfApproval,내 휴가는 내가 결재할 수 없어요.,You cannot approve your own leave.
+common,failure.code.minuteUsage,분 단위로 쓸 수 없는 휴가예요.,This leave cannot be used in minutes.
+common,failure.code.planExists,이미 있는 휴가 플랜이에요.,This leave plan already exists.
+common,failure.code.userPlanExists,이미 이 사용자에게 부여한 플랜이에요.,This plan is already granted to the user.
+common,failure.code.planPolicyExists,이미 플랜에 들어 있는 정책이에요.,This policy is already in the plan.
+common,failure.code.workStarted,이미 시작한 근무예요.,Work has already started.
+common,failure.code.workEnded,이미 끝난 근무예요.,Work has already ended.
+common,failure.code.workTime,시작 시간과 끝 시간을 확인해주세요.,Check the start and end times.
+common,failure.code.workCodeDuplicate,이미 있는 업무 코드예요.,This work code already exists.
+common,failure.code.workCodeParent,올바르지 않은 상위 업무 코드예요.,The parent work code is not valid.
+common,failure.code.workCodeRequired,업무 코드를 입력해주세요.,Enter a work code.
+common,failure.code.yearMonth,연도와 월을 골라주세요.,Select a year and month.
+common,failure.code.deptExists,이미 있는 부서예요.,This department already exists.
+common,failure.code.deptHasMembers,하위 부서나 구성원이 있어 지울 수 없어요.,It has sub-departments or members, so it cannot be deleted.
+common,failure.code.deptCompany,다른 회사의 부서는 고를 수 없어요.,You cannot select a department of another company.
+common,failure.code.deptSelf,부서를 자기 아래에 둘 수 없어요.,A department cannot be placed under itself.
+common,failure.code.deptCircular,하위 부서 아래로 옮길 수 없어요.,It cannot be moved under its own sub-department.
+common,failure.code.scheduleDate,일정 날짜를 확인해주세요.,Check the event dates.
+common,failure.code.scheduleConflict,다른 일정과 겹쳐요.,It overlaps with another event.
+common,failure.code.roleExists,이미 있는 역할이에요.,This role already exists.
+common,failure.code.permissionExists,이미 있는 권한이에요.,This permission already exists.
+common,failure.code.duesPaid,이미 낸 회비예요.,These dues are already paid.
+common,failure.code.duesAmount,금액을 확인해주세요.,Check the amount.
+common,failure.code.holidayExists,이미 있는 공휴일이에요.,This holiday already exists.
+common,failure.code.companyExists,이미 등록된 회사가 있어요.,A company is already registered.
+common,failure.code.invitationExpired,초대 기간이 지났어요.,The invitation has expired.
+common,failure.code.oauthProvider,지원하지 않는 계정이에요.,This account type is not supported.
+common,failure.code.noticeDate,공지 기간을 확인해주세요.,Check the notice period.
+common,failure.code.dateRange,기간을 확인해주세요.,Check the period.
+common,failure.code.fileType,올릴 수 없는 파일 형식이에요.,This file type cannot be uploaded.
+common,failure.code.fileLarge,파일이 너무 커요.,The file is too large.
+common,failure.code.notFound,대상을 찾지 못했어요. 목록을 새로 열어 확인해주세요.,Could not find it. Reload the list and check.
+common,failure.writeInput,저장하지 못했어요. 입력한 내용을 확인해주세요.,Could not save. Check what you entered.

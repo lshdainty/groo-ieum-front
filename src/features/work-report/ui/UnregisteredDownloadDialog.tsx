@@ -14,6 +14,7 @@ import { useUnregisteredWorkHistoryExcelDownloadMutation } from '@/entities/work
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { claimFailure } from '@/shared/api/failure'
 
 interface UnregisteredDownloadDialogProps {
   open: boolean;
@@ -44,6 +45,7 @@ const UnregisteredDownloadDialog = ({ open, onOpenChange }: UnregisteredDownload
       onOpenChange(false);
     } catch (error) {
       console.error('Unregistered list download failed:', error);
+      claimFailure(error);
       toast.error(t('unregistered.downloadFailed'));
     }
   };

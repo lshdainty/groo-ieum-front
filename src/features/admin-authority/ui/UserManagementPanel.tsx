@@ -12,6 +12,7 @@ import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { claimFailure } from '@/shared/api/failure'
 
 const UserManagementPanel = () => {
   const { t } = useTranslation('admin');
@@ -82,6 +83,7 @@ const UserManagementPanel = () => {
       toast.success(t('authority.userRolesUpdated'));
     } catch (error) {
       console.error("Failed to update user roles:", error);
+      claimFailure(error);
       toast.error(t('authority.userRolesUpdateFailed'));
       // 고르기 화면이 실패를 알아야 고른 것을 그대로 두고 다시 저장하게 할 수 있다
       throw error
