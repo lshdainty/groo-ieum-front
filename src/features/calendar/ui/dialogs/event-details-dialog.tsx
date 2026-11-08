@@ -54,7 +54,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
       <Dialog>
         <DialogTrigger asChild>{children}</DialogTrigger>
 
-        <DialogContent className='sm:max-w-sm'>
+        <DialogContent className='min-[40rem]:max-w-[24rem]'>
           <DialogHeader>
             <DialogTitle>{getEventDisplayName(event)}</DialogTitle>
           </DialogHeader>

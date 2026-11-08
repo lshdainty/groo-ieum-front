@@ -142,7 +142,7 @@ const UserInviteDialog = ({ open, onOpenChange, title, companyOptions, initialDa
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
+      <DialogContent className="min-[40rem]:max-w-[28rem] max-h-[90vh] flex flex-col">
         <DialogHeader className="shrink-0">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>

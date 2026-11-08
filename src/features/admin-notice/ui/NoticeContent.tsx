@@ -109,7 +109,7 @@ const NoticeContent = () => {
   const totalPages = noticesData?.totalPages || 0
 
   return (
-    <div className='flex w-full h-full p-4 sm:p-6 md:p-8'>
+    <div className='flex w-full h-full p-4 min-[40rem]:p-6 md:p-8'>
       <div className='w-full flex flex-col h-full'>
         <div className='flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 shrink-0'>
           <div>
@@ -134,7 +134,7 @@ const NoticeContent = () => {
         </div>
 
         <div className='flex items-center gap-2 mb-4 shrink-0'>
-          <div className='relative flex-1 max-w-sm'>
+          <div className='relative flex-1 max-w-[24rem]'>
             <Input
               placeholder={t('notice.searchPlaceholder')}
               value={searchInput}

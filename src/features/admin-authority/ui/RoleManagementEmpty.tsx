@@ -80,7 +80,7 @@ const RoleManagementEmpty = ({ className }: RoleManagementEmptyProps) => {
         </div>
         <div className="space-y-2">
           <h3 className="text-lg font-semibold">{t('authority.noRoles')}</h3>
-          <p className="text-sm text-muted-foreground max-w-sm">
+          <p className="text-sm text-muted-foreground max-w-[24rem]">
             {t('authority.noRolesDesc')}
           </p>
         </div>
@@ -93,7 +93,7 @@ const RoleManagementEmpty = ({ className }: RoleManagementEmptyProps) => {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="min-[40rem]:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{t('authority.addRole')}</DialogTitle>
           </DialogHeader>

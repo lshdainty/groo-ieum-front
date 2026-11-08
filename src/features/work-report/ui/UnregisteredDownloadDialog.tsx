@@ -50,7 +50,7 @@ const UnregisteredDownloadDialog = ({ open, onOpenChange }: UnregisteredDownload
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[425px]'>
+      <DialogContent className='min-[40rem]:max-w-[425px]'>
         <DialogHeader>
           <DialogTitle>{t('unregistered.title')}</DialogTitle>
           <DialogDescription>

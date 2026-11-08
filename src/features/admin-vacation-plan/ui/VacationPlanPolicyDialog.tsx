@@ -71,7 +71,7 @@ const VacationPlanPolicyDialog = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="min-[40rem]:max-w-[32rem]">
         <DialogHeader>
           <DialogTitle>{t('plan.policyManagement')}</DialogTitle>
           <DialogDescription>

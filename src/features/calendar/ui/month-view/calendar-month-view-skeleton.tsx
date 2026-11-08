@@ -6,7 +6,7 @@ const WEEK_DAYS_KO = ['일', '월', '화', '수', '목', '금', '토']
 
 const DayCellSkeleton = ({ isSunday }: { isSunday: boolean }) => {
   return (
-    <div className={`flex h-full flex-col gap-1 border-l border-t py-1.5 lg:pb-2 lg:pt-1 ${isSunday ? 'border-l-0' : ''}`}>
+    <div className={`flex h-full flex-col gap-1 border-l border-t py-1.5 min-[64rem]:pb-2 min-[64rem]:pt-1 ${isSunday ? 'border-l-0' : ''}`}>
       {/* 날짜 영역 */}
       <div className='flex items-center justify-between px-1'>
         <div className='flex items-center gap-1 flex-1 min-w-0'>
@@ -15,13 +15,13 @@ const DayCellSkeleton = ({ isSunday }: { isSunday: boolean }) => {
       </div>
 
       {/* 이벤트 영역 */}
-      <div className='flex flex-1 h-6 gap-1 px-2 lg:flex-col lg:gap-2 lg:px-0'>
+      <div className='flex flex-1 h-6 gap-1 px-2 min-[64rem]:flex-col min-[64rem]:gap-2 min-[64rem]:px-0'>
         {[0, 1, 2].map(position => (
-          <div key={position} className='lg:min-h-[28px]'>
+          <div key={position} className='min-[64rem]:min-h-[28px]'>
             {position === 0 && (
               <>
-                <Skeleton className='size-2 rounded-full lg:hidden' />
-                <Skeleton className='hidden lg:block h-5 w-full rounded mx-1' />
+                <Skeleton className='size-2 rounded-full min-[64rem]:hidden' />
+                <Skeleton className='hidden min-[64rem]:block h-5 w-full rounded mx-1' />
               </>
             )}
           </div>

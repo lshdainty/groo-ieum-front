@@ -9,7 +9,7 @@ const RuleEducation = () => {
       <h2 className='text-2xl md:text-3xl font-bold text-gray-800 dark:text-card-foreground mb-6'>
         {t('rule.education.title')}
       </h2>
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
+      <div className='grid grid-cols-1 min-[40rem]:grid-cols-2 min-[64rem]:grid-cols-4 gap-6'>
         <div className='bg-card rounded-lg shadow-md overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-lg'>
           <img src='/rule_3_1.png' alt='rule_3_1' className='w-full h-48 object-cover' />
           <div className='p-5'>

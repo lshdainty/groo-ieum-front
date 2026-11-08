@@ -82,7 +82,7 @@ const ReportFilter = ({
                 </Button>
               </div>
 
-              <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 items-end'>
+              <div className='grid grid-cols-1 min-[40rem]:grid-cols-2 min-[64rem]:grid-cols-4 min-[80rem]:grid-cols-8 gap-4 items-end'>
                 {/* 시작 날짜 */}
                 <div className='space-y-2'>
                   <Label htmlFor='start-date' className='text-xs text-muted-foreground'>

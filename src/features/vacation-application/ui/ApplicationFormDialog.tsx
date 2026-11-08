@@ -207,9 +207,9 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicie
         <form onSubmit={form.handleSubmit(onSubmit)} className='contents'>
           <ScrollArea>
             <div className='p-6 pt-0'>
-              <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+              <div className='grid grid-cols-1 min-[64rem]:grid-cols-3 gap-6'>
                 {/* 메인 폼 */}
-                <div className='lg:col-span-2'>
+                <div className='min-[64rem]:col-span-2'>
                   <Card>
                     <CardHeader>
                       <div className='flex items-center gap-2'>
@@ -621,7 +621,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicie
                 </div>
 
                 {/* 사이드바 */}
-                <div className='lg:col-span-1 space-y-4'>
+                <div className='min-[64rem]:col-span-1 space-y-4'>
                   {/* 승인자 지정 */}
                   <Card>
                     <CardHeader>

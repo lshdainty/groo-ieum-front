@@ -181,7 +181,7 @@ const VacationGrantDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-[500px]'>
+      <DialogContent className='min-[40rem]:max-w-[500px]'>
         <DialogHeader>
           <DialogTitle>{t('grant.title')}</DialogTitle>
         </DialogHeader>

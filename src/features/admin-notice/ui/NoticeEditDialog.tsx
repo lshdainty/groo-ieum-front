@@ -108,7 +108,7 @@ const NoticeEditDialog = ({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className='sm:max-w-[600px]'>
+      <DialogContent className='min-[40rem]:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle>
             {editingNotice ? t('notice.editTitle') : t('notice.addTitle')}

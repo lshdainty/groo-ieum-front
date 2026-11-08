@@ -10,7 +10,7 @@ const Authority = () => {
 
   return (
     <ProtectedPage permission="ROLE:MANAGE">
-      <div className="h-full flex flex-col p-4 sm:p-6 md:p-8 gap-6 overflow-hidden">
+      <div className="h-full flex flex-col p-4 min-[40rem]:p-6 md:p-8 gap-6 overflow-hidden">
         <div className="flex items-center gap-2 flex-shrink-0">
           <Shield className="w-8 h-8" />
           <h1 className="text-3xl font-bold">{t('authority.title')}</h1>

@@ -26,7 +26,7 @@ export const VacationStatsWidget = () => {
       emptyComponent={<VacationStatsEmpty className="h-full" />}
       isEmpty={(data) => !data}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-border h-full bg-card">
+      <div className="grid grid-cols-1 min-[64rem]:grid-cols-3 divide-y min-[64rem]:divide-y-0 min-[64rem]:divide-x divide-border h-full bg-card">
         {statsConfig.map((item) => (
           <div key={item.id} className="p-4 h-full">
             <VacationStatsItem {...item} />

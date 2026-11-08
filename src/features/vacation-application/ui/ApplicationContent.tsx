@@ -67,13 +67,13 @@ const ApplicationContent = () => {
   };
 
   const SkeletonContent = () => (
-    <div className='p-4 sm:p-6 md:p-8'>
-      <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8'>
+    <div className='p-4 min-[40rem]:p-6 md:p-8'>
+      <div className='flex flex-col min-[64rem]:flex-row min-[64rem]:items-center min-[64rem]:justify-between mb-8'>
         <div>
           <h1 className='text-3xl font-bold mb-2'>{t('application.pageTitle')}</h1>
           <p className='text-foreground/70'>{t('application.pageSubtitle')}</p>
         </div>
-        <div className='flex items-center gap-2 mt-4 lg:mt-0'>
+        <div className='flex items-center gap-2 mt-4 min-[64rem]:mt-0'>
           <Select value={selectedYear} onValueChange={setSelectedYear}>
             <SelectTrigger className='w-[120px]'>
               <SelectValue />
@@ -98,20 +98,20 @@ const ApplicationContent = () => {
       queryState={{ isLoading, error, data: vacationRequests }}
       loadingComponent={<SkeletonContent />}
       errorComponent={
-        <div className='p-4 sm:p-6 md:p-8'>
+        <div className='p-4 min-[40rem]:p-6 md:p-8'>
           <div className='p-8 text-center text-red-600'>
             {tc('loadFailed')}
           </div>
         </div>
       }
     >
-      <div className='p-4 sm:p-6 md:p-8'>
-        <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8'>
+      <div className='p-4 min-[40rem]:p-6 md:p-8'>
+        <div className='flex flex-col min-[64rem]:flex-row min-[64rem]:items-center min-[64rem]:justify-between mb-8'>
           <div>
             <h1 className='text-3xl font-bold mb-2'>{t('application.pageTitle')}</h1>
             <p className='text-foreground/70'>{t('application.pageSubtitle')}</p>
           </div>
-          <div className='flex items-center gap-2 mt-4 lg:mt-0'>
+          <div className='flex items-center gap-2 mt-4 min-[64rem]:mt-0'>
             <Select value={selectedYear} onValueChange={setSelectedYear}>
               <SelectTrigger className='w-[120px]'>
                 <SelectValue />

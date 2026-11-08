@@ -9,7 +9,7 @@ const CompanyContentSkeleton = () => {
 
   if (isMobile) {
     return (
-      <div className='p-4 sm:p-6 md:p-8 flex flex-col gap-6 h-full'>
+      <div className='p-4 min-[40rem]:p-6 md:p-8 flex flex-col gap-6 h-full'>
         <div className='flex items-center gap-2'>
           <Skeleton className='h-8 w-8' />
           <Skeleton className='h-8 w-48' />
@@ -22,7 +22,7 @@ const CompanyContentSkeleton = () => {
   }
 
   return (
-    <div className='p-4 sm:p-6 md:p-8 flex flex-col gap-6 h-full'>
+    <div className='p-4 min-[40rem]:p-6 md:p-8 flex flex-col gap-6 h-full'>
       <div className='flex items-center gap-2'>
         <Skeleton className='h-8 w-8' />
         <Skeleton className='h-8 w-48' />

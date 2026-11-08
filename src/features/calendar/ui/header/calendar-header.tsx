@@ -26,13 +26,13 @@ export function CalendarHeader({ events }: IProps) {
   const canAddEvent = hasAnyPermission(['VACATION:USE', 'VACATION:MANAGE', 'SCHEDULE:WRITE', 'SCHEDULE:MANAGE']);
 
   return (
-    <div className='flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between'>
+    <div className='flex flex-col gap-4 border-b p-4 min-[64rem]:flex-row min-[64rem]:items-center min-[64rem]:justify-between'>
       <div className='flex items-center gap-3'>
         <TodayButton />
         <DateNavigator view={view} events={events} />
       </div>
 
-      <div className='flex flex-col items-center gap-1.5 sm:flex-row sm:justify-between'>
+      <div className='flex flex-col items-center gap-1.5 min-[40rem]:flex-row min-[40rem]:justify-between'>
         <div className='flex w-full items-center gap-1.5'>
           <div className='inline-flex first:rounded-r-none last:rounded-l-none [&:not(:first-child):not(:last-child)]:rounded-none'>
             <Button
@@ -91,7 +91,7 @@ export function CalendarHeader({ events }: IProps) {
 
         <Activity mode={canAddEvent ? 'visible' : 'hidden'}>
           <AddEventDialog>
-            <Button className='w-full sm:w-auto'>
+            <Button className='w-full min-[40rem]:w-auto'>
               <Plus />
               {t('header.addEvent')}
             </Button>

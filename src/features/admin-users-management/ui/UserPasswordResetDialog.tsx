@@ -37,7 +37,7 @@ const UserPasswordResetDialog = ({ open, onOpenChange, userId, userName }: UserP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="min-[40rem]:max-w-[28rem]">
         <DialogHeader>
           <DialogTitle>{t('user.passwordResetTitle')}</DialogTitle>
           <DialogDescription>

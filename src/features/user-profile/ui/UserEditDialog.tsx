@@ -225,14 +225,14 @@ const UserEditDialog = ({ open, onOpenChange, user, onSave }: UserEditDialogProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
+      <DialogContent className="min-[40rem]:max-w-4xl max-h-[90vh] flex flex-col">
         <DialogHeader className="shrink-0">
           <DialogTitle>{ta('user.editTitle')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto">
-            <div className="flex flex-col sm:flex-row gap-6 p-6">
-              <div className="w-full sm:w-1/3 flex flex-col items-center justify-center gap-4">
+            <div className="flex flex-col min-[40rem]:flex-row gap-6 p-6">
+              <div className="w-full min-[40rem]:w-1/3 flex flex-col items-center justify-center gap-4">
                 <div className="relative group">
                   {isUploading ? (
                     <div className="relative">
@@ -342,9 +342,9 @@ const UserEditDialog = ({ open, onOpenChange, user, onSave }: UserEditDialogProp
                 )}
               </div>
 
-              <Separator orientation="vertical" className="hidden sm:block h-auto" />
+              <Separator orientation="vertical" className="hidden min-[40rem]:block h-auto" />
 
-              <div className="w-full sm:w-2/3 space-y-4">
+              <div className="w-full min-[40rem]:w-2/3 space-y-4">
                 <Controller
                   control={form.control}
                   name="user_name"

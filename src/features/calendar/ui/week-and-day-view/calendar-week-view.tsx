@@ -41,12 +41,12 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
 
   return (
     <div className='w-full h-full'>
-      <div className='flex flex-col items-center justify-center border-b py-4 text-sm text-muted-foreground sm:hidden'>
+      <div className='flex flex-col items-center justify-center border-b py-4 text-sm text-muted-foreground min-[40rem]:hidden'>
         <p>{t('calendar:weekView.notAvailable')}</p>
         <p>{t('calendar:weekView.switchView')}</p>
       </div>
 
-      <div className='hidden h-full flex-col sm:flex'>
+      <div className='hidden h-full flex-col min-[40rem]:flex'>
         <div>
           <WeekViewMultiDayEventsRow selectedDate={selectedDate} multiDayEvents={multiDayEvents} />
 

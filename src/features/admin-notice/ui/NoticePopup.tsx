@@ -40,7 +40,7 @@ export const NoticePopup = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="min-[40rem]:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -53,7 +53,7 @@ export const NoticePopup = ({
             content
           )}
         </div>
-        <DialogFooter className="flex-col sm:flex-col gap-2">
+        <DialogFooter className="flex-col min-[40rem]:flex-col gap-2">
           <div className="flex items-center space-x-2 mb-2">
             <Checkbox
               id="dontShowToday"

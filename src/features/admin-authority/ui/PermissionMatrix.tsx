@@ -71,7 +71,7 @@ const PermissionMatrix = ({ authorities, selectedAuthorityIds, onToggleAuthority
                   <Label htmlFor={`group-${group}`} className="text-xs cursor-pointer">{t('authority.selectAll')}</Label>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 min-[64rem]:grid-cols-3 gap-4">
                 {groupAuths.map((auth) => (
                   <div key={auth.code} className="flex items-start space-x-3 p-4 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer active:bg-muted" onClick={() => !disabled && onToggleAuthority(auth.code, !selectedAuthorityIds?.includes(auth.code))}>
                     <Checkbox

@@ -135,7 +135,7 @@ const RoleDetail = ({
           </RequirePermission>
         </div>
 
-        <div className="grid gap-4 max-w-2xl">
+        <div className="grid gap-4 max-w-[42rem]">
           <div className="grid gap-2">
             <Label htmlFor="role-code">{t('authority.roleCode')}</Label>
             <Input

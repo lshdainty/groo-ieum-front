@@ -40,7 +40,7 @@ const VacationPolicyDeleteDialog = ({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-      <AlertDialogContent className="sm:max-w-lg">
+      <AlertDialogContent className="min-[40rem]:max-w-[32rem]">
         <div className="flex items-start space-x-4">
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
             <TriangleAlert className="h-6 w-6 text-red-600 dark:text-red-400" />

@@ -109,7 +109,7 @@ const HolidayContent = () => {
   }
 
   return (
-    <div className='flex w-full h-full p-4 sm:p-6 md:p-8'>
+    <div className='flex w-full h-full p-4 min-[40rem]:p-6 md:p-8'>
       <div className='w-full flex flex-col h-full'>
         <div className='flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 shrink-0'>
           <div>
@@ -117,10 +117,10 @@ const HolidayContent = () => {
             <p className='text-sm md:text-base text-muted-foreground mt-1'>{t('holiday.description')}</p>
           </div>
 
-          <div className='flex flex-col sm:flex-row gap-2'>
+          <div className='flex flex-col min-[40rem]:flex-row gap-2'>
             <div className='flex items-center gap-2'>
               <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                <SelectTrigger className='flex-1 sm:w-[140px]'>
+                <SelectTrigger className='flex-1 min-[40rem]:w-[140px]'>
                   <SelectValue placeholder={t('holiday.countryPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -155,7 +155,7 @@ const HolidayContent = () => {
                 onSave={handleSave}
                 isLoading={editingHoliday ? putMutation.isPending : postMutation.isPending}
                 trigger={
-                  <Button className='flex-1 sm:flex-none flex items-center gap-2' onClick={handleAddClick}>
+                  <Button className='flex-1 min-[40rem]:flex-none flex items-center gap-2' onClick={handleAddClick}>
                     {tc('add')}
                   </Button>
                 }

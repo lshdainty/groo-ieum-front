@@ -53,7 +53,7 @@ const HolidayList = ({
       {holidays?.map((holiday) => (
         <Card key={holiday.holiday_id} className='hover:shadow-md transition-shadow'>
           <CardContent className='px-6'>
-            <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
+            <div className='flex flex-col min-[40rem]:flex-row items-start min-[40rem]:items-center justify-between gap-4'>
               <div className='flex items-center gap-4'>
                 <div className='text-3xl'>{(holiday.holiday_icon && holiday.holiday_icon.trim() !== '') ? holiday.holiday_icon : 'ㅤ'}</div>
                 <div>
@@ -75,7 +75,7 @@ const HolidayList = ({
                   </div>
                 </div>
               </div>
-              <div className='flex flex-wrap items-center gap-2 w-full sm:w-auto'>
+              <div className='flex flex-wrap items-center gap-2 w-full min-[40rem]:w-auto'>
                 <Badge className={holidayTypeColors[holiday.holiday_type as keyof typeof holidayTypeColors]}>
                   {holidayTypeLabels[holiday.holiday_type as keyof typeof holidayTypeLabels]}
                 </Badge>
@@ -94,7 +94,7 @@ const HolidayList = ({
                     <Button
                       variant='ghost'
                       size='sm'
-                      className='h-8 w-8 p-0 data-[state=open]:bg-muted hover:bg-muted ml-auto sm:ml-0'
+                      className='h-8 w-8 p-0 data-[state=open]:bg-muted hover:bg-muted ml-auto min-[40rem]:ml-0'
                     >
                       <EllipsisVertical className='w-4 h-4' />
                     </Button>

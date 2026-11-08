@@ -59,7 +59,7 @@ const HistoryContentLayout = ({
   const { t } = useTranslation('vacation')
 
   return (
-    <div className='p-4 sm:p-6 md:p-8'>
+    <div className='p-4 min-[40rem]:p-6 md:p-8'>
       <div className='flex items-center justify-between mb-6'>
         <h1 className='text-3xl font-bold'>{t('history.pageTitle')}</h1>
         <Select value={selectedYear} onValueChange={onYearChange}>
@@ -75,18 +75,18 @@ const HistoryContentLayout = ({
           </SelectContent>
         </Select>
       </div>
-      <div className='flex flex-col lg:flex-row gap-6'>
+      <div className='flex flex-col min-[64rem]:flex-row gap-6'>
         {user && <UserInfoCard value={[user]} />}
         <div className='flex flex-col gap-6 flex-1'>
           <VacationStatsCard value={vacationStats} />
           <MonthVacationStatsCard value={monthStats || []} className='h-full' />
         </div>
       </div>
-      <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6'>
-        <div className='xl:col-span-1 flex flex-col'>
+      <div className='grid grid-cols-1 min-[80rem]:grid-cols-3 gap-6 mt-6'>
+        <div className='min-[80rem]:col-span-1 flex flex-col'>
           <VacationTypeStatsCard value={vacationTypes || []} className='h-full' />
         </div>
-        <div className='xl:col-span-2 flex flex-col'>
+        <div className='min-[80rem]:col-span-2 flex flex-col'>
           <VacationHistoryTable value={histories || { grants: [], usages: [] }} canAdd={false} />
         </div>
       </div>
@@ -96,20 +96,20 @@ const HistoryContentLayout = ({
 
 const HistorySkeleton = ({ title }: { title: string }) => {
   return (
-    <div className='p-4 sm:p-6 md:p-8'>
+    <div className='p-4 min-[40rem]:p-6 md:p-8'>
       <h1 className='text-3xl font-bold mb-6'>{title}</h1>
-      <div className='flex flex-col lg:flex-row gap-6'>
+      <div className='flex flex-col min-[64rem]:flex-row gap-6'>
         <UserInfoCardSkeleton />
         <div className='flex flex-col gap-6 flex-1'>
           <VacationStatsCardSkeleton />
           <MonthVacationStatsCardSkeleton />
         </div>
       </div>
-      <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6'>
-        <div className='xl:col-span-1 flex flex-col'>
+      <div className='grid grid-cols-1 min-[80rem]:grid-cols-3 gap-6 mt-6'>
+        <div className='min-[80rem]:col-span-1 flex flex-col'>
           <VacationTypeStatsCardSkeleton />
         </div>
-        <div className='xl:col-span-2 flex flex-col'>
+        <div className='min-[80rem]:col-span-2 flex flex-col'>
           <VacationHistoryTableSkeleton />
         </div>
       </div>
@@ -147,7 +147,7 @@ const HistoryContent = () => {
       queryState={{ isLoading, error, data: user }}
       loadingComponent={<HistorySkeleton title={t('history.pageTitle')} />}
       errorComponent={
-        <div className='p-4 sm:p-6 md:p-8'>
+        <div className='p-4 min-[40rem]:p-6 md:p-8'>
           <div className='p-8 text-center text-red-600'>
             {tc('loadFailed')}
           </div>

@@ -236,7 +236,7 @@ const ScheduleTable = ({ users }: ScheduleTableProps) => {
         <div className="min-w-[800px]">
           {/* Header Row */}
           <div className="flex border-b border-border bg-background sticky top-0 z-30">
-            <div className="w-[120px] sm:w-64 shrink-0 p-4 border-r border-border bg-background sticky left-0 z-40" /> {/* User Info Header Placeholder */}
+            <div className="w-[120px] min-[40rem]:w-64 shrink-0 p-4 border-r border-border bg-background sticky left-0 z-40" /> {/* User Info Header Placeholder */}
             <div className="flex-1 relative min-w-[600px]">
               <TimeGridHeader />
             </div>
@@ -254,14 +254,14 @@ const ScheduleTable = ({ users }: ScheduleTableProps) => {
               return (
                 <div key={user.user_id} className="flex group hover:bg-muted/50 transition-colors h-24">
                   {/* Left: User Info - Sticky */}
-                  <div className="w-[120px] sm:w-64 shrink-0 p-2 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3 border-r border-border bg-background sticky left-0 z-20">
-                    <Avatar className="h-8 w-8 sm:h-10 sm:w-10 border border-border">
+                  <div className="w-[120px] min-[40rem]:w-64 shrink-0 p-2 min-[40rem]:p-4 flex flex-col min-[40rem]:flex-row items-center min-[40rem]:items-center gap-2 min-[40rem]:gap-3 border-r border-border bg-background sticky left-0 z-20">
+                    <Avatar className="h-8 w-8 min-[40rem]:h-10 min-[40rem]:w-10 border border-border">
                       <AvatarImage src={user.profile_url} />
                       <AvatarFallback>{user.user_name[0]}</AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col items-center sm:items-start text-center sm:text-left overflow-hidden w-full">
-                      <span className="font-bold text-foreground text-xs sm:text-sm truncate w-full">{user.user_name}</span>
-                      <span className="text-[10px] sm:text-xs text-muted-foreground truncate w-full hidden sm:block">{user.main_department_name_kr || user.user_role_name}</span>
+                    <div className="flex flex-col items-center min-[40rem]:items-start text-center min-[40rem]:text-left overflow-hidden w-full">
+                      <span className="font-bold text-foreground text-xs min-[40rem]:text-sm truncate w-full">{user.user_name}</span>
+                      <span className="text-[10px] min-[40rem]:text-xs text-muted-foreground truncate w-full hidden min-[40rem]:block">{user.main_department_name_kr || user.user_role_name}</span>
                       <Badge variant="secondary" className={cn("mt-1 w-fit text-[10px] px-1.5 py-0 h-5 font-normal", colors.badge)}>
                         {totalWorkTime}
                       </Badge>

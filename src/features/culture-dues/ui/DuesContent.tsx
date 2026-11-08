@@ -44,7 +44,7 @@ const DuesContent = () => {
     <QueryAsyncBoundary
       queryState={{ isLoading, error, data: true }}
       loadingComponent={
-        <div className='p-4 sm:p-6 md:p-8'>
+        <div className='p-4 min-[40rem]:p-6 md:p-8'>
           <div className='flex items-center justify-between mb-6'>
             <h1 className='text-3xl font-bold'>{tc('dues.title')}</h1>
             <Select value={year.toString()} onValueChange={(value) => setYear(parseInt(value))}>
@@ -70,14 +70,14 @@ const DuesContent = () => {
         </div>
       }
       errorComponent={
-        <div className='p-4 sm:p-6 md:p-8'>
+        <div className='p-4 min-[40rem]:p-6 md:p-8'>
           <div className='p-8 text-center text-red-600'>
             {t('loadFailed')}
           </div>
         </div>
       }
     >
-      <div className='p-4 sm:p-6 md:p-8'>
+      <div className='p-4 min-[40rem]:p-6 md:p-8'>
         <div className='flex items-center justify-between mb-6'>
           <h1 className='text-3xl font-bold'>{tc('dues.title')}</h1>
           <Select value={year.toString()} onValueChange={(value) => setYear(parseInt(value))}>

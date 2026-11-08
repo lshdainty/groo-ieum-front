@@ -100,7 +100,7 @@ const HolidayEditDialog = ({
       {trigger && (
         <DialogTrigger asChild>{trigger}</DialogTrigger>
       )}
-      <DialogContent className='sm:max-w-[500px]'>
+      <DialogContent className='min-[40rem]:max-w-[500px]'>
         <DialogHeader>
           <DialogTitle>
             {editingHoliday ? t('holiday.editTitle') : t('holiday.addTitle')}

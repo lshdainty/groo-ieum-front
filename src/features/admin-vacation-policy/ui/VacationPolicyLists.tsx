@@ -35,10 +35,10 @@ const VacationPolicyLists = ({ policies, searchQuery }: VacationPolicyListsProps
     <div className="flex flex-col gap-4">
       {policies.map(policy => (
         <Card key={policy.vacation_policy_id} className="transition-all hover:shadow-md">
-          <CardContent className="p-4 sm:px-6">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <CardContent className="p-4 min-[40rem]:px-6">
+            <div className="flex flex-col min-[40rem]:flex-row min-[40rem]:items-start min-[40rem]:justify-between gap-4">
               <div className="flex flex-col gap-3 flex-1">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <div className="flex flex-col min-[40rem]:flex-row min-[40rem]:items-center gap-2 min-[40rem]:gap-3">
                   <h3 className="font-semibold text-lg">{policy.vacation_policy_name}</h3>
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline" className="text-xs">
@@ -79,7 +79,7 @@ const VacationPolicyLists = ({ policies, searchQuery }: VacationPolicyListsProps
               <VacationPolicyDeleteDialog
                 policy={policy}
                 trigger={
-                  <div className="self-end sm:self-auto">
+                  <div className="self-end min-[40rem]:self-auto">
                     <Button
                       variant="ghost"
                       size="sm"

@@ -117,7 +117,7 @@ const WorkCodeEditDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="min-[40rem]:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{isEdit ? t('codeEdit') : t('codeCreate')}</DialogTitle>
         </DialogHeader>

@@ -26,9 +26,9 @@ export const TotalDuesWidget = () => {
       emptyComponent={<TotalDuesEmpty className="h-full" />}
       isEmpty={(data) => !data || !birthDues}
     >
-      <div className='flex flex-col lg:grid lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-border h-full bg-card overflow-y-auto scrollbar-hide'>
+      <div className='flex flex-col min-[64rem]:grid min-[64rem]:grid-cols-4 divide-y min-[64rem]:divide-y-0 min-[64rem]:divide-x divide-border h-full bg-card overflow-y-auto scrollbar-hide'>
         {duesConfig.map((item) => (
-          <div key={item.id} className='p-4 h-auto lg:h-full relative overflow-hidden min-h-[120px] shrink-0'>
+          <div key={item.id} className='p-4 h-auto min-[64rem]:h-full relative overflow-hidden min-h-[120px] shrink-0'>
             <TotalDuesItem {...item} />
           </div>
         ))}

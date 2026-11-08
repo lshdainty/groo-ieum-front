@@ -3,7 +3,7 @@ import { Skeleton } from '@/shared/ui/shadcn/skeleton'
 
 const VacationRequestStatsContentSkeleton = () => {
   return (
-    <div className='grid grid-cols-2 lg:grid-cols-7 gap-4 mb-8'>
+    <div className='grid grid-cols-2 min-[64rem]:grid-cols-7 gap-4 mb-8'>
       {[...Array(7)].map((_, i) => (
         <Card key={i} className='py-0'>
           <CardContent className='p-6'>

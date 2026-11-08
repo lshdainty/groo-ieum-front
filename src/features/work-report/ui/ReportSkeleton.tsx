@@ -4,7 +4,7 @@ import { ReportTableSkeleton } from '@/features/work-report/ui/ReportTableSkelet
 
 const ReportSkeleton = () => {
   return (
-    <div className='p-4 sm:p-6 md:p-8'>
+    <div className='p-4 min-[40rem]:p-6 md:p-8'>
       <ReportHeaderSkeleton />
       <ReportFilterSkeleton />
       <div className='mt-6'>

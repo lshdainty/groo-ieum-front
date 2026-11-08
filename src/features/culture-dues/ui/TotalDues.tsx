@@ -13,7 +13,7 @@ const TotalDues = ({ totalDues, birthDues }: TotalDuesProps) => {
   const duesConfig = getTotalDuesConfig(totalDues, birthDues, t);
 
   return (
-    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
+    <div className='grid grid-cols-1 md:grid-cols-2 min-[64rem]:grid-cols-4 gap-6'>
       {duesConfig.map((item) => (
         <Card key={item.id} className='relative overflow-hidden'>
           <CardContent className='h-full'>

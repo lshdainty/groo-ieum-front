@@ -3,6 +3,91 @@
 @import 'tw-animate-css';
 @plugin '@tailwindcss/typography';
 
+/* 그루 토큰(groo-design DESIGN.hr.md sync). 아래 shadcn 변수와 이름이 겹치면(--radius-sm/md/lg/xl · --color-primary) 아래 것이 이긴다 — 지금 화면 값 유지 */
+@import './shared/styles/groo-tokens.css';
+
+/* 22-0 임시 — groo-tokens 가 Tailwind 기본값을 바꾸는 자리 가운데 옛 화면이 쓰는 것을 지금 값으로 되돌린다(사용자 화면 변화 0).
+ * 옛 화면이 모두 ds 로 옮겨지면(이음 화면 이관의 마지막 묶음) 이 블록을 통째로 걷는다.
+ *  - 글꼴: groo 의 Pretendard 대신 Tailwind 기본 글꼴 묶음. Pretendard 로 바꾸는 일은 index.html 의 글꼴 링크와 이 줄을 같이 걷는 한 번의 변경이다.
+ *  - 그림자: ds 는 shadow-s1~s4 를 쓰고 shadow-sm/md/lg/xl 은 쓰지 않는다 — 옛 이름만 Tailwind 기본 값으로.
+ *  - 중단점(sm/lg/xl)·max-w-sm/md/lg/2xl 은 옛 화면 클래스를 임의값(min-[40rem]: · max-w-[24rem])으로 바꿔 지켰다. */
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* 팔레트 — groo 가 Tailwind 기본 팔레트 이름(gray·blue·green…)을 그루 팔레트로 덮는다. 옛 화면이 쓰는 이름만 Tailwind 기본값으로 body 아래에서 되돌린다.
+ * 역할 토큰(bg-layer-default 등)은 :root 에서 이미 풀려 있어 ds 부품은 영향받지 않는다. */
+body {
+  --color-red-100: #ffe2e2;
+  --color-red-200: #ffcaca;
+  --color-red-300: #ffa3a3;
+  --color-red-400: #ff6568;
+  --color-red-500: #fb2c36;
+  --color-red-600: #e40014;
+  --color-red-700: #bf000f;
+  --color-red-800: #9f0712;
+  --color-red-900: #82181a;
+  --color-orange-100: #ffedd5;
+  --color-orange-200: #ffd7a8;
+  --color-orange-300: #ffb96d;
+  --color-orange-400: #ff8b1a;
+  --color-orange-500: #fe6e00;
+  --color-orange-600: #f05100;
+  --color-orange-700: #c53c00;
+  --color-orange-800: #9f2d00;
+  --color-orange-900: #7e2a0c;
+  --color-yellow-100: #fef9c2;
+  --color-yellow-200: #fff085;
+  --color-yellow-300: #ffe02a;
+  --color-yellow-500: #edb200;
+  --color-yellow-600: #cd8900;
+  --color-yellow-700: #a36100;
+  --color-yellow-800: #874b00;
+  --color-yellow-900: #733e0a;
+  --color-green-100: #dcfce7;
+  --color-green-200: #b9f8cf;
+  --color-green-300: #7bf1a8;
+  --color-green-400: #05df72;
+  --color-green-500: #00c758;
+  --color-green-600: #00a544;
+  --color-green-700: #008138;
+  --color-green-800: #016630;
+  --color-green-900: #0d542b;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bedbff;
+  --color-blue-300: #90c5ff;
+  --color-blue-500: #3080ff;
+  --color-blue-600: #155dfc;
+  --color-blue-700: #1447e6;
+  --color-blue-800: #193cb8;
+  --color-blue-900: #1c398e;
+  --color-indigo-100: #e0e7ff;
+  --color-indigo-200: #c7d2ff;
+  --color-indigo-800: #372aac;
+  --color-indigo-900: #312c85;
+  --color-pink-200: #fccee8;
+  --color-pink-300: #fda5d5;
+  --color-pink-500: #f6339a;
+  --color-pink-600: #e30076;
+  --color-pink-700: #c4005c;
+  --color-pink-800: #a2004c;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5dc;
+  --color-gray-400: #99a1af;
+  --color-gray-500: #6a7282;
+  --color-gray-600: #4a5565;
+  --color-gray-700: #364153;
+  --color-gray-800: #1e2939;
+  --color-gray-900: #101828;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @font-face {
@@ -164,7 +249,7 @@
   .gsi-material-button {
     @apply select-none appearance-none bg-white border border-[#747775] rounded cursor-pointer;
     @apply text-[#1f1f1f] text-sm h-10 tracking-wide outline-none overflow-hidden px-3;
-    @apply relative text-center align-middle whitespace-nowrap w-full max-w-md;
+    @apply relative text-center align-middle whitespace-nowrap w-full max-w-[28rem];
     font-family: 'Roboto', arial, sans-serif;
     transition: background-color .218s, border-color .218s, box-shadow .218s;
   }

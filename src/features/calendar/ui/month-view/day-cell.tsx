@@ -89,7 +89,7 @@ const DayCell = ({ cell, events, eventPositions, maxVisibleEvents }: IProps) => 
     <DroppableDayCell cell={cell}>
       <div 
         className={cn(
-          'flex h-full flex-col gap-1 border-l border-t py-1.5 lg:pb-2 lg:pt-1 select-none', 
+          'flex h-full flex-col gap-1 border-l border-t py-1.5 min-[64rem]:pb-2 min-[64rem]:pt-1 select-none', 
           isSunday && 'border-l-0',
           isSelected && 'bg-blue-100/50 dark:bg-blue-900/20 shadow-[inset_0_0_0_2px_rgba(59,130,246,0.5)]'
         )}
@@ -116,7 +116,7 @@ const DayCell = ({ cell, events, eventPositions, maxVisibleEvents }: IProps) => 
 
             {holiday && (
               <span
-                className={cn('hidden lg:block text-xs truncate', !currentMonth && 'opacity-20')}
+                className={cn('hidden min-[64rem]:block text-xs truncate', !currentMonth && 'opacity-20')}
                 style={{ color: holidayColor }}
               >
                 {holiday.holiday_name}
@@ -132,24 +132,24 @@ const DayCell = ({ cell, events, eventPositions, maxVisibleEvents }: IProps) => 
                 !currentMonth && 'opacity-50'
               )}
             >
-              <span className='sm:hidden'>+{cellEvents.length - maxVisibleEvents}</span>
-              <span className='hidden sm:inline'>{cellEvents.length - maxVisibleEvents} more</span>
+              <span className='min-[40rem]:hidden'>+{cellEvents.length - maxVisibleEvents}</span>
+              <span className='hidden min-[40rem]:inline'>{cellEvents.length - maxVisibleEvents} more</span>
             </button>
           )}
         </div>
 
         {/* 두 번째 줄: 이벤트들 */}
-        <div className={cn('flex flex-1 h-6 gap-1 px-2 lg:flex-col lg:gap-2 lg:px-0', !currentMonth && 'opacity-50')}>
+        <div className={cn('flex flex-1 h-6 gap-1 px-2 min-[64rem]:flex-col min-[64rem]:gap-2 min-[64rem]:px-0', !currentMonth && 'opacity-50')}>
           {Array.from({ length: maxVisibleEvents }, (_, i) => i).map(position => {
             const event = cellEvents.find(e => e.position === position);
             const eventKey = event ? `event-${event.id}-${position}` : `empty-${position}`;
 
             return (
-              <div key={eventKey} className='lg:min-h-[28px]'>
+              <div key={eventKey} className='min-[64rem]:min-h-[28px]'>
                 {event && (
                   <>
-                    <EventBullet className='lg:hidden' color={event.type.color} />
-                    <MonthEventBadge className='hidden lg:flex' event={event} cellDate={startOfDay(date)} />
+                    <EventBullet className='min-[64rem]:hidden' color={event.type.color} />
+                    <MonthEventBadge className='hidden min-[64rem]:flex' event={event} cellDate={startOfDay(date)} />
                   </>
                 )}
               </div>

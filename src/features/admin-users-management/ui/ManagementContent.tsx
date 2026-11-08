@@ -16,7 +16,7 @@ const ManagementContent = () => {
   const { showInviteDialog, setShowInviteDialog } = useManagementContext()
 
   return (
-    <div className='flex w-full h-full p-4 sm:p-6 md:p-8'>
+    <div className='flex w-full h-full p-4 min-[40rem]:p-6 md:p-8'>
       <div className='w-full flex flex-col h-full'>
         <h1 className='text-3xl font-bold mb-6 shrink-0'>{t('user.title')}</h1>
         <div className='flex-0'>

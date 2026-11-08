@@ -30,7 +30,7 @@ const ResendEmailDialog = ({ open, onOpenChange, userId, userEmail }: ResendEmai
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="min-[40rem]:max-w-[28rem]">
         <DialogHeader>
           <DialogTitle>{t('user.resendEmailTitle')}</DialogTitle>
         </DialogHeader>

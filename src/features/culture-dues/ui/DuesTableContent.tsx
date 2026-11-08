@@ -252,7 +252,7 @@ const DuesTableContent = ({
           <div className='text-sm text-muted-foreground'>
             {data.length} row(s)
           </div>
-          <div className='flex items-center space-x-6 lg:space-x-8'>
+          <div className='flex items-center space-x-6 min-[64rem]:space-x-8'>
             <div className='flex items-center space-x-2'>
               <p className='text-sm font-medium'>
                 Page {currentPage} of {totalPages}

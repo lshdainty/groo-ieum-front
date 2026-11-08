@@ -84,7 +84,7 @@ const CompanyFormDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className='max-w-md'>
+      <DialogContent className='max-w-[28rem]'>
         <DialogHeader>
           <DialogTitle>{mode === 'edit' ? t('company.editTitle') : t('company.createTitle')}</DialogTitle>
         </DialogHeader>
