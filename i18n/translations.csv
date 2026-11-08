@@ -1550,3 +1550,7 @@ common,failure.code.fileType,올릴 수 없는 파일 형식이에요.,This file
 common,failure.code.fileLarge,파일이 너무 커요.,The file is too large.
 common,failure.code.notFound,대상을 찾지 못했어요. 목록을 새로 열어 확인해주세요.,Could not find it. Reload the list and check.
 common,failure.writeInput,저장하지 못했어요. 입력한 내용을 확인해주세요.,Could not save. Check what you entered.
+common,session.checking,불러오는 중,Loading
+common,session.failedTitle,로그인 상태를 확인하지 못했어요,Couldn't check your sign-in
+common,session.failedDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+common,session.retry,다시 시도,Try again
