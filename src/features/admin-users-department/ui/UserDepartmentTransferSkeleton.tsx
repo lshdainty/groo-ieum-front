@@ -9,9 +9,9 @@ const UserDepartmentTransferSkeleton = () => {
       </div>
 
       {/* TransferList 영역 */}
-      <div className='flex flex-col md:flex-row md:space-x-4 gap-4 md:gap-0 flex-1'>
+      <div className='flex flex-col min-[48rem]:flex-row min-[48rem]:space-x-4 gap-4 min-[48rem]:gap-0 flex-1'>
         {/* 왼쪽 패널 - 전체 사용자 */}
-        <div className='w-full md:w-1/2 bg-background rounded-sm flex flex-col h-[300px] md:h-auto'>
+        <div className='w-full min-[48rem]:w-1/2 bg-background rounded-sm flex flex-col h-[300px] min-[48rem]:h-auto'>
           <div className='flex items-center justify-between shrink-0'>
             <Skeleton className='h-9 w-full' />
           </div>
@@ -33,13 +33,13 @@ const UserDepartmentTransferSkeleton = () => {
         </div>
 
         {/* 중앙 버튼 영역 */}
-        <div className='hidden md:flex flex-col justify-center gap-2'>
+        <div className='hidden min-[48rem]:flex flex-col justify-center gap-2'>
           <Skeleton className='h-8 w-8' />
           <Skeleton className='h-8 w-8' />
         </div>
 
         {/* 오른쪽 패널 - 부서 사용자 */}
-        <div className='w-full md:w-1/2 bg-background rounded-sm flex flex-col h-[300px] md:h-auto'>
+        <div className='w-full min-[48rem]:w-1/2 bg-background rounded-sm flex flex-col h-[300px] min-[48rem]:h-auto'>
           <div className='flex items-center justify-between shrink-0'>
             <Skeleton className='h-9 w-full' />
           </div>

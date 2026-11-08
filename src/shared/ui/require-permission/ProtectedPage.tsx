@@ -75,7 +75,7 @@ export function ProtectedPage({
 
     return (
       <div className="h-full flex items-center justify-center p-8">
-        <div className="max-w-md w-full bg-destructive/10 border border-destructive/20 rounded-lg p-8 text-center">
+        <div className="max-w-[28rem] w-full bg-destructive/10 border border-destructive/20 rounded-lg p-8 text-center">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-destructive/20 rounded-full flex items-center justify-center">
               <Lock className="w-8 h-8 text-destructive" />

@@ -36,7 +36,7 @@ export const UserNoticeDetailDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] flex flex-col">
+      <DialogContent className="min-[40rem]:max-w-[600px] max-h-[80vh] flex flex-col">
         {isLoading ? (
           <div className="space-y-4 py-4">
             <Skeleton className="h-6 w-16" />
@@ -85,7 +85,7 @@ export const UserNoticeDetailDialog = ({
         ) : null}
 
         <DialogFooter>
-          <Button onClick={onClose} className="w-full sm:w-auto">
+          <Button onClick={onClose} className="w-full min-[40rem]:w-auto">
             {t('common:close')}
           </Button>
         </DialogFooter>

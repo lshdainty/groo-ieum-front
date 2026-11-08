@@ -313,14 +313,14 @@ const ReportContent = () => {
       queryState={{ isLoading, error, data: workHistoriesData }}
       loadingComponent={<ReportSkeleton />}
       errorComponent={
-        <div className='p-4 sm:p-6 md:p-8'>
+        <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
           <div className='p-8 text-center text-red-600'>
             {t('report.dataLoadFailed')}
           </div>
         </div>
       }
     >
-      <div className='p-4 sm:p-6 md:p-8'>
+      <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
         <ReportHeader
           handleExcelImport={handleExcelImport}
           handleExcelExport={handleExcelExport}

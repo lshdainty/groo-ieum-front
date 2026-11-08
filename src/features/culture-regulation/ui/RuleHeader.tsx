@@ -5,10 +5,10 @@ const RuleHeader = () => {
 
   return (
     <div className='text-center mb-12'>
-      <h1 className='text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-card-foreground leading-tight mb-4'>
+      <h1 className='text-4xl min-[48rem]:text-5xl font-extrabold text-gray-900 dark:text-card-foreground leading-tight mb-4'>
         {t('rule.header.title')}
       </h1>
-      <p className='text-lg md:text-xl text-gray-600 dark:text-card-foreground'>
+      <p className='text-lg min-[48rem]:text-xl text-gray-600 dark:text-card-foreground'>
         {t('rule.header.subtitle')}
       </p>
     </div>

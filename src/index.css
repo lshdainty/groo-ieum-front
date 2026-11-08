@@ -3,6 +3,157 @@
 @import 'tw-animate-css';
 @plugin '@tailwindcss/typography';
 
+/* 그루 토큰(groo-design DESIGN.hr.md sync). 아래 shadcn 변수와 이름이 겹치면(--radius-sm/md/lg/xl · --color-primary) 아래 것이 이긴다 — 지금 화면 값 유지 */
+@import './shared/styles/groo-tokens.css';
+
+/* 22-0 임시 — groo-tokens 가 Tailwind 기본값을 바꾸는 자리 가운데 옛 화면이 쓰는 것을 지금 값으로 되돌린다(사용자 화면 변화 0).
+ * 옛 화면이 모두 ds 로 옮겨지면(이음 화면 이관의 마지막 묶음) 이 블록을 통째로 걷는다.
+ *  - 글꼴: groo 의 Pretendard 대신 Tailwind 기본 글꼴 묶음. Pretendard 로 바꾸는 일은 index.html 의 글꼴 링크와 이 줄을 같이 걷는 한 번의 변경이다.
+ *  - 그림자: ds 는 shadow-s1~s4 를 쓰고 shadow-sm/md/lg/xl 은 쓰지 않는다 — 옛 이름만 Tailwind 기본 값으로.
+ *  - 중단점(sm/lg/xl)·max-w-sm/md/lg/2xl 은 옛 화면 클래스를 임의값(min-[40rem]: · max-w-[24rem])으로 바꿔 지켰다. */
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* 팔레트 — groo 가 Tailwind 기본 팔레트 이름(gray·blue·green…)을 그루 팔레트로 덮는다. 옛 화면이 쓰는 이름만 Tailwind 기본값으로 body 아래에서 되돌린다.
+ * 역할 토큰(bg-layer-default 등)은 :root 에서 이미 풀려 있어 ds 부품은 영향받지 않는다. */
+body {
+  --color-red-100: #ffe2e2;
+  --color-red-200: #ffcaca;
+  --color-red-300: #ffa3a3;
+  --color-red-400: #ff6568;
+  --color-red-500: #fb2c36;
+  --color-red-600: #e40014;
+  --color-red-700: #bf000f;
+  --color-red-800: #9f0712;
+  --color-red-900: #82181a;
+  --color-orange-100: #ffedd5;
+  --color-orange-200: #ffd7a8;
+  --color-orange-300: #ffb96d;
+  --color-orange-400: #ff8b1a;
+  --color-orange-500: #fe6e00;
+  --color-orange-600: #f05100;
+  --color-orange-700: #c53c00;
+  --color-orange-800: #9f2d00;
+  --color-orange-900: #7e2a0c;
+  --color-yellow-100: #fef9c2;
+  --color-yellow-200: #fff085;
+  --color-yellow-300: #ffe02a;
+  --color-yellow-500: #edb200;
+  --color-yellow-600: #cd8900;
+  --color-yellow-700: #a36100;
+  --color-yellow-800: #874b00;
+  --color-yellow-900: #733e0a;
+  --color-green-100: #dcfce7;
+  --color-green-200: #b9f8cf;
+  --color-green-300: #7bf1a8;
+  --color-green-400: #05df72;
+  --color-green-500: #00c758;
+  --color-green-600: #00a544;
+  --color-green-700: #008138;
+  --color-green-800: #016630;
+  --color-green-900: #0d542b;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bedbff;
+  --color-blue-300: #90c5ff;
+  --color-blue-500: #3080ff;
+  --color-blue-600: #155dfc;
+  --color-blue-700: #1447e6;
+  --color-blue-800: #193cb8;
+  --color-blue-900: #1c398e;
+  --color-indigo-100: #e0e7ff;
+  --color-indigo-200: #c7d2ff;
+  --color-indigo-800: #372aac;
+  --color-indigo-900: #312c85;
+  --color-pink-200: #fccee8;
+  --color-pink-300: #fda5d5;
+  --color-pink-500: #f6339a;
+  --color-pink-600: #e30076;
+  --color-pink-700: #c4005c;
+  --color-pink-800: #a2004c;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5dc;
+  --color-gray-400: #99a1af;
+  --color-gray-500: #6a7282;
+  --color-gray-600: #4a5565;
+  --color-gray-700: #364153;
+  --color-gray-800: #1e2939;
+  --color-gray-900: #101828;
+}
+@supports (color: lab(0% 0 0)) {
+  body {
+    --color-red-100: lab(92.243% 10.2865 3.83865);
+    --color-red-200: lab(86.017% 19.8815 7.75869);
+    --color-red-300: lab(76.5514% 36.422 15.5335);
+    --color-red-400: lab(63.7053% 60.745 31.3109);
+    --color-red-500: lab(55.4814% 75.0732 48.8528);
+    --color-red-600: lab(48.4493% 77.4328 61.5452);
+    --color-red-700: lab(40.4273% 67.2623 53.7441);
+    --color-red-800: lab(33.7174% 55.8993 41.0293);
+    --color-red-900: lab(28.5139% 44.5539 29.0463);
+    --color-orange-100: lab(94.7127% 3.58394 14.3151);
+    --color-orange-200: lab(88.4871% 9.94918 28.8378);
+    --color-orange-300: lab(80.8059% 21.7313 50.4455);
+    --color-orange-400: lab(70.0429% 42.5156 75.8207);
+    --color-orange-500: lab(64.272% 57.1788 90.3583);
+    --color-orange-600: lab(57.1026% 64.2584 89.8886);
+    --color-orange-700: lab(46.4615% 57.7275 70.8507);
+    --color-orange-800: lab(37.1566% 46.6433 50.5562);
+    --color-orange-900: lab(30.2951% 36.0434 37.671);
+    --color-yellow-100: lab(97.3564% -4.51407 27.344);
+    --color-yellow-200: lab(94.3433% -5.00429 52.9663);
+    --color-yellow-300: lab(89.7033% -.480294 84.4917);
+    --color-yellow-500: lab(76.3898% 14.5258 98.4589);
+    --color-yellow-600: lab(62.7799% 22.4197 86.1544);
+    --color-yellow-700: lab(47.8202% 25.2426 66.5015);
+    --color-yellow-800: lab(38.7484% 23.5833 51.4916);
+    --color-yellow-900: lab(32.3865% 21.1273 38.5959);
+    --color-green-100: lab(96.1861% -13.8464 6.52365);
+    --color-green-200: lab(92.4222% -26.4702 12.9427);
+    --color-green-300: lab(86.9953% -47.2691 25.0054);
+    --color-green-400: lab(78.503% -64.9265 39.7492);
+    --color-green-500: lab(70.5521% -66.5147 45.8073);
+    --color-green-600: lab(59.0978% -58.6621 41.2579);
+    --color-green-700: lab(47.0329% -47.0239 31.4788);
+    --color-green-800: lab(37.4616% -36.7971 22.9692);
+    --color-green-900: lab(30.797% -29.6927 17.382);
+    --color-blue-100: lab(92.0301% -2.24757 -11.6453);
+    --color-blue-200: lab(86.15% -4.04379 -21.0797);
+    --color-blue-300: lab(77.5052% -6.4629 -36.42);
+    --color-blue-500: lab(54.1736% 13.3369 -74.6839);
+    --color-blue-600: lab(44.0605% 29.0279 -86.0352);
+    --color-blue-700: lab(36.9089% 35.0961 -85.6872);
+    --color-blue-800: lab(30.2514% 27.7853 -70.2699);
+    --color-blue-900: lab(26.1542% 15.7545 -51.5504);
+    --color-indigo-100: lab(91.6577% 1.04591 -12.7199);
+    --color-indigo-200: lab(84.4329% 3.18977 -23.9688);
+    --color-indigo-800: lab(26.6645% 37.9804 -68.6402);
+    --color-indigo-900: lab(23.3911% 24.6978 -50.4718);
+    --color-pink-200: lab(87.4504% 19.6 -6.46662);
+    --color-pink-300: lab(77.8308% 38.525 -10.5394);
+    --color-pink-500: lab(56.9303% 76.8162 -8.07021);
+    --color-pink-600: lab(49.5493% 79.8381 2.31768);
+    --color-pink-700: lab(42.1737% 71.8009 7.42233);
+    --color-pink-800: lab(34.9559% 60.2885 5.99639);
+    --color-gray-100: lab(96.1596% -.0823438 -1.13575);
+    --color-gray-200: lab(91.6229% -.159115 -2.26791);
+    --color-gray-300: lab(85.1236% -.612259 -3.7138);
+    --color-gray-400: lab(65.9269% -.832707 -8.17473);
+    --color-gray-500: lab(47.7841% -.393182 -10.0268);
+    --color-gray-600: lab(35.6337% -1.58697 -10.8425);
+    --color-gray-700: lab(27.1134% -.956401 -12.3224);
+    --color-gray-800: lab(16.1051% -1.18239 -11.7533);
+    --color-gray-900: lab(8.11897% .811279 -12.254);
+  }
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @font-face {
@@ -164,7 +315,7 @@
   .gsi-material-button {
     @apply select-none appearance-none bg-white border border-[#747775] rounded cursor-pointer;
     @apply text-[#1f1f1f] text-sm h-10 tracking-wide outline-none overflow-hidden px-3;
-    @apply relative text-center align-middle whitespace-nowrap w-full max-w-md;
+    @apply relative text-center align-middle whitespace-nowrap w-full max-w-[28rem];
     font-family: 'Roboto', arial, sans-serif;
     transition: background-color .218s, border-color .218s, box-shadow .218s;
   }

@@ -15,7 +15,7 @@ const ReportFilterSkeleton = () => {
           </div>
 
           {/* 필터 입력 필드들 */}
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+          <div className='grid grid-cols-1 min-[48rem]:grid-cols-2 min-[64rem]:grid-cols-4 gap-4'>
             {/* 시작 날짜 */}
             <div className='space-y-2'>
               <Skeleton className='h-4 w-16' />

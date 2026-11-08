@@ -15,6 +15,7 @@ import koAuth from '@/locales/ko/auth.json'
 import koUser from '@/locales/ko/user.json'
 import koCalendar from '@/locales/ko/calendar.json'
 import koNotice from '@/locales/ko/notice.json'
+import koDs from '@/locales/ko/ds.json'
 
 import enCommon from '@/locales/en/common.json'
 import enLogin from '@/locales/en/login.json'
@@ -28,6 +29,7 @@ import enAuth from '@/locales/en/auth.json'
 import enUser from '@/locales/en/user.json'
 import enCalendar from '@/locales/en/calendar.json'
 import enNotice from '@/locales/en/notice.json'
+import enDs from '@/locales/en/ds.json'
 
 // 지원하는 언어 목록
 export const SUPPORTED_LANGUAGES = ['ko', 'en'] as const
@@ -52,7 +54,8 @@ export const NAMESPACES = [
   'auth',
   'user',
   'calendar',
-  'notice'
+  'notice',
+  'ds'
 ] as const
 export type Namespace = typeof NAMESPACES[number]
 
@@ -70,7 +73,8 @@ const resources = {
     auth: koAuth,
     user: koUser,
     calendar: koCalendar,
-    notice: koNotice
+    notice: koNotice,
+    ds: koDs
   },
   en: {
     common: enCommon,
@@ -84,7 +88,8 @@ const resources = {
     auth: enAuth,
     user: enUser,
     calendar: enCalendar,
-    notice: enNotice
+    notice: enNotice,
+    ds: enDs
   }
 }
 

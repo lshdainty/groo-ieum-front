@@ -93,7 +93,7 @@ const EventFilter = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant='outline' className='flex-1 md:w-48 justify-between gap-2'>
+        <Button variant='outline' className='flex-1 min-[48rem]:w-48 justify-between gap-2'>
           <div className='flex items-center gap-2'>
             <FilterIcon className='w-4 h-4' />
             <span>

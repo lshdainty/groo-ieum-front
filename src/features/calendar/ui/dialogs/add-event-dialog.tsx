@@ -210,7 +210,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent className='sm:max-w-[425px]'>
+      <DialogContent className='min-[40rem]:max-w-[425px]'>
         <DialogHeader>
           <DialogTitle>{t('addEvent.title')}</DialogTitle>
           <DialogDescription>{t('addEvent.description')}</DialogDescription>

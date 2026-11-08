@@ -92,7 +92,7 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-md'>
+      <DialogContent className='min-[40rem]:max-w-[28rem]'>
         <DialogHeader>
           <DialogTitle>{t('passwordChange')}</DialogTitle>
           <DialogDescription>{t('passwordChangeDescription')}</DialogDescription>

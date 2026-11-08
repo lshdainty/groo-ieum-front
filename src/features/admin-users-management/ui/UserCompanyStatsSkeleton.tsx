@@ -2,7 +2,7 @@ import { Skeleton } from '@/shared/ui/shadcn/skeleton'
 
 export const UserCompanyStatsSkeleton = () => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 divide-y lg:divide-y-0 lg:divide-x divide-border h-full bg-card">
+    <div className="grid grid-cols-1 min-[64rem]:grid-cols-5 divide-y min-[64rem]:divide-y-0 min-[64rem]:divide-x divide-border h-full bg-card">
       {Array.from({ length: 5 }).map((_, index) => (
         <div key={index} className="p-6 h-full">
           <div className="flex flex-col h-full justify-between">

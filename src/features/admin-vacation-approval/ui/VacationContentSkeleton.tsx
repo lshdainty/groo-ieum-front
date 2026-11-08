@@ -28,7 +28,7 @@ const VacationContentSkeleton = () => {
   const { selectedYear, setSelectedYear } = useVacationContext()
 
   return (
-    <div className='p-4 sm:p-6 md:p-8'>
+    <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
       <div className='flex items-center justify-between mb-6'>
         <h1 className='text-3xl font-bold'>{t('stats.title')}</h1>
         <Select value={selectedYear} onValueChange={setSelectedYear}>
@@ -44,18 +44,18 @@ const VacationContentSkeleton = () => {
           </SelectContent>
         </Select>
       </div>
-      <div className='flex flex-col lg:flex-row gap-6'>
+      <div className='flex flex-col min-[64rem]:flex-row gap-6'>
         <UserInfoCardSkeleton />
         <div className='flex flex-col gap-6 flex-1'>
           <VacationStatsCardSkeleton />
           <MonthVacationStatsCardSkeleton />
         </div>
       </div>
-      <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6'>
-        <div className='xl:col-span-1 flex flex-col'>
+      <div className='grid grid-cols-1 min-[80rem]:grid-cols-3 gap-6 mt-6'>
+        <div className='min-[80rem]:col-span-1 flex flex-col'>
           <VacationTypeStatsCardSkeleton />
         </div>
-        <div className='xl:col-span-2 flex flex-col'>
+        <div className='min-[80rem]:col-span-2 flex flex-col'>
           <VacationHistoryTableSkeleton />
         </div>
       </div>

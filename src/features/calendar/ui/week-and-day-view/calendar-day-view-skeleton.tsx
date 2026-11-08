@@ -62,7 +62,7 @@ export const CalendarDayViewSkeleton = () => {
       </div>
 
       {/* Side panel skeleton */}
-      <div className='hidden w-64 divide-y border-l md:block'>
+      <div className='hidden w-64 divide-y border-l min-[48rem]:block'>
         {/* Calendar skeleton */}
         <div className='p-4'>
           <Skeleton className='h-[280px] w-full rounded' />

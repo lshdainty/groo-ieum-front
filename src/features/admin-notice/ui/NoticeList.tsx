@@ -46,7 +46,7 @@ const NoticeList = ({
       {notices?.map((notice) => (
         <Card key={notice.notice_id} className='hover:shadow-md transition-shadow'>
           <CardContent className='px-6'>
-            <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4'>
+            <div className='flex flex-col min-[40rem]:flex-row items-start min-[40rem]:items-center justify-between gap-4'>
               <div className='flex-1 min-w-0'>
                 <div className='flex items-center gap-2 mb-2'>
                   {notice.is_pinned === 'Y' && (
@@ -70,7 +70,7 @@ const NoticeList = ({
                   <span>{t('notice.displayPeriod')}: {formatDate(notice.start_date)} ~ {formatDate(notice.end_date)}</span>
                 </div>
               </div>
-              <div className='flex flex-wrap items-center gap-2 w-full sm:w-auto'>
+              <div className='flex flex-wrap items-center gap-2 w-full min-[40rem]:w-auto'>
                 <Badge className={noticeTypeColors[notice.notice_type] || noticeTypeColors.GENERAL}>
                   {notice.notice_type_name}
                 </Badge>
@@ -88,7 +88,7 @@ const NoticeList = ({
                     <Button
                       variant='ghost'
                       size='sm'
-                      className='h-8 w-8 p-0 data-[state=open]:bg-muted hover:bg-muted ml-auto sm:ml-0'
+                      className='h-8 w-8 p-0 data-[state=open]:bg-muted hover:bg-muted ml-auto min-[40rem]:ml-0'
                     >
                       <EllipsisVertical className='w-4 h-4' />
                     </Button>

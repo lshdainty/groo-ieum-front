@@ -6,7 +6,7 @@ import { RuleVacation } from '@/features/culture-regulation/ui/RuleVacation';
 
 const RuleContent = () => {
   return (
-    <div className='container mx-auto py-12 px-4 md:px-0 max-w-4xl'>
+    <div className='container mx-auto py-12 px-4 min-[48rem]:px-0 max-w-4xl'>
       <RuleHeader />
       <RuleVacation />
       <RuleAttire />

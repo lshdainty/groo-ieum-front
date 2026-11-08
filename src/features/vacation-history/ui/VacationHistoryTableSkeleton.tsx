@@ -64,7 +64,7 @@ const VacationHistoryTableSkeleton = () => {
           <div className='text-sm text-muted-foreground'>
             <Skeleton className='h-4 w-16' />
           </div>
-          <div className='flex items-center space-x-6 lg:space-x-8'>
+          <div className='flex items-center space-x-6 min-[64rem]:space-x-8'>
             <div className='flex items-center space-x-2'>
               <Skeleton className='h-4 w-24' />
             </div>

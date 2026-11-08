@@ -21,10 +21,10 @@ const VacationPlanLists = ({ plans, searchQuery }: VacationPlanListsProps) => {
     <div className="flex flex-col gap-4">
       {plans.map(plan => (
         <Card key={plan.id} className="transition-all hover:shadow-md py-0">
-          <CardContent className="p-4 sm:px-6">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <CardContent className="p-4 min-[40rem]:px-6">
+            <div className="flex flex-col min-[40rem]:flex-row min-[40rem]:items-start min-[40rem]:justify-between gap-4">
               <div className="flex flex-col gap-3 flex-1">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                <div className="flex flex-col min-[40rem]:flex-row min-[40rem]:items-center gap-2 min-[40rem]:gap-3">
                   <h3 className="font-semibold text-lg">{plan.name}</h3>
                   <Badge variant="outline" className="text-xs w-fit">
                     {plan.code}
@@ -59,7 +59,7 @@ const VacationPlanLists = ({ plans, searchQuery }: VacationPlanListsProps) => {
                 )}
               </div>
 
-              <div className="flex items-center gap-1 self-end sm:self-auto">
+              <div className="flex items-center gap-1 self-end min-[40rem]:self-auto">
                 <VacationPlanPolicyDialog
                   plan={plan}
                   trigger={

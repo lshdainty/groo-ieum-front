@@ -129,7 +129,7 @@ const DepartmentContentInner = ({ company }: DepartmentContentInnerProps) => {
 
   return (
     <div className='h-full w-full'>
-      <div className='h-full flex flex-col p-4 sm:p-6 md:p-8 gap-6 overflow-hidden'>
+      <div className='h-full flex flex-col p-4 min-[40rem]:p-6 min-[48rem]:p-8 gap-6 overflow-hidden'>
         <div className='flex items-center gap-2 shrink-0'>
           <Building2 />
           <h1 className='text-3xl font-bold'>{company.company_name}</h1>

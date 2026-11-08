@@ -25,7 +25,7 @@ const CompanyCreateCard = ({ onCompanyCreate }: CompanyCreateCardProps) => {
   };
 
   return (
-    <Card className='w-full max-w-md shadow-lg'>
+    <Card className='w-full max-w-[28rem] shadow-lg'>
       <CardHeader className='text-center'>
         <CardTitle className='flex items-center justify-center space-x-2'>
           <Building2 className='text-blue-600' />

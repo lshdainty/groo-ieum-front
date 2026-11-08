@@ -111,9 +111,9 @@ const VacationApprovalForm = ({
           <div className='p-6'>
             <div className='space-y-6'>
               {/* 메인 폼 영역 */}
-              <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+              <div className='grid grid-cols-1 min-[64rem]:grid-cols-3 gap-6'>
                 {/* 좌측: 기본 정보 */}
-                <div className='lg:col-span-2 space-y-6'>
+                <div className='min-[64rem]:col-span-2 space-y-6'>
                   <Card>
                     <CardHeader>
                       <CardTitle className='flex items-center gap-2'>
@@ -304,7 +304,7 @@ const VacationApprovalForm = ({
                 </div>
 
                 {/* 우측: 결재선 */}
-                <div className='lg:col-span-1'>
+                <div className='min-[64rem]:col-span-1'>
                   <Card className='sticky top-0'>
                     <CardHeader>
                       <CardTitle className='flex items-center gap-2'>

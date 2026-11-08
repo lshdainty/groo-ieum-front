@@ -36,7 +36,7 @@ const RoleDetailSkeletonContent = () => (
         </div>
         <Skeleton className="h-10 w-32" />
       </div>
-      <div className="grid gap-4 max-w-2xl">
+      <div className="grid gap-4 max-w-[42rem]">
         <div className="grid gap-2">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-10 w-full" />
@@ -63,7 +63,7 @@ const RoleDetailSkeletonContent = () => (
                 <Skeleton className="h-3 w-16" />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 min-[48rem]:grid-cols-2 min-[64rem]:grid-cols-3 gap-4">
               {Array.from({ length: 3 }).map((_, itemIndex) => (
                 <div key={itemIndex} className="flex items-start space-x-3 p-4 rounded-lg border">
                   <Skeleton className="h-4 w-4 mt-1" />

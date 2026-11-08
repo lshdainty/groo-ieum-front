@@ -66,10 +66,10 @@ const UserRoleAssignment = ({ user, allRoles, onUpdateUserRole, onBack }: UserRo
 
   return (
     <div className="flex flex-col h-full min-h-0 min-w-0">
-      <div className="shrink-0 p-4 md:p-6 border-b bg-background">
+      <div className="shrink-0 p-4 min-[48rem]:p-6 border-b bg-background">
         <div className="flex items-start gap-2 mb-1">
           {onBack && (
-            <Button variant="outline" size="icon" onClick={onBack} className="mr-2 md:hidden shrink-0 h-8 w-8 mt-1">
+            <Button variant="outline" size="icon" onClick={onBack} className="mr-2 min-[48rem]:hidden shrink-0 h-8 w-8 mt-1">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           )}
@@ -89,7 +89,7 @@ const UserRoleAssignment = ({ user, allRoles, onUpdateUserRole, onBack }: UserRo
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 min-[48rem]:p-6">
         {/* fieldset 은 기본 min-inline-size 가 min-content 라 띄어쓰기 없는 긴 설명에 폭이 밀린다 — min-w-0 */}
         <FieldSet className="min-w-0 gap-3">
           <FieldLegend className="mb-2 leading-[22px]">{t('authority.roles')}</FieldLegend>
@@ -142,12 +142,12 @@ const UserRoleAssignment = ({ user, allRoles, onUpdateUserRole, onBack }: UserRo
           )}
         </FieldSet>
 
-        <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
+        <div className="mt-3 flex flex-col gap-3 min-[48rem]:flex-row min-[48rem]:items-center min-[48rem]:justify-end">
           <p id={hintId} className="text-sm text-muted-foreground">
             {isDirty ? t('authority.userRolesPending', { added, removed }) : t('authority.userRolesNoChanges')}
           </p>
           <Button
-            className="relative w-full md:w-auto"
+            className="relative w-full min-[48rem]:w-auto"
             onClick={handleSave}
             disabled={!isDirty || isSaving}
             aria-busy={isSaving}

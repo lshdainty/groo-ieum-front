@@ -266,7 +266,7 @@ const BulkGenerateHolidayDialog = ({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[700px] max-h-[80vh] flex flex-col">
+      <DialogContent className="min-[40rem]:max-w-[700px] max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{t('holiday.bulkGenerateTitle')}</DialogTitle>
           <DialogDescription>{t('holiday.bulkGenerateDescription')}</DialogDescription>
@@ -312,7 +312,7 @@ const BulkGenerateHolidayDialog = ({
 
           <div className="flex-1" />
 
-          <Button variant="outline" onClick={handleAddClick} className="hidden sm:inline-flex">
+          <Button variant="outline" onClick={handleAddClick} className="hidden min-[40rem]:inline-flex">
             {tc('add')}
           </Button>
         </div>
@@ -413,7 +413,7 @@ const BulkGenerateHolidayDialog = ({
         {/* 모바일용 추가 버튼 */}
         <Button
           onClick={handleAddClick}
-          className="sm:hidden w-full"
+          className="min-[40rem]:hidden w-full"
         >
           <CalendarPlus className="mr-2 h-4 w-4" />
           {t('holiday.addHoliday')}
