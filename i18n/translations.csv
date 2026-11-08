@@ -1560,3 +1560,6 @@ auth,callback.exchangeFailed,로그인 정보를 확인하지 못했어요. 그�
 auth,callback.noCode,다시 로그인해주세요.,Please sign in again.
 auth,callback.retry,다시 로그인하기,Sign in again
 auth,callback.finishing,로그인 마무리 중,Finishing sign-in
+login,sso.description,그루 계정으로 로그인해주세요.,Sign in with your 그루 account.
+login,sso.login,그루 계정으로 로그인,Sign in with 그루
+login,sso.failed,로그인을 시작하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't start sign-in. Please try again in a moment.
