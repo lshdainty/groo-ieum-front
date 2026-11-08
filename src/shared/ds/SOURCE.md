@@ -15,5 +15,5 @@
 7. `scripts/check-ds-spec.mjs` — groo-sso-front 판(Desk 판 + `resolveState` 가 맞는 규칙의 `skipped` 칸을 잰 값에서 뺀다. 이음 DESIGN.hr.md 는 brand 칸을 싣는다 — 이 보정은 skipped 가 비면 아무 일도 안 한다).
 8. `src/app/index.tsx` — `/dev/ds` 카탈로그(개발 서버 전용, `import.meta.env.DEV` 가드). 로그인·권한 확인 앞에서 그린다.
 9. (sso 의 다크 틀 보정 — snackbar · menu · table-pagination · side-navigation 의 `container` 손질 — 은 가져오지 않았다. 이음은 다크가 문서 루트라 필요 없다. 화면 이관에서 필요해지면 그때 판단.)
-10. `button/button-variants.ts` — 로딩 원의 `var(--color-gray-500)` 3곳을 `#8a91a0`(groo gray-500 리터럴)로. 옛 화면이 쓰는 Tailwind gray-500 을 `index.css` 의 body 블록이 되돌리기 때문이다. 그 블록을 걷을 때 `var(--color-gray-500)` 로 되돌린다.
+10. `button/button-variants.ts` — 로딩 원의 `var(--color-gray-500)` 3곳을 `#8a91a0` + `dark:#656b78`(groo gray-500 라이트·다크 리터럴)로. 옛 화면이 쓰는 Tailwind gray-500 을 `index.css` 의 body 블록이 되돌리기 때문이다. 그 블록을 걷을 때 `var(--color-gray-500)` 로 되돌린다.
 11. `src/index.css` — 임시 블록(글꼴 · shadow-sm~xl · 팔레트)이 옛 화면의 값을 지킨다. 전역 `word-break: keep-all` · 글리프 보충 글꼴 `GrooNumSymbols` 는 옛 화면을 바꾸므로 이 묶음에서 켜지 않았다(화면 이관 때).

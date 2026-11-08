@@ -58,15 +58,15 @@ export const buttonVariants = cva(
         neutralSolid:
           "bg-bg-neutral-inverted text-fg-neutral-inverted hover:bg-bg-neutral-inverted-pressed active:bg-bg-neutral-inverted-pressed aria-busy:bg-bg-neutral-inverted-pressed [--progress-track:color-mix(in_srgb,var(--color-fg-neutral-inverted)_30%,transparent)] [--progress-range:var(--color-fg-neutral-inverted)]",
         neutralWeak:
-          "bg-bg-neutral-weak text-fg-neutral hover:bg-bg-neutral-weak-pressed active:bg-bg-neutral-weak-pressed aria-busy:bg-bg-neutral-weak-pressed [--progress-track:#8a91a0] [--progress-range:var(--color-fg-neutral)]",
+          "bg-bg-neutral-weak text-fg-neutral hover:bg-bg-neutral-weak-pressed active:bg-bg-neutral-weak-pressed aria-busy:bg-bg-neutral-weak-pressed [--progress-track:#8a91a0] dark:[--progress-track:#656b78] [--progress-range:var(--color-fg-neutral)]",
         criticalSolid:
           "bg-bg-critical-solid text-static-white hover:bg-bg-critical-solid-pressed active:bg-bg-critical-solid-pressed aria-busy:bg-bg-critical-solid-pressed [--progress-track:color-mix(in_srgb,var(--color-static-white)_30%,transparent)] [--progress-range:var(--color-static-white)]",
         brandOutline:
           "shadow-[inset_0_0_0_1px_var(--color-stroke-neutral-weak)] bg-transparent text-fg-brand hover:bg-bg-layer-default-pressed active:bg-bg-layer-default-pressed aria-busy:bg-transparent disabled:bg-transparent [--progress-track:var(--color-bg-brand-weak-pressed)] [--progress-range:var(--color-stroke-brand-solid)]",
         neutralOutline:
-          "shadow-[inset_0_0_0_1px_var(--color-stroke-neutral-weak)] bg-transparent text-fg-neutral hover:bg-bg-layer-default-pressed active:bg-bg-layer-default-pressed aria-busy:bg-transparent disabled:bg-transparent [--progress-track:#8a91a0] [--progress-range:var(--color-fg-neutral)]",
+          "shadow-[inset_0_0_0_1px_var(--color-stroke-neutral-weak)] bg-transparent text-fg-neutral hover:bg-bg-layer-default-pressed active:bg-bg-layer-default-pressed aria-busy:bg-transparent disabled:bg-transparent [--progress-track:#8a91a0] dark:[--progress-track:#656b78] [--progress-range:var(--color-fg-neutral)]",
         ghost:
-          "bg-transparent text-fg-neutral hover:bg-bg-layer-default-pressed active:bg-bg-layer-default-pressed aria-busy:bg-bg-layer-default-pressed disabled:bg-transparent [--progress-track:#8a91a0] [--progress-range:var(--color-fg-neutral)]",
+          "bg-transparent text-fg-neutral hover:bg-bg-layer-default-pressed active:bg-bg-layer-default-pressed aria-busy:bg-bg-layer-default-pressed disabled:bg-transparent [--progress-track:#8a91a0] dark:[--progress-track:#656b78] [--progress-range:var(--color-fg-neutral)]",
       },
       size: {
         xsmall:
