@@ -4,12 +4,10 @@ import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 import { Layout, NotFoundScreen } from '@/widgets/layout'
-import NotFound from '@/shared/ui/not-found/NotFound'
 import { AuthCallbackPage } from '@/pages/auth-callback'
 import { LoginPage } from '@/pages/login'
 import { PasswordChangePage } from '@/pages/password-change'
-import { SignUpPage } from '@/pages/signup'
-import { ResultScreen, WaitingScreen } from '@/widgets/outside'
+import { OutsideNotFound, ResultScreen, WaitingScreen } from '@/widgets/outside'
 import { loginPathFor, safeReturnPath } from '@/shared/lib/return-path'
 
 // 설정 파일에서 import
@@ -122,11 +120,6 @@ export function AppRouter() {
         path='/auth/callback'
         element={<AuthCallbackPage />}
       />
-      {/* 회원가입 - SSO에서 처리하므로 리다이렉트 */}
-      <Route
-        path='/signup'
-        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <SignUpPage/>}
-      />
       {/* 비밀번호 강제 변경 페이지 */}
       <Route
         path='/password-change'
@@ -148,8 +141,8 @@ export function AppRouter() {
         {framed && <Route path='*' element={<NotFoundScreen/>} />}
       </Route>
 
-      {/* 로그인 전 404 — 흰 면(22-2 가 옮긴다) */}
-      {!framed && <Route path='/*' element={<NotFound/>} />}
+      {/* 로그인 전 404 — 흰 면. 비밀번호를 바꿔야 하는 사람은 모르는 주소도 /password-change 로 */}
+      {!framed && <Route path='/*' element={requiresPasswordChange ? <Navigate to="/password-change" replace /> : <OutsideNotFound/>} />}
     </Routes>
   )
 }

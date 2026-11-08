@@ -1,7 +1,7 @@
 // Features - Root Public API
 
 // Auth
-export { LoginContent, SignUpContent } from '@/features/auth'
+export { LoginContent } from '@/features/auth'
 export { LoginProvider, useLoginContext } from '@/features/auth'
 
 // Calendar

@@ -6,7 +6,7 @@ import { createContext, ReactNode, useContext, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 // 로그인 체크를 건너뛸 경로
-const AUTH_PATHS = ['/login', '/logout', '/signup', '/auth/callback']
+const AUTH_PATHS = ['/login', '/logout', '/auth/callback']
 
 /**
  * 세션 확인 상태
