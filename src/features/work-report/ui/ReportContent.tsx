@@ -10,6 +10,7 @@ import { ReportTable } from '@/features/work-report/ui/ReportTable';
 import { UnregisteredDownloadDialog } from '@/features/work-report/ui/UnregisteredDownloadDialog';
 import { useReportContext } from '@/features/work-report/model/ReportContext';
 import { WorkHistory } from '@/features/work-report/model/types';
+import { isExcelPeriodValid } from '@/features/work-report/model/excelPeriod';
 import { useUsersQuery } from '@/entities/user';
 import {
   WorkHistoryResp,
@@ -278,6 +279,10 @@ const ReportContent = () => {
   };
 
   const handleExcelExport = async () => {
+    if (!isExcelPeriodValid(searchCondition.startDate, searchCondition.endDate)) {
+      toast.error(t('report.excelPeriodInvalid'));
+      return;
+    }
     try {
       const blob = await downloadWorkHistoryExcel.mutateAsync(searchCondition);
       const url = window.URL.createObjectURL(blob);

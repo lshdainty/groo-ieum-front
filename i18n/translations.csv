@@ -798,6 +798,7 @@ work,report.deleteConfirm,"{{date}} 업무 이력을 삭제하시겠습니까?",
 work,report.deleteWarning,이 작업은 되돌릴 수 없습니다.,This action cannot be undone.
 work,report.batchRegisterFailed,일괄 등록에 실패했습니다.,Failed to batch register.
 work,report.excelDownloadFailed,엑셀 다운로드에 실패했습니다.,Failed to download Excel.
+work,report.excelPeriodInvalid,기간을 1년 안으로 골라주세요.,Please select a period within one year.
 work,report.dataLoadFailed,데이터를 불러오는데 실패했습니다.,Failed to load data.
 work,report.tableTitle,업무 이력 테이블,Work History Table
 work,report.duplicate,복제,Duplicate
