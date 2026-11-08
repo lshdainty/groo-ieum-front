@@ -155,7 +155,6 @@ export {
 } from '@/shared/ui/shadcn/table'
 export { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/ui/shadcn/tabs'
 export { Textarea } from '@/shared/ui/shadcn/textarea'
-export { ThemeProvider, useTheme } from '@/shared/ui/shadcn/themeProvider'
 export {
   Tooltip,
   TooltipTrigger,

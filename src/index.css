@@ -6,15 +6,34 @@
 /* 그루 토큰(groo-design DESIGN.hr.md sync). 아래 shadcn 변수와 이름이 겹치면(--radius-sm/md/lg/xl · --color-primary) 아래 것이 이긴다 — 지금 화면 값 유지 */
 @import './shared/styles/groo-tokens.css';
 
-/* 22-0 임시 — groo-tokens 가 Tailwind 기본값을 바꾸는 자리 가운데 옛 화면이 쓰는 것을 지금 값으로 되돌린다(사용자 화면 변화 0).
- * 옛 화면이 모두 ds 로 옮겨지면(이음 화면 이관의 마지막 묶음) 이 블록을 통째로 걷는다.
- *  - 글꼴: groo 의 Pretendard 대신 Tailwind 기본 글꼴 묶음. Pretendard 로 바꾸는 일은 index.html 의 글꼴 링크와 이 줄을 같이 걷는 한 번의 변경이다.
+/* 글리프 보충 — index.html 의 CDN Pretendard dynamic-subset(v1.3.9) 이 unicode-range 에 담지 않은 기호(− ✓ ⚠ ∅ ↺ ⌘).
+ * 원본 Pretendard 에서 뽑은 서브셋 woff2 를 별도 family 로 두고, --font-sans 에서 "Pretendard Variable" 바로 뒤에 넣어 글자 단위로
+ * 대체한다. OFL 1.1 조항 3(Reserved Font Name) 때문에 수정본은 "Pretendard" 이름을 쓰지 못한다 — 이름을 GrooNumSymbols 로 바꿨다.
+ * 라이선스 전문 public/fonts/Pretendard-OFL.txt (그루 담다 `src/index.css` · `scripts/build-font-supplement.mjs` 와 같은 파일). */
+@font-face {
+  font-family: "GrooNumSymbols";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 45 920;
+  src: url("/fonts/pretendard-supplement.woff2") format("woff2");
+  unicode-range: U+2212, U+2713, U+26A0, U+2205, U+21BA, U+2318;
+}
+
+/* 한국어 줄바꿈 — 단어 단위(DESIGN.hr.md Typography "v114 — 줄바꿈"). 낱말 사이에서만 줄을 바꾸고, 한 줄보다 긴 낱말만 칸 끝에서 끊는다.
+ * 메일 · 아이디처럼 한 낱말이 긴 칸만 그 칸에서 overflow-wrap: anywhere 로 덮는다(사이드바 계정 줄 등). 22-1 에서 켰다. */
+html {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 22-0 임시 — groo-tokens 가 Tailwind 기본값을 바꾸는 자리 가운데 옛 화면이 쓰는 것을 지금 값으로 되돌린다.
+ * 옛 화면이 모두 ds 로 옮겨지면(이음 화면 이관의 마지막 묶음) 이 블록을 통째로 걷는다. (22-1: 글꼴은 Pretendard 로 켜서 걷었다)
  *  - 그림자: ds 는 shadow-s1~s4 를 쓰고 shadow-sm/md/lg/xl 은 쓰지 않는다 — 옛 이름만 Tailwind 기본 값으로.
  *  - 중단점(sm/lg/xl)·max-w-sm/md/lg/2xl 은 옛 화면 클래스를 임의값(min-[40rem]: · max-w-[24rem])으로 바꿔 지켰다. */
 @theme {
   --font-sans:
-    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol", "Noto Color Emoji";
+    "Pretendard Variable", "GrooNumSymbols", "Pretendard", -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Noto Sans KR", "Inter", "Segoe UI", sans-serif;
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
