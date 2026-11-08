@@ -27,7 +27,7 @@ const PlanContentInner = ({ vacationPlans }: PlanContentInnerProps) => {
   );
 
   return (
-    <div className='p-4 min-[40rem]:p-6 md:p-8'>
+    <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
       <div className="flex flex-col gap-7">
         {/* Header area */}
         <div className="flex flex-col gap-2">

@@ -109,12 +109,12 @@ const HolidayContent = () => {
   }
 
   return (
-    <div className='flex w-full h-full p-4 min-[40rem]:p-6 md:p-8'>
+    <div className='flex w-full h-full p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
       <div className='w-full flex flex-col h-full'>
-        <div className='flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 shrink-0'>
+        <div className='flex flex-col min-[48rem]:flex-row min-[48rem]:items-center justify-between mb-6 gap-4 shrink-0'>
           <div>
-            <h1 className='text-2xl md:text-3xl font-bold text-card-foreground'>{t('holiday.title')}</h1>
-            <p className='text-sm md:text-base text-muted-foreground mt-1'>{t('holiday.description')}</p>
+            <h1 className='text-2xl min-[48rem]:text-3xl font-bold text-card-foreground'>{t('holiday.title')}</h1>
+            <p className='text-sm min-[48rem]:text-base text-muted-foreground mt-1'>{t('holiday.description')}</p>
           </div>
 
           <div className='flex flex-col min-[40rem]:flex-row gap-2'>

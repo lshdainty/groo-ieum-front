@@ -6,7 +6,7 @@ const RuleVacation = () => {
 
   return (
     <div className='mb-12'>
-      <h2 className='text-2xl md:text-3xl font-bold text-gray-800 dark:text-card-foreground mb-6'>
+      <h2 className='text-2xl min-[48rem]:text-3xl font-bold text-gray-800 dark:text-card-foreground mb-6'>
         {t('rule.vacation.title')}
       </h2>
       <div className='grid grid-cols-1 min-[40rem]:grid-cols-2 min-[64rem]:grid-cols-4 gap-6'>

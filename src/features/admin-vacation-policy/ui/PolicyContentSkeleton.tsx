@@ -3,7 +3,7 @@ import { VacationPolicyListsSkeleton } from './VacationPolicyListsSkeleton';
 
 const PolicyContentSkeleton = () => {
   return (
-    <div className='p-4 min-[40rem]:p-6 md:p-8'>
+    <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
       <div className="flex flex-col gap-7">
         {/* 헤더 영역 */}
         <div className="flex flex-col gap-2">

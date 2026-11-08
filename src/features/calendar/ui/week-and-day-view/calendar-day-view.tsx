@@ -170,7 +170,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
         </ScrollArea>
       </div>
 
-      <div className='hidden w-64 divide-y border-l md:block'>
+      <div className='hidden w-64 divide-y border-l min-[48rem]:block'>
         <Calendar
           className='mx-auto w-fit'
           mode='single'

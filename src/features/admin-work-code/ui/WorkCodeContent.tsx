@@ -11,7 +11,7 @@ const WorkCodeContent = () => {
   return (
     <WorkCodeProvider>
       <div className='w-full'>
-        <div className='flex flex-col p-4 min-[40rem]:p-6 md:p-8 gap-6'>
+        <div className='flex flex-col p-4 min-[40rem]:p-6 min-[48rem]:p-8 gap-6'>
           <div className='flex items-center gap-2 shrink-0'>
             <Briefcase />
             <h1 className='text-3xl font-bold'>{t('codeManagement')}</h1>

@@ -19,19 +19,19 @@ interface LoginContentProps extends React.ComponentProps<'div'> {}
  */
 const LoginContent = ({ className, ...props }: LoginContentProps) => {
   return (
-    <div className='bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10'>
-      <div className='w-full max-w-[24rem] md:max-w-6xl'>
+    <div className='bg-muted flex min-h-svh flex-col items-center justify-center p-6 min-[48rem]:p-10'>
+      <div className='w-full max-w-[24rem] min-[48rem]:max-w-6xl'>
         <div className={cn('flex flex-col gap-6 h-[700px]', className)} {...props}>
           <Card className='overflow-hidden p-0 h-full'>
-            <CardContent className='grid p-0 md:grid-cols-[2fr_1fr] h-full'>
-              <div className='bg-muted relative hidden md:block'>
+            <CardContent className='grid p-0 min-[48rem]:grid-cols-[2fr_1fr] h-full'>
+              <div className='bg-muted relative hidden min-[48rem]:block'>
                 <img
                   src={loginBG}
                   alt='Image'
                   className='absolute inset-0 h-full w-full object-cover'
                 />
               </div>
-              <div className='p-6 md:p-8 h-full flex justify-center'>
+              <div className='p-6 min-[48rem]:p-8 h-full flex justify-center'>
                 <div className='flex flex-col justify-center gap-6 w-full'>
                   <LoginForm />
                 </div>

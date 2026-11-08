@@ -67,7 +67,7 @@ const ApplicationContent = () => {
   };
 
   const SkeletonContent = () => (
-    <div className='p-4 min-[40rem]:p-6 md:p-8'>
+    <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
       <div className='flex flex-col min-[64rem]:flex-row min-[64rem]:items-center min-[64rem]:justify-between mb-8'>
         <div>
           <h1 className='text-3xl font-bold mb-2'>{t('application.pageTitle')}</h1>
@@ -98,14 +98,14 @@ const ApplicationContent = () => {
       queryState={{ isLoading, error, data: vacationRequests }}
       loadingComponent={<SkeletonContent />}
       errorComponent={
-        <div className='p-4 min-[40rem]:p-6 md:p-8'>
+        <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
           <div className='p-8 text-center text-red-600'>
             {tc('loadFailed')}
           </div>
         </div>
       }
     >
-      <div className='p-4 min-[40rem]:p-6 md:p-8'>
+      <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
         <div className='flex flex-col min-[64rem]:flex-row min-[64rem]:items-center min-[64rem]:justify-between mb-8'>
           <div>
             <h1 className='text-3xl font-bold mb-2'>{t('application.pageTitle')}</h1>

@@ -10,7 +10,7 @@ const UserCompanyCard = ({ value: users }: UserCompanyCardProps) => {
   const companyStats = getUserCompanyStatsConfig(users);
 
   return (
-    <div className='grid gap-4 md:grid-cols-2 min-[64rem]:grid-cols-5'>
+    <div className='grid gap-4 min-[48rem]:grid-cols-2 min-[64rem]:grid-cols-5'>
       {companyStats.map((stat) => (
         <Card key={stat.id}>
           <CardContent className='h-full'>

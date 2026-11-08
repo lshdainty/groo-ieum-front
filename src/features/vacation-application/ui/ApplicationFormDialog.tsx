@@ -287,7 +287,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicie
 
                       {isOvertimeType ? (
                         <>
-                          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                          <div className='grid grid-cols-1 min-[48rem]:grid-cols-3 gap-4'>
                             <Controller
                               control={form.control}
                               name='overtimeDate'
@@ -441,7 +441,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicie
                             />
                           )}
 
-                          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                          <div className='grid grid-cols-1 min-[48rem]:grid-cols-2 gap-4'>
                             <div className='space-y-2'>
                               <FieldLabel>{t('application.overtimeHoursLabel')}</FieldLabel>
                               <div className='h-9 px-3 border rounded-md flex items-center bg-gray-50'>

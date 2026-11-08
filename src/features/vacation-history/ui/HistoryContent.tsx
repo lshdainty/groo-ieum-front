@@ -59,7 +59,7 @@ const HistoryContentLayout = ({
   const { t } = useTranslation('vacation')
 
   return (
-    <div className='p-4 min-[40rem]:p-6 md:p-8'>
+    <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
       <div className='flex items-center justify-between mb-6'>
         <h1 className='text-3xl font-bold'>{t('history.pageTitle')}</h1>
         <Select value={selectedYear} onValueChange={onYearChange}>
@@ -96,7 +96,7 @@ const HistoryContentLayout = ({
 
 const HistorySkeleton = ({ title }: { title: string }) => {
   return (
-    <div className='p-4 min-[40rem]:p-6 md:p-8'>
+    <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
       <h1 className='text-3xl font-bold mb-6'>{title}</h1>
       <div className='flex flex-col min-[64rem]:flex-row gap-6'>
         <UserInfoCardSkeleton />
@@ -147,7 +147,7 @@ const HistoryContent = () => {
       queryState={{ isLoading, error, data: user }}
       loadingComponent={<HistorySkeleton title={t('history.pageTitle')} />}
       errorComponent={
-        <div className='p-4 min-[40rem]:p-6 md:p-8'>
+        <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
           <div className='p-8 text-center text-red-600'>
             {tc('loadFailed')}
           </div>

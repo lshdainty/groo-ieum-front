@@ -9,7 +9,7 @@ const TotalDuesSkeleton = () => {
   const currentMonth = dayjs().format('MM');
 
   return (
-    <div className='grid grid-cols-1 md:grid-cols-2 min-[64rem]:grid-cols-4 gap-6'>
+    <div className='grid grid-cols-1 min-[48rem]:grid-cols-2 min-[64rem]:grid-cols-4 gap-6'>
       <Card className='relative overflow-hidden'>
         <CardHeader className='pb-2'>
           <div className='flex items-center gap-2'>

@@ -187,7 +187,7 @@ const UserDepartmentTransfer = ({
 
   return (
     <div className='w-full h-full flex flex-col gap-4 min-h-0'>
-      <div className='hidden md:flex justify-end gap-2'>
+      <div className='hidden min-[48rem]:flex justify-end gap-2'>
         <Button onClick={handleSave} disabled={!hasChanges() || isSaving}>
           {isSaving && <Spinner />}
           {isSaving ? tc('processing') : tc('save')}
@@ -209,7 +209,7 @@ const UserDepartmentTransfer = ({
         itemClassName='border-b-0'
       />
 
-      <div className='md:hidden sticky bottom-0 bg-background pt-2 pb-4 border-t -mx-4 px-4'>
+      <div className='min-[48rem]:hidden sticky bottom-0 bg-background pt-2 pb-4 border-t -mx-4 px-4'>
         <Button onClick={handleSave} disabled={!hasChanges() || isSaving} className='w-full'>
           {isSaving && <Spinner />}
           {isSaving ? tc('processing') : tc('save')}

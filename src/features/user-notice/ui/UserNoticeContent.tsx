@@ -35,7 +35,7 @@ export const UserNoticeContent = () => {
   const isLast = noticesData?.last ?? true
 
   return (
-    <div className="p-4 min-[40rem]:p-6 md:p-8">
+    <div className="p-4 min-[40rem]:p-6 min-[48rem]:p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">{t('notice:title')}</h1>
         <p className="text-sm text-muted-foreground mt-1">

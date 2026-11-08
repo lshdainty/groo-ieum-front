@@ -28,7 +28,7 @@ const MonthSkeleton = () => {
 export const CalendarYearViewSkeleton = () => {
   return (
     <div className='w-full h-full overflow-hidden p-4'>
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2 min-[64rem]:grid-cols-3 min-[80rem]:grid-cols-4'>
+      <div className='grid grid-cols-1 gap-4 min-[48rem]:grid-cols-2 min-[64rem]:grid-cols-3 min-[80rem]:grid-cols-4'>
         {Array.from({ length: 12 }).map((_, i) => (
           <MonthSkeleton key={i} />
         ))}

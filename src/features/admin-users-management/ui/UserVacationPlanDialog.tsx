@@ -162,7 +162,7 @@ const UserVacationPlanDialog = ({
         </DialogHeader>
 
         <div className='flex-1 min-h-0 overflow-y-auto py-4'>
-          <div className='h-[500px] md:h-full min-h-[400px] flex flex-col'>
+          <div className='h-[500px] min-[48rem]:h-full min-h-[400px] flex flex-col'>
             {isLoading ? (
               <div className='flex items-center justify-center h-full'>
                 <div className='text-foreground/70'>{tc('loading')}</div>

@@ -13,7 +13,7 @@ const UserNoticePage = () => {
       queryState={{ isLoading, error, data }}
       loadingComponent={<UserNoticeSkeleton />}
       errorComponent={
-        <div className="p-4 min-[40rem]:p-6 md:p-8">
+        <div className="p-4 min-[40rem]:p-6 min-[48rem]:p-8">
           <div className="p-8 text-center text-red-600">
             {t('loadFailed')}
           </div>

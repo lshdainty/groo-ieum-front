@@ -142,7 +142,7 @@ export function DynamicBreadcrumb({
               )}
 
               {/* breadcrumb 항목 */}
-              <BreadcrumbItem className={isFirst && showHome ? 'hidden md:block' : ''}>
+              <BreadcrumbItem className={isFirst && showHome ? 'hidden min-[48rem]:block' : ''}>
                 {crumb.isActive ? (
                   <BreadcrumbPage className='font-medium text-foreground'>
                     {crumb.title}

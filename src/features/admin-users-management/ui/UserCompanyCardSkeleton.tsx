@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/shadcn/car
 
 const UserCompanyCardSkeleton = () => {
   return (
-    <div className='grid gap-4 md:grid-cols-2 min-[64rem]:grid-cols-5 mb-6'>
+    <div className='grid gap-4 min-[48rem]:grid-cols-2 min-[64rem]:grid-cols-5 mb-6'>
       {Array(5).fill(0).map((_, i) => (
         <Card key={i}>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>

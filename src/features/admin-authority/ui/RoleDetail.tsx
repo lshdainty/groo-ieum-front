@@ -112,11 +112,11 @@ const RoleDetail = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 md:p-6 border-b bg-background sticky top-0 z-20">
+      <div className="p-4 min-[48rem]:p-6 border-b bg-background sticky top-0 z-20">
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-center gap-2">
             {onBack && (
-              <Button variant="outline" size="icon" onClick={onBack} className="mr-2 md:hidden shrink-0">
+              <Button variant="outline" size="icon" onClick={onBack} className="mr-2 min-[48rem]:hidden shrink-0">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             )}
@@ -177,7 +177,7 @@ const RoleDetail = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-muted/10 pb-20">
+      <div className="flex-1 overflow-y-auto p-4 min-[48rem]:p-6 bg-muted/10 pb-20">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">{t('authority.permissions')}</h3>
           {!isMobile && (
