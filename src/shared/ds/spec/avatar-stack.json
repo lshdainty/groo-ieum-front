@@ -1,0 +1,395 @@
+{
+  "name": "AvatarStack",
+  "source": "specs/components/avatar-stack.yaml",
+  "design": {
+    "file": "DESIGN.hr.md",
+    "sha256": "0b1461f3cad9"
+  },
+  "slots": {
+    "root": "묶음 — 아바타를 가로로 겹쳐 놓는다. 뒤에 오는 아바타가 위",
+    "item": "아바타 한 칸 — avatar.yaml 의 아바타에 바탕색 링을 두른다",
+    "overflow": "\"+N\" 원 — 넘친 사람 수. 아바타와 같은 크기 · 같은 링"
+  },
+  "axes": {
+    "size": [
+      "20",
+      "24",
+      "36",
+      "42",
+      "48",
+      "56",
+      "64",
+      "80",
+      "96",
+      "108"
+    ],
+    "surface": [
+      "default",
+      "floating"
+    ]
+  },
+  "defaults": {
+    "size": "24",
+    "surface": "default"
+  },
+  "states": [
+    "enabled"
+  ],
+  "rules": [
+    {
+      "when": {},
+      "enabled": {
+        "root": {
+          "items": 4,
+          "overflow": "폭에 맞춰 보이는 사람 수를 줄인다"
+        },
+        "item": {
+          "radius": 9999,
+          "outlineColor": {
+            "light": "#FFFFFF",
+            "dark": "#242938"
+          }
+        },
+        "overflow": {
+          "radius": 9999,
+          "background": {
+            "light": "#F5F6FA",
+            "dark": "#353B4D"
+          },
+          "foreground": {
+            "light": "#535866",
+            "dark": "#B7BDCC"
+          },
+          "fontWeight": 700,
+          "outlineColor": {
+            "light": "#FFFFFF",
+            "dark": "#242938"
+          }
+        }
+      }
+    },
+    {
+      "when": {
+        "surface": "floating"
+      },
+      "enabled": {
+        "item": {
+          "outlineColor": {
+            "light": "#FFFFFF",
+            "dark": "#2D3346"
+          }
+        },
+        "overflow": {
+          "outlineColor": {
+            "light": "#FFFFFF",
+            "dark": "#2D3346"
+          }
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "20"
+      },
+      "enabled": {
+        "root": {
+          "gap": -5
+        },
+        "item": {
+          "size": 20,
+          "outlineWidth": 1
+        },
+        "overflow": {
+          "size": 20,
+          "outlineWidth": 1,
+          "fontSize": 10
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "24"
+      },
+      "enabled": {
+        "root": {
+          "gap": -6
+        },
+        "item": {
+          "size": 24,
+          "outlineWidth": 1
+        },
+        "overflow": {
+          "size": 24,
+          "outlineWidth": 1,
+          "fontSize": 10
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "36"
+      },
+      "enabled": {
+        "root": {
+          "gap": -8
+        },
+        "item": {
+          "size": 36,
+          "outlineWidth": 2
+        },
+        "overflow": {
+          "size": 36,
+          "outlineWidth": 2,
+          "fontSize": 13
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "42"
+      },
+      "enabled": {
+        "root": {
+          "gap": -10
+        },
+        "item": {
+          "size": 42,
+          "outlineWidth": 2
+        },
+        "overflow": {
+          "size": 42,
+          "outlineWidth": 2,
+          "fontSize": 15
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "48"
+      },
+      "enabled": {
+        "root": {
+          "gap": -12
+        },
+        "item": {
+          "size": 48,
+          "outlineWidth": 2
+        },
+        "overflow": {
+          "size": 48,
+          "outlineWidth": 2,
+          "fontSize": 17
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "56"
+      },
+      "enabled": {
+        "root": {
+          "gap": -13
+        },
+        "item": {
+          "size": 56,
+          "outlineWidth": 3
+        },
+        "overflow": {
+          "size": 56,
+          "outlineWidth": 3,
+          "fontSize": 20
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "64"
+      },
+      "enabled": {
+        "root": {
+          "gap": -16
+        },
+        "item": {
+          "size": 64,
+          "outlineWidth": 3
+        },
+        "overflow": {
+          "size": 64,
+          "outlineWidth": 3,
+          "fontSize": 23
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "80"
+      },
+      "enabled": {
+        "root": {
+          "gap": -20
+        },
+        "item": {
+          "size": 80,
+          "outlineWidth": 4
+        },
+        "overflow": {
+          "size": 80,
+          "outlineWidth": 4,
+          "fontSize": 29
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "96"
+      },
+      "enabled": {
+        "root": {
+          "gap": -24
+        },
+        "item": {
+          "size": 96,
+          "outlineWidth": 5
+        },
+        "overflow": {
+          "size": 96,
+          "outlineWidth": 5,
+          "fontSize": 35
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "108"
+      },
+      "enabled": {
+        "root": {
+          "gap": -27
+        },
+        "item": {
+          "size": 108,
+          "outlineWidth": 5
+        },
+        "overflow": {
+          "size": 108,
+          "outlineWidth": 5,
+          "fontSize": 39
+        }
+      }
+    }
+  ],
+  "notes": [
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "items",
+      "note": "아바타는 앞 4명까지 — 5명 이상이면 앞 4명 + \"+N\"(N = 전체 − 4, 99 를 넘으면 \"+99\"). 4명 이하면 모두 보이고 \"+N\" 이 없다. 놓인 폭이 모자라면 root.overflow 대로 더 줄인다"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "overflow",
+      "note": "묶음이 차지할 수 있는 폭 W(부모가 주는 폭)를 잰다. 원 c 개의 폭 = 지름 + (c − 1) × (지름 − 겹침). 모두(4명 이하)가 W 에 들면 모두 보이고, 아니면 \"+N\" 원까지 W 에 드는 원 수 c = 1 + ⌊(W − 지름) ÷ (지름 − 겹침)⌋ 에서 보이는 사람 = min(4, c − 1) — 가장 적어도 1명(그래도 넘치면 작은 크기를 쓴다). N = 전체 − 보이는 사람. 예: 108 · 6명 · W 312 → c = 1 + ⌊204 ÷ 81⌋ = 3 → 2명 + \"+4\"(폭 270). 폰 안쪽 폭 312 에서는 64 까지 늘 앞 4명이고(64 · 5원 256), 80 부터 줄어든다. 폭이 바뀌면(창 크기 · 화면 돌림) 다시 센다 — 웹 ResizeObserver · 앱 LayoutBuilder. 이름(aria-label)의 \"외 N명\" 도 보이는 \"+N\" 과 같게 바뀐다. 크기를 48 까지로 묶는 안(A)은 고르지 않았다(2026-10-17 사용자 결정 — 03-E 결정 4 B)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "item",
+      "prop": "outlineColor",
+      "note": "바깥 링 — 놓인 바탕과 같은 색으로 앞 아바타를 끊는다(SEED). 시트 · 대화상자 · 팝오버 안은 surface floating 의 바탕색 — 다크에서 두 바탕이 다르다(#242938 · #2D3346). 아바타의 1px 안쪽 테두리는 그대로 남는다"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "overflow",
+      "prop": "background",
+      "note": "옅은 면 — 흰 표면과 1.08 · 다크 1.30(바깥 링과 글이 알린다)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "overflow",
+      "prop": "foreground",
+      "note": "6.58 · 다크 5.93"
+    },
+    {
+      "rule": 1,
+      "state": "enabled",
+      "slot": "item",
+      "prop": "outlineColor",
+      "note": "시트 · 대화상자 · 팝오버 안 — 그 바탕색"
+    },
+    {
+      "rule": 2,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "gap",
+      "note": "25%"
+    },
+    {
+      "rule": 3,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "gap",
+      "note": "25%"
+    },
+    {
+      "rule": 4,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "gap",
+      "note": "22%"
+    },
+    {
+      "rule": 5,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "gap",
+      "note": "24%"
+    },
+    {
+      "rule": 6,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "gap",
+      "note": "25%"
+    },
+    {
+      "rule": 7,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "gap",
+      "note": "23%"
+    },
+    {
+      "rule": 8,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "gap",
+      "note": "25%"
+    },
+    {
+      "rule": 9,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "gap",
+      "note": "25%"
+    },
+    {
+      "rule": 10,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "gap",
+      "note": "25%"
+    },
+    {
+      "rule": 11,
+      "state": "enabled",
+      "slot": "root",
+      "prop": "gap",
+      "note": "25%"
+    }
+  ]
+}

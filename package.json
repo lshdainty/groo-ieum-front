@@ -9,7 +9,8 @@
     "build:skip-check": "vite build",
     "lint": "eslint .",
     "serve": "vite preview",
-    "i18n:generate": "node scripts/generate-i18n.mjs"
+    "i18n:generate": "node scripts/generate-i18n.mjs",
+    "design:sync": "node scripts/sync-design.mjs"
   },
   "dependencies": {
     "@ant-design/v5-patch-for-react-19": "^1.0.3",

@@ -1,0 +1,346 @@
+{
+  "name": "Avatar",
+  "source": "specs/components/avatar.yaml",
+  "design": {
+    "file": "DESIGN.hr.md",
+    "sha256": "0b1461f3cad9"
+  },
+  "slots": {
+    "root": "원 — 폭 = 높이. 사진 또는 이니셜을 원으로 자른다",
+    "image": "사진 — 원을 채운다. 불러오는 동안 · 실패하면 이니셜이 보인다",
+    "initial": "이니셜 — 사진이 없을 때. 이름의 첫 글자 + 이름 색 바탕",
+    "border": "1px 안쪽 테두리 — 모든 크기, 사진 · 이니셜 위에 겹친다(흰 사진이 바탕에 묻히지 않게)",
+    "uploadOverlay": "올리는 중 덮개 — 원 위 딤 + 값 있는 원 24. 사진 바꾸기 자리(edit photo)에만",
+    "editActions": "사진 바꾸기 버튼 줄 — 아바타 아래 늘 보이는 \"사진 바꾸기\" · \"사진 지우기\". 사진 바꾸기 자리(edit photo)에만"
+  },
+  "axes": {
+    "size": [
+      "20",
+      "24",
+      "36",
+      "42",
+      "48",
+      "56",
+      "64",
+      "80",
+      "96",
+      "108"
+    ],
+    "edit": [
+      "none",
+      "photo"
+    ]
+  },
+  "defaults": {
+    "size": "48",
+    "edit": "none"
+  },
+  "states": [
+    "enabled",
+    "uploading"
+  ],
+  "rules": [
+    {
+      "when": {},
+      "enabled": {
+        "root": {
+          "radius": 9999
+        },
+        "image": {
+          "objectFit": "cover"
+        },
+        "initial": {
+          "background": "chart-{이름 색}",
+          "foreground": {
+            "light": "#FFFFFF",
+            "dark": "#242938"
+          },
+          "fontWeight": 700,
+          "lineHeight": 1,
+          "textTransform": "uppercase"
+        },
+        "border": {
+          "borderWidth": 1,
+          "borderColor": {
+            "light": "#0000000C",
+            "dark": "#FFFFFF0D"
+          }
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "20"
+      },
+      "enabled": {
+        "root": {
+          "size": 20
+        },
+        "initial": {
+          "fontSize": 10
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "24"
+      },
+      "enabled": {
+        "root": {
+          "size": 24
+        },
+        "initial": {
+          "fontSize": 10
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "36"
+      },
+      "enabled": {
+        "root": {
+          "size": 36
+        },
+        "initial": {
+          "fontSize": 14
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "42"
+      },
+      "enabled": {
+        "root": {
+          "size": 42
+        },
+        "initial": {
+          "fontSize": 17
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "48"
+      },
+      "enabled": {
+        "root": {
+          "size": 48
+        },
+        "initial": {
+          "fontSize": 19
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "56"
+      },
+      "enabled": {
+        "root": {
+          "size": 56
+        },
+        "initial": {
+          "fontSize": 22
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "64"
+      },
+      "enabled": {
+        "root": {
+          "size": 64
+        },
+        "initial": {
+          "fontSize": 26
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "80"
+      },
+      "enabled": {
+        "root": {
+          "size": 80
+        },
+        "initial": {
+          "fontSize": 32
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "96"
+      },
+      "enabled": {
+        "root": {
+          "size": 96
+        },
+        "initial": {
+          "fontSize": 38
+        }
+      }
+    },
+    {
+      "when": {
+        "size": "108"
+      },
+      "enabled": {
+        "root": {
+          "size": 108
+        },
+        "initial": {
+          "fontSize": 43
+        }
+      }
+    },
+    {
+      "when": {
+        "edit": "photo"
+      },
+      "enabled": {
+        "editActions": {
+          "marginTop": 16,
+          "gap": 8,
+          "change": "Button neutralWeak · small — \"사진 바꾸기\"",
+          "remove": "Button ghost · small — \"사진 지우기\""
+        },
+        "uploadOverlay": {
+          "display": "none"
+        }
+      },
+      "uploading": {
+        "uploadOverlay": {
+          "display": "보임",
+          "background": {
+            "light": "rgba(0, 0, 0, 0.50)",
+            "dark": "rgba(0, 0, 0, 0.65)"
+          },
+          "radius": 9999,
+          "progress": "Progress Circle 24 · staticWhite · determinate"
+        },
+        "editActions": {
+          "disabled": "true"
+        }
+      }
+    }
+  ],
+  "notes": [
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "initial",
+      "prop": "background",
+      "note": "이름의 코드 포인트 합 % 10 → 차트 10색(v110 순서 blue · green · orange · violet · pink · indigo · red · yellow · brown · gray) — 라이트 700 · 다크 800-dark. 색은 뜻이 없다(장식)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "initial",
+      "prop": "foreground",
+      "note": "라이트 흰 · 다크 짙은 글자 — 차트 색 위 4.55(yellow) ~ 7.70:1(gray 다크). 다크에서 흰 글자는 1.88 ~ 2.39 라 쓰지 않는다"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "initial",
+      "prop": "lineHeight",
+      "note": "원 가운데 — 글자 크기 설정을 따르지 않는 px(원 안에서 넘치지 않게)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "initial",
+      "prop": "textTransform",
+      "note": "로마자 첫 글자만 대문자 — \"Kim Minsu\" → \"K\". 한글 · 숫자 · 그림 글자는 그대로"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "border",
+      "prop": "borderWidth",
+      "note": "모든 크기 1 — 원 안쪽(inset box-shadow), 크기가 변하지 않는다(SEED)"
+    },
+    {
+      "rule": 0,
+      "state": "enabled",
+      "slot": "border",
+      "prop": "borderColor",
+      "note": "v118 — 검정 4.7% · 다크 흰 5%(SEED stroke.neutral-subtle 의 값). 흰 사진이 흰 바탕에 묻히지 않고, 어두운 사진 · 이니셜 원 둘레에는 테가 생기지 않는다. Image Frame · Logo Tile 의 윤곽과 같은 색"
+    },
+    {
+      "rule": 1,
+      "state": "enabled",
+      "slot": "initial",
+      "prop": "fontSize",
+      "note": "지름의 50% — 10 아래로 내리지 않는다"
+    },
+    {
+      "rule": 2,
+      "state": "enabled",
+      "slot": "initial",
+      "prop": "fontSize",
+      "note": "지름의 42% — 10 아래로 내리지 않는다"
+    },
+    {
+      "rule": 11,
+      "state": "enabled",
+      "slot": "editActions",
+      "prop": "marginTop",
+      "note": "아바타 ↔ 버튼 줄 16"
+    },
+    {
+      "rule": 11,
+      "state": "enabled",
+      "slot": "editActions",
+      "prop": "gap",
+      "note": "버튼 사이 8 · 가운데 정렬 · 좁으면 줄을 바꾼다"
+    },
+    {
+      "rule": 11,
+      "state": "enabled",
+      "slot": "editActions",
+      "prop": "change",
+      "note": "누르면 고르기 창(앱은 Menu Sheet — 사진 찍기 · 앨범에서 고르기). 사진이 없어도 같은 이름"
+    },
+    {
+      "rule": 11,
+      "state": "enabled",
+      "slot": "editActions",
+      "prop": "remove",
+      "note": "사진이 있을 때만 — 지우면 이니셜로 돌아간다"
+    },
+    {
+      "rule": 11,
+      "state": "enabled",
+      "slot": "uploadOverlay",
+      "prop": "display",
+      "note": "올리는 중에만"
+    },
+    {
+      "rule": 11,
+      "state": "uploading",
+      "slot": "uploadOverlay",
+      "prop": "background",
+      "note": "원 위 딤 — Progress Circle 의 \"사진 위 딤\"(라이트 50% · 다크 65%)"
+    },
+    {
+      "rule": 11,
+      "state": "uploading",
+      "slot": "uploadOverlay",
+      "prop": "progress",
+      "note": "값 있는 원 — 흰 호 + 흰 30% 트랙(딤 위 3.95 · 19.27). 이름 \"프로필 사진 올리는 중\""
+    },
+    {
+      "rule": 11,
+      "state": "uploading",
+      "slot": "editActions",
+      "prop": "disabled",
+      "note": "올리는 동안 두 버튼 막힘(Button 막힘 색) — 끝나면 풀린다. 실패는 Field 오류 글(\"5MB 넘는 사진은 올릴 수 없어요.\")"
+    }
+  ]
+}
