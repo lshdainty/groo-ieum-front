@@ -1554,3 +1554,9 @@ common,session.checking,불러오는 중,Loading
 common,session.failedTitle,로그인 상태를 확인하지 못했어요,Couldn't check your sign-in
 common,session.failedDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
 common,session.retry,다시 시도,Try again
+auth,callback.failedTitle,로그인을 마치지 못했어요,Couldn't finish signing in
+auth,callback.stateMismatch,로그인 창을 하나만 열어 다시 시도해주세요.,Open only one sign-in window and try again.
+auth,callback.exchangeFailed,로그인 정보를 확인하지 못했어요. 그루 이음을 쓸 수 있는 계정인지 확인하고 다시 로그인해주세요.,"We couldn't verify your sign-in. Check that your account can use 그루 이음, then sign in again."
+auth,callback.noCode,다시 로그인해주세요.,Please sign in again.
+auth,callback.retry,다시 로그인하기,Sign in again
+auth,callback.finishing,로그인 마무리 중,Finishing sign-in
