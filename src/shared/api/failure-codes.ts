@@ -71,3 +71,12 @@ export const FAILURE_CODE_KEYS: Record<string, string> = {
   COMMON_404: 'failure.code.notFound',
   FILE_001: 'failure.code.notFound',
 }
+
+/*
+ * 비밀번호 변경이 필요한 로그인(임시 비밀번호)이 허용 목록 밖 API 를 불렀을 때 서버가 403 과 함께 주는 코드
+ * (HrErrorCode.PASSWORD_CHANGE_REQUIRED). 권한 부족 403 과 다르다 — 로그인 화면이 아니라 /password-change 로 보낸다.
+ */
+export const PASSWORD_CHANGE_REQUIRED_CODE = 'AUTH_003'
+
+export const isPasswordChangeRequiredResponse = (status: number | undefined, data: unknown): boolean =>
+  status === 403 && (data as { code?: unknown } | undefined)?.code === PASSWORD_CHANGE_REQUIRED_CODE

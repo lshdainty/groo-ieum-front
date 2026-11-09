@@ -2,6 +2,7 @@ import { config } from '@/shared/config'
 import axios, { type AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import type { ApiErrorResponse } from '@/shared/types/api'
 import { beginAttempt, endChain } from '@/shared/api/request-budget'
+import { isPasswordChangeRequiredResponse } from '@/shared/api/failure-codes'
 import { loginPathFor } from '@/shared/lib/return-path'
 
 declare module 'axios' {
@@ -58,6 +59,14 @@ apiClient.interceptors.response.use(
       // 현재 페이지가 로그인/콜백 페이지가 아닐 때만 리다이렉트
       if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/auth/callback')) {
         window.location.href = loginPathFor(`${window.location.pathname}${window.location.search}${window.location.hash}`)
+      }
+    }
+    // 403 PASSWORD_CHANGE_REQUIRED — 임시 비밀번호를 먼저 바꿔야 한다. 로그인 화면이 아니라 강제 변경 화면으로 보낸다
+    // (그 화면의 서버 판정이 Y 이므로 새로 불러도 /password-change 에 머문다). 이미 그 화면이거나 로그인 · 콜백이면 그대로 둔다.
+    if (isPasswordChangeRequiredResponse(err.response?.status, err.response?.data)) {
+      const path = window.location.pathname
+      if (!path.includes('/password-change') && !path.includes('/login') && !path.includes('/auth/callback')) {
+        window.location.href = '/password-change'
       }
     }
     return Promise.reject(err)

@@ -1,6 +1,6 @@
 import { isAxiosError } from 'axios'
 
-import { FAILURE_CODE_KEYS } from '@/shared/api/failure-codes'
+import { FAILURE_CODE_KEYS, isPasswordChangeRequiredResponse } from '@/shared/api/failure-codes'
 
 /*
  * 쓰기(POST · PUT · PATCH · DELETE) 실패 안내 — 서버 글 · axios 영어 글은 화면에 그리지 않고 고정 글로만 말한다.
@@ -30,6 +30,8 @@ export const writeFailureKey = (error: unknown): string | null => {
   if (!isAxiosError(error)) return 'failure.write'
   const status = error.response?.status
   if (status === 401) return null
+  // 비밀번호 변경 필요 — 강제 변경 화면으로 보내는 길(base.ts)이 있어 권한 글을 띄우지 않는다
+  if (isPasswordChangeRequiredResponse(status, error.response?.data)) return null
   if (status === undefined) return 'failure.unconfirmed'
   if (status === 403) return 'failure.forbidden'
   const code = (error.response?.data as { code?: unknown } | undefined)?.code
@@ -75,6 +77,7 @@ let lastReadNoticeAt = 0
 export const notifyReadFailure = (error: unknown): void => {
   // 401 은 로그인으로 보내는 길이 따로 있다
   if (isAxiosError(error) && error.response?.status === 401) return
+  if (isAxiosError(error) && isPasswordChangeRequiredResponse(error.response?.status, error.response?.data)) return
   const now = Date.now()
   if (now - lastReadNoticeAt < READ_QUIET_MS) return
   lastReadNoticeAt = now

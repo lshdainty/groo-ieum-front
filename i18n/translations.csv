@@ -1489,7 +1489,8 @@ login,sso.failed,로그인을 시작하지 못했어요. 잠시 뒤 다시 시�
 user,pwForce.title,비밀번호를 바꿔주세요,Change your password
 user,pwForce.description,임시 비밀번호로 로그인했어요. 계속 쓰려면 새 비밀번호로 바꿔주세요.,"You signed in with a temporary password. To keep using 그루 이음, change it to a new password."
 user,pwForce.docTitle,비밀번호 바꾸기,Change password
-user,pwForce.current,임시 비밀번호,Temporary password
+user,pwForce.current,메일로 받은 임시 비밀번호,Temporary password from your email
+user,pwForce.currentHelp,비밀번호 찾기로 받은 메일에 있어요.,It is in the email you received from Forgot password.
 user,pwForce.currentPlaceholder,메일로 받은 비밀번호,The password from your email
 user,pwForce.new,새 비밀번호,New password
 user,pwForce.confirm,새 비밀번호 확인,Confirm new password
