@@ -10,7 +10,7 @@ import { HolidayPage } from '@/pages/admin-holiday'
 import { NoticePage } from '@/pages/admin-notice'
 import { PlanPage } from '@/pages/admin-vacation-plan'
 import { PolicyPage } from '@/pages/admin-vacation-policy'
-import { UserNoticePage } from '@/pages/notice'
+import { UserNoticeDetailPage, UserNoticePage } from '@/pages/notice'
 import { ReportPage } from '@/pages/work-report'
 import { RulePage } from '@/pages/culture-regulation'
 import { SchedulePage } from '@/pages/work-schedule'
@@ -61,7 +61,14 @@ export const routesConfig: RouteGroup[] = [
             path: '/notice',
             component: UserNoticePage,
             requiredPermissions: ['NOTICE:READ'],
-          }
+          },
+          {
+            // 메뉴에 없는 하위 화면 — nameKey 가 없다(메뉴 모델이 읽지 않는다). 화면 제목 · 부모는 nav.ts 가 /notice 아래로 본다
+            id: 'notice-detail',
+            path: '/notice/:noticeId',
+            component: UserNoticeDetailPage,
+            requiredPermissions: ['NOTICE:READ'],
+          },
         ],
       },
       {

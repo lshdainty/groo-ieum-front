@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { createQueryKeys } from '@/shared/api/queryKeys'
 import { noticeApi } from '@/entities/notice/api/noticeApi'
@@ -22,12 +22,18 @@ export const useNoticesQuery = (page: number = 0, size: number = 10) => {
   })
 }
 
+/** quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다 — QueryProvider) */
+export interface NoticeQueryOptions {
+  quiet?: boolean
+}
+
 // 공지사항 상세 조회 훅
-export const useNoticeQuery = (noticeId: number | null) => {
+export const useNoticeQuery = (noticeId: number | null, options?: NoticeQueryOptions) => {
   return useQuery<NoticeResp>({
     queryKey: noticeKeys.detail(noticeId ?? 0),
     queryFn: () => noticeApi.getNotice(noticeId!),
-    enabled: noticeId !== null && noticeId > 0
+    enabled: noticeId !== null && noticeId > 0,
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
@@ -50,10 +56,23 @@ export const useSearchNoticesQuery = (keyword: string, page: number = 0, size: n
 }
 
 // 활성 공지사항 조회 훅
-export const useActiveNoticesQuery = (page: number = 0, size: number = 10) => {
+export const useActiveNoticesQuery = (page: number = 0, size: number = 10, options?: NoticeQueryOptions & { keepPrevious?: boolean }) => {
   return useQuery<NoticePageResp>({
     queryKey: noticeKeys.list({ active: true, page, size }),
-    queryFn: () => noticeApi.getActiveNotices(page, size)
+    queryFn: () => noticeApi.getActiveNotices(page, size),
+    placeholderData: options?.keepPrevious ? keepPreviousData : undefined,
+    meta: options?.quiet ? { quiet: true } : undefined
+  })
+}
+
+// 활성 공지사항 끝없이 불러오기 훅 — 폰(768 미만)의 공지 목록. 한 번에 size 개씩, 서버 쪽 번호(0부터)를 이어 받는다
+export const useActiveNoticesInfiniteQuery = (size: number = 10, options?: NoticeQueryOptions) => {
+  return useInfiniteQuery<NoticePageResp, Error, { pages: NoticePageResp[] }, ReturnType<typeof noticeKeys.list>, number>({
+    queryKey: noticeKeys.list({ active: true, infinite: true, size }),
+    queryFn: ({ pageParam }) => noticeApi.getActiveNotices(pageParam, size),
+    initialPageParam: 0,
+    getNextPageParam: (last) => (last.last ? undefined : last.page + 1),
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
