@@ -1,159 +1,104 @@
-import QueryAsyncBoundary from '@/shared/ui/async-boundary/QueryAsyncBoundary'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/shared/ui/shadcn/select'
-import { useUser } from '@/entities/session'
-import { VacationContentSkeleton } from '@/features/admin-vacation-approval/ui/VacationContentSkeleton'
-import { useVacationContext } from '@/features/admin-vacation-approval/model/VacationContext'
-import { UserInfoCard } from '@/features/user-profile/ui/UserInfoCard'
-import { ApplicationTable } from '@/features/vacation-application/ui/ApplicationTable'
-import { MonthVacationStatsCard } from '@/features/vacation-history/ui/MonthVacationStatsCard'
-import { VacationHistoryTable } from '@/features/vacation-history/ui/VacationHistoryTable'
-import { VacationStatsCard } from '@/features/vacation-history/ui/VacationStatsCard'
-import { VacationTypeStatsCard } from '@/features/vacation-history/ui/VacationTypeStatsCard'
-import { useGrantStatusTypesQuery } from '@/entities/type'
-import { useUsersQuery } from '@/entities/user'
-import {
-  useAllVacationsByApproverQuery,
-  useAvailableVacationsQuery,
-  useUserMonthlyVacationStatsQuery,
-  useUserRequestedVacationsQuery,
-  useUserVacationHistoryQuery,
-  useUserVacationStatsQuery
-} from '@/entities/vacation'
-import { type GetUsersResp } from '@/entities/user'
-import dayjs from 'dayjs'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-const getYearOptions = () => {
-  const currentYear = new Date().getFullYear()
-  const years: string[] = []
-  for (let i = currentYear - 5; i <= currentYear + 1; i++) {
-    years.push(i.toString())
-  }
-  return years
+import { Select, SelectItem } from '@/shared/ds/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ds/tabs'
+import { useUser } from '@/entities/session'
+import { useAllVacationsByApproverQuery } from '@/entities/vacation'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { useVacationContext } from '../model/VacationContext'
+import { needsMyApproval } from '../lib/approval-format'
+import { ApprovalInbox } from './ApprovalInbox'
+import { StaffVacation } from './StaffVacation'
+
+type VacationTab = 'inbox' | 'staff'
+
+/** 고른 해 선택지 — 5년 전 ~ 1년 뒤(지금 그대로) */
+const yearOptions = (): number[] => {
+  const current = new Date().getFullYear()
+  return Array.from({ length: 7 }, (_, i) => current - 5 + i)
 }
 
-interface VacationContentInnerProps {
-  users: GetUsersResp[]
-  loginUserId: string
-}
-
-const VacationContentInner = ({ users, loginUserId }: VacationContentInnerProps) => {
+/**
+ * 구성원 휴가(I-24 C 11) — 화면 탭 둘 "결재함 · 직원 휴가"(첫 탭 결재함, 내가 결재할 신청이 있으면 탭에 알림 점).
+ * 데스크톱: 제목 줄(h1 + 오른쪽 연도 Select) → 탭 → 16 → 내용. 폰: 상단 바 제목 아래 흰 면 하나 — 탭 → 연도 · 건수 줄 → 내용.
+ * 연도는 두 탭에 함께 걸린다. 결재함 질의는 여기서 한 번만 받아(탭 점 · 건수 · 표가 같이 쓴다) quiet 로 두고 구역이 실패를 말한다.
+ */
+export const VacationContent = () => {
   const { t } = useTranslation('vacation')
-  const { selectedUserId, setSelectedUserId, selectedYear, setSelectedYear } = useVacationContext()
-
-  const { data: vacationTypes } = useAvailableVacationsQuery(
-    selectedUserId,
-    dayjs().year(parseInt(selectedYear)).format('YYYY-MM-DDT23:59:59')
-  )
-  const { data: monthStats } = useUserMonthlyVacationStatsQuery(
-    selectedUserId,
-    selectedYear
-  )
-  const { data: histories } = useUserVacationHistoryQuery(selectedUserId, parseInt(selectedYear))
-  const { data: vacationStats } = useUserVacationStatsQuery(
-    selectedUserId,
-    dayjs().year(parseInt(selectedYear)).format('YYYY-MM-DDT23:59:59')
-  )
-  // 선택된 사용자의 신청 내역
-  const { data: selectedUserRequests = [] } = useUserRequestedVacationsQuery(
-    selectedUserId,
-    parseInt(selectedYear)
-  )
-  // 로그인한 관리자가 승인권자인 내역 (선택 사용자와 무관)
-  const { data: approvalRequests = [] } = useAllVacationsByApproverQuery(
-    loginUserId,
-    parseInt(selectedYear)
-  )
-  const { data: grantStatusTypes = [] } = useGrantStatusTypesQuery()
-
-  return (
-    <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
-      <div className='flex items-center justify-between mb-6'>
-        <h1 className='text-3xl font-bold'>{t('stats.title')}</h1>
-        <Select value={selectedYear} onValueChange={setSelectedYear}>
-          <SelectTrigger className='w-[120px]'>
-            <SelectValue placeholder={t('stats.selectYear')} />
-          </SelectTrigger>
-          <SelectContent>
-            {getYearOptions().map((year) => (
-              <SelectItem key={year} value={year}>
-                {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className='flex flex-col min-[64rem]:flex-row gap-6'>
-        <UserInfoCard
-          value={users}
-          selectedUserId={selectedUserId}
-          onUserChange={setSelectedUserId}
-        />
-        <div className='flex flex-col gap-6 flex-1'>
-          <VacationStatsCard
-            value={vacationStats}
-          />
-          <MonthVacationStatsCard
-            value={monthStats || []}
-            className='h-full'
-          />
-        </div>
-      </div>
-      <div className='grid grid-cols-1 min-[80rem]:grid-cols-3 gap-6 mt-6'>
-        <div className='min-[80rem]:col-span-1 flex flex-col'>
-          <VacationTypeStatsCard
-            value={vacationTypes}
-            className='h-full'
-          />
-        </div>
-        <div className='min-[80rem]:col-span-2 flex flex-col'>
-          <VacationHistoryTable
-            value={histories || { grants: [], usages: [] }}
-            canAdd={true}
-          />
-        </div>
-      </div>
-      <div className='grid grid-cols-1 gap-6 mt-6'>
-        <ApplicationTable
-          vacationRequests={selectedUserRequests}
-          approvalRequests={approvalRequests}
-          grantStatusTypes={grantStatusTypes}
-          showGrantButton={true}
-          showCancelButton={false}
-          showApprovalTab={true}
-        />
-      </div>
-    </div>
-  )
-}
-
-const VacationContent = () => {
+  const desktop = useDesktop()
   const { loginUser } = useUser()
-  const { selectedUserId, setSelectedUserId } = useVacationContext()
+  const { selectedUserId, setSelectedUserId, selectedYear, setSelectedYear } = useVacationContext()
+  const [tab, setTab] = useState<VacationTab>('inbox')
+  const loginUserId = loginUser?.user_id ?? ''
 
-  const { data: users, isLoading, error } = useUsersQuery()
-
+  // 처음 고른 직원은 로그인한 사람
   useEffect(() => {
-    if (loginUser && !selectedUserId) {
-      setSelectedUserId(loginUser.user_id)
-    }
+    if (loginUser && !selectedUserId) setSelectedUserId(loginUser.user_id)
   }, [loginUser, selectedUserId, setSelectedUserId])
 
+  const approvals = useAllVacationsByApproverQuery(loginUserId, parseInt(selectedYear, 10), undefined, { quiet: true })
+  const rows = approvals.data ?? []
+  const waiting = rows.some((row) => needsMyApproval(row, loginUserId))
+
+  const yearSelectProps = {
+    size: 'responsive' as const,
+    'aria-label': t('memberVacation.yearAria'),
+    value: selectedYear,
+    onValueChange: setSelectedYear,
+  }
+  const yearItems = yearOptions().map((y) => <SelectItem key={y} value={String(y)} label={t('memberVacation.yearLabel', { year: y })} />)
+
+  const pendingNote = waiting ? (
+    <span id='vacation-inbox-pending' className='sr-only'>
+      {t('memberVacation.inboxPending')}
+    </span>
+  ) : null
+
+  // 트리는 폭과 상관없이 하나다 — 768 을 넘나들어도(태블릿 회전) 열린 부여 폼 · 결재 상세 · 쪽이 이어지게, 달라지는 것은 클래스와 속성뿐
   return (
-    <QueryAsyncBoundary
-      queryState={{ isLoading, error, data: users }}
-      loadingComponent={<VacationContentSkeleton />}
-    >
-      <VacationContentInner users={users || []} loginUserId={loginUser?.user_id || ''} />
-    </QueryAsyncBoundary>
+    <ScreenBody density='high'>
+      <ScreenTitleRow
+        title={t('memberVacation.title')}
+        action={
+          <Select {...yearSelectProps} className='w-[9rem]'>
+            {yearItems}
+          </Select>
+        }
+      />
+      <div className='bg-bg-layer-default min-[48rem]:bg-transparent' data-member-vacation-phone>
+        <Tabs value={tab} onValueChange={(v) => setTab(v as VacationTab)}>
+          <TabsList aria-label={t('memberVacation.tabsAria')} layout={desktop ? 'hug' : 'fill'} size={desktop ? 'medium' : 'small'}>
+            <TabsTrigger value='inbox' notification={waiting} aria-describedby={waiting ? 'vacation-inbox-pending' : undefined}>
+              {t('memberVacation.tabInbox')}
+            </TabsTrigger>
+            <TabsTrigger value='staff'>{t('memberVacation.tabStaff')}</TabsTrigger>
+          </TabsList>
+          {pendingNote}
+          <div className='flex items-center justify-between gap-x3 px-x6 pb-x1 pt-x3 min-[48rem]:hidden'>
+            <Select {...yearSelectProps} className='w-[9rem]'>
+              {yearItems}
+            </Select>
+            {tab === 'inbox' && rows.length > 0 && (
+              <span className='text-t3 font-normal text-fg-neutral-subtle'>{t('memberVacation.count', { count: rows.length })}</span>
+            )}
+          </div>
+          <TabsContent value='inbox' className='min-[48rem]:mt-x4'>
+            <ApprovalInbox
+              key={selectedYear}
+              rows={rows}
+              pending={approvals.isPending}
+              failed={approvals.isLoadingError}
+              fetching={approvals.isFetching}
+              onRetry={() => void approvals.refetch()}
+            />
+          </TabsContent>
+          <TabsContent value='staff' className='pt-x3 min-[48rem]:mt-x4 min-[48rem]:pt-0'>
+            <StaffVacation />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </ScreenBody>
   )
 }
-
-export { VacationContent }

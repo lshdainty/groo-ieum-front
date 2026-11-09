@@ -1,44 +1,40 @@
-import { Button } from '@/shared/ui/shadcn/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/shadcn/card'
 import { Empty, EmptyDescription, EmptyIcon, EmptyTitle } from '@/shared/ui/shadcn/empty'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/shadcn/tabs'
-import { usePermission } from '@/entities/session'
 import { ApplicationTableContent } from '@/features/vacation-application/ui/ApplicationTableContent'
 import { VacationApprovalForm } from '@/features/vacation-application/ui/VacationApprovalForm'
-import { VacationGrantDialog } from '@/features/vacation-application/ui/VacationGrantDialog'
 import { usePostCancelVacationRequestMutation } from '@/entities/vacation'
 import { TypeResp } from '@/entities/type'
 import { type GetUserRequestedVacationsResp } from '@/entities/vacation'
 import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
 import { CalendarX2 } from 'lucide-react'
-import { Activity, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface ApplicationTableProps {
   vacationRequests: GetUserRequestedVacationsResp[]
   grantStatusTypes: TypeResp[]
   userId?: string
-  showGrantButton?: boolean
   showCancelButton?: boolean
-  approvalRequests?: GetUserRequestedVacationsResp[]
-  showApprovalTab?: boolean
+  /** 카드 제목 — 없으면 "신청이력"(휴가 신청 화면) */
+  title?: string
+  /** 빈 목록 글 — 없으면 본인 신청 화면의 글(작성 권유 포함) */
+  emptyTitle?: string
+  emptyDescription?: string
 }
 
 const ApplicationTable = ({
   vacationRequests,
   grantStatusTypes,
   userId,
-  showGrantButton = false,
   showCancelButton = true,
-  approvalRequests = [],
-  showApprovalTab = false
+  title,
+  emptyTitle,
+  emptyDescription
 }: ApplicationTableProps) => {
   const { t } = useTranslation('vacation')
   const { t: tc } = useTranslation('common')
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<GetUserRequestedVacationsResp | null>(null)
-  const [grantDialogOpen, setGrantDialogOpen] = useState(false)
-  const { hasAnyPermission } = usePermission()
 
   const { mutateAsync: cancelVacationRequest } = usePostCancelVacationRequestMutation()
   const cancelConfirm = useConfirmTarget<GetUserRequestedVacationsResp>()
@@ -67,74 +63,29 @@ const ApplicationTable = ({
     <>
       <Card className='flex-1'>
         <CardHeader>
-          <div className='flex items-center justify-between'>
-            <CardTitle>{t('application.applicationHistory')}</CardTitle>
-            <Activity mode={showGrantButton && hasAnyPermission(['VACATION:GRANT', 'VACATION:MANAGE']) ? 'visible' : 'hidden'}>
-              <Button
-                onClick={() => setGrantDialogOpen(true)}
-                className='bg-blue-600 hover:bg-blue-700 text-white'
-              >
-                {t('application.grantVacation')}
-              </Button>
-            </Activity>
-          </div>
+          <CardTitle>{title ?? t('application.applicationHistory')}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="requests">
-            <TabsList>
-              <TabsTrigger value="requests">{t('application.requestTab')}</TabsTrigger>
-              <Activity mode={showApprovalTab ? 'visible' : 'hidden'}>
-                <TabsTrigger value="approvals">{t('application.approvalTab')}</TabsTrigger>
-              </Activity>
-            </TabsList>
-
-            <TabsContent value="requests" className="mt-4">
-              {vacationRequests.length === 0 ? (
-                <div className="min-h-[300px] flex items-center justify-center">
-                  <Empty>
-                    <EmptyIcon>
-                      <CalendarX2 />
-                    </EmptyIcon>
-                    <EmptyTitle>{t('application.noRequestsTitle')}</EmptyTitle>
-                    <EmptyDescription>
-                      {t('application.noRequestsDescription')}
-                    </EmptyDescription>
-                  </Empty>
-                </div>
-              ) : (
-                <ApplicationTableContent
-                  vacationRequests={vacationRequests}
-                  grantStatusTypes={grantStatusTypes}
-                  onDetailView={handleDetailView}
-                  onCancelRequest={showCancelButton ? handleCancelRequest : undefined}
-                />
-              )}
-            </TabsContent>
-
-            <Activity mode={showApprovalTab ? 'visible' : 'hidden'}>
-              <TabsContent value="approvals" className="mt-4">
-                {approvalRequests.length === 0 ? (
-                  <div className="min-h-[300px] flex items-center justify-center">
-                    <Empty>
-                      <EmptyIcon>
-                        <CalendarX2 />
-                      </EmptyIcon>
-                      <EmptyTitle>{t('application.noApprovalsTitle')}</EmptyTitle>
-                      <EmptyDescription>
-                        {t('application.noApprovalsDesc')}
-                      </EmptyDescription>
-                    </Empty>
-                  </div>
-                ) : (
-                  <ApplicationTableContent
-                    vacationRequests={approvalRequests}
-                    grantStatusTypes={grantStatusTypes}
-                    onDetailView={handleDetailView}
-                  />
-                )}
-              </TabsContent>
-            </Activity>
-          </Tabs>
+          {vacationRequests.length === 0 ? (
+            <div className="min-h-[300px] flex items-center justify-center">
+              <Empty>
+                <EmptyIcon>
+                  <CalendarX2 />
+                </EmptyIcon>
+                <EmptyTitle>{emptyTitle ?? t('application.noRequestsTitle')}</EmptyTitle>
+                <EmptyDescription>
+                  {emptyDescription ?? t('application.noRequestsDescription')}
+                </EmptyDescription>
+              </Empty>
+            </div>
+          ) : (
+            <ApplicationTableContent
+              vacationRequests={vacationRequests}
+              grantStatusTypes={grantStatusTypes}
+              onDetailView={handleDetailView}
+              onCancelRequest={showCancelButton ? handleCancelRequest : undefined}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -142,11 +93,6 @@ const ApplicationTable = ({
         open={detailOpen}
         onClose={handleDetailClose}
         requestData={selectedRequest || undefined}
-      />
-
-      <VacationGrantDialog
-        open={grantDialogOpen}
-        onClose={() => setGrantDialogOpen(false)}
       />
 
       {/* [취소] 와 [신청 취소] 가 헷갈려서 이 확인창만 닫는 단추를 "닫기" 로 한다 */}
