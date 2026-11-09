@@ -88,11 +88,11 @@ function MemberRow({
               </div>
               <div className='flex flex-col gap-x2'>
                 {!isMain && (
-                  <Button variant='neutralWeak' size='large' onClick={() => { setSheet(false); onSetMain(user) }}>
+                  <Button variant='neutralWeak' size='large' className='h-auto min-h-12 whitespace-normal break-keep py-x3 text-center' onClick={() => { setSheet(false); onSetMain(user) }}>
                     {t('department.members.setMain')}
                   </Button>
                 )}
-                <Button variant='ghost' ghostColor='critical' size='large' onClick={() => { setSheet(false); onRemove(user) }}>
+                <Button variant='ghost' ghostColor='critical' size='large' className='h-auto min-h-12 whitespace-normal break-keep py-x3 text-center [overflow-wrap:break-word]' onClick={() => { setSheet(false); onRemove(user) }}>
                   {t('department.members.removeFrom', { dept: deptName })}
                 </Button>
               </div>
