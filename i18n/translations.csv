@@ -438,15 +438,6 @@ culture,dues.calcTypeSelect,유형,Type
 culture,dues.calcPlus,입금,Deposit
 culture,dues.calcMinus,출금,Withdrawal
 culture,dues.title,회비,Dues
-culture,rule.title,규정,Regulation
-culture,rule.educationTitle,교육 & OT,Education & OT
-culture,rule.selfDevelopment,자기개발,Self Development
-culture,rule.externalTraining,외부교육,External Training
-culture,rule.overtime,연장근무,Overtime
-culture,rule.additionalLeave,추가 휴가,Additional Leave
-culture,rule.externalTrainingExample,SK AI Summit AWS summit 등,SK AI Summit AWS summit etc.
-culture,rule.waitingTime,대기 시간,Waiting Time
-culture,rule.hourUnit,1시간 단위,Per hour unit
 admin,user.list,사용자 목록,User List
 admin,user.invite,초대,Invite
 admin,user.inviteEdit,초대정보 수정,Edit Invitation
@@ -868,6 +859,7 @@ vacation,grant.grantReasonPlaceholder,휴가 부여 사유를 입력하세요...
 vacation,grant.processing,처리 중...,Processing...
 culture,rule.header.title,💁 그루 🌲,💁 그루 🌲
 culture,rule.header.subtitle,그루 팀은 이용자분들의 복지를 개선하기 위해 항상 노력하고 있어요,그루 team always strives to improve the welfare of our members
+culture,rule.header.description,휴가 · 복장 · 교육 · 조직문화 규정을 한곳에 모았어요.,"Leave, dress code, training, and team culture rules in one place."
 culture,rule.vacation.title,🏖️ 휴가,🏖️ Vacation
 culture,rule.vacation.daysTitle,휴가 일수,Vacation Days
 culture,rule.vacation.daysDesc,휴가는 📅1년에 <b><u>총 15일</u></b> 지급으로 🕐<b><u>1시간 단위</u></b>로 자유롭게 사용 가능해요.,You receive 📅<b><u>15 days</u></b> per year with 🕐<b><u>hourly flexibility</u></b> to use vacation freely.
