@@ -584,6 +584,39 @@ vacation,plan.assignPlan,플랜 할당,Assign Plan
 vacation,plan.revokePlan,플랜 회수,Revoke Plan
 vacation,plan.noAssignedPlans,할당된 플랜이 없습니다.,No plans assigned.
 vacation,plan.assignSuccess,플랜이 성공적으로 할당되었습니다.,Plan assigned successfully.
+vacation,adminPolicy.title,휴가 정책,Leave policies
+vacation,adminPolicy.add,정책 추가,Add policy
+vacation,adminPolicy.count,정책 {{count}}개,{{count}} policies
+vacation,adminPolicy.count_one,정책 {{count}}개,{{count}} policy
+vacation,adminPolicy.searchLabel,정책 검색,Search policies
+vacation,adminPolicy.searchPlaceholder,이름이나 설명으로 찾아요,Search by name or description
+vacation,adminPolicy.listLabel,휴가 정책 목록,Leave policy list
+vacation,adminPolicy.failureTitle,휴가 정책을 불러오지 못했어요,Couldn't load leave policies
+vacation,adminPolicy.emptyTitle,휴가 정책이 없어요,No leave policies yet
+vacation,adminPolicy.emptyDescription,정책을 만들면 플랜에 넣어 직원에게 부여할 수 있어요.,Create a policy to add it to a plan and grant it to employees.
+vacation,adminPolicy.noMatch,찾는 정책이 없어요.,No matching policies.
+vacation,adminPolicy.flexibleTime,입력한 시간,Entered time
+vacation,adminPolicy.validity,유효기간 {{start}} ~ {{end}},Valid {{start}} ~ {{end}}
+vacation,adminPolicy.method.REPEAT_GRANT,반복 부여,Repeating grant
+vacation,adminPolicy.method.ON_REQUEST,신청할 때 부여,Granted on request
+vacation,adminPolicy.method.MANUAL_GRANT,관리자가 직접 부여,Granted by an admin
+vacation,adminPolicy.unit.YEARLY,매년,Every year
+vacation,adminPolicy.unit.MONTHLY,매월,Every month
+vacation,adminPolicy.unit.QUARTERLY,분기마다,Every quarter
+vacation,adminPolicy.unit.HALF,반기마다,Every half year
+vacation,adminPolicy.unit.DAILY,매일,Every day
+vacation,adminPolicy.editTitle,휴가 정책 수정,Edit leave policy
+vacation,adminPolicy.name,이름,Name
+vacation,adminPolicy.namePlaceholder,예: 연차,e.g. Annual leave
+vacation,adminPolicy.nameRequired,이름을 입력해주세요.,Enter a name.
+vacation,adminPolicy.nameDuplicate,같은 이름의 휴가 정책이 있어요.,A leave policy with the same name already exists.
+vacation,adminPolicy.desc,설명,Description
+vacation,adminPolicy.descPlaceholder,정책을 알아볼 수 있게 적어주세요.,Describe the policy.
+vacation,adminPolicy.rules,부여 규칙,Grant rules
+vacation,adminPolicy.rulesHelp,부여 규칙은 바꿀 수 없어요. 바꾸려면 새 정책을 만들어주세요.,Grant rules can't be changed. Create a new policy to change them.
+vacation,adminPolicy.editSaved,정책을 고쳤어요.,Policy updated.
+vacation,adminPolicy.deleted,정책을 삭제했어요.,Policy deleted.
+vacation,adminPolicy.deleteBlocked,기본 정책이라 지울 수 없어요.,This is a default policy and can't be deleted.
 vacation,plan.revokeSuccess,플랜이 성공적으로 회수되었습니다.,Plan revoked successfully.
 vacation,plan.createSuccess,플랜이 성공적으로 생성되었습니다.,Plan created successfully.
 vacation,plan.updateSuccess,플랜이 성공적으로 수정되었습니다.,Plan updated successfully.

@@ -1,95 +1,134 @@
-import { Button } from '@/shared/ui/shadcn/button';
-import { Input } from '@/shared/ui/shadcn/input';
-import { usePolicyContext } from '@/features/admin-vacation-policy/model/PolicyContext';
-import {
-  useEffectiveTypesQuery,
-  useExpirationTypesQuery,
-  useGrantMethodTypesQuery,
-  useRepeatUnitTypesQuery,
-  useVacationTypesQuery
-} from '@/entities/type';
-import { useVacationPoliciesQuery } from '@/entities/vacation-policy';
-import {
-  Plus,
-  Search,
-} from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react'
+import { FileText, Plus, SearchX } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
-import { VacationPolicyFormDialog } from '@/features/admin-vacation-policy/ui/VacationPolicyFormDialog';
-import { VacationPolicyLists } from '@/features/admin-vacation-policy/ui/VacationPolicyLists';
-import { PolicyContentSkeleton } from '@/features/admin-vacation-policy/ui/PolicyContentSkeleton';
+import { Button } from '@/shared/ds/button'
+import { List, ListButtonItem } from '@/shared/ds/list'
+import { ResultSection } from '@/shared/ds/result-section'
+import { LoadingRegion, Skeleton } from '@/shared/ds/skeleton'
+import { AdminListCard } from '@/shared/ui/groo/admin-list-card'
+import { useConfirmTarget } from '@/shared/ui/confirm'
+import { useEffectiveTypesQuery, useExpirationTypesQuery, useGrantMethodTypesQuery, useRepeatUnitTypesQuery, useVacationTypesQuery } from '@/entities/type'
+import { useVacationPoliciesQuery, type GetVacationPoliciesResp } from '@/entities/vacation-policy'
+import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { usePolicyContext } from '../model/PolicyContext'
+import { policyRuleLine, policyValidityLine } from '../lib/policy-format'
+import { PolicyEditDialog } from './PolicyEditDialog'
+import { VacationPolicyFormDialog } from './VacationPolicyFormDialog'
 
-const PolicyContent = () => {
-  const { t } = useTranslation('vacation');
-  const { searchQuery, setSearchQuery } = usePolicyContext();
+const PolicyListSkeleton = () => (
+  <div className='flex flex-col'>
+    {Array.from({ length: 4 }).map((_, i) => (
+      <div key={i} className='flex flex-col gap-x1 px-x6 py-x3'>
+        <Skeleton text='t5' className='block w-2/5' />
+        <Skeleton text='t3' className='block w-4/5' />
+        <Skeleton text='t3' className='block w-3/5' />
+      </div>
+    ))}
+  </div>
+)
 
-  const { data: vacationPolicies, isLoading } = useVacationPoliciesQuery();
-  const { data: grantMethodTypes } = useGrantMethodTypesQuery();
-  const { data: effectiveTypes } = useEffectiveTypesQuery();
-  const { data: expirationTypes } = useExpirationTypesQuery();
-  const { data: vacationTypes } = useVacationTypesQuery();
-  const { data: repeatUnitTypes } = useRepeatUnitTypesQuery();
+/**
+ * 휴가 정책(I-24 H 36) — 제목 줄 "휴가 정책" + [정책 추가] → 카드 "정책 {n}개"(밑줄 검색칸 + List 줄).
+ * 줄을 누르면 수정 폼(이름 · 설명 — 부여 규칙은 읽기 전용, 삭제는 폼 바닥 왼쪽 — 11-08 줄 ⋮ 금지). 읽기는 quiet — 실패는 이 구역의 Result Section.
+ * 폰은 상단 바가 제목이라 본문에는 [정책 추가] 만 둔다(상단 바 오른쪽 아이콘 자리는 24-2 가 만들어 머지되면 거기로 옮긴다).
+ */
+export const PolicyContent = () => {
+  const { t } = useTranslation('vacation')
+  const { t: tc } = useTranslation('common')
+  const desktop = useDesktop()
+  const { searchQuery, setSearchQuery } = usePolicyContext()
+  const policiesQuery = useVacationPoliciesQuery({ quiet: true })
+  const { data: vacationTypes } = useVacationTypesQuery()
+  const { data: effectiveTypes } = useEffectiveTypesQuery()
+  const { data: expirationTypes } = useExpirationTypesQuery()
+  const { data: grantMethodTypes } = useGrantMethodTypesQuery()
+  const { data: repeatUnitTypes } = useRepeatUnitTypesQuery()
+  const edit = useConfirmTarget<GetVacationPoliciesResp>()
 
-  const filteredPolicies = (vacationPolicies || []).filter(
-    policy =>
-      policy.vacation_policy_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (policy.vacation_policy_desc && policy.vacation_policy_desc.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const policies = policiesQuery.data
+  const needle = searchQuery.trim().toLowerCase()
+  const filtered = useMemo(
+    () =>
+      (policies ?? []).filter(
+        (p) => p.vacation_policy_name.toLowerCase().includes(needle) || (p.vacation_policy_desc ?? '').toLowerCase().includes(needle)
+      ),
+    [policies, needle]
+  )
+  const names = { vacationTypes, effectiveTypes, expirationTypes }
+  const none = policiesQuery.isSuccess && (policies?.length ?? 0) === 0
 
-
-
-  if (isLoading) {
-    return <PolicyContentSkeleton />;
-  }
+  // 만들기 폼은 다음 커밋에서 두 단계 폼으로 바뀐다 — 그때까지는 옛 폼을 그대로 연다
+  const addButton = (
+    <VacationPolicyFormDialog
+      isEditing={false}
+      grantMethodTypes={grantMethodTypes}
+      vacationTypes={vacationTypes}
+      effectiveTypes={effectiveTypes}
+      expirationTypes={expirationTypes}
+      repeatUnitTypes={repeatUnitTypes}
+      trigger={
+        <Button variant='neutralOutline' size='small' data-policy-add>
+          <Plus className='size-[18px]' aria-hidden />
+          {t('adminPolicy.add')}
+        </Button>
+      }
+    />
+  )
 
   return (
-    <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
-      <div className="flex flex-col gap-7">
-        {/* 헤더 영역 */}
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight">{t('policy.management')}</h1>
-          <p className="text-muted-foreground">{t('policy.managementDesc')}</p>
-        </div>
-
-        {/* 검색 및 리스트 영역 */}
-        <div className="flex flex-col gap-4">
-          {/* 검색 영역 */}
-          <div className="flex flex-col min-[40rem]:flex-row items-start min-[40rem]:items-center justify-between gap-4">
-            <div className="flex flex-col min-[40rem]:flex-row items-start min-[40rem]:items-center gap-4 w-full min-[40rem]:w-auto">
-              <div className="relative w-full min-[40rem]:w-auto">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder={t('policy.searchPlaceholder')}
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="pl-10 w-full min-[40rem]:w-80"
-                />
-              </div>
-              <div className="text-sm text-muted-foreground">{t('policy.totalCount', { count: filteredPolicies.length })}</div>
-            </div>
-
-            <VacationPolicyFormDialog
-              isEditing={false}
-              grantMethodTypes={grantMethodTypes}
-              vacationTypes={vacationTypes}
-              effectiveTypes={effectiveTypes}
-              expirationTypes={expirationTypes}
-              repeatUnitTypes={repeatUnitTypes}
-              trigger={
-                <Button className="flex items-center justify-center gap-2 w-full min-[40rem]:w-auto">
-                  <Plus className="h-4 w-4" />
-                  {t('policy.addTitle')}
-                </Button>
-              }
+    <ScreenBody density='medium'>
+      <ScreenTitleRow title={t('adminPolicy.title')} action={addButton} />
+      {!desktop && <div className='flex justify-end bg-bg-layer-default px-x6 pt-x3'>{addButton}</div>}
+      <AdminListCard
+        heading={t('adminPolicy.count', { count: filtered.length })}
+        searchLabel={t('adminPolicy.searchLabel')}
+        searchPlaceholder={t('adminPolicy.searchPlaceholder')}
+        query={searchQuery}
+        onQueryChange={setSearchQuery}
+        showSearch={!none && !policiesQuery.isPending && !policiesQuery.isLoadingError}
+      >
+        <LoadingRegion
+          pending={policiesQuery.isPending}
+          failed={policiesQuery.isLoadingError}
+          fallback={<PolicyListSkeleton />}
+          failure={
+            <ResultSection
+              kind='failure'
+              size='medium'
+              title={t('adminPolicy.failureTitle')}
+              description={t('memberVacation.failureDescription')}
+              primaryAction={{ label: tc('retry'), onClick: () => void policiesQuery.refetch(), loading: policiesQuery.isFetching }}
             />
-          </div>
-
-          {/* 정책 리스트 */}
-          <VacationPolicyLists policies={filteredPolicies} searchQuery={searchQuery} />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export { PolicyContent };
+          }
+        >
+          {none ? (
+            <ResultSection size='medium' icon={<FileText />} title={t('adminPolicy.emptyTitle')} description={t('adminPolicy.emptyDescription')} />
+          ) : filtered.length === 0 ? (
+            <ResultSection size='medium' icon={<SearchX />} title={t('adminPolicy.noMatch')} />
+          ) : (
+            <List aria-label={t('adminPolicy.listLabel')}>
+              {filtered.map((policy) => (
+                <ListButtonItem
+                  key={policy.vacation_policy_id}
+                  data-policy-id={policy.vacation_policy_id}
+                  title={<span className='[overflow-wrap:break-word] [word-break:keep-all]'>{policy.vacation_policy_name}</span>}
+                  detail={
+                    <>
+                      <span className='block [overflow-wrap:break-word]'>{policyRuleLine(t, policy, names)}</span>
+                      <span className='block [overflow-wrap:break-word]'>{policyValidityLine(t, policy, names)}</span>
+                    </>
+                  }
+                  align='top'
+                  onClick={() => edit.ask(policy)}
+                />
+              ))}
+            </List>
+          )}
+        </LoadingRegion>
+      </AdminListCard>
+      <PolicyEditDialog policy={edit.target} open={edit.open} onOpenChange={edit.onOpenChange} names={names} />
+    </ScreenBody>
+  )
+}
