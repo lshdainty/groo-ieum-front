@@ -48,7 +48,7 @@ export const UserNoticeDetail = ({ noticeId }: { noticeId: number }) => {
     <TagGroup size='t3'>
       {data.writer_name}
       {formatNoticeDateTime(data.create_date, i18n.language)}
-      {t('views', { n: data.view_count.toLocaleString(i18n.language) })}
+      {t('views', { count: data.view_count, n: data.view_count.toLocaleString(i18n.language) })}
     </TagGroup>
   )
   const body = data && (

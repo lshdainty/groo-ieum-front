@@ -38,7 +38,7 @@ export const NoticeRow = ({
     <TagGroup size='t3'>
       {notice.writer_name}
       {formatNoticeDay(notice.create_date, i18n.language)}
-      {t('views', { n: notice.view_count.toLocaleString(i18n.language) })}
+      {t('views', { count: notice.view_count, n: notice.view_count.toLocaleString(i18n.language) })}
     </TagGroup>
   )
   if (href) {

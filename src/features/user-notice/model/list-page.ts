@@ -16,7 +16,7 @@ export const rememberNoticeListPage = (page: number): void => {
 export const noticeListHref = (): string => {
   try {
     const n = Number(sessionStorage.getItem(KEY))
-    return Number.isInteger(n) && n > 1 ? `/notice?page=${n}` : '/notice'
+    return Number.isInteger(n) && n > 1 && n <= 2147483647 ? `/notice?page=${n}` : '/notice'
   } catch {
     return '/notice'
   }

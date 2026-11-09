@@ -12,9 +12,11 @@ import { NoticeRowsSkeleton } from './NoticeSkeletons'
 
 const PAGE_SIZE = 10
 
+/** `?page=` 읽기 — 자연수(1 ~ Int32 상한)가 아니면 첫 쪽. 서버(page-1 은 int)에 터무니없는 값을 보내지 않는다 */
+const MAX_PAGE = 2147483647
 const parsePage = (raw: string | null): number => {
   const n = Number(raw)
-  return Number.isInteger(n) && n >= 1 ? n : 1
+  return raw !== null && /^\d+$/.test(raw) && n >= 1 && n <= MAX_PAGE ? n : 1
 }
 
 /** 768 이상 공지 목록 — 머리 없는 목록 카드 하나 + 아래 Pagination(칸 40 · 쪽은 주소 `?page=n` 에 — 상세에서 돌아오면 그 쪽) */

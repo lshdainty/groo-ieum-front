@@ -179,6 +179,7 @@ admin,holiday.loadPreview,불러오기,Load
 admin,holiday.noRecurringHolidays,반복 공휴일이 없습니다,No recurring holidays found
 admin,holiday.selectedCount,{{count}}개 선택됨,{{count}} selected
 admin,holiday.bulkSaveSuccess,{{count}}개의 공휴일이 저장되었습니다,{{count}} holidays saved successfully
+admin,holiday.bulkSaveSuccess_one,{{count}}개의 공휴일이 저장되었습니다,{{count}} holiday saved successfully
 admin,holiday.bulkSaveError,공휴일 저장에 실패했습니다,Failed to save holidays
 admin,holiday.yearPlaceholder,연도 선택,Select year
 admin,holiday.countryPlaceholder,국가 선택,Select country
@@ -454,6 +455,7 @@ admin,user.unassignedPlans,미부여 플랜,Unassigned Plans
 admin,user.assignedPlans,부여된 플랜,Assigned Plans
 admin,user.searchPlan,플랜 검색...,Search plan...
 admin,user.planPolicyCount,정책 {{count}}개,{{count}} policies
+admin,user.planPolicyCount_one,정책 {{count}}개,{{count}} policy
 admin,user.planSaveError,플랜 저장 중 오류,Error saving plan
 admin,user.planError,플랜 정보를 불러오는 중 오류가 발생했습니다.,An error occurred while loading plan data.
 admin,user.statusPending,가입 대기,Pending
@@ -564,6 +566,7 @@ vacation,policy.management,휴가 정책 관리,Vacation Policy Management
 vacation,policy.managementDesc,회사의 휴가 정책을 관리할 수 있습니다,You can manage company vacation policies
 vacation,policy.searchPlaceholder,휴가 정책 검색,Search vacation policy
 vacation,policy.totalCount,총 {{count}}개 정책,Total {{count}} policies
+vacation,policy.totalCount_one,총 {{count}}개 정책,Total {{count}} policy
 vacation,policy.grantTimeLabel,부여 시간,Grant Time
 vacation,policy.noLimit,제한없음,No limit
 vacation,policy.validityPeriod,유효기간,Validity Period
@@ -588,11 +591,13 @@ vacation,plan.desc,플랜 설명,Plan Description
 vacation,plan.descPlaceholder,플랜에 대한 설명을 입력하세요.,Enter a description for the plan.
 vacation,plan.policies,포함된 정책,Included Policies
 vacation,plan.policyCount,{{count}}개 정책,{{count}} policies
+vacation,plan.policyCount_one,{{count}}개 정책,{{count}} policy
 vacation,plan.noPolicies,포함된 정책 없음,No policies included
 vacation,plan.managePolicies,정책 관리,Manage Policies
 vacation,plan.selectPolicies,정책 선택,Select Policies
 vacation,plan.deleteConfirm,"""{{name}}"" 휴가 플랜을 삭제할까요? 삭제한 플랜은 되돌릴 수 없어요.","Delete the ""{{name}}"" leave plan? A deleted plan can't be restored."
 vacation,plan.totalCount,총 {{count}}개 플랜,Total {{count}} plans
+vacation,plan.totalCount_one,총 {{count}}개 플랜,Total {{count}} plan
 vacation,plan.searchPlaceholder,휴가 플랜 검색,Search vacation plans
 vacation,plan.noPlans,등록된 휴가 플랜이 없습니다.,No vacation plans registered.
 vacation,plan.noPlansDesc,새로운 휴가 플랜을 등록해주세요.,Please register a new vacation plan.
@@ -692,6 +697,7 @@ work,report.pleaseEnterData,데이터를 입력해주세요.,Please enter data.
 work,report.validationComplete,데이터 검증이 완료되었습니다.,Data validation complete.
 work,report.fixErrorsRequired,오류가 있는 항목을 수정해주세요.,Please fix items with errors.
 work,report.errorCount,{{count}}개 오류 수정 필요,{{count}} errors need to be fixed
+work,report.errorCount_one,{{count}}개 오류 수정 필요,{{count}} error needs to be fixed
 work,report.batchRegister,일괄 등록,Batch Register
 work,report.unregisteredDownloadFailed,미등록 리스트 다운로드에 실패했습니다.,Failed to download unregistered list.
 vacation,grant.userPlaceholder,사용자를 선택하세요,Select user
@@ -765,6 +771,7 @@ work,report.contentPlaceholder,업무 내용을 입력하세요,Enter work conte
 work,report.noHistory,등록된 업무 이력이 없습니다,No work history registered
 work,report.filterTitle,상세 검색 조건,Advanced Search
 work,report.filtersApplied,{{count}}개 필터 적용 중,{{count}} filters applied
+work,report.filtersApplied_one,{{count}}개 필터 적용 중,{{count}} filter applied
 work,report.reset,초기화,Reset
 work,report.startDate,시작날짜,Start Date
 work,report.endDate,종료날짜,End Date
@@ -803,6 +810,7 @@ work,excel.verify,확인 및 검증,Verify & Validate
 work,excel.reenter,다시 입력,Re-enter
 work,excel.validate,데이터 검증,Validate Data
 work,excel.errorsNeedFix,{{count}}개 오류 수정 필요,{{count}} errors need to be fixed
+work,excel.errorsNeedFix_one,{{count}}개 오류 수정 필요,{{count}} error needs to be fixed
 work,excel.batchRegister,일괄 등록,Batch Register
 work,unregistered.title,미등록 업무 시간 다운로드,Download Unregistered Work Hours
 work,unregistered.desc,다운로드할 연도와 월을 선택해주세요.,Select the year and month to download.
@@ -832,8 +840,10 @@ vacation,grant.grantTime,부여 시간,Grant Time
 vacation,grant.day,일,Day
 vacation,grant.hour,시간,Hour
 vacation,grant.minute,분,Minute
-vacation,grant.nHours,{{n}}시간,{{n}} hours
-vacation,grant.nMinutes,{{n}}분,{{n}} minutes
+vacation,grant.nHours,{{count}}시간,{{count}} hours
+vacation,grant.nHours_one,{{count}}시간,{{count}} hour
+vacation,grant.nMinutes,{{count}}분,{{count}} minutes
+vacation,grant.nMinutes_one,{{count}}분,{{count}} minute
 vacation,grant.fixedTimePolicy,이 휴가 정책은 고정된 부여 시간을 사용합니다.,This vacation policy uses a fixed grant time.
 vacation,grant.selectTimeDesc,부여할 휴가를 일/시간 단위로 선택해주세요.,Select the vacation to grant in days/hours.
 vacation,grant.selectTimeDescWithMin,부여할 휴가를 일/시간/분 단위로 선택해주세요.,Select the vacation to grant in days/hours/minutes.
@@ -1080,8 +1090,10 @@ vacation,application.grantTimeLabel,부여 시간,Grant Time
 vacation,application.dayUnit,일,Day
 vacation,application.hourUnit,시간,Hour
 vacation,application.minuteUnit,분,Minute
-vacation,application.nHours,{{n}}시간,{{n}} hours
-vacation,application.nMinutes,{{n}}분,{{n}} minutes
+vacation,application.nHours,{{count}}시간,{{count}} hours
+vacation,application.nHours_one,{{count}}시간,{{count}} hour
+vacation,application.nMinutes,{{count}}분,{{count}} minutes
+vacation,application.nMinutes_one,{{count}}분,{{count}} minute
 vacation,application.timeSelectDesc,부여할 휴가를 일/시간 단위로 선택해주세요.,Select vacation in days/hours.
 vacation,application.timeSelectDescWithMin,부여할 휴가를 일/시간/분 단위로 선택해주세요.,Select vacation in days/hours/minutes.
 vacation,application.totalTimeLabel,총,Total
@@ -1182,6 +1194,7 @@ notice,pinned,고정,Pinned
 notice,allNotices,모든 공지,All notices
 notice,listEnd,공지를 모두 봤어요.,You have seen all notices.
 notice,views,조회 {{n}},{{n}} views
+notice,views_one,조회 {{n}},{{n}} view
 notice,empty.title,공지가 없어요,No notices
 notice,empty.description,새 공지가 올라오면 여기에 보여요.,New notices will appear here.
 notice,failure.title,공지를 불러오지 못했어요,Could not load notices
@@ -1191,6 +1204,7 @@ common,previous,이전,Previous
 common,next,다음,Next
 common,dontShowToday,오늘은 그만 보기,Don't show again today
 calendar,header.eventCount,{{count}}개 일정,{{count}} events
+calendar,header.eventCount_one,{{count}}개 일정,{{count}} event
 calendar,dayView.happeningNow,진행 중,Happening now
 calendar,dayView.noAppointments,현재 진행 중인 일정이 없습니다,No appointments or consultations at the moment
 calendar,weekView.notAvailable,주간 뷰는 작은 화면에서 사용할 수 없습니다.,Weekly view is not available on smaller devices.

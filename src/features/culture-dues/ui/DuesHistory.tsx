@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useLocation } from 'react-router-dom'
 
 import { cn } from '@/shared/lib/cn'
 import { Badge } from '@/shared/ds/badge'
@@ -77,7 +78,16 @@ export const DuesHistory = ({ year }: { year: number }) => {
   const lastRowId = useRef<number | null>(null)
 
   // 768 미만은 쪽 넘김이 아니라 끝없이 불러온다(table-pagination.md "768 미만은 List 줄") — 이미 받은 줄을 10개씩 더 보인다
-  const [shown, setShown] = useState<number>(PAGE_SIZES[0])
+  // 보인 줄 수는 화면(location.key)별로 기억한다 — 공지에 갔다 뒤로 오면 그만큼을 바로 그려야 셸의 스크롤 복원(screen-memory)이 높이를 기다리지 않고 정확히 닿는다
+  const memoryKey = `${useLocation().key}:${year}`
+  const [shown, setShownState] = useState<number>(() => shownMemory.get(memoryKey) ?? PAGE_SIZES[0])
+  const setShown = (update: (n: number) => number) =>
+    setShownState((n) => {
+      const next = update(n)
+      shownMemory.set(memoryKey, next)
+      if (shownMemory.size > 50) shownMemory.delete(shownMemory.keys().next().value!)
+      return next
+    })
   const showPagination = rows.length > PAGE_SIZES[0]
   // 쪽 번호는 늘 1 ~ 전체 쪽 수 안 — 줄이 줄어(지움 · 다른 해로 옮김) 지금 쪽이 없어져도 빈 표가 남지 않는다. 넘김 줄이 없으면 1쪽
   const lastPage = Math.max(1, Math.ceil(rows.length / pageValue.pageSize))
@@ -265,6 +275,9 @@ export const DuesHistory = ({ year }: { year: number }) => {
     </div>
   )
 }
+
+/** 폰 끝없이 불러오기 — 화면별 보인 줄 수(모듈 메모리, 새로 고침이면 사라진다) */
+const shownMemory = new Map<string, number>()
 
 const HistoryTableSkeleton = () => {
   const { t } = useTranslation('culture')

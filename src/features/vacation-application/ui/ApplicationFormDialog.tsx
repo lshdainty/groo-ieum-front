@@ -395,7 +395,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicie
                                           <SelectContent>
                                             {[0, 1, 2, 3, 4, 5, 6, 7].map((h) => (
                                               <SelectItem key={h} value={h.toString()}>
-                                                {t('application.nHours', { n: h })}
+                                                {t('application.nHours', { count: h })}
                                               </SelectItem>
                                             ))}
                                           </SelectContent>
@@ -414,8 +414,8 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicie
                                               <SelectValue placeholder={t('application.minuteUnit')} />
                                             </SelectTrigger>
                                             <SelectContent>
-                                              <SelectItem value='0'>{t('application.nMinutes', { n: 0 })}</SelectItem>
-                                              <SelectItem value='30'>{t('application.nMinutes', { n: 30 })}</SelectItem>
+                                              <SelectItem value='0'>{t('application.nMinutes', { count: 0 })}</SelectItem>
+                                              <SelectItem value='30'>{t('application.nMinutes', { count: 30 })}</SelectItem>
                                             </SelectContent>
                                           </Select>
                                           <p className='text-xs text-muted-foreground mt-1'>{t('application.minuteUnit')}</p>
@@ -447,7 +447,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicie
                               <div className='h-9 px-3 border rounded-md flex items-center bg-gray-50'>
                                 <Clock className='w-4 h-4 text-gray-400 mr-2' />
                                 <span className='font-semibold'>
-                                  {overtimeHours > 0 ? t('application.nHours', { n: overtimeHours }) : '-'}
+                                  {overtimeHours > 0 ? t('application.nHours', { count: overtimeHours }) : '-'}
                                 </span>
                               </div>
                             </div>
@@ -468,7 +468,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicie
                                           minutes > 0 && selectedPolicy?.minute_grant_yn === 'Y' ? `${minutes}${tc('minute')}` : ''
                                         ].filter(Boolean).join(' ') || '-'
                                       })()
-                                    : overtimeHours > 0 ? t('application.nHours', { n: overtimeHours }) : '-'}
+                                    : overtimeHours > 0 ? t('application.nHours', { count: overtimeHours }) : '-'}
                                 </span>
                               </div>
                             </div>
@@ -546,7 +546,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicie
                                           <SelectContent>
                                             {[0, 1, 2, 3, 4, 5, 6, 7].map((h) => (
                                               <SelectItem key={h} value={h.toString()}>
-                                                {t('application.nHours', { n: h })}
+                                                {t('application.nHours', { count: h })}
                                               </SelectItem>
                                             ))}
                                           </SelectContent>
@@ -565,8 +565,8 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicie
                                               <SelectValue placeholder={t('application.minuteUnit')} />
                                             </SelectTrigger>
                                             <SelectContent>
-                                              <SelectItem value='0'>{t('application.nMinutes', { n: 0 })}</SelectItem>
-                                              <SelectItem value='30'>{t('application.nMinutes', { n: 30 })}</SelectItem>
+                                              <SelectItem value='0'>{t('application.nMinutes', { count: 0 })}</SelectItem>
+                                              <SelectItem value='30'>{t('application.nMinutes', { count: 30 })}</SelectItem>
                                             </SelectContent>
                                           </Select>
                                           <p className='text-xs text-muted-foreground mt-1'>{t('application.minuteUnit')}</p>
@@ -729,12 +729,12 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicie
                           <>
                             <div>
                               <p className='text-xs text-gray-500'>{t('application.summaryOvertimeHours')}</p>
-                              <p className='text-sm font-medium'>{t('application.nHours', { n: overtimeHours })}</p>
+                              <p className='text-sm font-medium'>{t('application.nHours', { count: overtimeHours })}</p>
                             </div>
                             <div>
                               <p className='text-xs text-gray-500'>{t('application.summaryExpectedComp')}</p>
                               <p className='text-sm font-bold text-blue-600'>
-                                {t('application.nHours', { n: overtimeHours })}
+                                {t('application.nHours', { count: overtimeHours })}
                               </p>
                             </div>
                           </>
