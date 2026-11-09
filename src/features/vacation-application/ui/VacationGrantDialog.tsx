@@ -401,7 +401,7 @@ const VacationGrantDialog = ({
                               <SelectContent>
                                 {[0, 1, 2, 3, 4, 5, 6, 7].map((h) => (
                                   <SelectItem key={h} value={h.toString()}>
-                                    {t('grant.nHours', { n: h })}
+                                    {t('grant.nHours', { count: h })}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -421,8 +421,8 @@ const VacationGrantDialog = ({
                                   <SelectValue placeholder={t('grant.minute')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value='0'>{t('grant.nMinutes', { n: 0 })}</SelectItem>
-                                  <SelectItem value='30'>{t('grant.nMinutes', { n: 30 })}</SelectItem>
+                                  <SelectItem value='0'>{t('grant.nMinutes', { count: 0 })}</SelectItem>
+                                  <SelectItem value='30'>{t('grant.nMinutes', { count: 30 })}</SelectItem>
                                 </SelectContent>
                               </Select>
                               <p className='text-xs text-muted-foreground mt-1'>{t('grant.minute')}</p>
