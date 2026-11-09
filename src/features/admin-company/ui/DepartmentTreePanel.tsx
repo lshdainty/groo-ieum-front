@@ -1,251 +1,151 @@
-import { toast } from '@/shared/ui/shadcn/sonner';
-import { Button } from '@/shared/ui/shadcn/button';
-import { TreeDataItem, TreeView } from '@/shared/ui/shadcn/treeView';
-import { EmptyDepartment } from '@/features/admin-company/ui/EmptyDepartment';
-import { GetCompanyWithDepartment } from '@/entities/company';
-import { PutDepartmentReq } from '@/entities/department';
-import { Building2, Edit, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { DepartmentFormDialog } from '@/features/admin-company/ui/DepartmentFormDialog';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { Building2, EllipsisVertical, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
-interface DepartmentTreePanelProps {
-  departments: GetCompanyWithDepartment[];
-  selectedDept: GetCompanyWithDepartment | null;
-  onDeptSelect: (dept: GetCompanyWithDepartment) => void;
-  onDeptUpdate: (formData: any) => void;
-  onDeptDelete: (deptId: number) => void;
-  companyId: string;
-  title?: string;
-  showAddButton?: boolean;
-  showNodeActions?: boolean;
-  disableCollapse?: boolean;
-}
+import { dsText } from '@/shared/ds/i18n'
+import { Button } from '@/shared/ds/button'
+import { ResponsiveMenu, ResponsiveMenuContent, ResponsiveMenuGroup, ResponsiveMenuItem, ResponsiveMenuTrigger } from '@/shared/ds/menu'
+import { ResultSection } from '@/shared/ds/result-section'
+import { Skeleton } from '@/shared/ds/skeleton'
+import { TreeView } from '@/shared/ds/tree-view'
+import { findDept, flattenDepts, hasChildren, toTreeNodes, type Dept } from '../lib/dept-tree'
 
-const DepartmentTreePanel = ({
-  departments,
-  selectedDept,
-  onDeptSelect,
-  onDeptUpdate,
-  onDeptDelete,
-  companyId,
-  title,
-  showAddButton = true,
-  showNodeActions = true,
-  disableCollapse = false,
-}: DepartmentTreePanelProps) => {
-  const { t } = useTranslation('admin');
-  const displayTitle = title ?? t('department.title');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingDept, setEditingDept] = useState<GetCompanyWithDepartment | null>(null);
-  const [addingChildToId, setAddingChildToId] = useState<number | null>(null);
-
-  const handleAddChild = (parentId: number) => {
-    setAddingChildToId(parentId);
-    const parentDept = findDeptById(departments, parentId);
-    setEditingDept(parentDept);
-    setIsDialogOpen(true);
-  };
-
-  const handleEdit = (dept: GetCompanyWithDepartment) => {
-    setEditingDept(dept);
-    setAddingChildToId(null);
-    setIsDialogOpen(true);
-  };
-
-  const handleSave = (formData: any) => {
-    onDeptUpdate(formData);
-    setIsDialogOpen(false);
-    setEditingDept(null);
-    setAddingChildToId(null);
-  };
-
-  const handleSelectChange = (item?: TreeDataItem) => {
-    if (!item) return;
-    const dept = findDeptById(departments, Number(item.id));
-    if (dept) onDeptSelect(dept);
-  };
-
-  const handleDelete = (dept: GetCompanyWithDepartment) => {
-    if (dept.children && dept.children.length > 0) {
-      toast.error(t('department.hasChildrenError'));
-      return;
-    }
-    onDeptDelete(dept.department_id);
-  };
-
-  const handleDragDrop = (sourceItem: TreeDataItem, targetItem: TreeDataItem) => {
-    // 드래그된 부서 찾기
-    const draggedDept = findDeptById(departments, Number(sourceItem.id));
-    if (!draggedDept) {
-      return;
-    }
-
-    // 드롭된 위치의 부서 찾기
-    const targetDept = findDeptById(departments, Number(targetItem.id));
-    if (!targetDept) {
-      return;
-    }
-
-    // 부서를 자기 자신에게 드롭하는 경우 무시
-    if (draggedDept.department_id === targetDept.department_id) {
-      return;
-    }
-
-    // 업데이트할 데이터 준비
-    const data: PutDepartmentReq = {
-      department_name: draggedDept.department_name,
-      department_name_kr: draggedDept.department_name_kr,
-      parent_id: targetDept.department_id,
-      head_user_id: draggedDept.head_user_id || undefined,
-      color_code: draggedDept.color_code || undefined,
-      tree_level: targetDept.tree_level + 1,
-      department_desc: draggedDept.department_desc || undefined,
-      company_id: companyId || undefined,
-    };
-
-    const updateData = {
-      departmentId: draggedDept.department_id,
-      data
-    };
-
-    // 부서 업데이트
-    onDeptUpdate(updateData);
-  };
-
-  const mapDeptToTreeItem = (dept: GetCompanyWithDepartment): TreeDataItem => ({
-    id: dept.department_id.toString(),
-    name: dept.department_name_kr,
-    icon: Building2,
-    actions: showNodeActions ? (
-      <div className='flex space-x-1 items-center' onClick={e => e.stopPropagation()}>
-        <div
-          role='button'
-          tabIndex={0}
-          className='inline-flex items-center justify-center size-6 rounded-md hover:border hover:border-input hover:bg-background cursor-pointer transition-colors'
-          onClick={e => {
-            e.stopPropagation();
-            handleAddChild(dept.department_id);
-          }}
-          onKeyDown={e => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.stopPropagation();
-              handleAddChild(dept.department_id);
-            }
-          }}
-          title={t('department.addSubBtn')}
-        >
-          <Plus size={16} strokeWidth={1.5} />
-        </div>
-        <div
-          role='button'
-          tabIndex={0}
-          className='inline-flex items-center justify-center size-6 rounded-md hover:border hover:border-input hover:bg-background cursor-pointer transition-colors'
-          onClick={e => {
-            e.stopPropagation();
-            handleEdit(dept);
-          }}
-          onKeyDown={e => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.stopPropagation();
-              handleEdit(dept);
-            }
-          }}
-          title={t('department.editBtn')}
-        >
-          <Edit size={16} strokeWidth={1.5} />
-        </div>
-        <div
-          role='button'
-          tabIndex={0}
-          className='inline-flex items-center justify-center size-6 rounded-md hover:border hover:border-input hover:bg-background cursor-pointer transition-colors'
-          onClick={e => {
-            e.stopPropagation();
-            handleDelete(dept);
-          }}
-          onKeyDown={e => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.stopPropagation();
-              handleDelete(dept);
-            }
-          }}
-          title={t('department.deleteBtn')}
-        >
-          <Trash2 size={16} strokeWidth={1.5} />
-        </div>
-      </div>
-    ) : undefined,
-    children: dept.children && dept.children.length > 0 ? dept.children.map(mapDeptToTreeItem) : undefined,
-    draggable: dept.parent_id !== null,
-    droppable: true,
-  });
-
-  const findDeptById = (depts: GetCompanyWithDepartment[], id: number): GetCompanyWithDepartment | null => {
-    for (const dept of depts) {
-      if (dept.department_id === id) return dept;
-      if (dept.children) {
-        const found = findDeptById(dept.children, id);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
-
-  const treeData = departments.map(mapDeptToTreeItem);
-
-  // department_level이 0인 항목이 하나라도 있는지 확인
-  const hasLevelZeroDept = departments.some(dept => dept.tree_level === 0);
-
+/** 패널 머리 — "부서"(t5 700) + 오른쪽 ⋮ 자리. 머리 위 12 · 아래 8 · 좌 16 · 우 8(T12) */
+export function PanelHeader({ title, id, action }: { title: string; id: string; action?: ReactNode }) {
   return (
-    <div className='h-full flex flex-col overflow-hidden'>
-      {/* 헤더 - 고정 */}
-      <div className='flex items-center justify-between p-4 border-b flex-shrink-0'>
-        <h2 className='text-lg font-semibold'>{displayTitle}</h2>
-        {showAddButton && (
-          <Button
-            size='sm'
-            disabled={hasLevelZeroDept}
-            onClick={() => {
-              setEditingDept(null);
-              setAddingChildToId(null);
-              setIsDialogOpen(true);
-            }}
-          >
-            <Plus size={16} />
-            {t('department.addBtn')}
-          </Button>
-        )}
-      </div>
-      
-      {/* 트리 영역 - 스크롤 가능 */}
-      <div className='flex-1 min-h-0 p-4 overflow-y-auto'>
-        {departments.length > 0 ? (
-          <TreeView
-            data={treeData}
-            initialSelectedItemId={selectedDept?.department_id.toString()}
-            onSelectChange={handleSelectChange}
-            expandAll={true}
-            onDocumentDrag={handleDragDrop}
-            className='bg-transparent'
-            disableCollapse={disableCollapse}
-          />
-        ) : (
-          <EmptyDepartment className="h-full" />
-        )}
-      </div>
-      
-      <DepartmentFormDialog
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        onSave={handleSave}
-        initialData={editingDept}
-        isEditing={!!editingDept && !addingChildToId}
-        isAddingChild={!!addingChildToId}
-        parentId={addingChildToId}
-        companyId={companyId}
-      />
+    <div className='flex min-h-11 items-center justify-between gap-x2 pb-x2 pl-x4 pr-x2 pt-x3'>
+      <h2 id={id} className='m-0 min-w-0 text-t5 font-bold text-fg-neutral'>
+        {title}
+      </h2>
+      {action}
     </div>
   )
 }
 
-export { DepartmentTreePanel }
+/** 부서 나무 자리 — 머리는 그대로 두고 줄 여섯(들임 셋 단계)만 기다린다 */
+export function TreeSkeleton() {
+  return (
+    <div className='px-x2 pb-x4' aria-hidden>
+      {[1, 2, 2, 3, 3, 2].map((level, i) => (
+        <div key={i} className='flex min-h-11 items-center gap-x1_5 py-x3 pr-x2' style={{ paddingLeft: `calc(var(--spacing-x2) + ${level - 1} * var(--spacing-x5))` }}>
+          <Skeleton className='size-4 shrink-0' />
+          <Skeleton text='t4' className='block w-3/5' />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** 패널 안 실패 — Result Section medium "{구역}을/를 불러오지 못했어요" + [다시 시도] */
+export function PanelFailure({ title, onRetry, retrying }: { title: string; onRetry: () => void; retrying?: boolean }) {
+  const { t } = useTranslation('admin')
+  const { t: tc } = useTranslation('common')
+  return (
+    <ResultSection
+      kind='failure'
+      size='medium'
+      title={title}
+      description={t('department.failureDesc')}
+      primaryAction={{ label: tc('retry'), onClick: onRetry, loading: retrying }}
+    />
+  )
+}
+
+/**
+ * 부서 나무 패널(D 18 · E 24) — 머리 "부서" + 오른쪽 ⋮(고른 부서의 동작 — 회사 관리만) + 나무.
+ * `foldable`(회사 관리): 줄 전체 = 고르기 + 접고 펴기, 처음엔 모두 펼친다. `fixed`(부서 배치): 늘 펼친 나무, ⋮ 없음.
+ * 노드마다의 + ✎ 🗑 · 끌어 놓기는 없다 — 동작은 머리 ⋮ 하나가 고른 부서에 건다.
+ */
+export function DepartmentTreePanel({
+  departments,
+  selectedId,
+  onSelect,
+  mode = 'foldable',
+  hideHeader,
+  actions,
+  empty,
+}: {
+  departments: Dept[]
+  selectedId: number | null
+  onSelect: (id: number) => void
+  mode?: 'foldable' | 'fixed'
+  /** 폰 부서 배치 첫 화면은 머리 없이 나무만 — 제목이 상단 바에 있다 */
+  hideHeader?: boolean
+  /** 고른 부서의 동작(⋮) — 주면 머리 오른쪽에 단다 */
+  actions?: {
+    onAddChild: (dept: Dept) => void
+    onEdit: (dept: Dept) => void
+    onDelete: (dept: Dept) => void
+  }
+  /** 부서가 하나도 없을 때의 동작 — [부서 추가] */
+  empty?: { onAdd?: () => void }
+}) {
+  const { t } = useTranslation('admin')
+  const headingId = useId()
+  const nodes = toTreeNodes(departments)
+  const selected = selectedId == null ? null : findDept(departments, selectedId)
+
+  // 펼침 — 처음엔 모두 펼치고, 새로 생긴 부모(하위 부서 추가)는 바로 펼쳐 새 부서가 보이게 한다
+  const [expanded, setExpanded] = useState<string[]>(() => flattenDepts(departments).filter(hasChildren).map((d) => String(d.department_id)))
+  const seen = useRef(new Set(expanded))
+  useEffect(() => {
+    const fresh = flattenDepts(departments)
+      .filter(hasChildren)
+      .map((d) => String(d.department_id))
+      .filter((id) => !seen.current.has(id))
+    if (fresh.length === 0) return
+    fresh.forEach((id) => seen.current.add(id))
+    setExpanded((list) => [...list, ...fresh])
+  }, [departments])
+
+  const menu =
+    actions && selected ? (
+      <ResponsiveMenu>
+        <ResponsiveMenuTrigger asChild>
+          <Button variant='ghost' layout='iconOnly' size='medium' aria-label={dsText('common.moreFor', { label: selected.department_name_kr })}>
+            <EllipsisVertical />
+          </Button>
+        </ResponsiveMenuTrigger>
+        <ResponsiveMenuContent title={selected.department_name_kr}>
+          <ResponsiveMenuGroup>
+            <ResponsiveMenuItem icon={<Plus />} label={t('department.addSubBtn')} onSelect={() => actions.onAddChild(selected)} />
+            <ResponsiveMenuItem icon={<Pencil />} label={t('department.editBtn')} onSelect={() => actions.onEdit(selected)} />
+          </ResponsiveMenuGroup>
+          <ResponsiveMenuGroup>
+            {hasChildren(selected) ? (
+              <ResponsiveMenuItem icon={<Trash2 />} label={t('department.deleteBtn')} disabled description={t('department.deleteBlocked')} />
+            ) : (
+              <ResponsiveMenuItem icon={<Trash2 />} label={t('department.deleteBtn')} tone='critical' onSelect={() => actions.onDelete(selected)} />
+            )}
+          </ResponsiveMenuGroup>
+        </ResponsiveMenuContent>
+      </ResponsiveMenu>
+    ) : undefined
+
+  return (
+    <div className='flex min-h-0 flex-1 flex-col' data-dept-tree-panel>
+      {!hideHeader && <PanelHeader id={headingId} title={t('department.title')} action={menu} />}
+      <div className='min-h-0 flex-1 overflow-y-auto'>
+        {departments.length === 0 ? (
+          <ResultSection
+            size='medium'
+            icon={<Building2 />}
+            title={t('department.noDepartments')}
+            primaryAction={empty?.onAdd ? { label: t('department.addBtn'), onClick: empty.onAdd } : undefined}
+          />
+        ) : (
+          <TreeView
+            {...(hideHeader ? { 'aria-label': t('department.title') } : { 'aria-labelledby': headingId })}
+            nodes={nodes}
+            icon={<Building2 />}
+            collapsible={mode === 'foldable'}
+            selectedId={selectedId == null ? null : String(selectedId)}
+            onSelectedChange={(id) => onSelect(Number(id))}
+            expandedIds={mode === 'foldable' ? expanded : undefined}
+            onExpandedChange={mode === 'foldable' ? setExpanded : undefined}
+          />
+        )}
+      </div>
+    </div>
+  )
+}

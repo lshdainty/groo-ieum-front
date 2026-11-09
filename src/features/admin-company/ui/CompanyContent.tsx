@@ -1,191 +1,251 @@
-import QueryAsyncBoundary from '@/shared/ui/async-boundary/QueryAsyncBoundary';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/shared/ui/shadcn/resizable';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/shadcn/tabs';
-import { CompanyContentSkeleton } from '@/features/admin-company/ui/CompanyContentSkeleton';
-import { CompanyEmpty } from '@/features/admin-company/ui/CompanyEmpty';
-import { CompanyFormDialog } from '@/features/admin-company/ui/CompanyFormDialog';
-import { DepartmentChartPanel } from '@/features/admin-company/ui/DepartmentChartPanel';
-import { DepartmentTreePanel } from '@/features/admin-company/ui/DepartmentTreePanel';
-import { useCompanyContext } from '@/features/admin-company/model/CompanyContext';
-import { useCompanyQuery, useCompanyWithDepartmentsQuery, usePostCompanyMutation, usePutCompanyMutation } from '@/entities/company';
-import { useDeleteDepartmentMutation, usePostDepartmentMutation, usePutDepartmentMutation } from '@/entities/department';
-import { useIsMobile } from '@/shared/hooks/useIsMobile'
-import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm';
-import { type GetCompanyResp, type PostCompanyReq, type PutCompanyReq } from '@/entities/company';
-import { type PostDepartmentReq, type PutDepartmentReq } from '@/entities/department';
-import { type GetCompanyWithDepartment } from '@/entities/company';
-import { Building2, Pencil } from 'lucide-react';
-import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { Building2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
-interface CompanyContentInnerProps {
-  company: GetCompanyResp;
+import { Button } from '@/shared/ds/button'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/shared/ds/resizable'
+import { ResultSection } from '@/shared/ds/result-section'
+import { LoadingRegion, Skeleton } from '@/shared/ds/skeleton'
+import { useSnackbar } from '@/shared/ds/snackbar'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ds/tabs'
+import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
+import { useCompanyQuery, useCompanyWithDepartmentsQuery, type GetCompanyResp } from '@/entities/company'
+import { departmentApi, useDeleteDepartmentMutation } from '@/entities/department'
+import { useCompanyContext } from '../model/CompanyContext'
+import { countDepts, findDept, firstDeptId, type Dept } from '../lib/dept-tree'
+import { ChartSkeleton, DepartmentChartPanel } from './DepartmentChartPanel'
+import { DepartmentFormDialog, type DepartmentFormTarget } from './DepartmentFormDialog'
+import { DepartmentTreePanel, PanelFailure, PanelHeader, TreeSkeleton } from './DepartmentTreePanel'
+import { CompanyFormDialog } from './CompanyFormDialog'
+
+/** 회사 줄(폰) · 제목 줄 오른쪽(데스크톱)의 [회사 정보 수정] */
+const EditCompanyButton = ({ onClick }: { onClick: () => void }) => {
+  const { t } = useTranslation('admin')
+  return (
+    <Button variant='neutralOutline' size='small' onClick={onClick}>
+      {t('company.editBtn')}
+    </Button>
+  )
 }
 
-const CompanyContentInner = ({ company }: CompanyContentInnerProps) => {
-  const { t } = useTranslation('admin');
-  const isMobile = useIsMobile();
-  const { selectedDept, setSelectedDept, isCompanyEditDialogOpen, setIsCompanyEditDialogOpen } = useCompanyContext();
+const CompanyInner = ({ company }: { company: GetCompanyResp }) => {
+  const { t } = useTranslation('admin')
+  const { t: tMenu } = useTranslation('sidebar')
+  const desktop = useDesktop()
+  const snackbar = useSnackbar()
+  const { selectedDeptId, setSelectedDeptId } = useCompanyContext()
+  const query = useCompanyWithDepartmentsQuery(company.company_id, { quiet: true })
+  const deleteDepartment = useDeleteDepartmentMutation()
+  const deleteConfirm = useConfirmTarget<{ dept: Dept; members: number }>()
+  const departments = useMemo(() => query.data?.departments ?? [], [query.data])
+  const [tab, setTab] = useState('dept')
+  // 조직도가 패널보다 넓으면 가운데(맨 위 부서)부터 보인다 — 왼쪽 끝에서 시작하면 맨 위 상자가 화면 밖이다
+  const chartScroll = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = chartScroll.current
+    if (el) el.scrollLeft = Math.max(0, (el.scrollWidth - el.clientWidth) / 2)
+  }, [query.data, tab, desktop])
 
-  const { data: companyWithDepartments } = useCompanyWithDepartmentsQuery(company.company_id);
-  const { mutate: createCompany } = usePostCompanyMutation();
-  const { mutate: updateCompany } = usePutCompanyMutation();
-  const { mutate: createDepartment } = usePostDepartmentMutation();
-  const { mutate: updateDepartment } = usePutDepartmentMutation();
-  const { mutateAsync: deleteDepartment } = useDeleteDepartmentMutation();
-  const deleteConfirm = useConfirmTarget<GetCompanyWithDepartment>();
+  // 고른 부서가 없거나(처음) 지워졌으면 최상위 첫 부서 — 방금 만든 부서는 나무를 다시 받으면 고른 줄이 된다
+  const selected = selectedDeptId != null ? findDept(departments, selectedDeptId) : null
+  const selectedId = selected?.department_id ?? firstDeptId(departments)
 
-  const departments = useMemo(() => {
-    return companyWithDepartments?.departments || [];
-  }, [companyWithDepartments]);
+  // 폼 — 열 때마다 새로 만들어 값이 지난번 것을 물려받지 않는다
+  const [companyForm, setCompanyForm] = useState<{ key: number; open: boolean }>({ key: 0, open: false })
+  const [deptForm, setDeptForm] = useState<{ key: number; open: boolean; target: DepartmentFormTarget }>({
+    key: 0,
+    open: false,
+    target: { kind: 'add', parent: null },
+  })
+  const openDept = (target: DepartmentFormTarget) => setDeptForm((f) => ({ key: f.key + 1, open: true, target }))
 
-  const handleCompanySave = (formData: PostCompanyReq | { companyId: string; data: PutCompanyReq }) => {
-    if ('companyId' in formData) {
-      updateCompany(formData, {
-        onSuccess: () => {
-          setIsCompanyEditDialogOpen(false);
-        }
-      });
-    } else {
-      createCompany(formData);
-    }
-  };
+  const actions = {
+    onAddChild: (dept: Dept) => openDept({ kind: 'add', parent: dept }),
+    onEdit: (dept: Dept) => openDept({ kind: 'edit', dept }),
+    // 서버는 구성원이 있어도 지운다 — 그 사람들이 부서에서 빠진다는 것을 확인창이 말한다(사람 수를 받지 못하면 그 줄은 뺀다)
+    onDelete: async (dept: Dept) => {
+      const members = await departmentApi.getDepartmentUsers(dept.department_id).then((r) => r.users_in_department.length).catch(() => 0)
+      deleteConfirm.ask({ dept, members })
+    },
+  }
 
-  const handleDeptUpdate = (formData: PostDepartmentReq | { departmentId: number; data: PutDepartmentReq }) => {
-    if ('departmentId' in formData) {
-      updateDepartment(formData);
-    } else {
-      const createData: PostDepartmentReq = {
-        ...formData,
-        company_id: company.company_id
-      };
-      createDepartment(createData);
-    }
-  };
+  const treeFailure = (
+    <PanelFailure title={t('department.treeFailure')} onRetry={() => void query.refetch()} retrying={query.isFetching} />
+  )
+  const chartFailure = (
+    <PanelFailure title={t('department.chartFailure')} onRetry={() => void query.refetch()} retrying={query.isFetching} />
+  )
 
-  // 부서 지우기는 여기서 한 번 더 묻는다 — 트리의 🗑 가 어디서 오든 같은 확인창이다
-  const handleDeptDelete = (deptId: number) => {
-    const findDept = (list: GetCompanyWithDepartment[]): GetCompanyWithDepartment | null => {
-      for (const dept of list) {
-        if (dept.department_id === deptId) return dept;
-        const found = findDept(dept.children ?? []);
-        if (found) return found;
+  const treeBody = (
+    <LoadingRegion
+      pending={query.isPending}
+      failed={query.isLoadingError}
+      fallback={<TreeSkeleton />}
+      failure={treeFailure}
+      className='flex min-h-0 flex-1 flex-col'
+    >
+      <DepartmentTreePanel
+        departments={departments}
+        selectedId={selectedId}
+        onSelect={setSelectedDeptId}
+        actions={actions}
+        empty={{ onAdd: () => openDept({ kind: 'add', parent: null }) }}
+      />
+    </LoadingRegion>
+  )
+
+  const chartBody = (
+    <LoadingRegion pending={query.isPending} failed={query.isLoadingError} fallback={<ChartSkeleton />} failure={chartFailure}>
+      <DepartmentChartPanel departments={departments} />
+    </LoadingRegion>
+  )
+
+  const chartHeader = (
+    <PanelHeader
+      id='dept-chart-title'
+      title={t('department.chart')}
+      action={
+        departments.length > 0 ? (
+          <span className='pr-x2 text-t3 text-fg-neutral-subtle'>{t('department.chartCount', { count: countDepts(departments) })}</span>
+        ) : undefined
       }
-      return null;
-    };
-    const dept = findDept(departments);
-    if (dept) deleteConfirm.ask(dept);
-  };
+    />
+  )
+
+  const dialogs = (
+    <>
+      <CompanyFormDialog key={`c${companyForm.key}`} open={companyForm.open} onOpenChange={(open) => setCompanyForm((f) => ({ ...f, open }))} company={company} />
+      <DepartmentFormDialog
+        key={`d${deptForm.key}`}
+        open={deptForm.open}
+        onOpenChange={(open) => setDeptForm((f) => ({ ...f, open }))}
+        target={deptForm.target}
+        departments={departments}
+        companyId={company.company_id}
+        onSaved={(id) => {
+          if (id != null) setSelectedDeptId(id)
+        }}
+      />
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        onOpenChange={deleteConfirm.onOpenChange}
+        title={t('department.deleteTitle')}
+        description={`${t('department.deleteConfirm', { name: deleteConfirm.target?.dept.department_name_kr })}${deleteConfirm.target && deleteConfirm.target.members > 0 ? ` ${t('department.deleteMembers', { count: deleteConfirm.target.members })}` : ''}`}
+        onConfirm={async () => {
+          if (deleteConfirm.target) await deleteDepartment.mutateAsync(deleteConfirm.target.dept.department_id)
+        }}
+        onDone={() => snackbar.show({ message: t('department.deleted', { name: deleteConfirm.target?.dept.department_name_kr }), tone: 'positive' })}
+      />
+    </>
+  )
+
+  const editCompany = () => setCompanyForm((f) => ({ key: f.key + 1, open: true }))
+
+  // 폼 · 확인창(dialogs)은 폭과 상관없이 같은 자리에 둔다 — 768 을 넘나들어도 열린 폼이 다시 만들어지지 않는다
+  const layout = !desktop ? (
+      <div className='min-h-full bg-bg-layer-default'>
+        <div className='flex items-center justify-between gap-x2 px-x6 py-x3'>
+          <p className='m-0 min-w-0 break-keep text-t5 font-bold text-fg-neutral [overflow-wrap:break-word]'>{company.company_name}</p>
+          <EditCompanyButton onClick={editCompany} />
+        </div>
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList layout='fill' size='medium' aria-label={tMenu('menu.adminCompany')}>
+            <TabsTrigger value='dept'>{t('department.title')}</TabsTrigger>
+            <TabsTrigger value='chart'>{t('department.chart')}</TabsTrigger>
+          </TabsList>
+          <TabsContent value='dept'>
+            <div className='flex flex-col'>{treeBody}</div>
+          </TabsContent>
+          <TabsContent value='chart'>
+            {chartHeader}
+            <div ref={chartScroll} className='overflow-x-auto'>{chartBody}</div>
+          </TabsContent>
+        </Tabs>
+      </div>
+  ) : (
+    <ScreenBody density='high'>
+      <ScreenTitleRow title={tMenu('menu.adminCompany')} description={company.company_name} action={<EditCompanyButton onClick={editCompany} />} />
+      <div className='h-[calc(100svh-180px)] min-h-[480px]'>
+        <ResizablePanelGroup
+          storageKey='hr-admin-company'
+          className='overflow-hidden rounded-r4 border border-solid border-stroke-neutral-weak bg-bg-layer-default'
+        >
+          <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className='flex flex-col'>
+            {treeBody}
+          </ResizablePanel>
+          <ResizableHandle label={t('department.resizeLabel')} />
+          <ResizablePanel className='flex flex-col'>
+            {chartHeader}
+            <div ref={chartScroll} className='min-h-0 flex-1 overflow-auto'>{chartBody}</div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+    </ScreenBody>
+  )
 
   return (
     <>
-    <div className='h-full w-full'>
-      <div className='h-full flex flex-col p-4 min-[40rem]:p-6 min-[48rem]:p-8 gap-6 overflow-hidden'>
-        <div className='flex items-center gap-2 shrink-0'>
-          <Building2 />
-          <h1 className='text-3xl font-bold'>{company.company_name}</h1>
-          <div
-            onClick={() => setIsCompanyEditDialogOpen(true)}
-            className='cursor-pointer p-1 rounded hover:bg-accent transition-colors'
-          >
-            <Pencil className='h-4 w-4' />
-          </div>
-        </div>
-
-        <CompanyFormDialog
-          isOpen={isCompanyEditDialogOpen}
-          onOpenChange={setIsCompanyEditDialogOpen}
-          onSave={handleCompanySave}
-          initialData={{
-            company_id: company.company_id,
-            company_name: company.company_name,
-            company_desc: company.company_desc
-          }}
-          mode='edit'
-        />
-
-        {isMobile ? (
-          <Tabs defaultValue="dept-list" className="flex-1 min-h-0 flex flex-col">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="dept-list">{t('department.title')}</TabsTrigger>
-              <TabsTrigger value="org-chart">{t('department.chart')}</TabsTrigger>
-            </TabsList>
-            <TabsContent value="dept-list" className="flex-1 min-h-0 mt-2 border rounded-lg overflow-hidden">
-              <DepartmentTreePanel
-                departments={departments}
-                selectedDept={selectedDept}
-                onDeptSelect={setSelectedDept}
-                onDeptUpdate={handleDeptUpdate}
-                onDeptDelete={handleDeptDelete}
-                companyId={company.company_id}
-              />
-            </TabsContent>
-            <TabsContent value="org-chart" className="flex-1 min-h-0 mt-2 border rounded-lg overflow-hidden">
-              <DepartmentChartPanel
-                departments={departments}
-              />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <ResizablePanelGroup direction='horizontal' className='flex-1 min-h-0 rounded-lg border'>
-            <ResizablePanel
-              defaultSize={25}
-              minSize={25}
-              style={{ overflow: 'hidden' }}
-            >
-              <DepartmentTreePanel
-                departments={departments}
-                selectedDept={selectedDept}
-                onDeptSelect={setSelectedDept}
-                onDeptUpdate={handleDeptUpdate}
-                onDeptDelete={handleDeptDelete}
-                companyId={company.company_id}
-              />
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel
-              defaultSize={75}
-              style={{ overflow: 'hidden' }}
-            >
-              <DepartmentChartPanel
-                departments={departments}
-              />
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        )}
-      </div>
-    </div>
-    <ConfirmDialog
-      open={deleteConfirm.open}
-      onOpenChange={deleteConfirm.onOpenChange}
-      title={t('department.deleteTitle')}
-      description={t('department.deleteConfirm', { name: deleteConfirm.target?.department_name_kr })}
-      onConfirm={async () => {
-        if (deleteConfirm.target) await deleteDepartment(deleteConfirm.target.department_id);
-      }}
-    />
+      {layout}
+      {dialogs}
     </>
-  );
-};
+  )
+}
 
-const CompanyContent = () => {
-  const { data: company, isLoading, error } = useCompanyQuery();
-  const { mutate: createCompany } = usePostCompanyMutation();
+/** 회사 관리 전체 — 회사를 받는 동안 · 실패 · 회사 없음을 먼저 가르고, 있으면 나무 + 조직도 */
+export const CompanyContent = () => {
+  const { t } = useTranslation('admin')
+  const { t: tc } = useTranslation('common')
+  const { t: tMenu } = useTranslation('sidebar')
+  const desktop = useDesktop()
+  const query = useCompanyQuery({ quiet: true })
+  const [create, setCreate] = useState<{ key: number; open: boolean }>({ key: 0, open: false })
+  const company = query.data
 
-  const handleCompanyCreate = (companyFormData: PostCompanyReq) => {
-    createCompany(companyFormData);
-  };
+  const frame = (children: ReactNode) => (
+    <ScreenBody density='high'>
+      <ScreenTitleRow title={tMenu('menu.adminCompany')} />
+      {children}
+    </ScreenBody>
+  )
 
-  return (
-    <QueryAsyncBoundary
-      queryState={{ isLoading, error, data: company }}
-      loadingComponent={<CompanyContentSkeleton />}
-      emptyComponent={<CompanyEmpty onCompanyCreate={handleCompanyCreate} />}
-      isEmpty={(data) => !data}
-    >
-      <CompanyContentInner company={company!} />
-    </QueryAsyncBoundary>
-  );
-};
-
-export { CompanyContent };
+  if (query.isPending) {
+    return frame(
+      <div className={desktop ? 'h-[calc(100svh-180px)] min-h-[480px] overflow-hidden rounded-r4 border border-solid border-stroke-neutral-weak bg-bg-layer-default' : 'bg-bg-layer-default'}>
+        <div className='flex items-center justify-between px-x6 py-x3'>
+          <Skeleton text='t5' className='block w-1/3' />
+        </div>
+        <TreeSkeleton />
+      </div>,
+    )
+  }
+  if (query.isLoadingError || !company) {
+    return frame(
+      <ResultSection
+        kind='failure'
+        title={t('company.loadFailed')}
+        description={t('department.failureDesc')}
+        primaryAction={{ label: tc('retry'), onClick: () => void query.refetch(), loading: query.isFetching }}
+      />,
+    )
+  }
+  if (!company.company_id) {
+    return (
+      <>
+        {frame(
+          <div className={desktop ? '' : 'min-h-full bg-bg-layer-default'}>
+            <ResultSection
+              icon={<Building2 />}
+              title={t('company.emptyTitle')}
+              description={t('company.emptyDesc')}
+              primaryAction={{ label: t('company.createBtn'), onClick: () => setCreate((c) => ({ key: c.key + 1, open: true })) }}
+            />
+          </div>,
+        )}
+        <CompanyFormDialog key={create.key} open={create.open} onOpenChange={(open) => setCreate((c) => ({ ...c, open }))} />
+      </>
+    )
+  }
+  return <CompanyInner company={company} />
+}

@@ -30,4 +30,5 @@ export {
   useDeleteDepartmentMutation,
   usePostDepartmentUsersMutation,
   useDeleteDepartmentUsersMutation,
+  usePutMainDepartmentMutation,
 } from '@/entities/department/api/departmentQueries'

@@ -20,7 +20,7 @@ export const DepartmentChartWidget = () => {
     <WidgetFrame id='department-chart'>
       <WidgetBoundary id='department-chart' queries={queries} fallback={<Skeleton radius='12' className='block h-[240px] w-full' />}>
         <WidgetScrollBox label={t('widget.departmentChart')}>
-          <DepartmentChartPanel departments={departments.data?.departments ?? []} showHeader={false} />
+          <DepartmentChartPanel departments={departments.data?.departments ?? []} />
         </WidgetScrollBox>
       </WidgetBoundary>
     </WidgetFrame>
