@@ -388,6 +388,28 @@ work,noWorkCodesDesc,새로운 업무 코드를 추가해보세요.,Try adding a
 work,addWorkCode,업무 코드 추가,Add Work Code
 work,noWorkDivisions,등록된 업무 구분이 없습니다,No work divisions registered
 work,noWorkDivisionsDesc,새로운 업무 구분을 추가해보세요.,Try adding a new work division.
+work,adminWorkCode.title,업무 코드,Work Codes
+work,adminWorkCode.add,코드 추가,Add code
+work,adminWorkCode.tabsAria,업무 코드 종류,Work code kind
+work,adminWorkCode.colName,이름,Name
+work,adminWorkCode.colCode,코드,Code
+work,adminWorkCode.colType,종류,Kind
+work,adminWorkCode.colOrder,순서,Order
+work,adminWorkCode.typeLabel,묶음,Group
+work,adminWorkCode.typeOption,항목,Item
+work,adminWorkCode.rowDetail,{{code}} · {{type}},{{code}} · {{type}}
+work,adminWorkCode.failureTitle,업무 코드를 불러오지 못했어요,Could not load work codes
+work,adminWorkCode.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+work,adminWorkCode.emptyTitle,업무 코드가 없어요,No work codes
+work,adminWorkCode.divisionEmptyTitle,업무 구분이 없어요,No work divisions
+work,adminWorkCode.emptyDescription,코드를 추가하면 업무 보고에서 고를 수 있어요.,Added codes can be chosen in work reports.
+work,adminWorkCode.fieldCode,코드,Code
+work,adminWorkCode.fieldName,이름,Name
+work,adminWorkCode.fieldOrder,순서,Order
+work,adminWorkCode.orderInvalid,순서는 숫자로 입력해주세요.,Enter the order as a number.
+work,adminWorkCode.saved,업무 코드를 저장했어요.,Work code saved.
+work,adminWorkCode.deleted,업무 코드를 삭제했어요.,Work code deleted.
+work,adminWorkCode.saveFailed,저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save. Please try again in a moment.
 work,report.selectPlaceholder,선택,Select
 work,report.assigneePlaceholder,담당자,Assignee
 work,report.filterAll,전체,All

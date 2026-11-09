@@ -76,7 +76,6 @@ export { HolidayContent } from '@/features/admin-holiday'
 
 // Admin - Work Code
 export { WorkCodeContent } from '@/features/admin-work-code'
-export { WorkCodeProvider, useWorkCodeContext } from '@/features/admin-work-code'
 
 // Admin - Notice
 export { NoticeContent } from '@/features/admin-notice'
