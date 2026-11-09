@@ -79,7 +79,7 @@ export const NoticePopup = ({ open, notice, content, index, total, onPrev, onNex
         showCloseButton={false}
       >
         <ResponsiveDialogBody ref={bodyRef} scrollFog aria-busy={content === undefined || undefined}>
-          <article className='flex flex-col gap-x2'>
+          <article className='flex flex-col items-start gap-x2'>
             {kind}
             {wide && (
               <h2 className='m-0 break-keep text-t8 font-bold text-fg-neutral [overflow-wrap:break-word]'>{notice.title}</h2>
