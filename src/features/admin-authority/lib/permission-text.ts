@@ -9,15 +9,17 @@ const split = (code: string): [string, string] => {
 }
 
 /**
- * 권한 줄 이름 — 웹이 코드로 만든다("휴가 조회" · "View vacation"). 자원 · 동작 글 키가 하나라도 없는 새 코드는 서버 name 으로 폴백.
- * 서버 글은 DB 에 영어 코드 · 합니다체가 섞여 올 수 있어 키가 있는 코드에는 쓰지 않는다.
+ * 권한 줄 이름 — 한국어는 지금 쓰는 서버 name 그대로(이관에서 이름을 바꾸지 않는다), 영어는 웹이 코드 끝으로 만든다("View vacation").
+ * 서버 name 이 비었으면(ko) 코드로 만든 이름으로, 자원 · 동작 글 키가 없는 새 코드는 서버 name(없으면 코드)으로 폴백한다.
  */
 export function permissionTitle(p: PermissionResp, t: TFunction, i18n: I18n): string {
+  const en = i18n.language?.startsWith('en')
+  const server = p.name?.trim()
+  if (!en && server) return server
   const [resource, action] = split(p.code)
   const rKey = `authority.resource.${resource}`
   const aKey = `authority.action.${action}`
-  if (!i18n.exists(rKey, { ns: 'admin' }) || !i18n.exists(aKey, { ns: 'admin' })) return p.name
-  const en = i18n.language?.startsWith('en')
+  if (!i18n.exists(rKey, { ns: 'admin' }) || !i18n.exists(aKey, { ns: 'admin' })) return server || p.code
   const r = t(rKey)
   return t('authority.permName', { resource: en ? r.toLowerCase() : r, action: t(aKey) })
 }
