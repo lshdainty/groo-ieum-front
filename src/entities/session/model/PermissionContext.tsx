@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
+import { createContext, ReactNode, useContext } from 'react'
 import { useUser } from '@/entities/session/model/UserContext'
 
 // 권한 타입 정의
@@ -12,6 +12,8 @@ interface PermissionContextType {
   isLoading: boolean
 }
 
+const EMPTY: Permission[] = []
+
 const PermissionContext = createContext<PermissionContextType | undefined>(undefined)
 
 interface PermissionProviderProps {
@@ -20,15 +22,9 @@ interface PermissionProviderProps {
 
 export function PermissionProvider({ children }: PermissionProviderProps) {
   const { loginUser, isLoading: isUserLoading } = useUser()
-  const [permissions, setPermissions] = useState<Permission[]>([])
-
-  useEffect(() => {
-    if (loginUser?.permissions) {
-      setPermissions(loginUser.permissions)
-    } else {
-      setPermissions([])
-    }
-  }, [loginUser])
+  // 권한은 로그인 정보에서 바로 꺼낸다 — 상태 + effect 로 복사하면 로그인 정보가 생긴 첫 렌더에 아직 비어 있어
+  // 주소를 직접 연 화면의 PermissionGuard 가 "/" 로 내보냈다(I-22-2 ⓓ)
+  const permissions: Permission[] = loginUser?.permissions ?? EMPTY
 
   const hasPermission = (permission: Permission): boolean => {
     return permissions.includes(permission)

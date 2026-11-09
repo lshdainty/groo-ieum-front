@@ -15,5 +15,7 @@ export const useLoginCheckQuery = (enabled: boolean = true) => {
     queryFn: () => sessionApi.getLoginCheck(),
     retry: false,
     enabled,
+    // 실패는 앱 틀 밖 "로그인 상태를 확인하지 못했어요" 화면이 말한다 — 읽기 그물 Snackbar 를 겹치지 않는다
+    meta: { quiet: true },
   })
 }

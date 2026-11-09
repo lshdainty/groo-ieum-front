@@ -19,7 +19,11 @@ export function QueryProvider({ children }: QueryProviderProps) {
       // 쓰기 실패 — 호출처가 자기 글로 알리지 않은 것만 고정 글 Snackbar 로 알린다(shared/api/failure.ts)
       // 읽기 실패 — 화면이 자기 실패 글을 갖기 전의 임시 그물(shared/api/failure.ts)
       queryCache: new QueryCache({
-        onError: (error) => notifyReadFailure(error),
+        // meta.quiet — 그 자리가 자기 화면으로 말하는 읽기(세션 확인의 실패 화면)는 Snackbar 로 다시 알리지 않는다
+        onError: (error, query) => {
+          if (query.meta?.quiet) return
+          notifyReadFailure(error)
+        },
       }),
       mutationCache: new MutationCache({
         onError: (error) => notifyWriteFailure(error),

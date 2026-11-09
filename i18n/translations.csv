@@ -647,9 +647,6 @@ vacation,stats.title,휴가 관리,Vacation Management
 vacation,stats.noUser,사용자 정보가 없습니다.,No user information available.
 vacation,stats.empty.title,휴가 현황 정보가 없습니다,No Vacation Statistics
 vacation,stats.empty.description,휴가 현황 정보를 불러올 수 없습니다,Unable to load vacation statistics
-auth,signup.socialRequired,최소 하나의 소셜 로그인을 연동해주세요.,Please link at least one social login.
-auth,signup.complete,회원가입이 완료되었습니다!,Sign up completed!
-auth,signup.oauthLinked,{{oauth}} 계정 연동이 완료되었습니다!,{{oauth}} account has been linked!
 vacation,history.remainVacation,잔여 휴가,Remaining Vacation
 vacation,history.usedVacation,사용 휴가,Used Vacation
 vacation,history.expectedVacation,사용 예정 휴가,Expected Vacation
@@ -759,14 +756,6 @@ vacation,application.compReasonDesc,초과근무를 하게 된 사유를 상세�
 vacation,application.vacationReasonDesc,휴가 사용 사유를 상세히 기입해 주세요.,Please describe the reason for vacation in detail.
 vacation,application.approverRequired,승인자를 선택해주세요,Please select an approver
 vacation,application.approverPlaceholder,결재자를 선택해주세요,Select an approver
-auth,signup.linkCheckFailed,초대 링크 확인에 실패했습니다.,Failed to verify invitation link.
-auth,signup.invalidLink,유효하지 않은 초대 링크입니다.,Invalid invitation link.
-auth,signup.alreadyRegistered,이미 가입이 완료된 링크입니다.,This link has already been used for registration.
-auth,signup.expiredLink,만료된 초대 링크입니다.,Expired invitation link.
-auth,signup.inactiveLink,비활성화된 초대 링크입니다.,Inactive invitation link.
-auth,signup.registrationComplete,회원가입 완료,Registration Complete
-auth,signup.googleConnected,구글 연동 완료,Google Connected
-auth,signup.connectWithGoogle,Google로 연동하기,Connect with Google
 dashboard,saveError,대시보드 설정 저장에 실패했습니다.,Failed to save dashboard settings.
 user,edit.title,사용자 수정,Edit User
 user,edit.name,이름,Name
@@ -889,13 +878,6 @@ vacation,grant.totalTime,총 {{time}},Total {{time}}
 vacation,grant.grantReason,부여 사유,Grant Reason
 vacation,grant.grantReasonPlaceholder,휴가 부여 사유를 입력하세요...,Enter the reason for granting vacation...
 vacation,grant.processing,처리 중...,Processing...
-auth,signup.oauthConnected,{{provider}} 계정 연동이 완료되었습니다!,{{provider}} account connected successfully!
-auth,signup.needOAuth,최소 하나의 소셜 로그인을 연동해주세요.,Please connect at least one social login.
-auth,signup.complete,회원가입이 완료되었습니다!,Registration completed!
-auth,signup.title,회원가입,Sign Up
-auth,signup.subtitle,초대받은 정보로 계정을 완성해주세요,Complete your account with the invitation info
-auth,signup.additionalInfo,추가 정보,Additional Info
-auth,signup.hasAccount,이미 계정이 있으신가요?,Already have an account?
 culture,rule.header.title,💁 그루 🌲,💁 그루 🌲
 culture,rule.header.subtitle,그루 팀은 이용자분들의 복지를 개선하기 위해 항상 노력하고 있어요,그루 team always strives to improve the welfare of our members
 culture,rule.vacation.title,🏖️ 휴가,🏖️ Vacation
@@ -1066,16 +1048,6 @@ user,passwordMismatch,비밀번호가 일치하지 않습니다.,Passwords do no
 user,passwordMatched,비밀번호가 일치합니다.,Passwords match.
 user,passwordChangeSuccess,비밀번호가 성공적으로 변경되었습니다.,Password changed successfully.
 user,passwordChangeError,비밀번호 변경에 실패했습니다.,Failed to change password.
-auth,signup.birthDate,생년월일,Birth Date
-auth,signup.useLunarBirth,음력 생일 사용,Use Lunar Birthday
-auth,signup.processing,처리 중...,Processing...
-auth,signup.completeBtn,회원가입 완료,Complete Sign Up
-auth,signup.socialConnect,소셜 로그인 연동,Social Login Connect
-auth,signup.socialConnectRequired,최소 하나의 소셜 로그인을 연동해야 합니다,At least one social login must be connected
-auth,signup.invitationInfo,초대받은 정보,Invitation Info
-auth,signup.invitationName,이름,Name
-auth,signup.invitationEmail,이메일,Email
-auth,signup.invitationCompany,소속,Company
 common,login,로그인,Login
 calendar,header.addEvent,일정 추가,Add Event
 calendar,header.allFilters,전체 필터,All Filters
@@ -1295,54 +1267,6 @@ login,resetPassword.emailInvalid,올바른 이메일 형식을 입력해주세�
 login,idRequired,아이디를 입력해주세요.,Please enter your ID.
 login,passwordRequired,비밀번호를 입력해주세요.,Please enter your password.
 login,tab.login,로그인,Login
-login,tab.signup,회원가입,Sign Up
-login,signup.title,회원가입,Sign Up
-login,signup.subtitle,새 계정을 만들어보세요,Create a new account
-login,signup.idLabel,아이디,ID
-login,signup.idPlaceholder,아이디를 입력하세요,Enter your ID
-login,signup.nameLabel,이름,Name
-login,signup.namePlaceholder,이름을 입력하세요,Enter your name
-login,signup.emailLabel,이메일,Email
-login,signup.emailPlaceholder,이메일을 입력하세요,Enter your email
-login,signup.tokenLabel,초대 코드,Invitation Code
-login,signup.tokenPlaceholder,초대 코드를 입력하세요,Enter your invitation code
-login,signup.submitBtn,다음,Next
-login,signup.loadingBtn,처리 중...,Processing...
-login,signup.idRequired,아이디를 입력해주세요.,Please enter your ID.
-login,signup.nameRequired,이름을 입력해주세요.,Please enter your name.
-login,signup.emailRequired,이메일을 입력해주세요.,Please enter your email.
-login,signup.emailInvalid,올바른 이메일 형식을 입력해주세요.,Please enter a valid email address.
-login,signup.tokenRequired,초대 코드를 입력해주세요.,Please enter your invitation code.
-login,signup.hasAccount,이미 계정이 있으신가요?,Already have an account?
-login,signup.noAccount,계정이 없으신가요?,Don't have an account?
-login,signup.step1.title,초대 확인,Verify Invitation
-login,signup.step1.subtitle,초대 이메일에 포함된 정보를 입력하세요,Enter the information from your invitation email
-login,signup.step2.title,회원 정보 입력,Enter Your Information
-login,signup.step2.subtitle,비밀번호와 추가 정보를 입력하세요,Set your password and additional info
-login,signup.newUserId,새 아이디,New User ID
-login,signup.newUserIdPlaceholder,새 아이디 입력 (선택),Enter new user ID (optional)
-login,signup.password,비밀번호,Password
-login,signup.passwordPlaceholder,비밀번호 입력,Enter password
-login,signup.passwordConfirm,비밀번호 확인,Confirm Password
-login,signup.passwordConfirmPlaceholder,비밀번호 재입력,Re-enter password
-login,signup.birthDate,생년월일,Birth Date
-login,signup.lunarYn,음력,Lunar Calendar
-login,signup.complete,회원가입 진행,Continue Registration
-login,signup.back,뒤로,Back
-login,signup.success,회원가입이 완료되었습니다. 로그인해주세요.,Registration completed successfully. Please login.
-login,signup.error.invalidInfo,초대 정보가 일치하지 않습니다.,Invitation information does not match.
-login,signup.error.expired,초대가 만료되었습니다.,Invitation has expired.
-login,signup.error.passwordMismatch,비밀번호가 일치하지 않습니다.,Passwords do not match.
-login,signup.error.duplicateId,이미 사용 중인 아이디입니다.,User ID already exists.
-login,signup.error.blockedEmailDomain,사용할 수 없는 이메일 도메인입니다.,This email domain is not allowed.
-login,signup.passwordRequired,비밀번호를 입력해주세요.,Please enter your password.
-login,signup.passwordConfirmRequired,비밀번호 확인을 입력해주세요.,Please confirm your password.
-login,signup.birthDateRequired,생년월일을 입력해주세요.,Please enter your birth date.
-login,signup.newUserEmail,새 이메일,New Email
-login,signup.newUserEmailPlaceholder,새 이메일 입력 (선택),Enter new email (optional)
-login,signup.idAvailable,사용 가능한 아이디입니다.,ID is available.
-user,passwordChangeRequired,비밀번호 변경이 필요합니다,Password Change Required
-user,passwordChangeRequiredDescription,임시 비밀번호를 사용 중입니다. 보안을 위해 새 비밀번호로 변경해주세요.,You are using a temporary password. Please change to a new password for security.
 user,oauthLink.title,소셜 계정 연동,Social Account Link
 user,oauthLink.description,소셜 계정을 연동하면 해당 계정으로도 로그인할 수 있습니다.,Link your social account to enable login with that account.
 user,oauthLink.google,Google 계정 연동,Link Google Account
@@ -1355,7 +1279,6 @@ user,oauthLink.userNotFound,세션이 만료되었습니다. 다시 로그인해
 user,oauthLink.unlink,연동 해제,Unlink
 user,oauthLink.unlinkSuccess,소셜 계정 연동이 해제되었습니다.,Social account has been unlinked.
 user,oauthLink.unlinkError,소셜 계정 연동 해제에 실패했습니다.,Failed to unlink social account.
-common,or,또는,or
 common,logout,로그아웃,Log out
 ds,common.close,닫기,Close
 ds,common.news,새 소식,New activity
@@ -1550,3 +1473,37 @@ common,failure.code.fileType,올릴 수 없는 파일 형식이에요.,This file
 common,failure.code.fileLarge,파일이 너무 커요.,The file is too large.
 common,failure.code.notFound,대상을 찾지 못했어요. 목록을 새로 열어 확인해주세요.,Could not find it. Reload the list and check.
 common,failure.writeInput,저장하지 못했어요. 입력한 내용을 확인해주세요.,Could not save. Check what you entered.
+common,session.checking,불러오는 중,Loading
+common,session.failedTitle,로그인 상태를 확인하지 못했어요,Couldn't check your sign-in
+common,session.failedDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+common,session.retry,다시 시도,Try again
+auth,callback.failedTitle,로그인을 마치지 못했어요,Couldn't finish signing in
+auth,callback.stateMismatch,로그인 창을 하나만 열어 다시 시도해주세요.,Open only one sign-in window and try again.
+auth,callback.exchangeFailed,로그인 정보를 확인하지 못했어요. 그루 이음을 쓸 수 있는 계정인지 확인하고 다시 로그인해주세요.,"We couldn't verify your sign-in. Check that your account can use 그루 이음, then sign in again."
+auth,callback.noCode,다시 로그인해주세요.,Please sign in again.
+auth,callback.retry,다시 로그인하기,Sign in again
+auth,callback.finishing,로그인 마무리 중,Finishing sign-in
+login,sso.description,그루 계정으로 로그인해주세요.,Sign in with your 그루 account.
+login,sso.login,그루 계정으로 로그인,Sign in with 그루
+login,sso.failed,로그인을 시작하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't start sign-in. Please try again in a moment.
+user,pwForce.title,비밀번호를 바꿔주세요,Change your password
+user,pwForce.description,임시 비밀번호로 로그인했어요. 계속 쓰려면 새 비밀번호로 바꿔주세요.,"You signed in with a temporary password. To keep using 그루 이음, change it to a new password."
+user,pwForce.docTitle,비밀번호 바꾸기,Change password
+user,pwForce.current,임시 비밀번호,Temporary password
+user,pwForce.currentPlaceholder,메일로 받은 비밀번호,The password from your email
+user,pwForce.new,새 비밀번호,New password
+user,pwForce.confirm,새 비밀번호 확인,Confirm new password
+user,pwForce.confirmPlaceholder,한 번 더 입력해주세요,Enter it once more
+user,pwForce.submit,비밀번호 바꾸기,Change password
+user,pwForce.logout,로그아웃,Log out
+user,pwForce.done,비밀번호를 바꿨어요.,Your password has been changed.
+user,pwForce.error.currentRequired,임시 비밀번호를 입력해주세요.,Enter your temporary password.
+user,pwForce.error.newRequired,새 비밀번호를 입력해주세요.,Enter a new password.
+user,pwForce.error.confirmRequired,새 비밀번호를 한 번 더 입력해주세요.,Enter the new password once more.
+user,pwForce.error.tooShort,비밀번호는 8자 이상이어야 해요.,The password must be at least 8 characters.
+user,pwForce.error.noSpecial,비밀번호에 특수문자를 1자 이상 넣어주세요.,Include at least 1 special character.
+user,pwForce.error.same,임시 비밀번호와 다른 비밀번호를 넣어주세요.,Use a password different from the temporary one.
+user,pwForce.error.mismatch,비밀번호가 서로 달라요.,The passwords do not match.
+user,pwForce.failed.invalid,비밀번호를 바꾸지 못했어요. 임시 비밀번호를 다시 확인해주세요.,Couldn't change your password. Check your temporary password again.
+user,pwForce.failed.later,비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't change your password. Please try again in a moment.
+user,pwForce.error.blank,비밀번호를 입력해주세요.,Enter a password.
