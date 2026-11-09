@@ -1299,6 +1299,36 @@ admin,notice.noNoticesDesc,새로운 공지사항을 추가해보세요,Try addi
 admin,notice.addFirst,첫 번째 공지사항 추가,Add First Notice
 admin,notice.addBtn,추가,Add
 admin,notice.searchPlaceholder,제목으로 검색...,Search by title...
+admin,adminNotice.listTitleBase,공지,Notices
+admin,adminNotice.listTitle,공지 {{count}}개,{{count}} notices
+admin,adminNotice.listTitle_one,공지 {{count}}개,{{count}} notice
+admin,adminNotice.caption,공지 목록,Notices
+admin,adminNotice.searchAria,공지 제목 검색,Search notice titles
+admin,adminNotice.colTitle,제목,Title
+admin,adminNotice.colWriter,작성자,Author
+admin,adminNotice.colDate,작성일,Posted
+admin,adminNotice.colViews,조회,Views
+admin,adminNotice.colPeriod,게시 기간,Display period
+admin,adminNotice.periodText,{{start}} ~ {{end}},{{start}} ~ {{end}}
+admin,adminNotice.failureTitle,공지를 불러오지 못했어요,Could not load notices
+admin,adminNotice.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+admin,adminNotice.emptyTitle,공지가 없어요,No notices
+admin,adminNotice.emptyDescription,공지를 추가하면 직원에게 보여요.,Added notices are shown to staff.
+admin,adminNotice.searchEmpty,찾는 공지가 없어요.,No notices found.
+admin,adminNotice.listEnd,공지를 모두 봤어요.,You have seen all notices.
+admin,adminNotice.title,제목,Title
+admin,adminNotice.titleRequired,제목을 입력해주세요.,Enter a title.
+admin,adminNotice.type,종류,Kind
+admin,adminNotice.pinnedCheck,맨 위에 고정해요,Pin to the top
+admin,adminNotice.period,게시 기간,Display period
+admin,adminNotice.periodPlaceholder,기간을 골라주세요,Select a period
+admin,adminNotice.periodRequired,게시 기간을 골라주세요.,Select a display period.
+admin,adminNotice.content,본문,Content
+admin,adminNotice.contentRequired,본문을 입력해주세요.,Enter the content.
+admin,adminNotice.contentEditHint,수정할 때는 본문을 다시 입력해주세요.,Enter the content again when editing.
+admin,adminNotice.saved,공지를 저장했어요.,Notice saved.
+admin,adminNotice.deleted,공지를 삭제했어요.,Notice deleted.
+admin,adminNotice.saveFailed,저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save. Please try again in a moment.
 sidebar,menu.notice,공지사항,Notice
 sidebar,menu.adminNotice,공지사항 관리,Manage notices
 notice,title,공지사항,Notice
