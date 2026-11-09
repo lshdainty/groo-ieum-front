@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/cn'
@@ -26,6 +27,18 @@ export const UserNoticeDetail = ({ noticeId }: { noticeId: number }) => {
   const { data, isPending: loading, isLoadingError, isFetching, refetch } = useNoticeQuery(invalid ? null : noticeId, { quiet: true })
   const isPending = !invalid && loading
   const failed = invalid || isLoadingError
+
+  // 문서 제목 "{공지 제목} - 그루 이음" — 데이터가 오기 전에는 틀이 쓴 "공지사항 - 그루 이음" 그대로, 떠나면 되돌린다
+  const { t: tc } = useTranslation('common')
+  const docTitle = data?.title
+  useEffect(() => {
+    if (!docTitle) return
+    const prev = document.title
+    document.title = `${docTitle} - ${tc('app.title')}`
+    return () => {
+      document.title = prev
+    }
+  }, [docTitle, tc])
 
   const failure = <NoticeFailure onRetry={() => void refetch()} retrying={isFetching} />
   const skeleton = <NoticeDetailSkeleton />
