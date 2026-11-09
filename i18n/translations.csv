@@ -1644,3 +1644,5 @@ admin,department.deleteMembers,부서원 {{count}}명도 이 부서에서 빠져
 admin,department.deleteMembers_one,부서원 {{count}}명도 이 부서에서 빠져요.,{{count}} member is also removed from this department.
 admin,department.leaderLoading,불러오는 중이에요,Loading
 admin,department.leaderFailed,불러오지 못했어요,Could not load
+admin,users.peopleCount,{{count}}명,{{count}} people
+admin,users.peopleCount_one,{{count}}명,{{count}} person

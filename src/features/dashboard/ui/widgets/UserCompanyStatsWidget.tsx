@@ -11,7 +11,7 @@ import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
 import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
 
 /**
- * 회사별 인원 현황(D 29) — 회사마다 List 줄(Logo Tile 32 + 회사 이름 + 뒤 "{n}명" 700). 로고가 안 불러와지면 첫 글자 타일이라
+ * 회사별 인원 현황(D 29) — 회사마다 List 줄(Logo Tile 32 + 회사 이름 + 뒤 "{n}명" 700). 회사 로고를 서버가 주지 않아 첫 글자 타일이다(이름 · 코드로 그림을 고르지 않는다).
  * 깨진 그림 · "{회사} logo" 글이 보이지 않는다. 지표 카드(회사 관리 · 사용자 관리)와 한 부품은 I-24 몫이라 홈은 줄로 담는다.
  */
 export const UserCompanyStatsWidget = () => {
@@ -31,7 +31,7 @@ export const UserCompanyStatsWidget = () => {
               <ListItem
                 key={stat.id}
                 data-company={stat.id}
-                prefix={<LogoTile name={stat.name} face='name' size={32} src={stat.logo} />}
+                prefix={<LogoTile name={stat.name} face='name' size={32} />}
                 title={stat.name}
                 suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{td('companyCount', { count: stat.count })}</span>}
               />
