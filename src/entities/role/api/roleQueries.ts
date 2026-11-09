@@ -16,10 +16,12 @@ import type {
 const roleKeys = createQueryKeys('roles')
 
 // 전체 역할 목록 조회 훅
-export const useRolesQuery = () => {
+export const useRolesQuery = (options?: { quiet?: boolean }) => {
   return useQuery<RoleResp[]>({
     queryKey: roleKeys.lists(),
-    queryFn: () => roleApi.getRoles()
+    queryFn: () => roleApi.getRoles(),
+    // quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다)
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 

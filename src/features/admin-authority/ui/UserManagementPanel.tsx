@@ -11,7 +11,7 @@ import { usePutUserMutation, useUsersQuery, userApi } from '@/entities/user'
 import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+import { useSnackbar } from "@/shared/ds/snackbar";
 import { claimFailure } from '@/shared/api/failure'
 
 const UserManagementPanel = () => {
@@ -21,6 +21,7 @@ const UserManagementPanel = () => {
   const { data: authorities = [], isLoading: isPermissionsLoading } = usePermissionsQuery();
   const { mutateAsync: updateUser } = usePutUserMutation();
   const isMobile = useIsMobile();
+  const snackbar = useSnackbar();
 
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -80,11 +81,11 @@ const UserManagementPanel = () => {
       // Refetch users to reflect changes
       await refetchUsers();
 
-      toast.success(t('authority.userRolesUpdated'));
+      snackbar.show({ message: t('authority.userRolesUpdated'), tone: 'positive' });
     } catch (error) {
       console.error("Failed to update user roles:", error);
       claimFailure(error);
-      toast.error(t('authority.userRolesUpdateFailed'));
+      snackbar.show({ message: t('authority.userRolesUpdateFailed'), tone: 'critical' });
       // 고르기 화면이 실패를 알아야 고른 것을 그대로 두고 다시 저장하게 할 수 있다
       throw error
     }
@@ -92,7 +93,7 @@ const UserManagementPanel = () => {
 
   if (isMobile) {
     return (
-      <div className="h-full bg-background">
+      <div className="min-h-[28rem] bg-background">
         {isLoading ? (
           <UserListSkeleton />
         ) : (
@@ -126,7 +127,7 @@ const UserManagementPanel = () => {
   }
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border bg-background">
+    <ResizablePanelGroup direction="horizontal" className="h-[calc(100dvh-16rem)] min-h-[28rem] rounded-r3 border bg-background">
       <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
         {isLoading ? (
           <UserListSkeleton />

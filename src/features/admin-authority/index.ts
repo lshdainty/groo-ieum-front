@@ -1,11 +1,7 @@
-export { MobilePermissionDrawer } from './ui/MobilePermissionDrawer';
-export { PermissionMatrix } from './ui/PermissionMatrix';
+export { PermissionList } from './ui/PermissionList';
 export { RoleDetail } from './ui/RoleDetail';
 export { RoleList } from './ui/RoleList';
-export { RoleListSkeleton } from './ui/RoleListSkeleton';
-export { RoleManagementEmpty } from './ui/RoleManagementEmpty';
 export { RoleManagementPanel } from './ui/RoleManagementPanel';
-export { RoleManagementPanelSkeleton } from './ui/RoleManagementPanelSkeleton';
 export { UserList } from './ui/UserList';
 export { UserListSkeleton } from './ui/UserListSkeleton';
 export { UserManagementPanel } from './ui/UserManagementPanel';

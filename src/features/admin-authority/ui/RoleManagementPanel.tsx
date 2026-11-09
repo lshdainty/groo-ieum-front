@@ -1,352 +1,213 @@
-import QueryAsyncBoundary from "@/shared/ui/async-boundary/QueryAsyncBoundary";
-import { Dialog, DialogContent } from "@/shared/ui/shadcn/dialog";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/shadcn/resizable";
-import { RoleDetail } from "@/features/admin-authority/ui/RoleDetail";
-import { RoleList } from "@/features/admin-authority/ui/RoleList";
-import { RoleManagementEmpty } from "@/features/admin-authority/ui/RoleManagementEmpty";
-import { RoleManagementPanelSkeleton } from "@/features/admin-authority/ui/RoleManagementPanelSkeleton";
-import { Authority, Role } from "@/features/admin-authority/types";
-import { PermissionResp, usePermissionsQuery } from '@/entities/permission'
-import {
-  RoleResp,
-  useDeleteRoleMutation,
-  usePostRoleMutation,
-  usePutRoleMutation,
-  usePutRolePermissionsMutation,
-  useRolesQuery,
-} from '@/entities/role'
-import { useIsMobile } from '@/shared/hooks/useIsMobile'
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-import { claimFailure } from '@/shared/api/failure'
+import { useEffect, useState } from 'react'
+import { Shield } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/shared/ui/shadcn/resizable'
+import { ResultSection } from '@/shared/ds/result-section'
+import { LoadingRegion, Skeleton } from '@/shared/ds/skeleton'
+import { useSnackbar } from '@/shared/ds/snackbar'
+import { usePermissionsQuery } from '@/entities/permission'
+import { useDeleteRoleMutation, usePostRoleMutation, usePutRoleMutation, usePutRolePermissionsMutation, useRolesQuery } from '@/entities/role'
+import { usePermission } from '@/entities/session'
 import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
+import { useDiscardGuard } from '@/shared/ui/groo/use-discard-guard'
+import { readWriteFailure } from '@/shared/ui/groo/write-error'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { changesOf, draftOf, EMPTY_DRAFT, type RoleDraft } from '../lib/role-draft'
+import { RoleDetail } from './RoleDetail'
+import { RoleList } from './RoleList'
 
-interface RoleManagementPanelInnerProps {
-  roles: RoleResp[];
-  authorities: PermissionResp[];
-}
+const PanelSkeleton = () => (
+  <div className='flex flex-col gap-x3 p-x4'>
+    {[0, 1, 2, 3].map((i) => (
+      <Skeleton key={i} text='t5' className='block w-2/3' />
+    ))}
+    {[0, 1, 2].map((i) => (
+      <Skeleton key={`f${i}`} text='t5' className='block h-[40px] w-full' />
+    ))}
+  </div>
+)
 
-const RoleManagementPanelInner = ({ roles, authorities }: RoleManagementPanelInnerProps) => {
-  const { t } = useTranslation('admin');
-  const isMobile = useIsMobile();
+/**
+ * 역할 탭(I-24 G 32 ~ 35) — 데스크톱: 나눔 상자(왼쪽 목록 · 오른쪽 상세 한 면), 폰: 목록 → 역할을 누르면 그 역할 화면(`?role=코드`, 뒤로 = 목록).
+ * 고치는 값(draft)은 이 패널이 들어 폭이 바뀌어도 이어진다. [저장] 하나가 두 요청을 차례로 한다(설명 → 권한, 앞이 실패하면 뒤는 보내지 않는다).
+ * 값이 바뀐 채 다른 역할 · 목록으로 가면 "작성한 내용이 사라져요" 를 묻는다(dirty 는 페이지에도 알려 탭 전환을 막는다).
+ */
+export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange: (dirty: boolean) => void; discard: ReturnType<typeof useDiscardGuard>['guard'] }) => {
+  const { t } = useTranslation('admin')
+  const { t: tc } = useTranslation('common')
+  const desktop = useDesktop()
+  const snackbar = useSnackbar()
+  const { hasPermission } = usePermission()
+  const canManage = hasPermission('ROLE:MANAGE')
+  const [params, setParams] = useSearchParams()
+  const rolesQ = useRolesQuery({ quiet: true })
+  const permsQ = usePermissionsQuery({ quiet: true })
+  const { mutateAsync: createRole } = usePostRoleMutation()
+  const { mutateAsync: putRole } = usePutRoleMutation()
+  const { mutateAsync: putPerms } = usePutRolePermissionsMutation()
+  const { mutateAsync: deleteRole } = useDeleteRoleMutation()
+  const deleteConfirm = useConfirmTarget<{ code: string; name: string }>()
+  const [creating, setCreating] = useState(false)
+  const [edits, setEdits] = useState<RoleDraft | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [codeError, setCodeError] = useState<string | null>(null)
+  const [showErrors, setShowErrors] = useState(false)
 
-  const { refetch: refetchRoles } = useRolesQuery();
-  const { mutateAsync: createRole, isPending: isCreating } = usePostRoleMutation();
-  const { mutateAsync: deleteRole } = useDeleteRoleMutation();
-  const deleteConfirm = useConfirmTarget<RoleResp>();
-  const { mutateAsync: updateRoleMutation, isPending: isUpdatingRole } = usePutRoleMutation();
-  const { mutateAsync: updateRolePermissionsMutation, isPending: isUpdatingPermissions } = usePutRolePermissionsMutation();
+  const roles = rolesQ.data ?? []
+  const permissions = permsQ.data ?? []
+  const param = params.get('role')
+  // 데스크톱은 처음 첫 역할을 고른다(지금 그대로), 폰은 목록이 처음 화면이다
+  const selectedCode = creating ? null : roles.some((r) => r.role_code === param) ? param : desktop ? (roles[0]?.role_code ?? null) : null
+  const selected = roles.find((r) => r.role_code === selectedCode)
+  const base: RoleDraft | null = creating ? EMPTY_DRAFT : selected ? draftOf(selected) : null
+  const draft: RoleDraft | null = creating ? (edits ?? EMPTY_DRAFT) : selected ? (edits && edits.code === selected.role_code ? edits : base) : null
+  const changes = base && draft ? changesOf(base, draft) : { desc: false, perms: false }
+  const dirty = creating ? !!edits && (!!edits.code || !!edits.name || !!edits.desc || edits.perms.length > 0) : changes.desc || changes.perms
 
-  const isSavingRole = isCreating || isUpdatingRole;
-  const isSavingPermissions = isUpdatingPermissions;
+  useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange])
 
-  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
-  const [editingRole, setEditingRole] = useState<Role | null>(null);
-  const prevIsMobileRef = useRef<boolean | undefined>(undefined);
-
-  // Temporary role constant
-  const TEMP_ROLE_CODE = "NEW_ROLE_TEMP";
-
-  // Map API roles to Domain roles
-  const domainRoles: Role[] = useMemo(() => roles.map(r => ({
-    ...r,
-    permissions: r.permissions
-      .map((code: string) => authorities.find((a: PermissionResp) => a.code === code))
-      .filter((a): a is Authority => a !== undefined)
-  })), [roles, authorities]);
-
-  // Combine server roles with the temporary role if it exists
-  const displayRoles = useMemo(() => {
-    const list = [...domainRoles];
-    if (editingRole && (editingRole as any).isNew) {
-      if (!list.find(r => r.role_code === editingRole.role_code)) {
-        list.push(editingRole);
-      }
-    }
-    return list;
-  }, [domainRoles, editingRole]);
-
-  // 데스크톱에서만 첫 번째 역할 자동 선택
-  // isMobile이 undefined일 때(초기 로딩)는 선택하지 않음
-  useEffect(() => {
-    const prevIsMobile = prevIsMobileRef.current;
-
-    // 데스크톱에서 첫 번째 역할 자동 선택 (초기 로딩 시에만)
-    if (isMobile === false && domainRoles.length > 0 && selectedRoleId === null && prevIsMobile === undefined) {
-      setSelectedRoleId(domainRoles[0].role_code);
-    }
-
-    // 데스크톱 -> 모바일 전환 시 선택 해제 (리스트 먼저 보여주기)
-    if (prevIsMobile === false && isMobile === true && selectedRoleId !== null) {
-      setSelectedRoleId(null);
-    }
-
-    prevIsMobileRef.current = isMobile;
-  }, [domainRoles, selectedRoleId, isMobile]);
-
-  const selectedRole = useMemo(() =>
-    displayRoles.find(r => r.role_code === selectedRoleId),
-    [displayRoles, selectedRoleId]
-  );
-
-  useEffect(() => {
-    if (selectedRole) {
-      if ((selectedRole as any).isNew) {
-        if (editingRole?.role_code !== selectedRole.role_code) {
-          setEditingRole(selectedRole);
-        }
-      } else {
-        setEditingRole(prev => {
-          if (prev?.role_code === selectedRole.role_code) {
-            return prev;
-          }
-          return selectedRole;
-        });
-      }
-    } else {
-      setEditingRole(null);
-    }
-  }, [selectedRole]);
-
-  const handleAddRole = () => {
-    const tempRole: Role & { isNew?: boolean } = {
-      role_code: TEMP_ROLE_CODE,
-      role_name: t('authority.newRole'),
-      desc: "",
-      permissions: [],
-      isNew: true
-    };
-
-    setEditingRole(tempRole);
-    setSelectedRoleId(TEMP_ROLE_CODE);
-  };
-
-  const handleDeleteRole = async (roleCode: string) => {
-    const isServerRole = roles.some(r => r.role_code === roleCode);
-
-    if (!isServerRole) {
-      const firstRole = roles[0];
-      setSelectedRoleId(firstRole ? firstRole.role_code : null);
-      setEditingRole(null);
-      return;
-    }
-
-    const role = roles.find(r => r.role_code === roleCode);
-    if (role) deleteConfirm.ask(role);
-  };
-
-  // 확인한 뒤 지운다 — 실패하면 던진다(확인창이 닫히고 실패 알림이 뜬다)
-  const performDeleteRole = async (roleCode: string) => {
-    await deleteRole(roleCode);
-    await refetchRoles();
-
-    if (selectedRoleId === roleCode) {
-      const remainingRoles = roles.filter(r => r.role_code !== roleCode);
-      setSelectedRoleId(remainingRoles[0]?.role_code || null);
-    }
-  };
-
-  const deleteConfirmDialog = (
-    <ConfirmDialog
-      open={deleteConfirm.open}
-      onOpenChange={deleteConfirm.onOpenChange}
-      title={t('authority.deleteRoleTitle')}
-      description={t('authority.confirmDeleteRole', { name: deleteConfirm.target?.role_name })}
-      onConfirm={async () => {
-        if (deleteConfirm.target) await performDeleteRole(deleteConfirm.target.role_code);
-      }}
-    />
-  );
-
-  const handleUpdateRole = (updatedRole: Role) => {
-    setEditingRole(updatedRole);
-
-    if (selectedRoleId !== updatedRole.role_code) {
-      setSelectedRoleId(updatedRole.role_code);
-    }
-  };
-
-  // 역할 정보 저장 (새 역할 생성 또는 desc 수정)
-  const handleSaveRole = async (roleToSave?: Role) => {
-    const role = roleToSave || editingRole;
-    if (!role) return;
-
-    if (!role.role_code || !role.role_name) {
-      toast.error(t('authority.roleCodeNameRequired'));
-      return;
-    }
-
-    if ((role as any).isNew && role.role_code === TEMP_ROLE_CODE) {
-      toast.error(t('authority.enterValidRoleCode'));
-      return;
-    }
-
-    try {
-      const isNewRole = (role as any).isNew;
-
-      if (isNewRole) {
-        await createRole({
-          role_code: role.role_code,
-          role_name: role.role_name,
-          desc: role.desc,
-          permission_codes: role.permissions.map(p => p.code)
-        });
-
-        setSelectedRoleId(role.role_code);
-        toast.success(t('authority.roleCreated'));
-      } else {
-        await updateRoleMutation({
-          roleCode: role.role_code,
-          data: {
-            desc: role.desc
-          }
-        });
-
-        toast.success(t('authority.roleUpdated'));
-      }
-
-      await refetchRoles();
-    } catch (error) {
-      console.error("Failed to save role:", error);
-      claimFailure(error);
-      toast.error(t('authority.roleSaveFailed'));
-    }
-  };
-
-  // 권한만 저장
-  const handleSavePermissions = async (permissionCodes: string[]) => {
-    if (!editingRole) return;
-
-    const isNewRole = (editingRole as any).isNew;
-    if (isNewRole) {
-      // 새 역할은 역할 저장 시 권한도 함께 저장되므로 여기서는 로컬 상태만 업데이트
-      const newPermissions = authorities
-        .filter((a: PermissionResp) => permissionCodes.includes(a.code))
-        .map((a: PermissionResp): Authority => ({
-          code: a.code,
-          name: a.name,
-          desc: a.desc,
-          resource: a.resource,
-          action: a.action
-        }));
-      setEditingRole({ ...editingRole, permissions: newPermissions });
-      toast.success(t('authority.permissionsUpdatedLocal'));
-      return;
-    }
-
-    try {
-      await updateRolePermissionsMutation({
-        roleCode: editingRole.role_code,
-        data: {
-          permission_codes: permissionCodes
-        }
-      });
-
-      toast.success(t('authority.permissionsUpdated'));
-      await refetchRoles();
-    } catch (error) {
-      console.error("Failed to save permissions:", error);
-      claimFailure(error);
-      toast.error(t('authority.permissionsSaveFailed'));
-    }
-  };
-
-  const handleBackToList = () => {
-    setSelectedRoleId(null);
-    setEditingRole(null);
-  };
-
-  if (isMobile) {
-    return (
-      <div className="h-full bg-background">
-        <RoleList
-          roles={displayRoles}
-          selectedRoleId={selectedRoleId}
-          onSelectRole={setSelectedRoleId}
-          onAddRole={handleAddRole}
-          onDeleteRole={handleDeleteRole}
-        />
-
-        <Dialog
-          open={!!selectedRoleId && !!editingRole}
-          onOpenChange={(open) => {
-            if (!open) handleBackToList();
-          }}
-        >
-          <DialogContent className="w-full h-full max-w-none m-0 p-0 rounded-none border-none bg-background [&>button]:hidden" aria-describedby={undefined}>
-            {editingRole && (
-              <RoleDetail
-                role={editingRole}
-                allAuthorities={authorities}
-                onUpdateRole={handleUpdateRole}
-                onSaveRole={handleSaveRole}
-                onSavePermissions={handleSavePermissions}
-                onBack={handleBackToList}
-                isSavingRole={isSavingRole}
-                isSavingPermissions={isSavingPermissions}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
-        {deleteConfirmDialog}
-      </div>
-    );
+  const resetEdits = () => {
+    setEdits(null)
+    setSaveError(null)
+    setCodeError(null)
+    setShowErrors(false)
   }
+  const choose = (code: string | null) => {
+    discard(() => {
+      resetEdits()
+      setCreating(false)
+      const next = new URLSearchParams(params)
+      if (code) next.set('role', code)
+      else next.delete('role')
+      setParams(next, { replace: false })
+    })
+  }
+  const add = () =>
+    discard(() => {
+      resetEdits()
+      setCreating(true)
+    })
+
+  const save = async () => {
+    if (!draft || busy || !canManage) return
+    if (creating && (!draft.code.trim() || !draft.name.trim())) {
+      setShowErrors(true)
+      return
+    }
+    setBusy(true)
+    setSaveError(null)
+    setCodeError(null)
+    try {
+      if (creating) {
+        await createRole({ role_code: draft.code.trim(), role_name: draft.name.trim(), desc: draft.desc, permission_codes: draft.perms })
+        await rolesQ.refetch()
+        resetEdits()
+        setCreating(false)
+        const next = new URLSearchParams(params)
+        next.set('role', draft.code.trim())
+        setParams(next)
+        snackbar.show({ message: t('authority.roleCreatedToast'), tone: 'positive' })
+      } else if (selected) {
+        if (changes.desc) await putRole({ roleCode: selected.role_code, data: { desc: draft.desc } })
+        if (changes.perms) await putPerms({ roleCode: selected.role_code, data: { permission_codes: draft.perms } })
+        await rolesQ.refetch()
+        resetEdits()
+        snackbar.show({ message: t('authority.roleSavedToast'), tone: 'positive' })
+      }
+    } catch (error) {
+      const { code, key } = readWriteFailure(error)
+      if (code === 'PERMISSION_003') setCodeError(tc('failure.code.roleExists'))
+      else if (key) setSaveError(tc(key))
+      // 앞 요청이 이미 먹었을 수 있다 — 서버 값을 다시 받아 맞춘다(값은 화면에 남는다)
+      void rolesQ.refetch()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const detail = draft && (
+    <RoleDetail
+      key={creating ? '__new' : selectedCode}
+      draft={draft}
+      isNew={creating}
+      permissions={permissions}
+      canManage={canManage}
+      desktop={desktop}
+      busy={busy}
+      dirty={dirty}
+      saveError={saveError}
+      codeError={codeError}
+      showErrors={showErrors}
+      onChange={setEdits}
+      onSave={() => void save()}
+      onDelete={creating || !selected ? undefined : () => deleteConfirm.ask({ code: selected.role_code, name: selected.role_name })}
+      onBack={() => choose(null)}
+    />
+  )
+
+  const list = <RoleList roles={roles} selected={selectedCode} creating={creating} onSelect={(c) => (c !== selectedCode || creating ? choose(c) : undefined)} onAdd={add} />
+
+  const body =
+    roles.length === 0 && !creating ? (
+      <ResultSection
+        size='medium'
+        icon={<Shield />}
+        title={t('authority.noRoles')}
+        description={t('authority.noRolesDesc')}
+        primaryAction={canManage ? { label: t('authority.addRole'), onClick: add } : undefined}
+      />
+    ) : desktop ? (
+      <ResizablePanelGroup direction='horizontal' className='min-h-[32rem] rounded-r3 border border-stroke-neutral-subtle bg-bg-layer-default' data-role-split>
+        <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+          {list}
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={75}>
+          {detail ?? <div className='p-x6 text-t4 text-fg-neutral-muted'>{t('authority.selectRoleToView')}</div>}
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    ) : (
+      <div className='bg-bg-layer-default'>{detail ?? list}</div>
+    )
 
   return (
     <>
-    <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border bg-background">
-      <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-        <RoleList
-          roles={displayRoles}
-          selectedRoleId={selectedRoleId}
-          onSelectRole={setSelectedRoleId}
-          onAddRole={handleAddRole}
-          onDeleteRole={handleDeleteRole}
-        />
-      </ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={75}>
-        {editingRole ? (
-          <RoleDetail
-            role={editingRole}
-            allAuthorities={authorities}
-            onUpdateRole={handleUpdateRole}
-            onSaveRole={handleSaveRole}
-            onSavePermissions={handleSavePermissions}
-            isSavingRole={isSavingRole}
-            isSavingPermissions={isSavingPermissions}
+      <LoadingRegion
+        pending={rolesQ.isPending || permsQ.isPending}
+        failed={rolesQ.isLoadingError || permsQ.isLoadingError}
+        fallback={<PanelSkeleton />}
+        failure={
+          <ResultSection
+            kind='failure'
+            size='medium'
+            title={t('authority.failureTitle')}
+            description={t('users.failureDescription')}
+            primaryAction={{ label: tc('retry'), onClick: () => { void rolesQ.refetch(); void permsQ.refetch() }, loading: rolesQ.isFetching || permsQ.isFetching }}
           />
-        ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            {t('authority.selectRoleToView')}
-          </div>
-        )}
-      </ResizablePanel>
-    </ResizablePanelGroup>
-    {deleteConfirmDialog}
+        }
+      >
+        {body}
+      </LoadingRegion>
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        onOpenChange={deleteConfirm.onOpenChange}
+        title={t('authority.deleteRoleTitle')}
+        description={t('authority.confirmDeleteRole', { name: deleteConfirm.target?.name })}
+        onConfirm={async () => {
+          const code = deleteConfirm.target?.code
+          if (!code) return
+          await deleteRole(code)
+          await rolesQ.refetch()
+          resetEdits()
+          const next = new URLSearchParams(params)
+          next.delete('role')
+          setParams(next, { replace: true })
+        }}
+        onDone={() => snackbar.show({ message: t('authority.roleDeletedToast'), tone: 'positive' })}
+      />
     </>
-  );
-};
-
-const RoleManagementPanel = () => {
-  const { data: roles = [], isLoading: isRolesLoading, error: rolesError } = useRolesQuery();
-  const { data: authorities = [], isLoading: isPermissionsLoading, error: permissionsError } = usePermissionsQuery();
-
-  const isLoading = isRolesLoading || isPermissionsLoading;
-  const error = rolesError || permissionsError;
-
-  return (
-    <QueryAsyncBoundary
-      queryState={{ isLoading, error, data: roles }}
-      loadingComponent={<RoleManagementPanelSkeleton />}
-      emptyComponent={<RoleManagementEmpty className="h-full" />}
-      isEmpty={(data) => !data || data.length === 0}
-    >
-      <RoleManagementPanelInner roles={roles} authorities={authorities} />
-    </QueryAsyncBoundary>
-  );
-};
-
-export { RoleManagementPanel };
+  )
+}
