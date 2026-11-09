@@ -209,7 +209,7 @@ export function DepartmentFormDialog({
                 errorMessage={showErrors && errors.color ? t('department.colorRequired') : null}
               />
             </div>
-            <Field label={t('department.description')} indicator={tc('optional')} maxGraphemeCount={DESC_MAX}>
+            <Field label={t('department.description')} maxGraphemeCount={DESC_MAX}>
               <Textarea value={values.desc} onChange={(e) => set('desc', e.target.value.slice(0, DESC_MAX))} maxLength={DESC_MAX} />
             </Field>
           </div>
