@@ -10,6 +10,7 @@ const DashboardPage = () => {
 
   return (
     <DashboardContent
+      userId={userId}
       dashboard={user.data?.dashboard}
       pending={!userId || user.isPending}
       failed={user.isLoadingError}

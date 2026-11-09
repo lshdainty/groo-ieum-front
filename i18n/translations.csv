@@ -1569,3 +1569,11 @@ dashboard,widget.empty.allUsers.title,사용자가 없어요,No users
 dashboard,widget.allUsers.detail,{{department}} · 전체 {{total}} · 쓴 {{used}},{{department}} · Total {{total}} · Used {{used}}
 dashboard,widget.allUsers.listEnd,사용자를 모두 봤어요.,That's everyone.
 dashboard,companyCount,{{count}}명,{{count}}
+dashboard,editShort,편집,Edit
+dashboard,editPanel.description,켠 위젯만 홈에 보여요. 역할에 따라 고를 수 있는 위젯이 달라요.,Only widgets you turn on show on Home. Which widgets you can pick depends on your role.
+dashboard,editPanel.visibleHeader,보이는 위젯 — 끌어서 차례를 바꿔요,Visible widgets — drag to reorder
+dashboard,editPanel.hiddenHeader,숨긴 위젯,Hidden widgets
+dashboard,editPanel.reset,처음 모양으로,Reset to default
+dashboard,editPanel.grip,{{name}} 차례 바꾸기,Reorder {{name}}
+dashboard,editPanel.gripHint,위 · 아래 화살표 키로 옮겨요,Use the up and down arrow keys to move
+dashboard,editPanel.moved,{{name}} {{n}}번째로 옮겼어요.,Moved {{name}} to position {{n}}.
