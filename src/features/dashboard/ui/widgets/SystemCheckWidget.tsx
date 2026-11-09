@@ -16,6 +16,9 @@ import {
 import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
 import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
 
+const without = (record: Record<string, boolean>, key: string): Record<string, boolean> =>
+  Object.fromEntries(Object.entries(record).filter(([k]) => k !== key))
+
 /**
  * 시스템 데일리 체크(D 30 — 홈뿐) — 시스템마다 체크 줄(ds ListCheckItem: 체크 24 + 이름 + "오늘 확인했어요 · 오늘 아직 확인하지 않았어요").
  * 줄 전체가 누르는 자리이고 키보드로 닿는다. 누르면 확인 토글 API → 성공하면 다시 읽는다. 보내는 동안 그 줄은 aria-busy 로 막히고,
@@ -51,11 +54,11 @@ export const SystemCheckWidget = () => {
       {
         onSuccess: async () => {
           await status.refetch()
-          setPending(({ [code]: _done, ...rest }) => rest)
+          setPending((cur) => without(cur, code))
         },
         onError: (error) => {
           claimFailure(error)
-          setPending(({ [code]: _done, ...rest }) => rest)
+          setPending((cur) => without(cur, code))
           snackbar.show({ message: t('systemCheck.toggleFailed'), tone: 'critical' })
         },
       },

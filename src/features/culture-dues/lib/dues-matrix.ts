@@ -1,3 +1,6 @@
+import type { GetUsersMonthBirthDuesResp } from '@/entities/dues'
+import type { GetUsersResp } from '@/entities/user'
+
 /** 칸 폭 = (본문 폭 − 이름 열 − 칸 사이 44) ÷ 12, 18 ~ 60(E 43). 넘치지 않게 본문 폭에 맞춰 줄어든다 */
 export const MATRIX_CELL_MIN = 18
 export const MATRIX_CELL_MAX = 60
@@ -8,3 +11,13 @@ export const MONTH_LABEL_MIN = 30
 
 export const matrixCellWidth = (bodyWidth: number, nameColumn: number): number =>
   Math.max(MATRIX_CELL_MIN, Math.min(MATRIX_CELL_MAX, Math.floor((bodyWidth - nameColumn - CELL_GAP_TOTAL) / 12)))
+
+export type Row = { user: GetUsersResp; amounts: number[]; birthMonth: number | null }
+
+export const rowsOf = (users: GetUsersResp[] | undefined, birth: GetUsersMonthBirthDuesResp[] | undefined): Row[] =>
+  (users ?? []).map((user) => ({
+    user,
+    // 응답에 사용자 id 가 없어 이름으로 맞춘다(서버 응답이 바뀌어야 고칠 수 있다 — 지시서 R · 사용자 보고)
+    amounts: birth?.find((d) => d.dues_user_name === user.user_name)?.month_birth_dues ?? Array<number>(12).fill(0),
+    birthMonth: user.user_birth ? parseInt(user.user_birth.split('-')[1] ?? '', 10) || null : null,
+  }))
