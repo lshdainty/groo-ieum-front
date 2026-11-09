@@ -205,7 +205,7 @@ const DuesTable = ({ yearDues = [] }: DuesTableProps) => {
       onOpenChange={deleteConfirm.onOpenChange}
       title={t('dues.deleteTitle')}
       description={t('dues.deleteConfirm', {
-        date: duesRow?.dues_date,
+        date: duesRow ? dayjs(duesRow.dues_date).format('YYYY-MM-DD') : '',
         content: duesRow?.dues_detail,
         amount: `${Math.abs(duesRow?.dues_amount ?? 0).toLocaleString('ko-KR')}원`,
       })}

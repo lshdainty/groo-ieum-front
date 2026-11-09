@@ -116,7 +116,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
         title={t('eventDetails.deleteTitle')}
         description={t('eventDetails.deleteConfirm', {
           date: format(startDate, 'yyyy.MM.dd'),
-          title: event.title,
+          title: getEventDisplayName(event),
         })}
         onConfirm={() => deleteEvent(event)}
         onDone={() => setOpen(false)}
