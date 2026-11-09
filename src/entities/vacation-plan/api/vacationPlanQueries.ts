@@ -14,10 +14,12 @@ export const vacationPlanKeys = createQueryKeys('vacationPlans')
 
 // === Query Hooks ===
 
-export const useVacationPlansQuery = () => {
+export const useVacationPlansQuery = (options?: { quiet?: boolean }) => {
   return useQuery<VacationPlanResp[]>({
     queryKey: vacationPlanKeys.lists(),
-    queryFn: () => vacationPlanApi.getVacationPlans()
+    queryFn: () => vacationPlanApi.getVacationPlans(),
+    // quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다)
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
@@ -29,10 +31,11 @@ export const useVacationPlanQuery = (code: string) => {
   })
 }
 
-export const useUserVacationPlansQuery = (userId: string) => {
+export const useUserVacationPlansQuery = (userId: string, options?: { quiet?: boolean }) => {
   return useQuery<VacationPlanResp[]>({
     queryKey: vacationPlanKeys.list({ userId }),
     queryFn: () => vacationPlanApi.getUserVacationPlans(userId),
+    meta: options?.quiet ? { quiet: true } : undefined,
     enabled: !!userId
   })
 }

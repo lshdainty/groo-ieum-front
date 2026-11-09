@@ -17,7 +17,7 @@ import { useSnackbar, type SnackbarApi } from '@/shared/ds/snackbar'
  */
 
 /** 확인창이 하는 일의 종류 — 실패 글의 동사를 정한다 */
-export type ConfirmKind = 'delete' | 'cancel'
+export type ConfirmKind = 'delete' | 'cancel' | 'reset' | 'send'
 
 /** 실패 글 키(common 이름공간) — 401 은 로그인으로 넘어가는 길이 따로 있어 알리지 않는다(null) */
 export const confirmFailureKey = (error: unknown, kind: ConfirmKind): string | null => {
