@@ -5,6 +5,7 @@ import { Card } from '@/shared/ds/card'
 import { Pagination } from '@/shared/ds/pagination'
 import { LoadingRegion } from '@/shared/ds/skeleton'
 import { useActiveNoticesQuery } from '@/entities/notice'
+import { rememberNoticeListPage } from '../model/list-page'
 import { NoticeGroupedList } from './NoticeGroupedList'
 import { NoticeEmpty, NoticeFailure } from './NoticeResults'
 import { NoticeRowsSkeleton } from './NoticeSkeletons'
@@ -21,6 +22,8 @@ export const NoticeListDesktop = () => {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const page = parsePage(params.get('page'))
+  // 상세의 "‹ 공지사항" 이 이 쪽으로 돌려보낸다
+  useEffect(() => rememberNoticeListPage(page), [page])
   const cardRef = useRef<HTMLElement>(null)
   const { data, isPending, isLoadingError, isFetching, isPlaceholderData, refetch } = useActiveNoticesQuery(page - 1, PAGE_SIZE, {
     quiet: true,

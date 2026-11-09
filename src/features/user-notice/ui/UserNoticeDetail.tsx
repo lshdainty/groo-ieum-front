@@ -11,6 +11,7 @@ import { NoticeContentText, NoticeKinds, formatNoticeDateTime, useNoticeQuery } 
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { ParentLink } from '@/widgets/layout/ui/ParentLink'
 import { ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { noticeListHref } from '../model/list-page'
 import { NoticeFailure } from './NoticeResults'
 import { NoticeDetailSkeleton } from './NoticeSkeletons'
 
@@ -77,7 +78,7 @@ export const UserNoticeDetail = ({ noticeId }: { noticeId: number }) => {
   return (
     <ScreenBody density='medium'>
       <div className='mx-auto w-full max-w-(--layout-max-low)'>
-        <ParentLink to='/notice' label={ts('menu.notice')} />
+        <ParentLink to={noticeListHref()} label={ts('menu.notice')} />
         <article className='mt-x2'>
           {data && <NoticeKinds type={data.notice_type} typeName={data.notice_type_name} pinned={data.is_pinned} />}
           <Card className={data ? 'mt-x2' : undefined}>
