@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/cn'
 import { claimFailure, writeFailureKey } from '@/shared/api/failure'
-import { useLeaveConfirm } from '@/shared/ds/alert-dialog'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { BottomSheet, BottomSheetBody, BottomSheetContent, BottomSheetFooter } from '@/shared/ds/bottom-sheet'
 import { Button } from '@/shared/ds/button'
 import { Callout } from '@/shared/ds/callout'
 import { List, ListHeader, ListItem } from '@/shared/ds/list'
 import { SidePanel, SidePanelBody, SidePanelContent, SidePanelFooter } from '@/shared/ds/side-panel'
 import { Switchmark } from '@/shared/ds/switch'
+import { useBeforeUnloadWhile } from '@/shared/lib/before-unload'
 import { useUpdateDashboardMutation } from '@/entities/user'
 import { useWide } from '@/widgets/layout/lib/use-wide'
 import { defaultVisible, hiddenOf, moveWidget, moveWidgetTo, sameOrder, serializeHomeWidgets, toggleWidget } from '@/features/dashboard/lib/home-edit'
@@ -46,13 +47,24 @@ const HomeEditSurface = ({ wide, open, onOpenChange, userId, visible, stored, av
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [announce, setAnnounce] = useState('')
-  const contentRef = useRef<HTMLDivElement>(null)
   const update = useUpdateDashboardMutation()
   const dirty = !sameOrder(draft, visible)
   const hidden = hiddenOf(draft, availableIds)
 
-  const close = () => onOpenChange(false)
-  const leave = useLeaveConfirm({ dirty, contentRef, leave: close, busy: saving })
+  // 새로 고침 · 탭 닫기 · 주소창 이동 전 브라우저 확인(Bottom Sheet 는 스스로 걸지만 Side Panel 은 걸지 않는다 — 둘 다 걸어도 개수로 센다)
+  useBeforeUnloadWhile(open && (dirty || saving))
+  // 켜고 끈 줄은 다른 묶음으로 옮겨 가므로 그 줄 스위치로 초점을 따라 보낸다
+  const focusSwitch = useRef<string | null>(null)
+  useEffect(() => {
+    const id = focusSwitch.current
+    if (!id) return
+    focusSwitch.current = null
+    document.querySelector<HTMLElement>(`[data-home-edit] [data-edit-row="${id}"] [role=switch]`)?.focus({ preventScroll: true })
+  }, [draft])
+  const toggle = (id: string, on: boolean) => {
+    focusSwitch.current = id
+    setDraft((cur) => toggleWidget(cur, id, on))
+  }
 
   const nameOf = (id: string) => {
     const w = widgetOf(id)
@@ -89,10 +101,12 @@ const HomeEditSurface = ({ wide, open, onOpenChange, userId, visible, stored, av
           {error}
         </Callout>
       )}
+      {/* 목록은 본문 좌우 여백 없이 붙인다 — 줄 안쪽 24 가 제목과 같은 선에 서게(본문 24 + 줄 24 가 겹치지 않게) */}
+      <div className='-mx-x6'>
       <ListHeader variant='mediumWeak' as='h3'>
         {t('editPanel.visibleHeader')}
       </ListHeader>
-      <ReorderList draft={draft} nameOf={nameOf} onMove={move} onMoveTo={(id, to) => setDraft((cur) => moveWidgetTo(cur, id, to))} onToggle={(id, on) => setDraft((cur) => toggleWidget(cur, id, on))} />
+      <ReorderList draft={draft} nameOf={nameOf} onMove={move} onMoveTo={(id, to) => setDraft((cur) => moveWidgetTo(cur, id, to))} onToggle={toggle} />
       <ListHeader variant='mediumWeak' as='h3'>
         {t('editPanel.hiddenHeader')}
       </ListHeader>
@@ -102,10 +116,11 @@ const HomeEditSurface = ({ wide, open, onOpenChange, userId, visible, stored, av
             key={id}
             data-edit-row={id}
             title={nameOf(id)}
-            suffix={<Switchmark checked={false} onCheckedChange={() => setDraft((cur) => toggleWidget(cur, id, true))} aria-label={nameOf(id)} />}
+            suffix={<Switchmark checked={false} onCheckedChange={() => toggle(id, true)} aria-label={nameOf(id)} />}
           />
         ))}
       </List>
+      </div>
       <p role='status' aria-live='polite' className='sr-only' data-edit-live>
         {announce}
       </p>
@@ -113,48 +128,46 @@ const HomeEditSurface = ({ wide, open, onOpenChange, userId, visible, stored, av
   )
   const reset = () => setDraft(defaultVisible(availableIds))
   const resetButton = (
-    <Button variant='ghost' ghostColor='neutralMuted' size={wide ? 'small' : 'medium'} onClick={reset} data-edit-reset>
+    <Button variant={wide ? 'ghost' : 'neutralWeak'} ghostColor={wide ? 'neutralMuted' : undefined} onClick={reset} data-edit-reset>
       {t('editPanel.reset')}
     </Button>
   )
 
+  // 닫기는 표면이 묻는다 — dirty · busy 를 표면에 넘기면 Esc · 딤 · 뒤로 가기 · [취소] 가 모두 한 자리에서 "작성한 내용이 사라져요" 를 묻는다.
+  // 뒤로 가기 → [계속 작성] → 뒤로 가기 도 다시 묻는다(표면이 칸을 다시 쌓는다). onOpenChange(false) 는 확인 뒤에만 온다
   if (wide) {
     return (
-      <SidePanel open={open} onOpenChange={(next) => (next ? onOpenChange(true) : leave.request())} form>
-        <SidePanelContent ref={contentRef} size='small' title={t('edit')} description={t('editPanel.description')} data-home-edit>
+      <SidePanel open={open} onOpenChange={onOpenChange} form dirty={dirty}>
+        <SidePanelContent size='small' title={t('edit')} description={t('editPanel.description')} data-home-edit>
           <SidePanelBody scrollFog>{content}</SidePanelBody>
           <SidePanelFooter className='justify-between'>
             {resetButton}
             <span className='flex items-center gap-x2'>
-              <Button variant='neutralWeak' onClick={() => leave.request()}>
-                {tc('cancel')}
-              </Button>
+              <DialogPrimitive.Close asChild>
+                <Button variant='neutralWeak' disabled={saving}>
+                  {tc('cancel')}
+                </Button>
+              </DialogPrimitive.Close>
               <Button loading={saving} onClick={() => void save()}>
                 {tc('save')}
               </Button>
             </span>
           </SidePanelFooter>
-          {leave.node}
         </SidePanelContent>
       </SidePanel>
     )
   }
+  // 폰 시트의 입력 폼은 위 닫기(✕) + 바닥 [저장]이고 닫기와 취소를 함께 두지 않는다 — 보조(처음 모양으로)는 왼쪽, 주 버튼은 오른쪽에 반씩(bottom-sheet.md)
   return (
-    <BottomSheet open={open} onOpenChange={(next) => (next ? onOpenChange(true) : leave.request())} form busy={saving}>
-      <BottomSheetContent ref={contentRef} title={t('edit')} description={t('editPanel.description')} data-home-edit>
-        <BottomSheetBody>
-          {content}
-          <div className='flex justify-center pt-x2'>{resetButton}</div>
-        </BottomSheetBody>
+    <BottomSheet open={open} onOpenChange={onOpenChange} form dirty={dirty} busy={saving}>
+      <BottomSheetContent title={t('edit')} description={t('editPanel.description')} data-home-edit>
+        <BottomSheetBody>{content}</BottomSheetBody>
         <BottomSheetFooter>
-          <Button variant='neutralWeak' onClick={() => leave.request()}>
-            {tc('cancel')}
-          </Button>
+          {resetButton}
           <Button loading={saving} onClick={() => void save()}>
             {tc('save')}
           </Button>
         </BottomSheetFooter>
-        {leave.node}
       </BottomSheetContent>
     </BottomSheet>
   )
@@ -184,15 +197,14 @@ const ReorderList = ({
     listRef.current?.querySelector<HTMLElement>(`[data-grip="${focusId.current}"]`)?.focus({ preventScroll: true })
   }, [draft])
 
-  const indexAt = (y: number): number => {
-    const rows = [...(listRef.current?.querySelectorAll<HTMLElement>('[data-edit-row]') ?? [])]
-    let idx = rows.length - 1
-    for (let i = 0; i < rows.length; i++) {
-      const r = rows[i].getBoundingClientRect()
-      if (y < r.top + r.height / 2) {
-        idx = i
-        break
-      }
+  // 끄는 줄은 빼고 이웃 줄의 가운데와만 견준다 — 자기 줄을 포함하면 1px 만 가도 자리가 바뀌고 떨림에 ABCD ↔ BACD 가 반복된다.
+  // 끄는 줄 위쪽 이웃 가운데보다 위로 가야 앞으로, 아래쪽 이웃 가운데를 넘어야 뒤로 간다(반 줄 넘겨야 바뀐다)
+  const indexAt = (y: number, dragId: string): number => {
+    const others = [...(listRef.current?.querySelectorAll<HTMLElement>('[data-edit-row]') ?? [])].filter((r) => r.dataset.editRow !== dragId)
+    let idx = 0
+    for (const r of others) {
+      const b = r.getBoundingClientRect()
+      if (y > b.top + b.height / 2) idx += 1
     }
     return idx
   }
@@ -211,7 +223,7 @@ const ReorderList = ({
               data-grip={id}
               aria-label={t('editPanel.grip', { name: nameOf(id) })}
               aria-description={t('editPanel.gripHint')}
-              className='flex size-x8 shrink-0 cursor-grab touch-none items-center justify-center rounded-r2 text-fg-neutral-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring active:cursor-grabbing'
+              className='-my-x1_5 -ml-x2_5 flex size-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-r2 text-fg-neutral-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring active:cursor-grabbing'
               onFocus={() => (focusId.current = id)}
               onBlur={() => {
                 if (focusId.current === id) focusId.current = null
@@ -230,7 +242,7 @@ const ReorderList = ({
               }}
               onPointerMove={(e) => {
                 if (dragging !== id) return
-                const to = indexAt(e.clientY)
+                const to = indexAt(e.clientY, id)
                 if (to !== draft.indexOf(id)) onMoveTo(id, to)
               }}
               onPointerUp={() => setDragging(null)}
