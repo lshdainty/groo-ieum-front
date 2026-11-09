@@ -1213,9 +1213,6 @@ admin,notice.searchPlaceholder,제목으로 검색...,Search by title...
 sidebar,menu.notice,공지사항,Notice
 sidebar,menu.adminNotice,공지사항 관리,Manage notices
 notice,title,공지사항,Notice
-notice,description,중요 공지사항을 확인하세요,Check important notices
-notice,noNotices,등록된 공지사항이 없습니다,No notices available
-notice,noNoticesDesc,새로운 공지사항이 등록되면 여기에 표시됩니다,New notices will be displayed here when posted
 notice,pinned,고정,Pinned
 notice,allNotices,모든 공지,All notices
 notice,listEnd,공지를 모두 봤어요.,You have seen all notices.
