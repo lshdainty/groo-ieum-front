@@ -1,5 +1,9 @@
 import { Tree, TreeNode } from 'react-organizational-chart'
 
+import { Building2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+
+import { ResultSection } from '@/shared/ds/result-section'
 import { Skeleton } from '@/shared/ds/skeleton'
 import { chartColorVar, childrenOf, deptChartColor, type Dept } from '../lib/dept-tree'
 
@@ -38,7 +42,7 @@ const renderNode = (node: Dept) => (
  */
 export function DepartmentChartPanel({ departments }: { departments: Dept[] }) {
   const root = departments[0]
-  if (!root) return null
+  if (!root) return <ChartEmpty />
   return (
     <div className='inline-block min-w-max p-x6' data-org-chart>
       <Tree
@@ -52,6 +56,12 @@ export function DepartmentChartPanel({ departments }: { departments: Dept[] }) {
       </Tree>
     </div>
   )
+}
+
+/** 부서가 하나도 없을 때 — 빈 상자 대신 안내(홈 조직도 위젯도 같다) */
+function ChartEmpty() {
+  const { t } = useTranslation('admin')
+  return <ResultSection size='medium' icon={<Building2 />} title={t('department.noDepartments')} />
 }
 
 /** 조직도 자리 — 상자 셋 */

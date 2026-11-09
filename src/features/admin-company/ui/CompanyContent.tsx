@@ -12,7 +12,7 @@ import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
 import { useCompanyQuery, useCompanyWithDepartmentsQuery, type GetCompanyResp } from '@/entities/company'
-import { useDeleteDepartmentMutation } from '@/entities/department'
+import { departmentApi, useDeleteDepartmentMutation } from '@/entities/department'
 import { useCompanyContext } from '../model/CompanyContext'
 import { countDepts, findDept, firstDeptId, type Dept } from '../lib/dept-tree'
 import { ChartSkeleton, DepartmentChartPanel } from './DepartmentChartPanel'
@@ -38,7 +38,7 @@ const CompanyInner = ({ company }: { company: GetCompanyResp }) => {
   const { selectedDeptId, setSelectedDeptId } = useCompanyContext()
   const query = useCompanyWithDepartmentsQuery(company.company_id, { quiet: true })
   const deleteDepartment = useDeleteDepartmentMutation()
-  const deleteConfirm = useConfirmTarget<Dept>()
+  const deleteConfirm = useConfirmTarget<{ dept: Dept; members: number }>()
   const departments = useMemo(() => query.data?.departments ?? [], [query.data])
   const [tab, setTab] = useState('dept')
   // 조직도가 패널보다 넓으면 가운데(맨 위 부서)부터 보인다 — 왼쪽 끝에서 시작하면 맨 위 상자가 화면 밖이다
@@ -64,7 +64,11 @@ const CompanyInner = ({ company }: { company: GetCompanyResp }) => {
   const actions = {
     onAddChild: (dept: Dept) => openDept({ kind: 'add', parent: dept }),
     onEdit: (dept: Dept) => openDept({ kind: 'edit', dept }),
-    onDelete: (dept: Dept) => deleteConfirm.ask(dept),
+    // 서버는 구성원이 있어도 지운다 — 그 사람들이 부서에서 빠진다는 것을 확인창이 말한다(사람 수를 받지 못하면 그 줄은 뺀다)
+    onDelete: async (dept: Dept) => {
+      const members = await departmentApi.getDepartmentUsers(dept.department_id).then((r) => r.users_in_department.length).catch(() => 0)
+      deleteConfirm.ask({ dept, members })
+    },
   }
 
   const treeFailure = (
@@ -128,11 +132,11 @@ const CompanyInner = ({ company }: { company: GetCompanyResp }) => {
         open={deleteConfirm.open}
         onOpenChange={deleteConfirm.onOpenChange}
         title={t('department.deleteTitle')}
-        description={t('department.deleteConfirm', { name: deleteConfirm.target?.department_name_kr })}
+        description={`${t('department.deleteConfirm', { name: deleteConfirm.target?.dept.department_name_kr })}${deleteConfirm.target && deleteConfirm.target.members > 0 ? ` ${t('department.deleteMembers', { count: deleteConfirm.target.members })}` : ''}`}
         onConfirm={async () => {
-          if (deleteConfirm.target) await deleteDepartment.mutateAsync(deleteConfirm.target.department_id)
+          if (deleteConfirm.target) await deleteDepartment.mutateAsync(deleteConfirm.target.dept.department_id)
         }}
-        onDone={() => snackbar.show({ message: t('department.deleted', { name: deleteConfirm.target?.department_name_kr }), tone: 'positive' })}
+        onDone={() => snackbar.show({ message: t('department.deleted', { name: deleteConfirm.target?.dept.department_name_kr }), tone: 'positive' })}
       />
     </>
   )

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Avatar } from '@/shared/ds/avatar'
 import { ColorSwatchGroup, colorName, type ChartColor, type ColorSwatchValue } from '@/shared/ds/color-swatch'
+import { ResultSection } from '@/shared/ds/result-section'
 import { ScrollFog } from '@/shared/ds/scroll-fog'
 import {
   SearchableList,
@@ -10,6 +11,7 @@ import {
   SearchableListInput,
   SearchableListItem,
   SearchableListResults,
+  SearchableListSkeleton,
   focusSearchableList,
   matchesSearch,
 } from '@/shared/ds/searchable-list'
@@ -80,14 +82,20 @@ const NONE = '__none__'
 /** 부서장 줄(D 20) — 값 = "{이름}" 또는 "없음". 누르면 사람 고르기(검색칸 + 줄 · 맨 위 "없음"), 하나 고르면 닫힌다 */
 export function LeaderRow({
   people,
+  state = 'ok',
+  onRetry,
   value,
   onChange,
 }: {
   people: GetUsersResp[]
+  /** 사용자 목록 상태 — 받는 중 · 실패면 "없음" 대신 그 상태를 값으로 보이고, 실패면 고르기 안에서 다시 시도 */
+  state?: 'ok' | 'pending' | 'error'
+  onRetry?: () => void
   value: string
   onChange: (id: string) => void
 }) {
   const { t } = useTranslation('admin')
+  const { t: tc } = useTranslation('common')
   const [query, setQuery] = useState('')
   const title = t('department.leader')
   const current = people.find((p) => p.user_id === value)
@@ -95,14 +103,18 @@ export function LeaderRow({
   return (
     <PickerRow
       title={title}
-      value={current?.user_name ?? t('department.leaderNone')}
-      ariaLabel={`${title}, ${current?.user_name ?? t('department.leaderNone')}`}
+      value={state === 'pending' ? t('department.leaderLoading') : state === 'error' ? t('department.leaderFailed') : (current?.user_name ?? t('department.leaderNone'))}
+      ariaLabel={`${title}, ${state === 'pending' ? t('department.leaderLoading') : state === 'error' ? t('department.leaderFailed') : (current?.user_name ?? t('department.leaderNone'))}`}
       surfaceTitle={title}
       bodyless
       onOpen={() => setQuery('')}
       onOpenAutoFocus={focusSearchableList}
     >
-      {({ close }) => (
+      {({ close }) => state === 'error' ? (
+        <ResultSection kind='failure' size='medium' title={t('department.leaderFailed')} primaryAction={{ label: tc('retry'), onClick: () => onRetry?.() }} />
+      ) : state === 'pending' ? (
+        <SearchableListSkeleton prefix='avatar' />
+      ) : (
         <SearchableList
           value={value || NONE}
           onValueChange={(id) => {

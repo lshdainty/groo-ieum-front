@@ -19,7 +19,7 @@ import { usePostCompanyMutation, usePutCompanyMutation, type GetCompanyResp } fr
 
 const ID_MAX = 50
 const NAME_MAX = 100
-const DESC_MAX = 500
+const DESC_MAX = 1000
 
 interface Values {
   id: string

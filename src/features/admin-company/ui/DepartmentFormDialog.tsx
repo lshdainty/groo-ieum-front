@@ -144,7 +144,8 @@ export function DepartmentFormDialog({
         head_user_id: values.headId || undefined,
         color_code: colorCode,
         tree_level: treeLevel,
-        department_desc: values.desc,
+        // 설명이 처음부터 비어 있고 그대로면 보내지 않는다(null 을 "" 로 다시 쓰지 않는다) — 지운 것만 빈 글로 보낸다
+        department_desc: values.desc === '' && !(editDept?.department_desc) ? undefined : values.desc,
         company_id: companyId,
       }
       if (editDept) {
@@ -201,7 +202,13 @@ export function DepartmentFormDialog({
                 selfName={editDept?.department_name_kr}
                 readOnlyTop={isTop}
               />
-              <LeaderRow people={users.data ?? []} value={values.headId} onChange={(id) => set('headId', id)} />
+              <LeaderRow
+                people={users.data ?? []}
+                state={users.isPending ? 'pending' : users.isError && !users.data ? 'error' : 'ok'}
+                onRetry={() => void users.refetch()}
+                value={values.headId}
+                onChange={(id) => set('headId', id)}
+              />
               <ColorRow
                 value={colorShown}
                 currentHex={storedHex}
