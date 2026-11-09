@@ -145,7 +145,6 @@ const RoleManagementPanelInner = ({ roles, authorities }: RoleManagementPanelInn
       const remainingRoles = roles.filter(r => r.role_code !== roleCode);
       setSelectedRoleId(remainingRoles[0]?.role_code || null);
     }
-    toast.success(t('authority.roleDeleted'));
   };
 
   const deleteConfirmDialog = (

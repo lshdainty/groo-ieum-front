@@ -150,7 +150,6 @@ const PasswordChangeContent = () => {
                 type='password'
                 value={values.current}
                 onChange={(e) => change('current', e.target.value)}
-                placeholder={t('pwForce.currentPlaceholder')}
                 autoComplete='current-password'
               />
             </Field>

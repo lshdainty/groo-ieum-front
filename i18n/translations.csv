@@ -252,7 +252,6 @@ admin,authority.selectUserToManage,역할을 관리할 사용자를 선택하세
 admin,authority.department,부서,Department
 admin,authority.position,직위,Position
 admin,authority.newRole,새 역할,New Role
-admin,authority.roleDeleted,역할이 삭제되었습니다.,Role deleted successfully
 admin,authority.roleCodeNameRequired,역할 코드와 이름이 필요합니다.,Role code and name are required
 admin,authority.enterValidRoleCode,유효한 역할 코드를 입력하세요.,Please enter a valid Role Code
 admin,authority.roleCreated,역할이 생성되었습니다.,Role created successfully
@@ -1093,7 +1092,6 @@ vacation,approval.rejectBtn,반려,Reject
 vacation,approval.approvalNotice,승인 완료되면 변경 내역이 바로 반영됩니다.,Changes will be applied immediately after approval.
 vacation,history.vacationHistory,휴가 이력,Vacation History
 vacation,history.useVacation,휴가 사용,Use Vacation
-vacation,history.deleteConfirm,{{date}} {{type}} 사용 내역을 삭제할까요? 쓴 시간({{time}})은 남은 휴가로 돌아와요. 삭제한 내역은 되돌릴 수 없어요.,Delete the {{type}} usage on {{date}}? The time used ({{time}}) returns to your remaining leave. A deleted record can't be restored.
 login,idLabel,ID,ID
 login,passwordLabel,Password,Password
 login,idPlaceholder,아이디를 입력하세요,Enter your ID
@@ -1443,7 +1441,7 @@ common,failure.code.workCodeParent,고를 수 없는 상위 업무 코드예요.
 common,failure.code.workCodeRequired,업무 코드를 입력해주세요.,Enter a work code.
 common,failure.code.yearMonth,연도와 월을 골라주세요.,Select a year and month.
 common,failure.code.deptExists,이미 있는 부서예요.,This department already exists.
-common,failure.code.deptHasMembers,하위 부서나 구성원이 있어 지울 수 없어요.,It has sub-departments or members, so it cannot be deleted.
+common,failure.code.deptHasMembers,하위 부서나 구성원이 있어 지울 수 없어요.,"It has sub-departments or members, so it cannot be deleted."
 common,failure.code.deptCompany,다른 회사의 부서는 고를 수 없어요.,You cannot select a department of another company.
 common,failure.code.deptSelf,부서를 자기 아래에 둘 수 없어요.,A department cannot be placed under itself.
 common,failure.code.deptCircular,하위 부서 아래로 옮길 수 없어요.,It cannot be moved under its own sub-department.
@@ -1481,7 +1479,6 @@ user,pwForce.description,임시 비밀번호로 로그인했어요. 계속 쓰�
 user,pwForce.docTitle,비밀번호 바꾸기,Change password
 user,pwForce.current,현재 비밀번호,Current password
 user,pwForce.currentHelp,메일로 받은 임시 비밀번호나 원래 비밀번호를 넣어주세요.,Enter the temporary password from your email or your original password.
-user,pwForce.currentPlaceholder,현재 비밀번호,Current password
 user,pwForce.new,새 비밀번호,New password
 user,pwForce.confirm,새 비밀번호 확인,Confirm new password
 user,pwForce.confirmPlaceholder,한 번 더 입력해주세요,Enter it once more
@@ -1503,8 +1500,6 @@ common,failure.delete,삭제하지 못했어요. 잠시 뒤 다시 시도해주�
 common,failure.deleteUnconfirmed,삭제됐는지 확인하지 못했어요. 목록을 확인한 뒤 다시 시도해주세요.,Could not confirm that it was deleted. Check the list and try again.
 common,failure.cancel,취소하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not cancel. Please try again in a moment.
 common,failure.cancelUnconfirmed,취소됐는지 확인하지 못했어요. 목록을 확인한 뒤 다시 시도해주세요.,Could not confirm that it was canceled. Check the list and try again.
-vacation,history.deleteTitle,휴가 사용 내역 삭제,Delete leave usage
-vacation,history.deleteConfirmNoTime,{{date}} {{type}} 사용 내역을 삭제할까요? 쓴 시간은 남은 휴가로 돌아와요. 삭제한 내역은 되돌릴 수 없어요.,Delete the {{type}} usage on {{date}}? The time used returns to your remaining leave. A deleted record can't be restored.
 admin,authority.deleteRoleTitle,역할 삭제,Delete role
 admin,authority.confirmDeleteRole,"""{{name}}"" 역할을 삭제할까요? 삭제한 역할은 되돌릴 수 없어요.","Delete the ""{{name}}"" role? A deleted role can't be restored."
 vacation,application.cancelTitle,휴가 신청 취소,Cancel leave request
@@ -1520,5 +1515,8 @@ notice,popup.label,공지사항,Notices
 notice,popup.prev,이전 공지,Previous notice
 notice,popup.next,다음 공지,Next notice
 notice,popup.position,{{current}} / {{total}},{{current}} / {{total}}
-calendar,eventDetails.deleteVacationTitle,휴가 삭제,Delete leave
-calendar,eventDetails.deleteVacationConfirm,{{date}} 휴가를 삭제할까요? 쓴 시간은 남은 휴가로 돌아와요. 삭제한 휴가는 되돌릴 수 없어요.,Delete the leave on {{date}}? The time used returns to your remaining leave. Deleted leave can't be restored.
+common,deleteVacation.title,휴가 삭제,Delete leave
+common,deleteVacation.confirm,{{date}} 휴가를 삭제할까요? 쓴 시간은 남은 휴가로 돌아와요. 삭제한 휴가는 되돌릴 수 없어요.,Delete the leave on {{date}}? The time used returns to your remaining leave. Deleted leave can't be restored.
+common,failure.deleteInput,삭제하지 못했어요. 내용을 확인해주세요.,Could not delete. Check the details.
+common,failure.cancelInput,취소하지 못했어요. 내용을 확인해주세요.,Could not cancel. Check the details.
+culture,dues.deleteConfirmNoContent,{{date}} {{amount}} 내역을 삭제할까요? 삭제한 회비 내역은 되돌릴 수 없어요.,Delete the {{amount}} record on {{date}}? A deleted dues record can't be restored.

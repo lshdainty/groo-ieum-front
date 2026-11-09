@@ -204,9 +204,10 @@ const DuesTable = ({ yearDues = [] }: DuesTableProps) => {
       open={deleteConfirm.open}
       onOpenChange={deleteConfirm.onOpenChange}
       title={t('dues.deleteTitle')}
-      description={t('dues.deleteConfirm', {
+      // 내용이 비어 있으면 그 조각을 뺀다(빈칸이 겹치지 않게)
+      description={t(duesRow?.dues_detail?.trim() ? 'dues.deleteConfirm' : 'dues.deleteConfirmNoContent', {
         date: duesRow ? dayjs(duesRow.dues_date).format('YYYY-MM-DD') : '',
-        content: duesRow?.dues_detail,
+        content: duesRow?.dues_detail?.trim(),
         amount: `${Math.abs(duesRow?.dues_amount ?? 0).toLocaleString('ko-KR')}원`,
       })}
       onConfirm={async () => {

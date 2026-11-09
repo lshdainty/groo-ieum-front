@@ -20,6 +20,7 @@ interface VacationHistoryTableProps {
 
 const VacationHistoryTable = ({ value: data, canAdd = false }: VacationHistoryTableProps) => {
   const { t } = useTranslation('vacation');
+  const { t: tc } = useTranslation('common');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<IEvent | null>(null);
@@ -82,11 +83,9 @@ const VacationHistoryTable = ({ value: data, canAdd = false }: VacationHistoryTa
       <ConfirmDialog
         open={deleteConfirm.open}
         onOpenChange={deleteConfirm.onOpenChange}
-        title={t('history.deleteTitle')}
-        description={t(usage?.used_time_str ? 'history.deleteConfirm' : 'history.deleteConfirmNoTime', {
-          date: usage ? formatDateTime(usage.start_date) : '',
-          type: usage?.vacation_time_type_name,
-          time: usage?.used_time_str,
+        title={tc('deleteVacation.title')}
+        description={tc('deleteVacation.confirm', {
+          date: usage ? formatDateTime(usage.start_date).slice(0, 10) : '',
         })}
         onConfirm={async () => {
           if (usage) await deleteVacationUsage(usage.vacation_usage_id);

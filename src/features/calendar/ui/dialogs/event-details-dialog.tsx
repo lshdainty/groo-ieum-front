@@ -115,11 +115,12 @@ export function EventDetailsDialog({ event, children }: IProps) {
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={t(isVacation ? 'eventDetails.deleteVacationTitle' : 'eventDetails.deleteTitle')}
-        description={t(isVacation ? 'eventDetails.deleteVacationConfirm' : 'eventDetails.deleteConfirm', {
-          date: format(startDate, 'yyyy.MM.dd'),
-          title: getEventDisplayName(event),
-        })}
+        title={isVacation ? tc('deleteVacation.title') : t('eventDetails.deleteTitle')}
+        description={
+          isVacation
+            ? tc('deleteVacation.confirm', { date: format(startDate, 'yyyy.MM.dd') })
+            : t('eventDetails.deleteConfirm', { date: format(startDate, 'yyyy.MM.dd'), title: getEventDisplayName(event) })
+        }
         onConfirm={() => deleteEvent(event)}
         onDone={() => setOpen(false)}
       />

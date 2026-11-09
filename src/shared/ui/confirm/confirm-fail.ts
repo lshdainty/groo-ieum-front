@@ -24,7 +24,9 @@ export const confirmFailureKey = (error: unknown, kind: ConfirmKind): string | n
   const key = writeFailureKey(error)
   if (key === null) return null
   // 일반 실패는 "저장" 이 아니라 이 확인창의 동사로 말한다 — 사유 글(권한 · 코드별)은 그대로
-  if (key === 'failure.write' || key === 'failure.writeInput') return `failure.${kind}`
+  // 5xx · 네트워크는 "잠시 뒤 다시 시도", 사유 코드가 없는 4xx 는 "내용을 확인해주세요"(22-1 규칙과 같다)
+  if (key === 'failure.write') return `failure.${kind}`
+  if (key === 'failure.writeInput') return `failure.${kind}Input`
   if (key === 'failure.unconfirmed') return `failure.${kind}Unconfirmed`
   return key
 }
