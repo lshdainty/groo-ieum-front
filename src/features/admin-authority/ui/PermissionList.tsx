@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Checkbox } from '@/shared/ds/checkbox'
 import { List, ListCheckItem, ListHeader } from '@/shared/ds/list'
 import type { PermissionResp } from '@/entities/permission'
+import { permissionDesc, permissionTitle } from '../lib/permission-text'
 
 /**
  * 권한 한 면(I-24 G 33) — 머리 "권한 {n}개"(n = 고른 수) 아래 묶음마다 List Header + "모두" Checkbox(일부면 일부 표시), 권한 줄(앞 Checkbox ·
@@ -21,7 +22,7 @@ export function PermissionList({
   onToggle: (code: string, on: boolean) => void
   onToggleGroup: (codes: string[], on: boolean) => void
 }) {
-  const { t } = useTranslation('admin')
+  const { t, i18n } = useTranslation('admin')
   const groups = new Map<string, PermissionResp[]>()
   permissions.forEach((p) => {
     if (!p.resource) return
@@ -56,8 +57,8 @@ export function PermissionList({
                 <ListCheckItem
                   key={p.code}
                   data-permission-code={p.code}
-                  title={<span className='[overflow-wrap:break-word] [word-break:keep-all]'>{p.name}</span>}
-                  detail={p.desc || undefined}
+                  title={<span className='[overflow-wrap:break-word] [word-break:keep-all]'>{permissionTitle(p, t, i18n)}</span>}
+                  detail={permissionDesc(p, t, i18n)}
                   checked={selected.includes(p.code)}
                   disabled={disabled}
                   onCheckedChange={(c) => onToggle(p.code, c === true)}

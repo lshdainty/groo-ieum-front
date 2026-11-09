@@ -1712,3 +1712,37 @@ admin,authority.resource.ROLE,역할,Roles
 admin,authority.resource.PERMISSION,권한,Permissions
 admin,authority.userFailureTitle,사용자 역할을 불러오지 못했어요,Could not load user roles
 admin,authority.roleDescRequired,설명은 비울 수 없어요.,The description can't be empty.
+admin,authority.permName,{{resource}} {{action}},{{action}} {{resource}}
+admin,authority.action.READ,조회,View
+admin,authority.action.EDIT,수정,Edit
+admin,authority.action.MANAGE,관리,Manage
+admin,authority.action.USE,사용,Use
+admin,authority.action.REQUEST,신청,Request
+admin,authority.action.APPROVE,승인,Approve
+admin,authority.action.GRANT,부여,Grant
+admin,authority.action.WRITE,작성,Write
+admin,authority.permDesc.USER_READ,내 정보를 볼 수 있어요.,View your own information.
+admin,authority.permDesc.USER_EDIT,내 정보를 고칠 수 있어요.,Edit your own information.
+admin,authority.permDesc.USER_MANAGE,사용자를 초대 · 수정 · 삭제하고 모든 사용자를 관리해요.,"Invite, edit and delete users, and manage everyone."
+admin,authority.permDesc.VACATION_READ,내 휴가 내역을 볼 수 있어요.,View your own vacation history.
+admin,authority.permDesc.VACATION_USE,"받은 휴가를 쓰고, 쓴 휴가를 고치거나 지워요.",Use granted vacation and edit or delete what you used.
+admin,authority.permDesc.VACATION_REQUEST,경조 · 연장 근무 등 휴가를 신청해요.,Request vacation such as overtime or family events.
+admin,authority.permDesc.VACATION_APPROVE,구성원 휴가 신청을 승인 · 반려해요.,Approve or reject members' vacation requests.
+admin,authority.permDesc.VACATION_GRANT,구성원에게 휴가를 주거나 회수해요.,Grant vacation to members or take it back.
+admin,authority.permDesc.VACATION_MANAGE,휴가 정책 · 플랜 등 휴가 설정을 모두 만들고 고치고 지워요.,"Create, edit and delete all vacation settings such as policies and plans."
+admin,authority.permDesc.WORK_READ,내가 쓴 업무 일지를 볼 수 있어요.,View the work logs you wrote.
+admin,authority.permDesc.WORK_WRITE,업무 일지를 쓰고 고쳐요.,Write and edit work logs.
+admin,authority.permDesc.WORK_MANAGE,모든 업무 일지와 업무 코드를 고치고 지워요.,Edit and delete all work logs and work codes.
+admin,authority.permDesc.SCHEDULE_READ,캘린더 일정을 볼 수 있어요.,View calendar events.
+admin,authority.permDesc.SCHEDULE_WRITE,캘린더에 일정을 등록 · 수정 · 삭제해요.,"Add, edit and delete calendar events."
+admin,authority.permDesc.SCHEDULE_MANAGE,모든 일정을 관리해요.,Manage all events.
+admin,authority.permDesc.COMPANY_READ,회사와 부서 정보를 볼 수 있어요.,View company and department information.
+admin,authority.permDesc.COMPANY_MANAGE,회사와 부서 정보를 관리해요.,Manage company and department information.
+admin,authority.permDesc.HOLIDAY_READ,공휴일을 볼 수 있어요.,View holidays.
+admin,authority.permDesc.HOLIDAY_MANAGE,공휴일을 만들고 고치고 지워요.,"Create, edit and delete holidays."
+admin,authority.permDesc.DUES_READ,회비 내역을 볼 수 있어요.,View dues records.
+admin,authority.permDesc.DUES_MANAGE,회비 내역을 만들고 고치고 지워요.,"Create, edit and delete dues records."
+admin,authority.permDesc.REGULATION_READ,규정 페이지를 볼 수 있어요.,View the regulations page.
+admin,authority.permDesc.NOTICE_READ,공지사항을 볼 수 있어요.,View notices.
+admin,authority.permDesc.NOTICE_MANAGE,공지사항을 만들고 고치고 지워요.,"Create, edit and delete notices."
+admin,authority.permDesc.ROLE_MANAGE,"역할을 만들고 고치고 지우고, 역할에 권한을 연결해요.","Create, edit and delete roles, and link permissions to roles."
