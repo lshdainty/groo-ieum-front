@@ -42,76 +42,59 @@ export const VacationContent = () => {
   const rows = approvals.data ?? []
   const waiting = rows.some((row) => needsMyApproval(row, loginUserId))
 
-  const yearSelect = (
-    <Select
-      size={desktop ? 'medium' : 'large'}
-      aria-label={t('memberVacation.yearAria')}
-      value={selectedYear}
-      onValueChange={setSelectedYear}
-      className='w-[9rem]'
-    >
-      {yearOptions().map((y) => (
-        <SelectItem key={y} value={String(y)} label={t('memberVacation.yearLabel', { year: y })} />
-      ))}
-    </Select>
-  )
+  const yearSelectProps = {
+    size: 'responsive' as const,
+    'aria-label': t('memberVacation.yearAria'),
+    value: selectedYear,
+    onValueChange: setSelectedYear,
+  }
+  const yearItems = yearOptions().map((y) => <SelectItem key={y} value={String(y)} label={t('memberVacation.yearLabel', { year: y })} />)
 
-  const tabs = (
-    <TabsList aria-label={t('memberVacation.tabsAria')} layout={desktop ? 'hug' : 'fill'} size={desktop ? 'medium' : 'small'}>
-      <TabsTrigger value='inbox' notification={waiting} aria-describedby={waiting ? 'vacation-inbox-pending' : undefined}>
-        {t('memberVacation.tabInbox')}
-      </TabsTrigger>
-      <TabsTrigger value='staff'>{t('memberVacation.tabStaff')}</TabsTrigger>
-    </TabsList>
-  )
   const pendingNote = waiting ? (
     <span id='vacation-inbox-pending' className='sr-only'>
       {t('memberVacation.inboxPending')}
     </span>
   ) : null
 
-  const inbox = (
-    <ApprovalInbox
-      rows={rows}
-      pending={approvals.isPending}
-      failed={approvals.isLoadingError}
-      fetching={approvals.isFetching}
-      onRetry={() => void approvals.refetch()}
-    />
-  )
-
-  if (desktop) {
-    return (
-      <ScreenBody density='high'>
-        <ScreenTitleRow title={t('memberVacation.title')} action={yearSelect} />
-        <Tabs value={tab} onValueChange={(v) => setTab(v as VacationTab)}>
-          {tabs}
-          {pendingNote}
-          <TabsContent value='inbox' className='mt-x4'>
-            {inbox}
-          </TabsContent>
-          <TabsContent value='staff' className='mt-x4'>
-            <StaffVacation />
-          </TabsContent>
-        </Tabs>
-      </ScreenBody>
-    )
-  }
-
+  // 트리는 폭과 상관없이 하나다 — 768 을 넘나들어도(태블릿 회전) 열린 부여 폼 · 결재 상세 · 쪽이 이어지게, 달라지는 것은 클래스와 속성뿐
   return (
     <ScreenBody density='high'>
-      <div className='bg-bg-layer-default' data-member-vacation-phone>
+      <ScreenTitleRow
+        title={t('memberVacation.title')}
+        action={
+          <Select {...yearSelectProps} className='w-[9rem]'>
+            {yearItems}
+          </Select>
+        }
+      />
+      <div className='bg-bg-layer-default min-[48rem]:bg-transparent' data-member-vacation-phone>
         <Tabs value={tab} onValueChange={(v) => setTab(v as VacationTab)}>
-          {tabs}
+          <TabsList aria-label={t('memberVacation.tabsAria')} layout={desktop ? 'hug' : 'fill'} size={desktop ? 'medium' : 'small'}>
+            <TabsTrigger value='inbox' notification={waiting} aria-describedby={waiting ? 'vacation-inbox-pending' : undefined}>
+              {t('memberVacation.tabInbox')}
+            </TabsTrigger>
+            <TabsTrigger value='staff'>{t('memberVacation.tabStaff')}</TabsTrigger>
+          </TabsList>
           {pendingNote}
-          <div className='flex items-center justify-between gap-x3 px-x6 pb-x1 pt-x3'>
-            {yearSelect}
+          <div className='flex items-center justify-between gap-x3 px-x6 pb-x1 pt-x3 min-[48rem]:hidden'>
+            <Select {...yearSelectProps} className='w-[9rem]'>
+              {yearItems}
+            </Select>
             {tab === 'inbox' && rows.length > 0 && (
               <span className='text-t3 font-normal text-fg-neutral-subtle'>{t('memberVacation.count', { n: rows.length })}</span>
             )}
           </div>
-          <TabsContent value='inbox'>{inbox}</TabsContent>
-          <TabsContent value='staff' className='pt-x3'>
+          <TabsContent value='inbox' className='min-[48rem]:mt-x4'>
+            <ApprovalInbox
+              key={selectedYear}
+              rows={rows}
+              pending={approvals.isPending}
+              failed={approvals.isLoadingError}
+              fetching={approvals.isFetching}
+              onRetry={() => void approvals.refetch()}
+            />
+          </TabsContent>
+          <TabsContent value='staff' className='pt-x3 min-[48rem]:mt-x4 min-[48rem]:pt-0'>
             <StaffVacation />
           </TabsContent>
         </Tabs>
