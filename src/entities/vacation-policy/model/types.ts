@@ -21,6 +21,8 @@ export interface GetVacationPolicyResp {
   effective_type: string
   expiration_type: string
   repeat_grant_desc: string
+  /** 지울 수 있는 정책인가("Y" · "N") — 서버 24-0 이후에만 온다. 칸이 없으면(옛 서버) Y 로 본다 */
+  can_deleted?: 'Y' | 'N'
 }
 
 export interface GetVacationPoliciesResp {
@@ -40,6 +42,16 @@ export interface GetVacationPoliciesResp {
   effective_type: string
   expiration_type: string
   repeat_grant_desc: string
+  can_deleted?: 'Y' | 'N'
+}
+
+export interface UpdateVacationPolicyReq {
+  vacation_policy_name: string
+  vacation_policy_desc: string
+}
+
+export interface UpdateVacationPolicyResp {
+  vacation_policy_id: number
 }
 
 export interface PostVacationPolicyReq {

@@ -584,6 +584,132 @@ vacation,plan.assignPlan,플랜 할당,Assign Plan
 vacation,plan.revokePlan,플랜 회수,Revoke Plan
 vacation,plan.noAssignedPlans,할당된 플랜이 없습니다.,No plans assigned.
 vacation,plan.assignSuccess,플랜이 성공적으로 할당되었습니다.,Plan assigned successfully.
+vacation,adminPolicy.title,휴가 정책,Leave policies
+vacation,adminPolicy.add,정책 추가,Add policy
+vacation,adminPolicy.count,정책 {{count}}개,{{count}} policies
+vacation,adminPolicy.count_one,정책 {{count}}개,{{count}} policy
+vacation,adminPolicy.searchLabel,정책 검색,Search policies
+vacation,adminPolicy.searchPlaceholder,이름이나 설명으로 찾아요,Search by name or description
+vacation,adminPolicy.listLabel,휴가 정책 목록,Leave policy list
+vacation,adminPolicy.failureTitle,휴가 정책을 불러오지 못했어요,Couldn't load leave policies
+vacation,adminPolicy.emptyTitle,휴가 정책이 없어요,No leave policies yet
+vacation,adminPolicy.emptyDescription,정책을 만들면 플랜에 넣어 직원에게 부여할 수 있어요.,Create a policy to add it to a plan and grant it to employees.
+vacation,adminPolicy.noMatch,찾는 정책이 없어요.,No matching policies.
+vacation,adminPolicy.flexibleTime,입력한 시간,Entered time
+vacation,adminPolicy.validity,유효기간 {{start}} ~ {{end}},Valid {{start}} ~ {{end}}
+vacation,adminPolicy.method.REPEAT_GRANT,반복 부여,Repeating grant
+vacation,adminPolicy.method.ON_REQUEST,신청할 때 부여,Granted on request
+vacation,adminPolicy.method.MANUAL_GRANT,관리자가 직접 부여,Granted by an admin
+vacation,adminPolicy.unit.YEARLY,매년,Every year
+vacation,adminPolicy.unit.MONTHLY,매월,Every month
+vacation,adminPolicy.unit.QUARTERLY,분기마다,Every quarter
+vacation,adminPolicy.unit.HALF,반기마다,Every half year
+vacation,adminPolicy.unit.DAILY,매일,Every day
+vacation,adminPolicy.editTitle,휴가 정책 수정,Edit leave policy
+vacation,adminPolicy.name,이름,Name
+vacation,adminPolicy.namePlaceholder,예: 연차,e.g. Annual leave
+vacation,adminPolicy.nameRequired,이름을 입력해주세요.,Enter a name.
+vacation,adminPolicy.nameDuplicate,같은 이름의 휴가 정책이 있어요.,A leave policy with the same name already exists.
+vacation,adminPolicy.desc,설명,Description
+vacation,adminPolicy.descPlaceholder,정책을 알아볼 수 있게 적어주세요.,Describe the policy.
+vacation,adminPolicy.rules,부여 규칙,Grant rules
+vacation,adminPolicy.rulesHelp,부여 규칙은 바꿀 수 없어요. 바꾸려면 새 정책을 만들어주세요.,Grant rules can't be changed. Create a new policy to change them.
+vacation,adminPolicy.editSaved,정책을 고쳤어요.,Policy updated.
+vacation,adminPolicy.deleted,정책을 삭제했어요.,Policy deleted.
+vacation,adminPolicy.deleteBlocked,기본 정책이라 지울 수 없어요.,This is a default policy and can't be deleted.
+vacation,adminPolicy.created,정책을 만들었어요.,Policy created.
+vacation,adminPolicy.create.step1Title,어떻게 부여하나요?,How is leave granted?
+vacation,adminPolicy.create.step1Desc,고른 방법에 맞는 칸만 다음에 보여요.,The next step shows only the fields for the method you pick.
+vacation,adminPolicy.create.methodLabel,부여 방법,Grant method
+vacation,adminPolicy.create.methodRequired,부여 방법을 골라주세요.,Choose a grant method.
+vacation,adminPolicy.create.methodDesc.REPEAT_GRANT,정한 날마다 저절로 부여해요 — 연차 · 월차,Granted automatically on set days — annual or monthly leave
+vacation,adminPolicy.create.methodDesc.ON_REQUEST,직원이 신청하고 승인되면 부여해요 — 연장 근무 보상 · 경조사,"Granted when an employee requests and it's approved — overtime compensation, family events"
+vacation,adminPolicy.create.methodDesc.MANUAL_GRANT,관리자가 사람을 골라 부여해요 — 건강검진,An admin picks people to grant to — health checkups
+vacation,adminPolicy.create.vacationType,휴가 종류,Leave type
+vacation,adminPolicy.create.vacationTypePlaceholder,휴가 종류를 골라주세요,Choose a leave type
+vacation,adminPolicy.create.vacationTypeRequired,휴가 종류를 골라주세요.,Choose a leave type.
+vacation,adminPolicy.create.repeat,반복,Repeat
+vacation,adminPolicy.create.repeatPlaceholder,반복 단위를 골라주세요,Choose how often
+vacation,adminPolicy.create.repeatRequired,반복 단위를 골라주세요.,Choose how often.
+vacation,adminPolicy.create.interval,반복 간격,Repeat interval
+vacation,adminPolicy.create.intervalHelp,"1이면 매번, 2면 한 번 걸러 부여해요.","1 grants every time, 2 skips one."
+vacation,adminPolicy.create.when,부여하는 날,Grant day
+vacation,adminPolicy.create.whenYearlyHelp,달을 비우면 첫 부여 날짜의 달에 부여해요. 없는 날짜는 그 달의 마지막 날에 부여해요.,Leave the month empty to use the month of the first grant date. A missing date falls on the last day of the month.
+vacation,adminPolicy.create.whenDayHelp,일을 비우면 1일에 부여해요. 없는 날짜는 그 달의 마지막 날에 부여해요.,Leave the day empty to grant on the 1st. A missing date falls on the last day of the month.
+vacation,adminPolicy.create.monthAria,부여하는 달,Grant month
+vacation,adminPolicy.create.dayAria,부여하는 일,Grant day of month
+vacation,adminPolicy.create.monthUnit,월,month
+vacation,adminPolicy.create.dayUnit,일,day
+vacation,adminPolicy.create.monthRequired,일을 정했다면 달도 함께 입력해주세요.,Enter the month too if you set the day.
+vacation,adminPolicy.create.monthRange,달은 1부터 12까지 입력해주세요.,Enter a month from 1 to 12.
+vacation,adminPolicy.create.dayRange,일은 1부터 31까지 입력해주세요.,Enter a day from 1 to 31.
+vacation,adminPolicy.create.firstGrantDate,첫 부여 날짜,First grant date
+vacation,adminPolicy.create.datePlaceholder,날짜를 골라주세요,Choose a date
+vacation,adminPolicy.create.firstGrantDateRequired,첫 부여 날짜를 골라주세요.,Choose the first grant date.
+vacation,adminPolicy.create.howMany,몇 번 부여하나요,How many times?
+vacation,adminPolicy.create.forever,계속 반복,Keep repeating
+vacation,adminPolicy.create.foreverDesc,정한 날마다 계속 부여해요.,Granted on every set day.
+vacation,adminPolicy.create.limited,정한 횟수만,A set number of times
+vacation,adminPolicy.create.limitedDesc,최대 부여 횟수를 정해요.,Set the maximum number of grants.
+vacation,adminPolicy.create.maxCount,최대 부여 횟수,Maximum grants
+vacation,adminPolicy.create.times,{{count}}회,{{count}} times
+vacation,adminPolicy.create.times_one,{{count}}회,{{count}} time
+vacation,adminPolicy.create.timeKind,부여 시간 방식,How the time is set
+vacation,adminPolicy.create.fixed,정한 시간,Set time
+vacation,adminPolicy.create.fixedDesc,정책에 정한 시간으로 부여해요.,Granted with the time set in the policy.
+vacation,adminPolicy.create.flexible,입력한 시간,Entered time
+vacation,adminPolicy.create.flexibleDesc,부여할 때 관리자가 시간을 입력해요.,An admin enters the time when granting.
+vacation,adminPolicy.create.grantTime,부여 시간,Grant time
+vacation,adminPolicy.create.grantTimeRequired,부여 시간을 입력해주세요.,Enter the grant time.
+vacation,adminPolicy.create.minute,30분 단위로 부여할 수 있어요,Can be granted in 30-minute units
+vacation,adminPolicy.create.approval,승인 필요 횟수,Approvals needed
+vacation,adminPolicy.create.approvalHelp,0이면 신청하자마자 부여해요.,0 grants as soon as it's requested.
+vacation,adminPolicy.create.approvalNone,부서장이 없어 승인 단계는 0만 고를 수 있어요. 0이면 신청하자마자 부여해요.,"No department head is set, so only 0 is available. 0 grants as soon as it's requested."
+vacation,adminPolicy.create.validityStart,유효 시작,Valid from
+vacation,adminPolicy.create.validityStartPlaceholder,시작 시점을 골라주세요,Choose when it starts
+vacation,adminPolicy.create.validityStartRequired,유효 시작을 골라주세요.,Choose when validity starts.
+vacation,adminPolicy.create.validityEnd,유효 만료,Valid until
+vacation,adminPolicy.create.validityEndPlaceholder,만료 시점을 골라주세요,Choose when it ends
+vacation,adminPolicy.create.validityEndRequired,유효 만료를 골라주세요.,Choose when validity ends.
+vacation,adminPolicy.create.listsFailureTitle,고를 목록을 불러오지 못했어요,Couldn't load the choices
+vacation,adminPolicy.create.submit,만들기,Create
+vacation,adminPolicy.create.approvalFailureTitle,승인 단계를 불러오지 못했어요,Couldn't load the approval steps
+vacation,adminPolicy.create.approvalFailureDescription,승인 단계를 알 수 없어 정책을 만들 수 없어요. 잠시 뒤 다시 시도해주세요.,"The approval steps are unknown, so the policy can't be created. Please try again in a moment."
+vacation,adminPlan.title,휴가 플랜,Leave plans
+vacation,adminPlan.add,플랜 추가,Add plan
+vacation,adminPlan.count,플랜 {{count}}개,{{count}} plans
+vacation,adminPlan.count_one,플랜 {{count}}개,{{count}} plan
+vacation,adminPlan.searchLabel,플랜 검색,Search plans
+vacation,adminPlan.searchPlaceholder,이름 · 코드 · 설명으로 찾아요,"Search by name, code, or description"
+vacation,adminPlan.listLabel,휴가 플랜 목록,Leave plan list
+vacation,adminPlan.failureTitle,휴가 플랜을 불러오지 못했어요,Couldn't load leave plans
+vacation,adminPlan.emptyTitle,휴가 플랜이 없어요,No leave plans yet
+vacation,adminPlan.emptyDescription,플랜에 정책을 묶어 직원에게 한 번에 걸 수 있어요.,Bundle policies into a plan to assign them to employees at once.
+vacation,adminPlan.noMatch,찾는 플랜이 없어요.,No matching plans.
+vacation,adminPlan.policyCount,정책 {{count}}개,{{count}} policies
+vacation,adminPlan.policyCount_one,정책 {{count}}개,{{count}} policy
+vacation,adminPlan.addTitle,휴가 플랜 추가,Add leave plan
+vacation,adminPlan.editTitle,휴가 플랜 수정,Edit leave plan
+vacation,adminPlan.code,코드,Code
+vacation,adminPlan.codePlaceholder,예: FULL_TIME,e.g. FULL_TIME
+vacation,adminPlan.codeLocked,만든 뒤에는 바꿀 수 없어요.,It can't be changed after it's created.
+vacation,adminPlan.codeRequired,코드를 입력해주세요.,Enter a code.
+vacation,adminPlan.codePattern,"영문, 숫자, 밑줄(_)만 쓸 수 있어요.","Use only letters, numbers, and underscores."
+vacation,adminPlan.codeDuplicate,같은 코드의 휴가 플랜이 있어요.,A leave plan with the same code already exists.
+vacation,adminPlan.name,이름,Name
+vacation,adminPlan.namePlaceholder,예: 정규직 플랜,e.g. Full-time plan
+vacation,adminPlan.nameRequired,이름을 입력해주세요.,Enter a name.
+vacation,adminPlan.desc,설명,Description
+vacation,adminPlan.descPlaceholder,플랜을 알아볼 수 있게 적어주세요.,Describe the plan.
+vacation,adminPlan.created,플랜을 만들었어요.,Plan created.
+vacation,adminPlan.editSaved,플랜을 고쳤어요.,Plan updated.
+vacation,adminPlan.deleted,플랜을 삭제했어요.,Plan deleted.
+vacation,adminPlan.moreFor,{{name}} 더보기,More actions for {{name}}
+vacation,adminPlan.managePolicies,정책 관리,Manage policies
+vacation,adminPlan.policiesTitle,{{name}} 정책,{{name}} policies
+vacation,adminPlan.policyDetail,{{method}} · {{type}},{{method}} · {{type}}
+vacation,adminPlan.policiesSaved,플랜의 정책을 고쳤어요.,Plan policies updated.
+vacation,adminPlan.policiesFailureTitle,휴가 정책을 불러오지 못했어요,Couldn't load leave policies
 vacation,plan.revokeSuccess,플랜이 성공적으로 회수되었습니다.,Plan revoked successfully.
 vacation,plan.createSuccess,플랜이 성공적으로 생성되었습니다.,Plan created successfully.
 vacation,plan.updateSuccess,플랜이 성공적으로 수정되었습니다.,Plan updated successfully.
@@ -1336,6 +1462,7 @@ common,failure.code.minuteUsage,분 단위로 쓸 수 없는 휴가예요.,This 
 common,failure.code.planExists,이미 있는 휴가 플랜이에요.,This leave plan already exists.
 common,failure.code.userPlanExists,이미 이 사용자에게 부여한 플랜이에요.,This plan is already granted to the user.
 common,failure.code.planPolicyExists,이미 플랜에 들어 있는 정책이에요.,This policy is already in the plan.
+common,failure.code.policyNameDuplicate,같은 이름의 휴가 정책이 있어요.,A leave policy with the same name already exists.
 common,failure.code.workStarted,이미 시작한 근무예요.,Work has already started.
 common,failure.code.workEnded,이미 끝난 근무예요.,Work has already ended.
 common,failure.code.workTime,시작 시간과 끝 시간을 확인해주세요.,Check the start and end times.

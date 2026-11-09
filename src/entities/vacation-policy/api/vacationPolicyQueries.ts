@@ -5,11 +5,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createQueryKeys } from '@/shared/api'
 import { vacationPolicyApi } from '@/entities/vacation-policy/api/vacationPolicyApi'
 import { vacationKeys } from '@/entities/vacation/api/vacationQueries'
+import { vacationPlanKeys } from '@/entities/vacation-plan/api/vacationPlanQueries'
 import type {
   GetVacationPolicyResp,
   GetVacationPoliciesResp,
   PostVacationPolicyReq,
   PostVacationPolicyResp,
+  UpdateVacationPolicyReq,
+  UpdateVacationPolicyResp,
   DeleteVacationPolicyResp,
   PostAssignVacationPoliciesToUserResp,
   GetUserVacationPoliciesResp,
@@ -31,10 +34,12 @@ export const useVacationPolicyQuery = (vacationPolicyId: number) => {
   })
 }
 
-export const useVacationPoliciesQuery = () => {
+export const useVacationPoliciesQuery = (options?: { quiet?: boolean }) => {
   return useQuery<GetVacationPoliciesResp[]>({
     queryKey: vacationPolicyKeys.list({ type: 'policies' }),
-    queryFn: () => vacationPolicyApi.getVacationPolicies()
+    queryFn: () => vacationPolicyApi.getVacationPolicies(),
+    // quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다)
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
@@ -78,6 +83,20 @@ export const usePostVacationPolicyMutation = () => {
   })
 }
 
+export const usePutVacationPolicyMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation<UpdateVacationPolicyResp, Error, { vacationPolicyId: number; data: UpdateVacationPolicyReq }>({
+    mutationFn: ({ vacationPolicyId, data }) => vacationPolicyApi.putVacationPolicy(vacationPolicyId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: vacationPolicyKeys.all() })
+      // 정책 이름은 휴가 기록 · 플랜 안 정책 목록에도 보인다
+      queryClient.invalidateQueries({ queryKey: vacationKeys.all() })
+      queryClient.invalidateQueries({ queryKey: vacationPlanKeys.all() })
+    }
+  })
+}
+
 export const useDeleteVacationPolicyMutation = () => {
   const queryClient = useQueryClient()
 
@@ -86,6 +105,7 @@ export const useDeleteVacationPolicyMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: vacationPolicyKeys.all() })
       queryClient.invalidateQueries({ queryKey: vacationKeys.all() })
+      queryClient.invalidateQueries({ queryKey: vacationPlanKeys.all() })
     }
   })
 }

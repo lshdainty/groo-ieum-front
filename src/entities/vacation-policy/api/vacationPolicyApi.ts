@@ -5,6 +5,8 @@ import type {
   GetVacationPoliciesResp,
   PostVacationPolicyReq,
   PostVacationPolicyResp,
+  UpdateVacationPolicyReq,
+  UpdateVacationPolicyResp,
   DeleteVacationPolicyResp,
   PostAssignVacationPoliciesToUserResp,
   GetUserVacationPoliciesResp,
@@ -38,6 +40,16 @@ export const vacationPolicyApi = {
     const resp: ApiResponse<PostVacationPolicyResp> = await apiClient.request({
       method: 'post',
       url: `/vacation-policies`,
+      data
+    })
+    if (!resp.success) throw new Error(resp.message)
+    return resp.data
+  },
+
+  putVacationPolicy: async (vacationPolicyId: number, data: UpdateVacationPolicyReq): Promise<UpdateVacationPolicyResp> => {
+    const resp: ApiResponse<UpdateVacationPolicyResp> = await apiClient.request({
+      method: 'put',
+      url: `/vacation-policies/${vacationPolicyId}`,
       data
     })
     if (!resp.success) throw new Error(resp.message)

@@ -19,6 +19,7 @@ export const FAILURE_CODE_KEYS: Record<string, string> = {
   VACATION_010: 'failure.code.duplicateApprover',
   VACATION_011: 'failure.code.selfApproval',
   VACATION_012: 'failure.code.minuteUsage',
+  VACATION_014: 'failure.code.policyNameDuplicate',
   VACATION_PLAN_002: 'failure.code.planExists',
   VACATION_PLAN_005: 'failure.code.userPlanExists',
   VACATION_PLAN_006: 'failure.code.planPolicyExists',

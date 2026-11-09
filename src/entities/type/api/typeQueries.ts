@@ -33,26 +33,32 @@ export const useVacationTimeTypesQuery = () => {
 }
 
 // Vacation Types 조회 훅
-export const useVacationTypesQuery = () => {
+export const useVacationTypesQuery = (options?: { quiet?: boolean }) => {
   return useQuery<TypeResp[]>({
     queryKey: typeKeys.list({ type: 'vacation-type' }),
-    queryFn: () => typeApi.getVacationTypes()
+    queryFn: () => typeApi.getVacationTypes(),
+    // quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다)
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
 // Effective Types 조회 훅
-export const useEffectiveTypesQuery = () => {
+export const useEffectiveTypesQuery = (options?: { quiet?: boolean }) => {
   return useQuery<TypeResp[]>({
     queryKey: typeKeys.list({ type: 'effective-type' }),
-    queryFn: () => typeApi.getEffectiveTypes()
+    queryFn: () => typeApi.getEffectiveTypes(),
+    // quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다)
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
 // Expiration Types 조회 훅
-export const useExpirationTypesQuery = () => {
+export const useExpirationTypesQuery = (options?: { quiet?: boolean }) => {
   return useQuery<TypeResp[]>({
     queryKey: typeKeys.list({ type: 'expiration-type' }),
-    queryFn: () => typeApi.getExpirationTypes()
+    queryFn: () => typeApi.getExpirationTypes(),
+    // quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다)
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
