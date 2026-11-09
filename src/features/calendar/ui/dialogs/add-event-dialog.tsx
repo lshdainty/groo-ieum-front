@@ -79,6 +79,8 @@ interface AddEventDialogProps {
   startDate?: Date;
   endDate?: Date;
   startTime?: { hour: number; minute: number };
+  /** 구성원 휴가 > 직원 휴가 탭에서만 — 고른 직원으로 고정한다(창 안 사용자 선택을 숨기고 그 직원의 휴가로 올린다). 없으면 지금 동작 */
+  fixedUser?: { id: string; name: string; department?: string | null };
 }
 
 export const AddEventDialog: React.FC<AddEventDialogProps> = ({
@@ -87,7 +89,8 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
   onOpenChange,
   startDate: propStartDate,
   endDate: propEndDate,
-  startTime
+  startTime,
+  fixedUser
 }) => {
   const { t } = useTranslation('calendar');
   const { t: tc } = useTranslation('common');
@@ -144,9 +147,11 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
   const watchedSelectedUser = form.watch('selectedUser');
 
   // 휴가 조회 시 사용할 userId: VACATION:MANAGE 권한이 있으면 선택된 유저, 없으면 loginUser
-  const targetUserId = canManageVacation && watchedSelectedUser
-    ? watchedSelectedUser
-    : loginUser?.user_id || '';
+  const targetUserId = fixedUser
+    ? fixedUser.id
+    : canManageVacation && watchedSelectedUser
+      ? watchedSelectedUser
+      : loginUser?.user_id || '';
 
   useEffect(() => {
     const currentEndDate = form.getValues('endDate');
@@ -169,9 +174,11 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
 
   const onSubmit = (values: AddEventFormValues) => {
     // VACATION:MANAGE 권한이 있으면 선택된 유저, 없으면 loginUser
-    const userId = canManageVacation && values.selectedUser
-      ? values.selectedUser
-      : loginUser?.user_id || '';
+    const userId = fixedUser
+      ? fixedUser.id
+      : canManageVacation && values.selectedUser
+        ? values.selectedUser
+        : loginUser?.user_id || '';
 
     // 선택된 사용자의 근무타입 조회
     const targetUser = users?.find(u => u.user_id === userId);
@@ -217,8 +224,13 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="py-6 space-y-4">
+            {fixedUser && (
+              <p className='mb-2 text-sm text-muted-foreground' data-fixed-user>
+                {t('addEvent.fixedUser', { name: fixedUser.name, detail: fixedUser.department?.trim() ? `${fixedUser.id} · ${fixedUser.department}` : fixedUser.id })}
+              </p>
+            )}
             {/* VACATION:MANAGE 권한이 있을 때만 유저 선택 표시 */}
-            <Activity mode={canManageVacation ? 'visible' : 'hidden'}>
+            <Activity mode={canManageVacation && !fixedUser ? 'visible' : 'hidden'}>
               <Controller
                 control={form.control}
                 name="selectedUser"
@@ -272,7 +284,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
                             ))}
                           </SelectGroup>
                         </Activity>
-                        <Activity mode={canUseSchedule ? 'visible' : 'hidden'}>
+                        <Activity mode={canUseSchedule && !fixedUser ? 'visible' : 'hidden'}>
                           <SelectGroup>
                             <SelectLabel>{t('addEvent.schedule')}</SelectLabel>
                             {calendarTypes.filter(c => c.type === 'schedule').map(ct => (

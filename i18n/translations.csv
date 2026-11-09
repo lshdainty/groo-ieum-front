@@ -1608,3 +1608,4 @@ vacation,grantForm.submit,부여,Grant
 
 vacation,staff.noRequestsTitle,{{name}} 님의 신청이 없어요,{{name}} has no requests
 vacation,staff.noRequestsDescription,고른 해에 낸 휴가 신청이 없어요.,There are no leave requests for the selected year.
+calendar,addEvent.fixedUser,{{name}} 님({{detail}})의 휴가를 등록해요.,Register leave for {{name}} ({{detail}}).

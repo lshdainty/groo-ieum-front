@@ -30,7 +30,7 @@ import { useVacationContext } from '../model/VacationContext'
 /**
  * 직원 휴가 탭(I-24 C 14 · 15) — 사람 고르기 줄(왼쪽 Input Button · 오른쪽 [휴가 사용] [휴가 부여]) 아래에 고른 직원의 카드들.
  * 카드는 H-C(I-25) 가 모양을 정하기 전이라 지금 부품 그대로다(옛 카드 — 임시). 처음 고른 사람은 로그인한 사람(VacationContent 가 정한다).
- * [휴가 사용] 은 지금처럼 일정 등록 대화상자(로그인한 사람의 일정)를 연다, [휴가 부여] 는 고른 직원에게 부여하는 폼(VACATION:GRANT · MANAGE 만).
+ * [휴가 사용] 은 고른 직원으로 고정된 휴가 사용 창(MANAGE 만)을 연다, [휴가 부여] 는 고른 직원에게 부여하는 폼(VACATION:GRANT · MANAGE 만).
  */
 export function StaffVacation() {
   const { t } = useTranslation('vacation')
@@ -49,12 +49,13 @@ export function StaffVacation() {
   const selected = people.find((p) => p.id === selectedUserId)
   const selectedUser = (usersQuery.data ?? []).find((u) => u.user_id === selectedUserId)
   const canGrant = hasAnyPermission(['VACATION:GRANT', 'VACATION:MANAGE'])
-  const canUse = hasAnyPermission(['VACATION:USE', 'VACATION:MANAGE', 'SCHEDULE:WRITE', 'SCHEDULE:MANAGE'])
+  // 대리 사용은 VACATION:MANAGE 만(서버 규칙 — 대상이 로그인한 사람과 다르면 MANAGE). 결재자(APPROVER)에게는 이 단추가 없다
+  const canUse = hasAnyPermission(['VACATION:MANAGE'])
 
   const actions = (
     <>
       {canUse && (
-        <Button variant='neutralOutline' size='small' onClick={() => setUseOpen(true)} data-use-vacation>
+        <Button variant='neutralOutline' size='small' disabled={!selected} onClick={() => setUseOpen(true)} data-use-vacation>
           {t('staff.useVacation')}
         </Button>
       )}
@@ -108,7 +109,9 @@ export function StaffVacation() {
         <VacationGrantDialog key={selected.id} open={grantOpen} user={{ id: selected.id, name: selected.name, department: selected.department }} onOpenChange={setGrantOpen} />
       )}
       {/* 열 때만 마운트 — 이 창이 직원 목록을 quiet 없이 부르므로 늘 마운트해 두면 첫 로드 실패에 전역 Snackbar 가 겹친다 */}
-      {useOpen && <AddEventDialog open={useOpen} onOpenChange={setUseOpen} />}
+      {useOpen && selected && (
+        <AddEventDialog key={selected.id} open={useOpen} onOpenChange={setUseOpen} fixedUser={{ id: selected.id, name: selected.name, department: selected.department }} />
+      )}
     </div>
   )
 }
