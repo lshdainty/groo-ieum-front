@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { FileText, Plus, SearchX } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -8,14 +8,14 @@ import { ResultSection } from '@/shared/ds/result-section'
 import { LoadingRegion, Skeleton } from '@/shared/ds/skeleton'
 import { AdminListCard } from '@/shared/ui/groo/admin-list-card'
 import { useConfirmTarget } from '@/shared/ui/confirm'
-import { useEffectiveTypesQuery, useExpirationTypesQuery, useGrantMethodTypesQuery, useRepeatUnitTypesQuery, useVacationTypesQuery } from '@/entities/type'
+import { useEffectiveTypesQuery, useExpirationTypesQuery, useVacationTypesQuery } from '@/entities/type'
 import { useVacationPoliciesQuery, type GetVacationPoliciesResp } from '@/entities/vacation-policy'
 import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { usePolicyContext } from '../model/PolicyContext'
 import { policyRuleLine, policyValidityLine } from '../lib/policy-format'
 import { PolicyEditDialog } from './PolicyEditDialog'
-import { VacationPolicyFormDialog } from './VacationPolicyFormDialog'
+import { PolicyCreateDialog } from './PolicyCreateDialog'
 
 const PolicyListSkeleton = () => (
   <div className='flex flex-col'>
@@ -40,12 +40,11 @@ export const PolicyContent = () => {
   const desktop = useDesktop()
   const { searchQuery, setSearchQuery } = usePolicyContext()
   const policiesQuery = useVacationPoliciesQuery({ quiet: true })
-  const { data: vacationTypes } = useVacationTypesQuery()
-  const { data: effectiveTypes } = useEffectiveTypesQuery()
-  const { data: expirationTypes } = useExpirationTypesQuery()
-  const { data: grantMethodTypes } = useGrantMethodTypesQuery()
-  const { data: repeatUnitTypes } = useRepeatUnitTypesQuery()
+  const { data: vacationTypes } = useVacationTypesQuery({ quiet: true })
+  const { data: effectiveTypes } = useEffectiveTypesQuery({ quiet: true })
+  const { data: expirationTypes } = useExpirationTypesQuery({ quiet: true })
   const edit = useConfirmTarget<GetVacationPoliciesResp>()
+  const [createOpen, setCreateOpen] = useState(false)
 
   const policies = policiesQuery.data
   const needle = searchQuery.trim().toLowerCase()
@@ -59,22 +58,11 @@ export const PolicyContent = () => {
   const names = { vacationTypes, effectiveTypes, expirationTypes }
   const none = policiesQuery.isSuccess && (policies?.length ?? 0) === 0
 
-  // 만들기 폼은 다음 커밋에서 두 단계 폼으로 바뀐다 — 그때까지는 옛 폼을 그대로 연다
   const addButton = (
-    <VacationPolicyFormDialog
-      isEditing={false}
-      grantMethodTypes={grantMethodTypes}
-      vacationTypes={vacationTypes}
-      effectiveTypes={effectiveTypes}
-      expirationTypes={expirationTypes}
-      repeatUnitTypes={repeatUnitTypes}
-      trigger={
-        <Button variant='neutralOutline' size='small' data-policy-add>
-          <Plus className='size-[18px]' aria-hidden />
-          {t('adminPolicy.add')}
-        </Button>
-      }
-    />
+    <Button variant='neutralOutline' size='small' onClick={() => setCreateOpen(true)} data-policy-add>
+      <Plus className='size-[18px]' aria-hidden />
+      {t('adminPolicy.add')}
+    </Button>
   )
 
   return (
@@ -129,6 +117,7 @@ export const PolicyContent = () => {
         </LoadingRegion>
       </AdminListCard>
       <PolicyEditDialog policy={edit.target} open={edit.open} onOpenChange={edit.onOpenChange} names={names} />
+      <PolicyCreateDialog open={createOpen} onOpenChange={setCreateOpen} />
     </ScreenBody>
   )
 }

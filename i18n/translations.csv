@@ -617,6 +617,62 @@ vacation,adminPolicy.rulesHelp,부여 규칙은 바꿀 수 없어요. 바꾸려�
 vacation,adminPolicy.editSaved,정책을 고쳤어요.,Policy updated.
 vacation,adminPolicy.deleted,정책을 삭제했어요.,Policy deleted.
 vacation,adminPolicy.deleteBlocked,기본 정책이라 지울 수 없어요.,This is a default policy and can't be deleted.
+vacation,adminPolicy.created,정책을 만들었어요.,Policy created.
+vacation,adminPolicy.create.step1Title,어떻게 부여하나요?,How is leave granted?
+vacation,adminPolicy.create.step1Desc,고른 방법에 맞는 칸만 다음에 보여요.,The next step shows only the fields for the method you pick.
+vacation,adminPolicy.create.methodLabel,부여 방법,Grant method
+vacation,adminPolicy.create.methodRequired,부여 방법을 골라주세요.,Choose a grant method.
+vacation,adminPolicy.create.methodDesc.REPEAT_GRANT,정한 날마다 저절로 부여해요 — 연차 · 월차,Granted automatically on set days — annual or monthly leave
+vacation,adminPolicy.create.methodDesc.ON_REQUEST,직원이 신청하고 승인되면 부여해요 — 연장 근무 보상 · 경조사,"Granted when an employee requests and it's approved — overtime compensation, family events"
+vacation,adminPolicy.create.methodDesc.MANUAL_GRANT,관리자가 사람을 골라 부여해요 — 건강검진,An admin picks people to grant to — health checkups
+vacation,adminPolicy.create.vacationType,휴가 종류,Leave type
+vacation,adminPolicy.create.vacationTypePlaceholder,휴가 종류를 골라주세요,Choose a leave type
+vacation,adminPolicy.create.vacationTypeRequired,휴가 종류를 골라주세요.,Choose a leave type.
+vacation,adminPolicy.create.repeat,반복,Repeat
+vacation,adminPolicy.create.repeatPlaceholder,반복 단위를 골라주세요,Choose how often
+vacation,adminPolicy.create.repeatRequired,반복 단위를 골라주세요.,Choose how often.
+vacation,adminPolicy.create.interval,반복 간격,Repeat interval
+vacation,adminPolicy.create.intervalHelp,"1이면 매번, 2면 한 번 걸러 부여해요.","1 grants every time, 2 skips one."
+vacation,adminPolicy.create.when,부여하는 날,Grant day
+vacation,adminPolicy.create.whenYearlyHelp,달을 비우면 첫 부여 날짜의 달에 부여해요. 없는 날짜는 그 달의 마지막 날에 부여해요.,Leave the month empty to use the month of the first grant date. A missing date falls on the last day of the month.
+vacation,adminPolicy.create.whenDayHelp,일을 비우면 첫 부여 날짜의 일에 부여해요. 없는 날짜는 그 달의 마지막 날에 부여해요.,Leave the day empty to use the day of the first grant date. A missing date falls on the last day of the month.
+vacation,adminPolicy.create.monthAria,부여하는 달,Grant month
+vacation,adminPolicy.create.dayAria,부여하는 일,Grant day of month
+vacation,adminPolicy.create.monthUnit,월,month
+vacation,adminPolicy.create.dayUnit,일,day
+vacation,adminPolicy.create.monthRequired,일을 정했다면 달도 함께 입력해주세요.,Enter the month too if you set the day.
+vacation,adminPolicy.create.monthRange,달은 1부터 12까지 입력해주세요.,Enter a month from 1 to 12.
+vacation,adminPolicy.create.dayRange,일은 1부터 31까지 입력해주세요.,Enter a day from 1 to 31.
+vacation,adminPolicy.create.firstGrantDate,첫 부여 날짜,First grant date
+vacation,adminPolicy.create.datePlaceholder,날짜를 골라주세요,Choose a date
+vacation,adminPolicy.create.firstGrantDateRequired,첫 부여 날짜를 골라주세요.,Choose the first grant date.
+vacation,adminPolicy.create.howMany,몇 번 부여하나요,How many times?
+vacation,adminPolicy.create.forever,계속 반복,Keep repeating
+vacation,adminPolicy.create.foreverDesc,정한 날마다 계속 부여해요.,Granted on every set day.
+vacation,adminPolicy.create.limited,정한 횟수만,A set number of times
+vacation,adminPolicy.create.limitedDesc,최대 부여 횟수를 정해요.,Set the maximum number of grants.
+vacation,adminPolicy.create.maxCount,최대 부여 횟수,Maximum grants
+vacation,adminPolicy.create.times,{{count}}회,{{count}} times
+vacation,adminPolicy.create.times_one,{{count}}회,{{count}} time
+vacation,adminPolicy.create.timeKind,부여 시간 방식,How the time is set
+vacation,adminPolicy.create.fixed,정한 시간,Set time
+vacation,adminPolicy.create.fixedDesc,정책에 정한 시간으로 부여해요.,Granted with the time set in the policy.
+vacation,adminPolicy.create.flexible,입력한 시간,Entered time
+vacation,adminPolicy.create.flexibleDesc,부여할 때 관리자가 시간을 입력해요.,An admin enters the time when granting.
+vacation,adminPolicy.create.grantTime,부여 시간,Grant time
+vacation,adminPolicy.create.grantTimeRequired,부여 시간을 입력해주세요.,Enter the grant time.
+vacation,adminPolicy.create.minute,30분 단위로 부여할 수 있어요,Can be granted in 30-minute units
+vacation,adminPolicy.create.approval,승인 필요 횟수,Approvals needed
+vacation,adminPolicy.create.approvalHelp,0이면 신청하자마자 부여해요.,0 grants as soon as it's requested.
+vacation,adminPolicy.create.approvalNone,부서장이 없어 승인 단계는 0만 고를 수 있어요. 0이면 신청하자마자 부여해요.,"No department head is set, so only 0 is available. 0 grants as soon as it's requested."
+vacation,adminPolicy.create.validityStart,유효 시작,Valid from
+vacation,adminPolicy.create.validityStartPlaceholder,시작 시점을 골라주세요,Choose when it starts
+vacation,adminPolicy.create.validityStartRequired,유효 시작을 골라주세요.,Choose when validity starts.
+vacation,adminPolicy.create.validityEnd,유효 만료,Valid until
+vacation,adminPolicy.create.validityEndPlaceholder,만료 시점을 골라주세요,Choose when it ends
+vacation,adminPolicy.create.validityEndRequired,유효 만료를 골라주세요.,Choose when validity ends.
+vacation,adminPolicy.create.listsFailureTitle,고를 목록을 불러오지 못했어요,Couldn't load the choices
+vacation,adminPolicy.create.submit,만들기,Create
 vacation,plan.revokeSuccess,플랜이 성공적으로 회수되었습니다.,Plan revoked successfully.
 vacation,plan.createSuccess,플랜이 성공적으로 생성되었습니다.,Plan created successfully.
 vacation,plan.updateSuccess,플랜이 성공적으로 수정되었습니다.,Plan updated successfully.
