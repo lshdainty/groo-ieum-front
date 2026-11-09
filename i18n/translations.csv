@@ -1710,3 +1710,4 @@ admin,authority.resource.REGULATION,규정,Regulations
 admin,authority.resource.NOTICE,공지사항,Notices
 admin,authority.resource.ROLE,역할,Roles
 admin,authority.resource.PERMISSION,권한,Permissions
+admin,authority.userFailureTitle,사용자 역할을 불러오지 못했어요,Could not load user roles

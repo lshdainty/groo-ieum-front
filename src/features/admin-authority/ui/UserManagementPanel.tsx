@@ -11,14 +11,19 @@ import { usePutUserMutation, useUsersQuery, userApi } from '@/entities/user'
 import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ResultSection } from "@/shared/ds/result-section";
 import { useSnackbar } from "@/shared/ds/snackbar";
 import { claimFailure } from '@/shared/api/failure'
 
 const UserManagementPanel = () => {
   const { t } = useTranslation('admin');
-  const { data: usersData = [], isLoading: isUsersLoading, refetch: refetchUsers } = useUsersQuery();
-  const { data: roles = [], isLoading: isRolesLoading } = useRolesQuery();
-  const { data: authorities = [], isLoading: isPermissionsLoading } = usePermissionsQuery();
+  const { t: tc } = useTranslation('common');
+  const usersQ = useUsersQuery({ quiet: true });
+  const { data: usersData = [], isLoading: isUsersLoading, refetch: refetchUsers } = usersQ;
+  const rolesQ = useRolesQuery({ quiet: true });
+  const { data: roles = [], isLoading: isRolesLoading } = rolesQ;
+  const permsQ = usePermissionsQuery({ quiet: true });
+  const { data: authorities = [], isLoading: isPermissionsLoading } = permsQ;
   const { mutateAsync: updateUser } = usePutUserMutation();
   const isMobile = useIsMobile();
   const snackbar = useSnackbar();
@@ -90,6 +95,18 @@ const UserManagementPanel = () => {
       throw error
     }
   };
+
+  if (usersQ.isLoadingError || rolesQ.isLoadingError || permsQ.isLoadingError) {
+    return (
+      <ResultSection
+        kind='failure'
+        size='medium'
+        title={t('authority.userFailureTitle')}
+        description={t('users.failureDescription')}
+        primaryAction={{ label: tc('retry'), onClick: () => { void usersQ.refetch(); void rolesQ.refetch(); void permsQ.refetch() }, loading: usersQ.isFetching || rolesQ.isFetching || permsQ.isFetching }}
+      />
+    )
+  }
 
   if (isMobile) {
     return (
