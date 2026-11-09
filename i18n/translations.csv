@@ -1336,6 +1336,7 @@ common,failure.code.minuteUsage,분 단위로 쓸 수 없는 휴가예요.,This 
 common,failure.code.planExists,이미 있는 휴가 플랜이에요.,This leave plan already exists.
 common,failure.code.userPlanExists,이미 이 사용자에게 부여한 플랜이에요.,This plan is already granted to the user.
 common,failure.code.planPolicyExists,이미 플랜에 들어 있는 정책이에요.,This policy is already in the plan.
+common,failure.code.policyNameDuplicate,같은 이름의 휴가 정책이 있어요.,A leave policy with the same name already exists.
 common,failure.code.workStarted,이미 시작한 근무예요.,Work has already started.
 common,failure.code.workEnded,이미 끝난 근무예요.,Work has already ended.
 common,failure.code.workTime,시작 시간과 끝 시간을 확인해주세요.,Check the start and end times.
