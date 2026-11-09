@@ -1,5 +1,5 @@
 import { useActiveNoticesQuery, useNoticeQuery } from '@/entities/notice';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { NoticePopup } from '@/widgets/notice-popup/ui/NoticePopup';
 
 const STORAGE_KEY = 'notice_popup_hidden_date';
@@ -24,14 +24,16 @@ const hideAllToday = (): void => {
 
 /**
  * 공지사항 팝업 컨테이너
- * 로그인 후 활성 공지사항을 팝업으로 보여주는 컴포넌트
+ * 앱 틀이 열릴 때 활성 공지사항이 있으면 창 하나에 띄우고, 한 창 안에서 ‹ › 로 넘겨 본다.
+ * 닫으면 이번 진입에서는 다시 뜨지 않고(다음 공지가 이어 뜨지 않는다), [오늘은 그만 보기] 는 이 기기의 모든 공지를 하루 가린다.
  */
 export const NoticePopupContainer = () => {
-  const [hiddenToday, setHiddenToday] = useState(() => isAllHiddenToday());
+  // 오늘 그만 보기로 가린 기기는 처음부터 띄우지 않는다
+  const [hiddenOnLoad] = useState(() => isAllHiddenToday());
   const { data: activeNotices, isLoading: isLoadingList } = useActiveNoticesQuery(0, 50);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
-  const [initialized, setInitialized] = useState(false);
+  // 열려 있다 — 목록이 오면 저절로 열리고, 닫으면 이번 진입에서는 다시 열지 않는다
+  const [dismissed, setDismissed] = useState(false);
 
   // 활성 공지사항 목록
   const notices = useMemo(() => {
@@ -39,67 +41,32 @@ export const NoticePopupContainer = () => {
     return activeNotices.content;
   }, [activeNotices]);
 
-  // 현재 표시할 공지사항 ID
-  const currentNoticeId = useMemo(() => {
-    if (notices.length === 0 || currentIndex >= notices.length) return null;
-    return notices[currentIndex].notice_id;
-  }, [notices, currentIndex]);
+  const current = notices[currentIndex];
 
-  // 현재 공지사항 상세 조회
-  const { data: currentNotice, isLoading: isLoadingDetail } = useNoticeQuery(
-    isOpen ? currentNoticeId : null
-  );
+  // 현재 공지사항 상세 조회 — 보이는 것 하나씩 받는다
+  const { data: currentNotice } = useNoticeQuery(!dismissed && !hiddenOnLoad && current ? current.notice_id : null);
 
-  // 데이터 로드 완료 후 첫 팝업 열기
-  useEffect(() => {
-    if (!isLoadingList && notices.length > 0 && !initialized && !hiddenToday) {
-      setCurrentIndex(0);
-      setIsOpen(true);
-      setInitialized(true);
-    }
-  }, [isLoadingList, notices.length, initialized, hiddenToday]);
-
-  // 오늘 보지 않기 체크 시 호출
-  const handleHideToday = useCallback(() => {
+  // [오늘은 그만 보기]
+  const handleHideToday = () => {
     hideAllToday();
-    setHiddenToday(true);
-    setIsOpen(false);
-  }, []);
+    setDismissed(true);
+  };
 
-  // 다음 공지사항으로 이동
-  const handleClose = useCallback(() => {
-    setIsOpen(false);
-    // 다음 공지사항이 있으면 표시
-    setTimeout(() => {
-      if (currentIndex < notices.length - 1) {
-        setCurrentIndex(prev => prev + 1);
-        setIsOpen(true);
-      }
-    }, 300); // 애니메이션을 위한 딜레이
-  }, [currentIndex, notices.length]);
-
-  // 오늘 숨김 처리되었으면 렌더링하지 않음
-  if (hiddenToday) {
-    return null;
-  }
-
-  // 표시할 공지사항이 없으면 렌더링하지 않음
-  if (isLoadingList || notices.length === 0 || currentIndex >= notices.length) {
-    return null;
-  }
-
-  // 상세 로딩 중이거나 데이터가 없으면 렌더링하지 않음
-  if (!currentNotice || isLoadingDetail) {
+  if (hiddenOnLoad || isLoadingList || !current) {
     return null;
   }
 
   return (
     <NoticePopup
-      isOpen={isOpen}
-      onClose={handleClose}
+      open={!dismissed}
+      notice={current}
+      content={currentNotice?.notice_id === current.notice_id ? currentNotice.content : undefined}
+      index={currentIndex}
+      total={notices.length}
+      onPrev={() => setCurrentIndex((i) => Math.max(0, i - 1))}
+      onNext={() => setCurrentIndex((i) => Math.min(notices.length - 1, i + 1))}
+      onClose={() => setDismissed(true)}
       onHideToday={handleHideToday}
-      title={currentNotice.title}
-      content={currentNotice.content}
     />
   );
 };

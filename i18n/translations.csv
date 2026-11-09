@@ -1222,7 +1222,7 @@ notice,pinned,고정,Pinned
 common,clear,초기화,Clear
 common,previous,이전,Previous
 common,next,다음,Next
-common,dontShowToday,오늘 하루 보지 않기,Don't show again today
+common,dontShowToday,오늘은 그만 보기,Don't show again today
 calendar,header.eventCount,{{count}}개 일정,{{count}} events
 calendar,dayView.happeningNow,진행 중,Happening now
 calendar,dayView.noAppointments,현재 진행 중인 일정이 없습니다,No appointments or consultations at the moment
@@ -1516,3 +1516,7 @@ culture,dues.deleteTitle,회비 내역 삭제,Delete dues record
 culture,dues.deleteConfirm,{{date}} {{content}} {{amount}} 내역을 삭제할까요? 삭제한 회비 내역은 되돌릴 수 없어요.,"Delete the {{amount}} ""{{content}}"" record on {{date}}? A deleted dues record can't be restored."
 calendar,eventDetails.deleteTitle,일정 삭제,Delete event
 calendar,eventDetails.deleteConfirm,"{{date}} ""{{title}}"" 일정을 삭제할까요? 삭제한 일정은 되돌릴 수 없어요.","Delete the ""{{title}}"" event on {{date}}? A deleted event can't be restored."
+notice,popup.label,공지사항,Notices
+notice,popup.prev,이전 공지,Previous notice
+notice,popup.next,다음 공지,Next notice
+notice,popup.position,{{current}} / {{total}},{{current}} / {{total}}

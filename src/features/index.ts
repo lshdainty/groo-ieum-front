@@ -83,4 +83,3 @@ export { WorkCodeProvider, useWorkCodeContext } from '@/features/admin-work-code
 // Admin - Notice
 export { NoticeContent } from '@/features/admin-notice'
 export { NoticeProvider, useNoticeContext } from '@/features/admin-notice'
-export { NoticePopupContainer } from '@/features/admin-notice'
