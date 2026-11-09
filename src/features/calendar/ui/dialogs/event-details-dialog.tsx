@@ -29,6 +29,8 @@ export function EventDetailsDialog({ event, children }: IProps) {
 
   const [open, setOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // 휴가 이벤트를 지우면 휴가 사용 내역이 지워지고 쓴 시간이 돌아온다 — 일반 일정과 글이 다르다
+  const isVacation = event.type.type === 'vacation';
   const { deleteEvent } = useDeleteEvent();
   const { hasAnyPermission } = usePermission();
   const { loginUser } = useUser();
@@ -113,8 +115,8 @@ export function EventDetailsDialog({ event, children }: IProps) {
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={t('eventDetails.deleteTitle')}
-        description={t('eventDetails.deleteConfirm', {
+        title={t(isVacation ? 'eventDetails.deleteVacationTitle' : 'eventDetails.deleteTitle')}
+        description={t(isVacation ? 'eventDetails.deleteVacationConfirm' : 'eventDetails.deleteConfirm', {
           date: format(startDate, 'yyyy.MM.dd'),
           title: getEventDisplayName(event),
         })}

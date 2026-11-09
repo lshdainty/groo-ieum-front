@@ -1520,3 +1520,5 @@ notice,popup.label,공지사항,Notices
 notice,popup.prev,이전 공지,Previous notice
 notice,popup.next,다음 공지,Next notice
 notice,popup.position,{{current}} / {{total}},{{current}} / {{total}}
+calendar,eventDetails.deleteVacationTitle,휴가 삭제,Delete leave
+calendar,eventDetails.deleteVacationConfirm,{{date}} 휴가를 삭제할까요? 쓴 시간은 남은 휴가로 돌아와요. 삭제한 휴가는 되돌릴 수 없어요.,Delete the leave on {{date}}? The time used returns to your remaining leave. Deleted leave can't be restored.
