@@ -1,491 +1,198 @@
-import { Button } from '@/shared/ui/shadcn/button';
-import { Checkbox } from '@/shared/ui/shadcn/checkbox';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/shadcn/dialog';
-import { Field, FieldError, FieldLabel } from '@/shared/ui/shadcn/field';
-import { Input } from '@/shared/ui/shadcn/input';
-import { InputDatePicker } from '@/shared/ui/shadcn/inputDatePicker';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/shadcn/select';
-import { Textarea } from '@/shared/ui/shadcn/textarea';
-import { useEffectiveTypesQuery, useExpirationTypesQuery } from '@/entities/type';
-import { useUsersQuery } from '@/entities/user';
-import { usePostManualGrantVacationMutation } from '@/entities/vacation';
-import { useUserAssignedVacationPoliciesQuery } from '@/entities/vacation-policy';
-import { zodResolver } from '@hookform/resolvers/zod';
-import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
+import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-const createFormSchema = (t: (key: string) => string) => z.object({
-  selectedUser: z.string().min(1, { message: t('grant.selectUser') }),
-  vacationPolicy: z.string().min(1, { message: t('grant.selectPolicy') }),
-  grantDate: z.string().optional(),
-  expiryDate: z.string().optional(),
-  grantTime: z.number().min(0.0625, { message: t('grant.enterGrantTime') }),
-  description: z.string().min(1, { message: t('grant.enterReason') }),
-});
+import { claimFailure, writeFailureKey } from '@/shared/api/failure'
+import { Button } from '@/shared/ds/button'
+import { Callout } from '@/shared/ds/callout'
+import { Checkbox } from '@/shared/ds/checkbox'
+import { ResponsiveDialog, ResponsiveDialogBody, ResponsiveDialogCancel, ResponsiveDialogContent, ResponsiveDialogFooter } from '@/shared/ds/dialog'
+import { Field } from '@/shared/ds/field'
+import { ResultSection } from '@/shared/ds/result-section'
+import { Select, SelectItem } from '@/shared/ds/select'
+import { Skeleton } from '@/shared/ds/skeleton'
+import { useSnackbar } from '@/shared/ds/snackbar'
+import { Textarea } from '@/shared/ds/textarea'
+import { useEffectiveTypesQuery, useExpirationTypesQuery } from '@/entities/type'
+import { usePostManualGrantVacationMutation } from '@/entities/vacation'
+import { useUserAssignedVacationPoliciesQuery } from '@/entities/vacation-policy'
+import { DayField } from '@/shared/ui/groo/day-field'
+import { GrantTimeField } from '@/shared/ui/groo/grant-time-field'
+import { grantFormChanged, grantFormErrors, grantFormOf, grantPayloadOf, type GrantFormValues } from '../lib/grant-form'
 
-type VacationGrantFormValues = z.infer<ReturnType<typeof createFormSchema>>;
-
-interface VacationGrantDialogProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-const VacationGrantDialog = ({
+/**
+ * 휴가 부여 폼(I-24 C 16) — ds Responsive Dialog `form`(1280 이상 대화상자 · 미만 Bottom Sheet), 바닥 [취소] [부여].
+ * 받는 사람은 직원 휴가 탭에서 고른 사람이다(폼 안에 사람 고르기가 없다). 정책은 그 사람에게 걸린 "관리자가 직접 부여" 정책만.
+ * 칸 차례: 정책 → (부여일 · 만료일 직접 정하기) → 부여 시간 → 사유. 저장 실패는 폼 맨 위 Callout(고정 글), 칸 오류는 칸 아래.
+ */
+export function VacationGrantDialog({
   open,
-  onClose,
-}: VacationGrantDialogProps) => {
-  const { t } = useTranslation('vacation');
-  const { t: tc } = useTranslation('common');
-  const formSchema = createFormSchema(t);
-  const { data: users, isLoading: isLoadingUsers } = useUsersQuery();
-  const { mutate: grantVacation, isPending } = usePostManualGrantVacationMutation();
-  const { data: effectiveTypes = [] } = useEffectiveTypesQuery();
-  const { data: expirationTypes = [] } = useExpirationTypesQuery();
-  const [useCustomDates, setUseCustomDates] = useState(false);
+  user,
+  onOpenChange,
+  onCloseAutoFocus,
+}: {
+  open: boolean
+  user: { id: string; name: string }
+  onOpenChange: (open: boolean) => void
+  onCloseAutoFocus?: (e: Event) => void
+}) {
+  const { t } = useTranslation('vacation')
+  const { t: tc } = useTranslation('common')
+  const snackbar = useSnackbar()
+  const [values, setValues] = useState<GrantFormValues>(grantFormOf())
+  const [showErrors, setShowErrors] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const reasonRef = useRef<HTMLTextAreaElement>(null)
+  const grant = usePostManualGrantVacationMutation()
+  const policiesQuery = useUserAssignedVacationPoliciesQuery(user.id, undefined, 'MANUAL_GRANT', { quiet: true })
+  const { data: effectiveTypes = [] } = useEffectiveTypesQuery()
+  const { data: expirationTypes = [] } = useExpirationTypesQuery()
+  const policies = policiesQuery.data ?? []
+  const policy = policies.find((p) => String(p.vacation_policy_id) === values.policyId)
 
-  const form = useForm<VacationGrantFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      selectedUser: '',
-      vacationPolicy: '',
-      grantDate: undefined,
-      expiryDate: undefined,
-      grantTime: undefined,
-      description: '',
-    },
-  });
+  const set = <K extends keyof GrantFormValues>(key: K, value: GrantFormValues[K]) => setValues((v) => ({ ...v, [key]: value }))
+  const errors = grantFormErrors(values)
+  const dirty = grantFormChanged(values)
 
-  const selectedUser = form.watch('selectedUser');
-  const vacationPolicyId = form.watch('vacationPolicy');
-  const grantTime = form.watch('grantTime');
-  const description = form.watch('description');
-  const grantDate = form.watch('grantDate');
-  const expiryDate = form.watch('expiryDate');
+  const pickPolicy = (id: string) => {
+    const next = policies.find((p) => String(p.vacation_policy_id) === id)
+    // 시간이 정해진 정책은 그 시간으로, 가변 정책은 0 에서 시작한다
+    setValues((v) => ({ ...v, policyId: id, grantTime: next && next.is_flexible_grant === 'N' ? next.grant_time : 0 }))
+  }
 
-  // 선택된 사용자의 MANUAL_GRANT 휴가 정책 조회
-  const { data: vacationPolicies, isLoading: isLoadingPolicies } = useUserAssignedVacationPoliciesQuery(
-    selectedUser,
-    undefined,
-    'MANUAL_GRANT'
-  );
-
-  // 선택된 정책 찾기
-  const selectedPolicy = vacationPolicies?.find(
-    policy => policy.vacation_policy_id.toString() === vacationPolicyId
-  );
-
-  // 부여 시간이 유연한지 여부
-  const isFlexibleGrant = selectedPolicy?.is_flexible_grant === 'Y';
-
-  // effective_type과 expiration_type을 한글로 변환
-  const getEffectiveTypeName = (code: string) => {
-    return effectiveTypes.find(type => type.code === code)?.name || code;
-  };
-
-  const getExpirationTypeName = (code: string) => {
-    return expirationTypes.find(type => type.code === code)?.name || code;
-  };
-
-  // 저장 버튼 활성화 조건 체크
-  const isFormValid = () => {
-    // 기본 필수값 체크
-    if (!selectedUser || !vacationPolicyId || !grantTime || !description) {
-      return false;
+  const submit = async () => {
+    if (busy) return
+    if (Object.keys(errors).length > 0) {
+      setShowErrors(true)
+      return
     }
-
-    // 직접 지정 옵션을 선택한 경우 날짜도 필수
-    if (useCustomDates) {
-      if (!grantDate || !expiryDate) {
-        return false;
-      }
+    setBusy(true)
+    setSaveError(null)
+    try {
+      await grant.mutateAsync(grantPayloadOf(user.id, values))
+      onOpenChange(false)
+      snackbar.show({ message: t('grantForm.saved'), tone: 'positive' })
+    } catch (error) {
+      claimFailure(error)
+      const key = writeFailureKey(error)
+      if (key) setSaveError(key === 'failure.write' ? t('grantForm.saveFailed') : tc(key))
+    } finally {
+      setBusy(false)
     }
+  }
 
-    return true;
-  };
+  const name = (list: { code: string; name: string }[], code: string | null | undefined) =>
+    code ? (list.find((x) => x.code === code)?.name ?? t('grantForm.policyDefault')) : t('grantForm.policyDefault')
 
-  // Dialog가 열릴 때 폼 초기화
-  useEffect(() => {
-    if (open) {
-      form.reset({
-        selectedUser: '',
-        vacationPolicy: '',
-        grantDate: undefined,
-        expiryDate: undefined,
-        grantTime: undefined,
-        description: '',
-      });
-      setUseCustomDates(false);
-    }
-  }, [open, form]);
-
-  // 휴가 정책 선택 시 is_flexible_grant가 'N'이면 grant_time 자동 설정
-  useEffect(() => {
-    if (selectedPolicy) {
-      if (selectedPolicy.is_flexible_grant === 'N') {
-        // grant_time을 그대로 설정 (소수점 형식)
-        form.setValue('grantTime', selectedPolicy.grant_time);
-      } else {
-        // is_flexible_grant가 'Y'인 경우, 기존 값 유지 또는 초기화
-        form.setValue('grantTime', 0);
-      }
-    }
-  }, [selectedPolicy, form]);
-
-  const onSubmit = (values: VacationGrantFormValues) => {
-    // 직접 지정을 선택한 경우 날짜 검증
-    if (useCustomDates) {
-      if (!values.grantDate) {
-        form.setError('grantDate', { message: t('grant.selectStartDate') });
-        return;
-      }
-      if (!values.expiryDate) {
-        form.setError('expiryDate', { message: t('grant.selectEndDate') });
-        return;
-      }
-    }
-
-    // LocalDateTime 형식으로 변환 (YYYY-MM-DDTHH:mm:ss) 또는 null
-    const grantDateTime = useCustomDates && values.grantDate ? `${values.grantDate}T00:00:00` : null;
-    const expiryDateTime = useCustomDates && values.expiryDate ? `${values.expiryDate}T23:59:59` : null;
-
-    grantVacation({
-      user_id: values.selectedUser,
-      vacation_policy_id: parseInt(values.vacationPolicy),
-      grant_time: values.grantTime!,
-      grant_date: grantDateTime!,
-      expiry_date: expiryDateTime!,
-      grant_desc: values.description,
-    }, {
-      onSuccess: () => {
-        form.reset();
-        onClose();
-      }
-    });
-  };
+  const noPolicy = policiesQuery.isSuccess && policies.length === 0
+  const flexible = policy?.is_flexible_grant === 'Y'
+  const withMinutes = policy?.minute_grant_yn === 'Y'
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className='min-[40rem]:max-w-[500px]'>
-        <DialogHeader>
-          <DialogTitle>{t('grant.title')}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className='p-6 space-y-4'>
-            {/* 대상 사용자 */}
-            <Controller
-              control={form.control}
-              name='selectedUser'
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    {t('grant.targetUser')} <span className='text-red-500'>*</span>
-                  </FieldLabel>
-                  <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingUsers}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingUsers ? tc('loading') : t('grant.selectUserPlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {users?.map((user) => (
-                        <SelectItem key={user.user_id} value={user.user_id}>
-                          {user.user_name} ({user.user_id})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
+    <ResponsiveDialog open={open} form dirty={dirty} busy={busy} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent title={t('grantForm.title')} onCloseAutoFocus={onCloseAutoFocus}>
+        <ResponsiveDialogBody>
+          {saveError && (
+            <Callout tone='critical' role='alert' className='mb-x4' data-save-failure>
+              {saveError}
+            </Callout>
+          )}
+          <p className='mb-x6 mt-0 text-t4 font-normal text-fg-neutral-muted [overflow-wrap:break-word] [word-break:keep-all]' data-grant-recipient>
+            {t('grantForm.recipient', { name: user.name })}
+          </p>
+          {policiesQuery.isLoadingError ? (
+            <ResultSection
+              kind='failure'
+              size='medium'
+              title={t('grantForm.policyFailureTitle')}
+              description={t('memberVacation.failureDescription')}
+              primaryAction={{ label: tc('retry'), onClick: () => void policiesQuery.refetch(), loading: policiesQuery.isFetching }}
             />
-
-            {selectedUser && (
-              <>
-                {/* 휴가 정책 */}
-                <Controller
-                  control={form.control}
-                  name='vacationPolicy'
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={!!fieldState.error}>
-                      <FieldLabel>
-                        {t('grant.policyLabel')} <span className='text-red-500'>*</span>
-                      </FieldLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isLoadingPolicies || !vacationPolicies || vacationPolicies.length === 0}
-                      >
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={
-                              isLoadingPolicies
-                                ? tc('loading')
-                                : vacationPolicies && vacationPolicies.length === 0
-                                  ? t('grant.noManualGrantPolicy')
-                                  : t('grant.selectPolicyPlaceholder')
-                            }
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {vacationPolicies?.map((policy) => (
-                            <SelectItem
-                              key={policy.vacation_policy_id}
-                              value={policy.vacation_policy_id.toString()}
-                            >
-                              {policy.vacation_policy_name} ({policy.vacation_type})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                    </Field>
-                  )}
-                />
-
-                {/* 부여일, 만료일 직접 지정 옵션 */}
-                <div className='flex items-center space-x-2'>
-                  <Checkbox
-                    id='useCustomDates'
-                    checked={useCustomDates}
-                    onCheckedChange={(checked) => {
-                      setUseCustomDates(checked === true);
-                      if (!checked) {
-                        form.setValue('grantDate', undefined);
-                        form.setValue('expiryDate', undefined);
-                        form.clearErrors(['grantDate', 'expiryDate']);
-                      } else {
-                        form.setValue('grantDate', dayjs().format('YYYY-MM-DD'));
-                        form.setValue('expiryDate', dayjs().format('YYYY-MM-DD'));
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor='useCustomDates'
-                    className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
+          ) : (
+            <div className='flex flex-col gap-x6 pb-x2'>
+              <Field
+                label={t('grantForm.policy')}
+                showRequiredIndicator
+                invalid={showErrors && !!errors.policy}
+                errorMessage={t('grantForm.policyRequired')}
+              >
+                {policiesQuery.isPending ? (
+                  <Skeleton text='t5' className='block h-[40px] w-full' />
+                ) : (
+                  <Select
+                    value={values.policyId}
+                    onValueChange={pickPolicy}
+                    disabled={noPolicy}
+                    placeholder={noPolicy ? t('grantForm.noPolicy') : t('grantForm.policyPlaceholder')}
+                    aria-invalid={(showErrors && !!errors.policy) || undefined}
                   >
-                    {t('grant.customDateOption', { comma: ',' })}
-                  </label>
-                </div>
-
-                {!useCustomDates && selectedPolicy && (
-                  <div className='grid grid-cols-2 gap-4'>
-                    {/* 유효기간 시작일자 정책 표시 */}
-                    <Field>
-                      <FieldLabel>{t('grant.validityStart')}</FieldLabel>
-                      <div className='flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm'>
-                        {selectedPolicy.effective_type ? getEffectiveTypeName(selectedPolicy.effective_type) : t('grant.policyDefault')}
-                      </div>
-                      <p className='text-xs text-muted-foreground mt-1'>
-                        {t('grant.startDateRule')}
-                      </p>
-                    </Field>
-
-                    {/* 유효기간 만료일자 정책 표시 */}
-                    <Field>
-                      <FieldLabel>{t('grant.validityEnd')}</FieldLabel>
-                      <div className='flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm'>
-                        {selectedPolicy.expiration_type ? getExpirationTypeName(selectedPolicy.expiration_type) : t('grant.policyDefault')}
-                      </div>
-                      <p className='text-xs text-muted-foreground mt-1'>
-                        {t('grant.endDateRule')}
-                      </p>
-                    </Field>
-                  </div>
+                    {policies.map((p) => (
+                      <SelectItem key={p.vacation_policy_id} value={String(p.vacation_policy_id)} label={p.vacation_policy_name} />
+                    ))}
+                  </Select>
                 )}
-
-                {useCustomDates && (
-                  <div className='grid grid-cols-2 gap-4'>
-                    {/* 유효기간 시작일자 */}
-                    <Controller
-                      control={form.control}
-                      name='grantDate'
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={!!fieldState.error}>
-                          <FieldLabel>
-                            {t('grant.validityStart')} <span className='text-red-500'>*</span>
-                          </FieldLabel>
-                          <InputDatePicker
-                            value={field.value}
-                            onValueChange={(value) => field.onChange(value)}
-                          />
-                          <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                        </Field>
-                      )}
-                    />
-
-                    {/* 유효기간 만료일자 */}
-                    <Controller
-                      control={form.control}
-                      name='expiryDate'
-                      render={({ field, fieldState }) => (
-                        <Field data-invalid={!!fieldState.error}>
-                          <FieldLabel>
-                            {t('grant.validityEnd')} <span className='text-red-500'>*</span>
-                          </FieldLabel>
-                          <InputDatePicker
-                            value={field.value}
-                            onValueChange={(value) => field.onChange(value)}
-                          />
-                          <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                        </Field>
-                      )}
-                    />
-                  </div>
-                )}
-
-                {/* 부여 시간 */}
-                <Controller
-                  control={form.control}
-                  name='grantTime'
-                  render={({ field, fieldState }) => {
-                    const totalValue = field.value || 0;
-                    const days = Math.floor(totalValue);
-                    const remainder = totalValue - days;
-                    const hours = Math.floor(remainder / 0.125);
-                    const minutes = (remainder - hours * 0.125) >= 0.0625 ? 30 : 0;
-
-                    const handleTimeChange = (newDays: number, newHours: number, newMinutes: number) => {
-                      const total = newDays + (newHours * 0.125) + (newMinutes === 30 ? 0.0625 : 0);
-                      field.onChange(total > 0 ? total : undefined);
-                    };
-
-                    const isDisabled = !isFlexibleGrant;
-
-                    return (
-                      <Field data-invalid={!!fieldState.error}>
-                        <FieldLabel>
-                          {t('grant.grantTime')} <span className='text-red-500'>*</span>
-                        </FieldLabel>
-                        <div className={`grid ${selectedPolicy?.minute_grant_yn === 'Y' ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
-                          <div className='flex flex-col'>
-                            <Input
-                              type='number'
-                              min='0'
-                              max='365'
-                              placeholder={t('grant.day')}
-                              className='w-full'
-                              value={days || ''}
-                              onChange={(e) => {
-                                const newDays = e.target.value ? parseInt(e.target.value) : 0;
-                                handleTimeChange(newDays, hours, minutes);
-                              }}
-                              disabled={isDisabled}
-                            />
-                            <p className='text-xs text-muted-foreground mt-1'>{t('grant.day')}</p>
-                          </div>
-                          <div className='flex flex-col'>
-                            <Select
-                              value={hours.toString()}
-                              onValueChange={(value) => {
-                                handleTimeChange(days, parseInt(value), minutes);
-                              }}
-                              disabled={isDisabled}
-                            >
-                              <SelectTrigger className='w-full'>
-                                <SelectValue placeholder={t('grant.hour')} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {[0, 1, 2, 3, 4, 5, 6, 7].map((h) => (
-                                  <SelectItem key={h} value={h.toString()}>
-                                    {t('grant.nHours', { count: h })}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <p className='text-xs text-muted-foreground mt-1'>{t('grant.hour')}</p>
-                          </div>
-                          {selectedPolicy?.minute_grant_yn === 'Y' && (
-                            <div className='flex flex-col'>
-                              <Select
-                                value={minutes.toString()}
-                                onValueChange={(value) => {
-                                  handleTimeChange(days, hours, parseInt(value));
-                                }}
-                                disabled={isDisabled}
-                              >
-                                <SelectTrigger className='w-full'>
-                                  <SelectValue placeholder={t('grant.minute')} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value='0'>{t('grant.nMinutes', { count: 0 })}</SelectItem>
-                                  <SelectItem value='30'>{t('grant.nMinutes', { count: 30 })}</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <p className='text-xs text-muted-foreground mt-1'>{t('grant.minute')}</p>
-                            </div>
-                          )}
-                        </div>
-                        <p className='text-sm text-muted-foreground mt-2'>
-                          {isDisabled
-                            ? t('grant.fixedTimePolicy')
-                            : selectedPolicy?.minute_grant_yn === 'Y' ? t('grant.selectTimeDescWithMin') : t('grant.selectTimeDesc')}
-                          {field.value && field.value > 0 && (
-                            <span className='block mt-1 font-medium text-primary'>
-                              {t('grant.totalTime', { time: [
-                                days > 0 ? `${days}${t('grant.day')}` : '',
-                                hours > 0 ? `${hours}${t('grant.hour')}` : '',
-                                minutes > 0 && selectedPolicy?.minute_grant_yn === 'Y' ? `${minutes}${t('grant.minute')}` : ''
-                              ].filter(Boolean).join(' ') })}
-                            </span>
-                          )}
-                        </p>
-                        <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                      </Field>
-                    );
-                  }}
-                />
-
-                {/* 부여 사유 */}
-                <Controller
-                  control={form.control}
-                  name='description'
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={!!fieldState.error}>
-                      <FieldLabel>
-                        {t('grant.grantReason')} <span className='text-red-500'>*</span>
-                      </FieldLabel>
-                      <Textarea
-                        {...field}
-                        placeholder={t('grant.grantReasonPlaceholder')}
-                        rows={4}
-                        className='resize-none'
+              </Field>
+              {policy && (
+                <>
+                  <Checkbox
+                    label={t('grantForm.customDates')}
+                    checked={values.customDates}
+                    onCheckedChange={(checked) => set('customDates', checked === true)}
+                  />
+                  {values.customDates ? (
+                    <>
+                      <DayField
+                        label={t('grantForm.validityStart')}
+                        placeholder={t('grantForm.datePlaceholder')}
+                        value={values.grantDate}
+                        onValueChange={(d) => set('grantDate', d)}
+                        invalid={showErrors && !!errors.grantDate}
+                        errorMessage={t('grantForm.dateRequired')}
                       />
-                      <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                    </Field>
+                      <DayField
+                        label={t('grantForm.validityEnd')}
+                        placeholder={t('grantForm.datePlaceholder')}
+                        value={values.expiryDate}
+                        onValueChange={(d) => set('expiryDate', d)}
+                        invalid={showErrors && !!errors.expiryDate}
+                        errorMessage={t('grantForm.dateRequired')}
+                      />
+                    </>
+                  ) : (
+                    <div className='flex flex-col gap-x4' data-grant-rules>
+                      <Field label={t('grantForm.validityStart')} description={t('grantForm.startRule')} readOnly>
+                        <p className='m-0 text-t5 font-normal text-fg-neutral'>{name(effectiveTypes, policy.effective_type)}</p>
+                      </Field>
+                      <Field label={t('grantForm.validityEnd')} description={t('grantForm.endRule')} readOnly>
+                        <p className='m-0 text-t5 font-normal text-fg-neutral'>{name(expirationTypes, policy.expiration_type)}</p>
+                      </Field>
+                    </div>
                   )}
-                />
-              </>
-            )}
-          </div>
-
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type='button' variant='secondary' disabled={isPending}>
-                {tc('cancel')}
-              </Button>
-            </DialogClose>
-            <Button type='submit' disabled={isPending || !isFormValid()}>
-              {isPending ? t('grant.processing') : tc('save')}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+                  <GrantTimeField
+                    label={t('grantForm.grantTime')}
+                    value={values.grantTime}
+                    onValueChange={(total) => set('grantTime', total)}
+                    withMinutes={withMinutes}
+                    locked={!flexible}
+                    description={!flexible ? t('grantForm.timeFixed') : withMinutes ? t('grantForm.timeHelpMinutes') : t('grantForm.timeHelp')}
+                    invalid={showErrors && !!errors.grantTime}
+                    errorMessage={t('grantForm.timeRequired')}
+                  />
+                  <Field label={t('grantForm.reason')} showRequiredIndicator invalid={showErrors && !!errors.reason} errorMessage={t('grantForm.reasonRequired')}>
+                    <Textarea ref={reasonRef} value={values.reason} placeholder={t('grantForm.reasonPlaceholder')} onChange={(e) => set('reason', e.target.value)} />
+                  </Field>
+                </>
+              )}
+            </div>
+          )}
+        </ResponsiveDialogBody>
+        <ResponsiveDialogFooter>
+          <ResponsiveDialogCancel>{tc('cancel')}</ResponsiveDialogCancel>
+          <Button loading={busy} disabled={policiesQuery.isLoadingError} onClick={() => void submit()}>
+            {t('grantForm.submit')}
+          </Button>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   )
 }
-
-export { VacationGrantDialog }

@@ -1592,3 +1592,78 @@ dashboard,editPanel.grip,{{name}} 차례 바꾸기,Reorder {{name}}
 dashboard,editPanel.gripHint,위 · 아래 화살표 키로 옮겨요,Use the up and down arrow keys to move
 dashboard,editPanel.moved,{{name}} {{n}}번째로 옮겼어요.,Moved {{name}} to position {{n}}.
 vacation,history.chart.minuteUnit,분,m
+common,done,완료,Done
+vacation,memberVacation.title,구성원 휴가,Team leave
+vacation,memberVacation.tabsAria,구성원 휴가 보기,Team leave views
+vacation,memberVacation.tabInbox,결재함,Approvals
+vacation,memberVacation.tabStaff,직원 휴가,Staff leave
+vacation,memberVacation.inboxPending,결재할 신청이 있어요,Requests waiting for your approval
+vacation,memberVacation.yearAria,연도,Year
+vacation,memberVacation.yearLabel,{{year}}년,{{year}}
+vacation,memberVacation.count,{{n}}건,{{n}} requests
+vacation,memberVacation.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+vacation,inbox.caption,결재함,Approvals
+vacation,inbox.colApplicant,신청자,Applicant
+vacation,inbox.colVacation,휴가,Leave
+vacation,inbox.colDate,날짜,Date
+vacation,inbox.colTime,시간,Time
+vacation,inbox.colRequestedAt,신청일,Requested
+vacation,inbox.colStatus,상태,Status
+vacation,inbox.detail,상세 보기,View details
+vacation,inbox.detailFor,{{name}} 상세 보기,View details of {{name}}
+vacation,inbox.rowDetail,{{date}} · {{time}} · 신청 {{requested}},{{date}} · {{time}} · requested {{requested}}
+vacation,inbox.listEnd,결재할 신청을 모두 봤어요.,You've seen all the requests.
+vacation,inbox.emptyTitle,결재할 신청이 없어요,No requests to approve
+vacation,inbox.emptyDescription,결재선에 내가 든 신청이 생기면 여기에 모여요.,Requests that need your approval will show up here.
+vacation,inbox.failureTitle,결재함을 불러오지 못했어요,Couldn't load the approvals
+vacation,staff.pickerAria,직원 고르기,Choose a staff member
+vacation,staff.pickerPlaceholder,직원 선택,Choose staff
+vacation,staff.pickerTitle,직원,Staff
+vacation,staff.searchPlaceholder,이름 · 아이디 검색,Search by name or ID
+vacation,staff.searchEmpty,찾는 직원이 없어요.,No matching staff.
+vacation,staff.useVacation,휴가 사용,Use leave
+vacation,staff.grantVacation,휴가 부여,Grant leave
+vacation,staff.requestsTitle,신청 내역,Requests
+vacation,staff.usersFailureTitle,직원 목록을 불러오지 못했어요,Couldn't load the staff list
+vacation,status.pending,대기,Pending
+vacation,status.progress,진행,In progress
+vacation,status.approved,승인,Approved
+vacation,status.rejected,반려,Rejected
+vacation,status.canceled,취소,Canceled
+vacation,status.revoked,회수,Revoked
+vacation,grantTime.day,일,Days
+vacation,grantTime.hour,시간,Hours
+vacation,grantTime.minute,분,Minutes
+vacation,grantTime.nHours,{{n}}시간,{{n}} h
+vacation,grantTime.nMinutes,{{n}}분,{{n}} min
+vacation,grantTime.hourDecrease,시간 줄이기,Decrease hours
+vacation,grantTime.hourIncrease,시간 늘리기,Increase hours
+vacation,grantForm.title,휴가 부여,Grant leave
+vacation,grantForm.recipient,{{name}} 님에게 휴가를 부여해요.,Grant leave to {{name}}.
+vacation,grantForm.policy,휴가 정책,Leave policy
+vacation,grantForm.policyPlaceholder,휴가 정책 선택,Choose a leave policy
+vacation,grantForm.policyLoading,불러오는 중,Loading
+vacation,grantForm.noPolicy,직접 부여할 수 있는 정책이 없어요.,No policies can be granted manually.
+vacation,grantForm.policyRequired,휴가 정책을 골라주세요.,Choose a leave policy.
+vacation,grantForm.policyFailureTitle,휴가 정책을 불러오지 못했어요,Couldn't load the leave policies
+vacation,grantForm.customDates,부여일과 만료일을 직접 정해요,Set the grant and expiry dates myself
+vacation,grantForm.validityStart,부여일,Grant date
+vacation,grantForm.validityEnd,만료일,Expiry date
+vacation,grantForm.datePlaceholder,날짜 선택,Choose a date
+vacation,grantForm.dateRequired,날짜를 골라주세요.,Choose a date.
+vacation,grantForm.startRule,정책이 정한 부여일 규칙을 따라요.,The policy's grant date rule applies.
+vacation,grantForm.endRule,정책이 정한 만료일 규칙을 따라요.,The policy's expiry date rule applies.
+vacation,grantForm.policyDefault,정책 기본값,Policy default
+vacation,grantForm.grantTime,부여 시간,Grant time
+vacation,grantForm.timeHelp,부여할 시간을 일 · 시간 단위로 정해요.,Set the time to grant in days and hours.
+vacation,grantForm.timeHelpMinutes,부여할 시간을 일 · 시간 · 분 단위로 정해요.,"Set the time to grant in days, hours, and minutes."
+vacation,grantForm.timeFixed,이 정책은 부여 시간이 정해져 있어요.,This policy has a fixed grant time.
+vacation,grantForm.timeRequired,부여 시간을 정해주세요.,Set the grant time.
+vacation,grantForm.reason,부여 사유,Reason
+vacation,grantForm.reasonPlaceholder,휴가를 부여하는 사유를 적어주세요.,Write why you're granting this leave.
+vacation,grantForm.reasonRequired,부여 사유를 적어주세요.,Write the reason.
+vacation,grantForm.saved,휴가를 부여했어요.,Leave granted.
+vacation,grantForm.saveFailed,휴가를 부여하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't grant the leave. Please try again in a moment.
+vacation,application.noRequestsTitle,신청 내역이 없어요,No requests yet
+vacation,application.noRequestsDescription,아직 신청한 휴가가 없어요. 새 신청서를 작성해 보세요.,You haven't requested any leave yet. Try writing a new request.
+vacation,grantForm.submit,부여,Grant
