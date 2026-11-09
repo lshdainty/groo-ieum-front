@@ -1,311 +1,226 @@
-import { useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import { claimFailure, writeFailureKey } from '@/shared/api/failure'
+import { Button } from '@/shared/ds/button'
+import { Callout } from '@/shared/ds/callout'
+import { firstUnusedColor, type ChartColor } from '@/shared/ds/color-swatch'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle
-} from '@/shared/ui/shadcn/dialog'
-import { Button } from '@/shared/ui/shadcn/button'
-import { Input } from '@/shared/ui/shadcn/input'
-import { Textarea } from '@/shared/ui/shadcn/textarea'
-import {
-  Field,
-  FieldLabel,
-  FieldError
-} from '@/shared/ui/shadcn/field'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/shared/ui/shadcn/select'
-import { Spinner } from '@/shared/ui/shadcn/spinner'
-import { PostDepartmentReq, PutDepartmentReq } from '@/entities/department'
+  ResponsiveDialog,
+  ResponsiveDialogBody,
+  ResponsiveDialogCancel,
+  ResponsiveDialogContent,
+  ResponsiveDialogFooter,
+} from '@/shared/ds/dialog'
+import { Field } from '@/shared/ds/field'
+import { Input } from '@/shared/ds/input'
+import { useSnackbar } from '@/shared/ds/snackbar'
+import { Textarea } from '@/shared/ds/textarea'
+import { usePostDepartmentMutation, usePutDepartmentMutation, type PostDepartmentReq } from '@/entities/department'
 import { useUsersQuery } from '@/entities/user'
+import { deptColorName, findDept, outsidePaletteHex, selfAndDescendantIds, usedColors, type Dept } from '../lib/dept-tree'
+import { ColorRow, LeaderRow, ParentRow } from './DepartmentFormFields'
 
-type DepartmentFormValues = z.infer<ReturnType<typeof createDepartmentFormSchema>>
+const NAME_MAX = 20
+const DESC_MAX = 1000
 
-const createDepartmentFormSchema = (t: (key: string) => string) => z.object({
-  department_name: z.string().min(1, { message: t('department.nameEnRequired') }),
-  department_name_kr: z.string().min(1, { message: t('department.nameKoRequired') }),
-  parent_id: z.number().nullable(),
-  head_user_id: z.string().optional(),
-  color_code: z.string().optional(),
-  tree_level: z.number().optional(),
-  department_desc: z.string().optional(),
-  company_id: z.string().optional(),
-})
+/** 폼이 하는 일 — 새 부서(상위 없음: 빈 회사의 첫 부서) · 하위 부서 추가(상위 = 고른 부서) · 수정 */
+export type DepartmentFormTarget =
+  | { kind: 'add'; parent: Dept | null }
+  | { kind: 'edit'; dept: Dept }
 
-interface DepartmentFormDialogProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
-  onSave: (formData: PostDepartmentReq | { departmentId: number; data: PutDepartmentReq }) => void
-  initialData?: any
-  isEditing?: boolean
-  isAddingChild?: boolean
-  parentId?: number | null
-  companyId?: string
+interface Values {
+  nameKr: string
+  nameEn: string
+  parentId: number | null
+  headId: string
+  /** 사용자가 고른 색 — null 이면 저장 값을 그대로 둔다(옛 값을 몰래 바꾸지 않는다) */
+  pickedColor: ChartColor | null
+  desc: string
 }
 
-const DepartmentFormDialog = ({
-  isOpen,
+const initialOf = (target: DepartmentFormTarget, departments: Dept[]): Values => {
+  if (target.kind === 'edit') {
+    const d = target.dept
+    return {
+      nameKr: d.department_name_kr ?? '',
+      nameEn: d.department_name ?? '',
+      parentId: d.parent_id ?? null,
+      headId: d.head_user_id ?? '',
+      pickedColor: null,
+      desc: d.department_desc ?? '',
+    }
+  }
+  return {
+    nameKr: '',
+    nameEn: '',
+    parentId: target.parent?.department_id ?? null,
+    headId: '',
+    // 새 부서의 처음 색 = 이 회사 부서가 아직 쓰지 않은 첫 색
+    pickedColor: firstUnusedColor(usedColors(departments)),
+    desc: '',
+  }
+}
+
+/**
+ * 부서 추가 · 하위 부서 추가 · 부서 수정(D 20) — ds Responsive Dialog `form`, 한 열. 칸 차례: 한글 이름 · 영문 이름 · 상위 부서(줄) · 부서장(줄) · 색(줄) · 설명.
+ * 저장 본문은 지금 Post/PutDepartmentReq 그대로 — `parent_id` = 고른 상위, `tree_level` = 고른 상위 + 1(상위를 바꾸지 않았으면 지금 값).
+ * 옮긴 부서 아래 부서들의 단계는 서버가 다시 센다(24-0). 색은 이름(`blue`)으로 저장하되, 고르지 않으면 저장 값을 그대로 보낸다.
+ */
+export function DepartmentFormDialog({
+  open,
   onOpenChange,
-  onSave,
-  initialData = null,
-  isEditing = false,
-  isAddingChild = false,
-  parentId,
-  companyId
-}: DepartmentFormDialogProps) => {
+  target,
+  departments,
+  companyId,
+  onSaved,
+  onCloseAutoFocus,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  target: DepartmentFormTarget
+  departments: Dept[]
+  companyId: string
+  /** 저장 끝 — 새 부서면 그 id */
+  onSaved?: (id: number | null) => void
+  onCloseAutoFocus?: (e: Event) => void
+}) {
   const { t } = useTranslation('admin')
   const { t: tc } = useTranslation('common')
-  const { data: users, isLoading: usersLoading } = useUsersQuery()
+  const snackbar = useSnackbar()
+  const initial = useMemo(() => initialOf(target, departments), [target, departments])
+  const [values, setValues] = useState<Values>(initial)
+  const [showErrors, setShowErrors] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const nameKrRef = useRef<HTMLInputElement>(null)
+  const nameEnRef = useRef<HTMLInputElement>(null)
+  const users = useUsersQuery({ quiet: true })
+  const post = usePostDepartmentMutation()
+  const put = usePutDepartmentMutation()
 
-  const form = useForm<DepartmentFormValues>({
-    resolver: zodResolver(createDepartmentFormSchema(t)),
-    defaultValues: {
-      department_name: '',
-      department_name_kr: '',
-      parent_id: null,
-      head_user_id: '',
-      color_code: '',
-      tree_level: 0,
-      department_desc: '',
-      company_id: '',
-    },
-    mode: 'onChange',
-  })
+  const editing = target.kind === 'edit'
+  const editDept = editing ? target.dept : null
+  const storedCode = editDept?.color_code ?? null
+  const storedName = deptColorName(storedCode)
+  const storedHex = outsidePaletteHex(storedCode)
+  const colorShown: ChartColor | 'current' | null = values.pickedColor ?? (storedName ?? (storedHex ? 'current' : null))
+  const blocked = useMemo(() => (editDept ? selfAndDescendantIds(editDept) : new Set<number>()), [editDept])
+  const isTop = editing && editDept?.parent_id == null
 
-  useEffect(() => {
-    if (isOpen) {
-      if (isEditing && initialData) {
-        form.reset({
-          department_name: initialData.department_name || '',
-          department_name_kr: initialData.department_name_kr || '',
-          parent_id: initialData.parent_id ?? null,
-          head_user_id: initialData.head_user_id || '',
-          color_code: initialData.color_code || '',
-          tree_level: initialData.tree_level || 0,
-          department_desc: initialData.department_desc || '',
-          company_id: initialData.company_id || companyId || '',
-        })
+  const set = <K extends keyof Values>(key: K, value: Values[K]) => setValues((v) => ({ ...v, [key]: value }))
+  const errors = {
+    nameKr: values.nameKr.trim() === '',
+    nameEn: values.nameEn.trim() === '',
+    color: colorShown === null,
+  }
+  const dirty =
+    values.nameKr !== initial.nameKr ||
+    values.nameEn !== initial.nameEn ||
+    values.parentId !== initial.parentId ||
+    values.headId !== initial.headId ||
+    values.pickedColor !== initial.pickedColor ||
+    values.desc !== initial.desc
+
+  const submit = async () => {
+    if (busy) return
+    if (errors.nameKr || errors.nameEn || errors.color) {
+      setShowErrors(true)
+      if (errors.nameKr) nameKrRef.current?.focus()
+      else if (errors.nameEn) nameEnRef.current?.focus()
+      return
+    }
+    const parent = values.parentId == null ? null : findDept(departments, values.parentId)
+    const treeLevel = editDept && values.parentId === (editDept.parent_id ?? null) ? editDept.tree_level : parent ? parent.tree_level + 1 : 0
+    // 고르지 않았으면 저장 값 그대로(옛 `chart-3` · 팔레트 밖 hex) — 고른 색만 새 이름으로
+    const colorCode = values.pickedColor ?? storedCode ?? ''
+    setBusy(true)
+    setSaveError(null)
+    try {
+      const body: PostDepartmentReq = {
+        department_name: values.nameEn.trim(),
+        department_name_kr: values.nameKr.trim(),
+        parent_id: values.parentId,
+        head_user_id: values.headId || undefined,
+        color_code: colorCode,
+        tree_level: treeLevel,
+        department_desc: values.desc,
+        company_id: companyId,
+      }
+      if (editDept) {
+        await put.mutateAsync({ departmentId: editDept.department_id, data: body })
+        snackbar.show({ message: t('department.savedEdit', { name: body.department_name_kr }), tone: 'positive' })
+        onSaved?.(editDept.department_id)
       } else {
-        form.reset({
-          department_name: '',
-          department_name_kr: '',
-          parent_id: isAddingChild && typeof parentId === 'number' ? parentId : null,
-          head_user_id: '',
-          color_code: '',
-          tree_level: isAddingChild && typeof parentId === 'number' && initialData ? (initialData.tree_level || 0) + 1 : 0,
-          department_desc: '',
-          company_id: companyId || '',
-        })
+        const created = await post.mutateAsync(body)
+        snackbar.show({ message: t('department.savedAdd', { name: body.department_name_kr }), tone: 'positive' })
+        onSaved?.(created.department_id)
       }
-    }
-  }, [isOpen, isEditing, initialData, form])
-
-  const onSubmit = (values: DepartmentFormValues): void => {
-    if (isEditing && !isAddingChild && initialData?.department_id) {
-      // 수정 모드
-      const updateData: PutDepartmentReq = {
-        department_name: values.department_name,
-        department_name_kr: values.department_name_kr,
-        parent_id: values.parent_id,
-        head_user_id: values.head_user_id || undefined,
-        color_code: values.color_code || undefined,
-        tree_level: values.tree_level,
-        department_desc: values.department_desc || undefined,
-        company_id: values.company_id || undefined,
-      }
-      onSave({ departmentId: initialData.department_id, data: updateData })
-    } else {
-      // 생성 모드 (새 부서 또는 하위 부서 추가)
-      const createData: PostDepartmentReq = {
-        department_name: values.department_name,
-        department_name_kr: values.department_name_kr,
-        parent_id: values.parent_id,
-        head_user_id: values.head_user_id || undefined,
-        color_code: values.color_code || undefined,
-        tree_level: values.tree_level,
-        department_desc: values.department_desc || undefined,
-        company_id: values.company_id || undefined,
-      }
-      onSave(createData)
+      onOpenChange(false)
+    } catch (error) {
+      claimFailure(error)
+      const key = writeFailureKey(error)
+      if (key) setSaveError(key === 'failure.write' ? t('department.saveFailed') : tc(key))
+    } finally {
+      setBusy(false)
     }
   }
 
-  const getDialogTitle = () => {
-    if (isAddingChild) return t('department.addSubTitle')
-    if (isEditing) return t('department.editTitle')
-    return t('department.addTitle')
-  }
+  const title = editing ? t('department.editTitle') : target.parent ? t('department.addSubTitle') : t('department.addTitle')
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className='max-w-[32rem]'>
-        <DialogHeader>
-          <DialogTitle>{getDialogTitle()}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <div className='grid grid-cols-2 gap-4'>
-            <Controller
-              control={form.control}
-              name='department_name_kr'
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    {t('department.nameKo')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <Input placeholder={t('department.nameKoPlaceholder')} {...field} />
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
-            <Controller
-              control={form.control}
-              name='department_name'
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    {t('department.nameEn')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <Input placeholder={t('department.nameEnPlaceholder')} {...field} />
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
+    <ResponsiveDialog open={open} form dirty={dirty} busy={busy} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent
+        title={title}
+        onOpenAutoFocus={(e) => {
+          e.preventDefault()
+          nameKrRef.current?.focus({ preventScroll: true })
+        }}
+        onCloseAutoFocus={onCloseAutoFocus}
+      >
+        <ResponsiveDialogBody>
+          {saveError && (
+            <Callout tone='critical' role='alert' className='mb-x4' data-save-failure>
+              {saveError}
+            </Callout>
+          )}
+          <div className='flex flex-col gap-x6 pb-x2'>
+            <Field label={t('department.nameKo')} showRequiredIndicator invalid={showErrors && errors.nameKr} errorMessage={t('department.nameKoRequired')} maxGraphemeCount={NAME_MAX}>
+              <Input ref={nameKrRef} value={values.nameKr} onChange={(e) => set('nameKr', e.target.value.slice(0, NAME_MAX))} maxLength={NAME_MAX} />
+            </Field>
+            <Field label={t('department.nameEn')} showRequiredIndicator invalid={showErrors && errors.nameEn} errorMessage={t('department.nameEnRequired')} maxGraphemeCount={NAME_MAX}>
+              <Input ref={nameEnRef} value={values.nameEn} onChange={(e) => set('nameEn', e.target.value.slice(0, NAME_MAX))} maxLength={NAME_MAX} />
+            </Field>
+            {/* 고르는 줄 칸 셋 — 줄이 제 좌우 24 를 가져 폼 안쪽 여백만큼 -mx 로 가장자리까지 */}
+            <div className='-mx-x6 flex flex-col gap-x6'>
+              <ParentRow
+                departments={departments}
+                value={values.parentId}
+                onChange={(id) => set('parentId', id)}
+                blocked={blocked}
+                selfName={editDept?.department_name_kr}
+                readOnlyTop={isTop}
+              />
+              <LeaderRow people={users.data ?? []} value={values.headId} onChange={(id) => set('headId', id)} />
+              <ColorRow
+                value={colorShown}
+                currentHex={storedHex}
+                onChange={(c) => set('pickedColor', c)}
+                errorMessage={showErrors && errors.color ? t('department.colorRequired') : null}
+              />
+            </div>
+            <Field label={t('department.description')} indicator={tc('optional')} maxGraphemeCount={DESC_MAX}>
+              <Textarea value={values.desc} onChange={(e) => set('desc', e.target.value.slice(0, DESC_MAX))} maxLength={DESC_MAX} />
+            </Field>
           </div>
-          <div className='grid grid-cols-2 gap-4'>
-            <Controller
-              control={form.control}
-              name='head_user_id'
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>{t('department.leader')}</FieldLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value === 'none' ? '' : value)
-                    }}
-                    value={field.value || 'none'}
-                    disabled={usersLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('department.leaderPlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='none'>{tc('selectNone')}</SelectItem>
-                      {users?.map((user) => (
-                        <SelectItem key={user.user_id} value={user.user_id}>
-                          {user.user_name} ({user.user_id})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
-            <Controller
-              control={form.control}
-              name='color_code'
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>{t('department.color')}</FieldLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value === 'none' ? '' : value)
-                    }}
-                    value={field.value || 'none'}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={tc('colorSelect')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='none'>
-                        <div className='flex items-center gap-2'>
-                          <div className='size-4 rounded-full border-2 border-muted-foreground/30' />
-                          <span>{tc('selectNone')}</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value='chart-1'>
-                        <div className='flex items-center gap-2'>
-                          <div className='size-4 rounded-full bg-chart-1' />
-                          <span>{tc('colorBlue')}</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value='chart-2'>
-                        <div className='flex items-center gap-2'>
-                          <div className='size-4 rounded-full bg-chart-2' />
-                          <span>{tc('colorGreen')}</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value='chart-3'>
-                        <div className='flex items-center gap-2'>
-                          <div className='size-4 rounded-full bg-chart-3' />
-                          <span>{tc('colorYellow')}</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value='chart-4'>
-                        <div className='flex items-center gap-2'>
-                          <div className='size-4 rounded-full bg-chart-4' />
-                          <span>{tc('colorPurple')}</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value='chart-5'>
-                        <div className='flex items-center gap-2'>
-                          <div className='size-4 rounded-full bg-chart-5' />
-                          <span>{tc('colorRed')}</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
-          </div>
-          <Controller
-            control={form.control}
-            name='department_desc'
-            render={({ field, fieldState }) => (
-              <Field data-invalid={!!fieldState.error}>
-                <FieldLabel>{t('department.description')}</FieldLabel>
-                <Textarea
-                  placeholder={t('department.descriptionPlaceholder')}
-                  rows={2}
-                  {...field}
-                />
-                <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-              </Field>
-            )}
-          />
-          <div className='flex justify-end space-x-2 pt-4'>
-            <Button
-              type='button'
-              variant='secondary'
-              onClick={() => onOpenChange(false)}
-            >
-              {tc('cancel')}
-            </Button>
-            <Button
-              type='submit'
-              disabled={!form.formState.isValid || form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting && <Spinner />}
-              {form.formState.isSubmitting ? tc('saving') : tc('save')}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </ResponsiveDialogBody>
+        <ResponsiveDialogFooter>
+          <ResponsiveDialogCancel>{tc('cancel')}</ResponsiveDialogCancel>
+          <Button loading={busy} onClick={() => void submit()}>
+            {tc('save')}
+          </Button>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   )
 }
-
-export { DepartmentFormDialog }

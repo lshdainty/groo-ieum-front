@@ -39,11 +39,13 @@ export const useDepartmentWithChildrenQuery = (departmentId: number) => {
 }
 
 // 부서 사용자 조회 훅
-export const useDepartmentUsersQuery = (departmentId: number) => {
+export const useDepartmentUsersQuery = (departmentId: number, options?: { quiet?: boolean }) => {
   return useQuery<GetDepartmentUsersResp>({
     queryKey: departmentKeys.list({ type: 'users', departmentId }),
     queryFn: () => departmentApi.getDepartmentUsers(departmentId),
-    enabled: !!departmentId
+    enabled: !!departmentId,
+    // quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다)
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 

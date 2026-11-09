@@ -93,46 +93,30 @@ sidebar,theme.dark,다크,Dark
 sidebar,group.manage,관리,Management
 sidebar,skipToMain,본문 바로가기,Skip to main content
 sidebar,footer.oauthLink,소셜 계정 연동,Social Account Link
-admin,company.title,회사 정보,Company Info
-admin,company.editTitle,회사 정보 수정,Edit Company Info
-admin,company.createTitle,회사 정보 입력,Create Company Info
+admin,company.editTitle,회사 정보 수정,Edit company info
+admin,company.createTitle,회사 만들기,Create company
 admin,company.companyId,회사 ID,Company ID
-admin,company.companyIdPlaceholder,회사 ID를 입력하세요,Enter company ID
-admin,company.companyIdRequired,회사 ID를 입력해주세요.,Please enter the company ID.
-admin,company.companyName,회사명,Company Name
-admin,company.companyNamePlaceholder,회사명을 입력하세요,Enter company name
-admin,company.companyNameRequired,회사명을 입력해주세요.,Please enter the company name.
-admin,company.companyIntro,회사소개,Company Introduction
-admin,company.companyIntroPlaceholder,회사에 대한 간단한 소개를 입력하세요,Enter a brief introduction about the company
-admin,department.title,부서 관리,Department Management
-admin,department.addTitle,부서 추가,Add Department
-admin,department.editTitle,부서 수정,Edit Department
-admin,department.addSubTitle,하위 부서 추가,Add Sub-department
-admin,department.nameKo,한글 부서명,Korean Name
-admin,department.nameKoPlaceholder,예: 인사팀,e.g. HR Team
-admin,department.nameKoRequired,한글 부서명을 입력해주세요.,Please enter the Korean department name.
-admin,department.nameEn,영문 부서명,English Name
-admin,department.nameEnPlaceholder,예: HR Team,e.g. HR Team
-admin,department.nameEnRequired,영문 부서명을 입력해주세요.,Please enter the English department name.
-admin,department.leader,부서장,Department Head
-admin,department.leaderPlaceholder,부서장을 선택해주세요,Select department head
-admin,department.color,부서 색상,Department Color
-admin,department.description,부서설명,Department Description
-admin,department.descriptionPlaceholder,부서에 대한 설명을 입력하세요,Enter description for this department
-admin,department.addBtn,부서 추가,Add Department
-admin,department.addSubBtn,하위 부서 추가,Add Sub-department
+admin,company.companyIdRequired,회사 ID를 입력해주세요.,Enter the company ID.
+admin,company.companyName,회사 이름,Company name
+admin,company.companyNameRequired,회사 이름을 입력해주세요.,Enter the company name.
+admin,company.companyIntro,회사 소개,About the company
+admin,department.title,부서,Departments
+admin,department.addTitle,부서 추가,Add department
+admin,department.editTitle,부서 수정,Edit department
+admin,department.addSubTitle,하위 부서 추가,Add sub-department
+admin,department.nameKo,한글 이름,Korean name
+admin,department.nameKoRequired,한글 이름을 입력해주세요.,Enter the Korean name.
+admin,department.nameEn,영문 이름,English name
+admin,department.nameEnRequired,영문 이름을 입력해주세요.,Enter the English name.
+admin,department.leader,부서장,Department head
+admin,department.color,색,Color
+admin,department.description,설명,Description
+admin,department.addBtn,부서 추가,Add department
+admin,department.addSubBtn,하위 부서 추가,Add sub-department
 admin,department.editBtn,수정,Edit
 admin,department.deleteBtn,삭제,Delete
-admin,department.hasChildrenError,하위 부서가 있어 삭제할 수 없습니다.,Cannot delete because it has sub-departments.
-admin,department.noDepartments,부서가 없습니다,No departments
-admin,department.noDepartmentsDesc,새로운 부서를 추가해보세요.,Try adding a new department.
-admin,department.chart,조직도,Organization Chart
-admin,department.totalCount,전체 부서: {{count}}개,Total departments: {{count}}
-admin,department.empty.title,회사가 없습니다,No Company
-admin,department.empty.description,회사 정보를 먼저 등록해주세요.,Please register company information first.
-admin,company.addCardTitle,회사 정보 추가하기,Add Company Info
-admin,company.addCardDesc,회사 정보를 입력하여 시작하세요,Enter company info to get started
-admin,company.addBtn,회사 추가하기,Add Company
+admin,department.noDepartments,부서가 없어요,No departments yet
+admin,department.chart,조직도,Org chart
 admin,holiday.title,공휴일 관리,Holiday Management
 admin,holiday.description,공휴일을 관리하고 추가/수정/삭제할 수 있습니다,Manage holidays - add/edit/delete
 admin,holiday.addTitle,새 공휴일 추가,Add New Holiday
@@ -459,10 +443,6 @@ admin,user.companyStats.empty.description,등록된 사용자 정보가 없습�
 admin,user.allUsers,전체 사용자,All Users
 admin,user.usersInDepartment,부서 소속 사용자,Users in Department
 admin,user.searchUser,사용자 검색...,Search user...
-admin,user.mainDepartment,메인부서,Main Department
-admin,user.mainDepartmentExists,이미 메인부서가 존재합니다,Main department already exists
-admin,user.selectDepartment,부서를 선택하세요,Please select a department
-admin,department.list,부서 목록,Department List
 vacation,policy.description,휴가 정책 설명,Policy Description
 vacation,policy.descriptionPlaceholder,휴가 정책에 대한 설명을 입력해주세요,Enter a description for the vacation policy
 vacation,policy.namePlaceholder,예: 연차 리프레시 휴가,e.g. Annual leave Refresh vacation
@@ -1610,3 +1590,49 @@ vacation,grantForm.submit,부여,Grant
 vacation,staff.noRequestsTitle,{{name}} 님의 신청이 없어요,{{name}} has no requests
 vacation,staff.noRequestsDescription,고른 해에 낸 휴가 신청이 없어요.,There are no leave requests for the selected year.
 calendar,addEvent.fixedUser,{{name}} 님({{detail}})의 휴가를 등록해요.,Register leave for {{name}} ({{detail}}).
+admin,company.editBtn,회사 정보 수정,Edit company info
+admin,company.createBtn,회사 만들기,Create company
+admin,company.emptyTitle,회사가 없어요,No company yet
+admin,company.emptyDesc,회사를 만들면 부서를 나눌 수 있어요.,Create a company to organize departments.
+admin,company.loadFailed,회사를 불러오지 못했어요,Could not load the company
+admin,company.saved,회사 정보를 저장했어요.,Company info saved.
+admin,company.created,회사를 만들었어요.,Company created.
+admin,company.saveFailed,회사 정보를 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save the company info. Please try again in a moment.
+admin,department.chartCount,부서 {{count}}개,{{count}} departments
+admin,department.resizeLabel,목록 너비,List width
+admin,department.deleteBlocked,하위 부서가 있어 지울 수 없어요,"It has sub-departments, so it cannot be deleted"
+admin,department.parent,상위 부서,Parent department
+admin,department.parentNone,없음,None
+admin,department.parentTop,없음 — 최상위 부서,None — top-level department
+admin,department.parentSheetDesc,{{name}}와 그 아래 부서는 고를 수 없어요.,{{name}} and the departments under it cannot be chosen.
+admin,department.leaderNone,없음,None
+admin,department.leaderSearch,이름 · 아이디 검색,Search by name or ID
+admin,department.leaderEmpty,찾는 사람이 없어요.,No one found.
+admin,department.colorNone,없음,None
+admin,department.colorCurrent,지금 색,Current color
+admin,department.colorRequired,색을 골라주세요.,Choose a color.
+admin,department.savedAdd,"""{{name}}"" 부서를 추가했어요.","Added the ""{{name}}"" department."
+admin,department.savedEdit,"""{{name}}"" 부서를 수정했어요.","Updated the ""{{name}}"" department."
+admin,department.deleted,"""{{name}}"" 부서를 삭제했어요.","Deleted the ""{{name}}"" department."
+admin,department.saveFailed,부서를 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save the department. Please try again in a moment.
+admin,department.treeFailure,부서를 불러오지 못했어요,Could not load the departments
+admin,department.chartFailure,조직도를 불러오지 못했어요,Could not load the org chart
+admin,department.failureDesc,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+admin,department.members.title,{{name}} {{count}}명,{{name}} · {{count}}
+admin,department.members.add,사람 추가,Add people
+admin,department.members.main,주 부서,Main
+admin,department.members.remove,빼기,Remove
+admin,department.members.removeFor,{{name}} 님을 {{dept}}에서 빼기,Remove {{name}} from {{dept}}
+admin,department.members.removed,{{name}} 님을 {{dept}}에서 뺐어요.,Removed {{name}} from {{dept}}.
+admin,department.members.removedMain,{{name}} 님을 {{dept}}에서 뺐어요. 주 부서도 함께 빠졌어요.,Removed {{name}} from {{dept}}. The main department was removed as well.
+admin,department.members.listLabel,{{dept}} 사람,People in {{dept}}
+admin,department.members.empty,{{dept}}에 아직 사람이 없어요,No one in {{dept}} yet
+admin,department.members.failure,{{dept}} 사람을 불러오지 못했어요,Could not load the people in {{dept}}
+admin,department.members.search,이름 · 아이디 검색,Search by name or ID
+admin,department.members.searchEmpty,찾는 사람이 없어요.,No one found.
+admin,department.members.noneToAdd,추가할 사람이 없어요,No one to add
+admin,department.members.pickError,추가할 사람을 골라주세요.,Choose people to add.
+admin,department.members.submit,{{count}}명 추가,Add {{count}}
+admin,department.members.added,{{count}}명을 {{dept}}에 넣었어요.,Added {{count}} to {{dept}}.
+admin,department.members.addFailed,사람을 추가하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not add people. Please try again in a moment.
+admin,department.members.noCompanyDesc,회사 관리에서 회사를 먼저 만들어주세요.,Create a company in Company first.
