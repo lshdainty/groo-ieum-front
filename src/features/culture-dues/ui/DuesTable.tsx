@@ -209,7 +209,9 @@ const DuesTable = ({ yearDues = [] }: DuesTableProps) => {
         content: duesRow?.dues_detail,
         amount: `${Math.abs(duesRow?.dues_amount ?? 0).toLocaleString('ko-KR')}원`,
       })}
-      onConfirm={() => performDelete(duesRow!)}
+      onConfirm={async () => {
+        if (duesRow) await performDelete(duesRow);
+      }}
     />
     </>
   );

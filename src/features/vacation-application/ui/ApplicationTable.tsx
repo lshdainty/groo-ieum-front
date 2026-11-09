@@ -158,9 +158,11 @@ const ApplicationTable = ({
         description={t('application.cancelConfirm', { title: cancelTarget?.desc || cancelTarget?.policy_name })}
         confirmLabel={t('application.cancelAction')}
         cancelLabel={tc('close')}
-        onConfirm={() =>
-          cancelVacationRequest({ vacationGrantId: cancelTarget!.vacation_grant_id, userId: userId! })
-        }
+        onConfirm={async () => {
+          if (cancelTarget && userId) {
+            await cancelVacationRequest({ vacationGrantId: cancelTarget.vacation_grant_id, userId })
+          }
+        }}
       />
     </>
   )

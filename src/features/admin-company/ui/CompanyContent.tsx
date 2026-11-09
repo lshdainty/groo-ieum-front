@@ -160,7 +160,9 @@ const CompanyContentInner = ({ company }: CompanyContentInnerProps) => {
       onOpenChange={deleteConfirm.onOpenChange}
       title={t('department.deleteTitle')}
       description={t('department.deleteConfirm', { name: deleteConfirm.target?.department_name_kr })}
-      onConfirm={() => deleteDepartment(deleteConfirm.target!.department_id)}
+      onConfirm={async () => {
+        if (deleteConfirm.target) await deleteDepartment(deleteConfirm.target.department_id);
+      }}
     />
     </>
   );

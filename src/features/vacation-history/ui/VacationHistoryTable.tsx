@@ -87,7 +87,9 @@ const VacationHistoryTable = ({ value: data, canAdd = false }: VacationHistoryTa
           type: usage?.vacation_time_type_name,
           time: usage?.used_time_str,
         })}
-        onConfirm={() => deleteVacationUsage(usage!.vacation_usage_id)}
+        onConfirm={async () => {
+          if (usage) await deleteVacationUsage(usage.vacation_usage_id);
+        }}
       />
       <AddEventDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} />
       {selectedEvent && (

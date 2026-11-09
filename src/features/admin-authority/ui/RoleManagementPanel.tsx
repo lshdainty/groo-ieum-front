@@ -154,7 +154,9 @@ const RoleManagementPanelInner = ({ roles, authorities }: RoleManagementPanelInn
       onOpenChange={deleteConfirm.onOpenChange}
       title={t('authority.deleteRoleTitle')}
       description={t('authority.confirmDeleteRole', { name: deleteConfirm.target?.role_name })}
-      onConfirm={() => performDeleteRole(deleteConfirm.target!.role_code)}
+      onConfirm={async () => {
+        if (deleteConfirm.target) await performDeleteRole(deleteConfirm.target.role_code);
+      }}
     />
   );
 
