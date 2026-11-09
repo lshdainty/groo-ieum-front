@@ -21,7 +21,16 @@ export const safeReturnPath = (raw: string | null | undefined): string | null =>
     return null
   }
   if (url.origin !== window.location.origin) return null
-  if (NEVER_RETURN.some((p) => url.pathname === p || url.pathname.startsWith(`${p}/`))) return null
+  // 점 구간 정리(`/..//evil`)로 새로 생긴 `//` · `/\` 도 거절 — 정리된 결과로 다시 검사한다
+  if (url.pathname.startsWith('//') || url.pathname.startsWith('/\\')) return null
+  // 제외 목록은 디코드 + 소문자로 정리한 결과와 비교(`/LOGIN` · `/%6Cogin` · `/Auth/Callback`)
+  let clean: string
+  try {
+    clean = decodeURIComponent(url.pathname).toLowerCase()
+  } catch {
+    return null
+  }
+  if (NEVER_RETURN.some((p) => clean === p || clean.startsWith(`${p}/`))) return null
   return `${url.pathname}${url.search}${url.hash}`
 }
 
