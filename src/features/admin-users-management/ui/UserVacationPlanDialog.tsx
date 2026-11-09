@@ -1,22 +1,16 @@
-import {
-  useUserVacationPlansQuery,
-  useVacationPlansQuery,
-  usePostAssignPlansToUserMutation,
-  useDeleteRevokePlanFromUserMutation
-} from '@/entities/vacation-plan'
-import { Badge } from '@/shared/ui/shadcn/badge'
-import { Button } from '@/shared/ui/shadcn/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/shadcn/dialog'
-import TransferList, { type TransferItem } from '@/shared/ui/shadcn/transfer'
-import { FileText } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { ShieldEllipsis } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+
+import { Button } from '@/shared/ds/button'
+import { Callout } from '@/shared/ds/callout'
+import { ResponsiveDialog, ResponsiveDialogBody, ResponsiveDialogCancel, ResponsiveDialogContent, ResponsiveDialogFooter } from '@/shared/ds/dialog'
+import { List, ListCheckItem } from '@/shared/ds/list'
+import { ResultSection } from '@/shared/ds/result-section'
+import { Skeleton } from '@/shared/ds/skeleton'
+import { useSnackbar } from '@/shared/ds/snackbar'
+import { useDeleteRevokePlanFromUserMutation, usePostAssignPlansToUserMutation, useUserVacationPlansQuery, useVacationPlansQuery } from '@/entities/vacation-plan'
+import { readWriteFailure } from '@/shared/ui/groo/write-error'
 
 interface UserVacationPlanDialogProps {
   open: boolean
@@ -25,176 +19,103 @@ interface UserVacationPlanDialogProps {
   userName?: string
 }
 
-const UserVacationPlanDialog = ({
-  open,
-  onOpenChange,
-  userId,
-  userName
-}: UserVacationPlanDialogProps) => {
+/**
+ * 휴가 플랜(I-24 F 29) — 폼 Dialog 480 / 시트. 내용 = 플랜을 여럿 고르는 체크 줄(제목 플랜 이름 · 설명 "정책 {n}개" — 칸 없는 체크가 아니라
+ * ds List 체크 줄), 바닥 [취소][저장]. 요청은 지금 그대로(더한 플랜 = 한 번에 할당, 뺀 플랜 = 하나씩 회수).
+ * 불러오기는 quiet — 표면 안 Result Section + [다시 시도]. 저장 실패는 맨 위 Callout.
+ */
+const UserVacationPlanDialog = ({ open, onOpenChange, userId, userName }: UserVacationPlanDialogProps) => {
   const { t } = useTranslation('admin')
   const { t: tc } = useTranslation('common')
-  const [leftItems, setLeftItems] = useState<TransferItem[]>([])
-  const [rightItems, setRightItems] = useState<TransferItem[]>([])
-  const [initialLeftPlanCodes, setInitialLeftPlanCodes] = useState<Set<string>>(new Set())
-  const [initialRightPlanCodes, setInitialRightPlanCodes] = useState<Set<string>>(new Set())
+  const snackbar = useSnackbar()
+  const all = useVacationPlansQuery({ quiet: true })
+  const mine = useUserVacationPlansQuery(userId, { quiet: true })
+  const assign = usePostAssignPlansToUserMutation()
+  const revoke = useDeleteRevokePlanFromUserMutation()
+  const [picked, setPicked] = useState<Set<string> | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
-  // API 호출
-  const { data: allPlans, isLoading: isLoadingAll } = useVacationPlansQuery()
-  const { data: userPlans, isLoading: isLoadingUser } = useUserVacationPlansQuery(userId)
+  const plans = all.data ?? []
+  const original = new Set((mine.data ?? []).map((p) => p.code))
+  const current = picked ?? original
+  const added = plans.filter((p) => current.has(p.code) && !original.has(p.code)).map((p) => p.code)
+  const removed = [...original].filter((c) => !current.has(c))
+  const dirty = added.length + removed.length > 0
+  const pending = all.isPending || mine.isPending
+  const failed = all.isLoadingError || mine.isLoadingError
 
-  // 휴가 플랜 할당/회수 API
-  const assignPlansMutation = usePostAssignPlansToUserMutation()
-  const revokePlanMutation = useDeleteRevokePlanFromUserMutation()
-
-  const isLoading = isLoadingAll || isLoadingUser
-
-  // 데이터 로드 및 초기화
-  useEffect(() => {
-    if (!open || !allPlans || !userPlans) return
-
-    // 사용자에게 할당된 플랜 코드 Set
-    const userPlanCodes = new Set(userPlans.map(p => p.code))
-
-    // 미할당 플랜 (왼쪽)
-    const unassignedPlans = allPlans.filter(p => !userPlanCodes.has(p.code))
-    // 할당된 플랜 (오른쪽)
-    const assignedPlans = userPlans
-
-    const newLeftPlanCodes = new Set(unassignedPlans.map(p => p.code))
-    const newRightPlanCodes = new Set(assignedPlans.map(p => p.code))
-
-    setInitialLeftPlanCodes(newLeftPlanCodes)
-    setInitialRightPlanCodes(newRightPlanCodes)
-
-    const newLeftItems = unassignedPlans.map(plan => ({
-      key: plan.code,
-      label: plan.name,
-      selected: false,
-      desc: plan.desc,
-      policyCount: plan.policies?.length || 0
-    }))
-
-    const newRightItems = assignedPlans.map(plan => ({
-      key: plan.code,
-      label: plan.name,
-      selected: false,
-      desc: plan.desc,
-      policyCount: plan.policies?.length || 0
-    }))
-
-    setLeftItems(newLeftItems)
-    setRightItems(newRightItems)
-  }, [open, userId, allPlans, userPlans])
-
-  // 변경사항이 있는지 확인
-  const hasChanges = () => {
-    const hasAddedPlans = rightItems.some(item => initialLeftPlanCodes.has(item.key))
-    const hasRemovedPlans = leftItems.some(item => initialRightPlanCodes.has(item.key))
-    return hasAddedPlans || hasRemovedPlans
+  const toggle = (code: string, on: boolean) => {
+    const next = new Set(current)
+    if (on) next.add(code)
+    else next.delete(code)
+    setPicked(next)
   }
 
-  const handleSave = async () => {
-    // 추가된 플랜
-    const addedPlanCodes = rightItems
-      .filter(item => initialLeftPlanCodes.has(item.key))
-      .map(item => item.key)
-
-    // 제거된 플랜
-    const removedPlanCodes = leftItems
-      .filter(item => initialRightPlanCodes.has(item.key))
-      .map(item => item.key)
-
+  const submit = async () => {
+    if (busy || !dirty) return
+    setBusy(true)
+    setSaveError(null)
     try {
-      // 추가된 플랜이 있으면 할당 API 호출
-      if (addedPlanCodes.length > 0) {
-        await assignPlansMutation.mutateAsync({
-          userId: userId,
-          planCodes: addedPlanCodes
-        })
-      }
-
-      // 제거된 플랜이 있으면 회수 API 호출 (개별 호출)
-      for (const code of removedPlanCodes) {
-        await revokePlanMutation.mutateAsync({
-          userId: userId,
-          code: code
-        })
-      }
-
+      if (added.length > 0) await assign.mutateAsync({ userId, planCodes: added })
+      for (const code of removed) await revoke.mutateAsync({ userId, code })
       onOpenChange(false)
+      snackbar.show({ message: t('users.planSaved'), tone: 'positive' })
     } catch (error) {
-      console.error(t('user.planSaveError'), error)
+      const { key } = readWriteFailure(error)
+      if (key) setSaveError(tc(key))
+    } finally {
+      setBusy(false)
     }
   }
 
-  const renderPlanItem = (item: TransferItem) => {
-    return (
-      <div className='flex flex-col gap-2'>
-        <div className='flex items-center gap-2'>
-          <span className='font-medium text-sm'>{item.label}</span>
-          <Badge variant='outline' className='text-[10px] h-4 px-1.5'>
-            <FileText className='h-3 w-3 mr-1' />
-            {t('user.planPolicyCount', { count: item.policyCount as number })}
-          </Badge>
-        </div>
-        {item.desc && (
-          <p className='text-xs text-muted-foreground'>{item.desc}</p>
-        )}
-      </div>
-    )
-  }
-
-  const filterPlanItem = (item: TransferItem, search: string) => {
-    const searchLower = search.toLowerCase()
-    return (
-      item.label.toLowerCase().includes(searchLower) ||
-      (item.desc as string)?.toLowerCase().includes(searchLower)
-    )
-  }
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='max-w-5xl max-h-[90vh] flex flex-col'>
-        <DialogHeader className='shrink-0'>
-          <DialogTitle>
-            {t('user.vacationPlanTitle')} {userName && `- ${userName}`}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className='flex-1 min-h-0 overflow-y-auto py-4'>
-          <div className='h-[500px] min-[48rem]:h-full min-h-[400px] flex flex-col'>
-            {isLoading ? (
-              <div className='flex items-center justify-center h-full'>
-                <div className='text-foreground/70'>{tc('loading')}</div>
-              </div>
-            ) : (
-              <TransferList
-                leftItems={leftItems}
-                rightItems={rightItems}
-                onLeftChange={setLeftItems}
-                onRightChange={setRightItems}
-                leftTitle={t('user.unassignedPlans')}
-                rightTitle={t('user.assignedPlans')}
-                leftPlaceholder={t('user.searchPlan')}
-                rightPlaceholder={t('user.searchPlan')}
-                renderItem={renderPlanItem}
-                renderRightItem={renderPlanItem}
-                filterItem={filterPlanItem}
-              />
-            )}
-          </div>
-        </div>
-
-        <DialogFooter className='shrink-0'>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
-            {tc('cancel')}
-          </Button>
-          <Button onClick={handleSave} disabled={!hasChanges()}>
+    <ResponsiveDialog open={open} form dirty={dirty} busy={busy} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent title={t('user.vacationPlan')} description={userName}>
+        <ResponsiveDialogBody>
+          {saveError && (
+            <Callout tone='critical' role='alert' className='mb-x4' data-save-failure>
+              {saveError}
+            </Callout>
+          )}
+          {failed ? (
+            <ResultSection
+              kind='failure'
+              size='medium'
+              title={t('users.planFailureTitle')}
+              description={t('users.failureDescription')}
+              primaryAction={{ label: tc('retry'), onClick: () => { void all.refetch(); void mine.refetch() }, loading: all.isFetching || mine.isFetching }}
+            />
+          ) : pending ? (
+            <div className='flex flex-col gap-x3'>
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} text='t5' className='block w-full' />
+              ))}
+            </div>
+          ) : plans.length === 0 ? (
+            <ResultSection size='medium' icon={<ShieldEllipsis />} title={t('users.planEmptyTitle')} description={t('users.planEmptyDescription')} />
+          ) : (
+            <List data-plan-list>
+              {plans.map((plan) => (
+                <ListCheckItem
+                  key={plan.code}
+                  title={<span className='[overflow-wrap:break-word] [word-break:keep-all]'>{plan.name}</span>}
+                  detail={t('user.planPolicyCount', { count: plan.policies?.length || 0 })}
+                  checked={current.has(plan.code)}
+                  onCheckedChange={(c) => toggle(plan.code, c === true)}
+                />
+              ))}
+            </List>
+          )}
+        </ResponsiveDialogBody>
+        <ResponsiveDialogFooter>
+          <ResponsiveDialogCancel>{tc('cancel')}</ResponsiveDialogCancel>
+          <Button loading={busy} disabled={!dirty || pending || failed} onClick={() => void submit()}>
             {tc('save')}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   )
 }
 

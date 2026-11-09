@@ -174,30 +174,30 @@ admin,user.deleteTitle,사용자 삭제,Delete user
 admin,user.deleteConfirm,"""{{name}}"" 님을 삭제할까요? 삭제한 사용자는 되돌릴 수 없어요.","Delete ""{{name}}""? A deleted user can't be restored."
 admin,user.userId,아이디,User ID
 admin,user.userIdPlaceholder,아이디를 입력하세요,Enter user ID
-admin,user.userIdRequired,아이디를 입력해주세요.,Please enter the user ID.
+admin,user.userIdRequired,아이디를 입력해주세요.,Enter a user ID.
 admin,user.userIdDuplicate,아이디가 중복됩니다.,User ID already exists.
 admin,user.userName,이름,Name
 admin,user.userNamePlaceholder,이름을 입력하세요,Enter name
-admin,user.userNameRequired,이름을 입력해주세요.,Please enter the name.
+admin,user.userNameRequired,이름을 입력해주세요.,Enter a name.
 admin,user.userEmail,이메일,Email
 admin,user.userEmailPlaceholder,이메일을 입력하세요,Enter email
-admin,user.userEmailRequired,유효한 이메일을 입력해주세요.,Please enter a valid email.
+admin,user.userEmailRequired,메일 주소를 확인해주세요.,Check the email address.
 admin,user.userBirth,생년월일,Birth Date
 admin,user.userBirthPlaceholder,생년월일을 선택하세요,Select birth date
 admin,user.joinDate,입사일,Join Date
 admin,user.joinDatePlaceholder,입사일을 선택하세요,Select join date
-admin,user.joinDateRequired,입사일을 입력해주세요.,Please enter the join date.
+admin,user.joinDateRequired,입사일을 골라주세요.,Pick a join date.
 admin,user.company,소속 회사,Company
 admin,user.companyPlaceholder,회사를 선택하세요,Select company
-admin,user.companyRequired,회사를 선택해주세요.,Please select a company.
+admin,user.companyRequired,회사를 골라주세요.,Pick a company.
 admin,user.department,부서,Department
 admin,user.departmentPlaceholder,부서를 선택하세요,Select department
 admin,user.workTime,유연근무시간,Flexible Work Time
 admin,user.workTimePlaceholder,유연근무시간을 선택하세요,Select flexible work time
-admin,user.workTimeRequired,유연근무시간을 선택해주세요.,Please select flexible work time.
+admin,user.workTimeRequired,근무 시간을 골라주세요.,Pick work hours.
 admin,user.countryCode,국가,Country
 admin,user.countryCodePlaceholder,국가를 선택하세요,Select country
-admin,user.countryCodeRequired,국가를 선택해주세요.,Please select a country.
+admin,user.countryCodeRequired,국가를 골라주세요.,Pick a country.
 admin,user.empty.title,사용자가 없습니다,No Users
 admin,user.empty.description,등록된 사용자가 없습니다. 사용자를 초대해 주세요.,No registered users. Please invite users.
 admin,user.lunarYn,음력 여부,Lunar Calendar
@@ -211,12 +211,12 @@ admin,authority.roleDetail,역할 상세,Role Details
 admin,authority.roleDetailDesc,역할 정보 및 권한을 관리합니다.,Manage role information and permissions.
 admin,authority.roleCode,역할 코드,Role Code
 admin,authority.roleCodePlaceholder,예: ROLE_HR_MANAGER,e.g. ROLE_HR_MANAGER
-admin,authority.roleCodeDisabledHint,역할 코드는 생성 후 변경할 수 없습니다.,Role code cannot be changed after creation.
-admin,authority.roleCodeHint,대문자·숫자·밑줄 사용 (예: ROLE_ADMIN),Use uppercase letters. numbers. and underscores (e.g. ROLE_ADMIN).
+admin,authority.roleCodeDisabledHint,만든 뒤에는 바꿀 수 없어요.,Can't be changed after it's created.
+admin,authority.roleCodeHint,대문자 · 숫자 · 밑줄로 써요. 예: ROLE_ADMIN,"Use capital letters, numbers and underscores. e.g. ROLE_ADMIN"
 admin,authority.roleName,역할 이름,Role Name
 admin,authority.roleNamePlaceholder,예: HR 매니저,e.g. HR Manager
 admin,authority.roleDesc,설명,Description
-admin,authority.roleDescPlaceholder,역할의 책임을 설명하세요...,Describe the role's responsibilities...
+admin,authority.roleDescPlaceholder,역할이 맡는 일을 적어주세요.,Describe what this role does.
 admin,authority.permissions,권한,Permissions
 admin,authority.saveChanges,변경사항 저장,Save Changes
 admin,authority.searchUsers,사용자 검색...,Search users...
@@ -228,8 +228,8 @@ admin,authority.done,완료,Done
 admin,authority.managePermissions,권한 관리,Manage Permissions
 admin,authority.selected,{{count}}개 선택됨,{{count}} Selected
 admin,authority.managePermissionsDesc,이 역할의 권한을 선택하세요. 완료를 눌러 저장하세요.,Select permissions for this role. Tap Done to save changes.
-admin,authority.userRolesUpdated,사용자 역할이 업데이트되었습니다.,User roles updated successfully
-admin,authority.userRolesUpdateFailed,사용자 역할 업데이트에 실패했습니다.,Failed to update user roles
+admin,authority.userRolesUpdated,사용자 역할을 저장했어요.,Saved the user's roles.
+admin,authority.userRolesUpdateFailed,사용자 역할을 저장하지 못했어요.,Could not save the user's roles.
 admin,authority.userRolesHint,여럿 고를 수 있어요. 저장을 눌러야 바뀌어요.,You can choose more than one. Changes apply when you save.
 admin,authority.userRolesNoChanges,바뀐 것 없음,No changes
 admin,authority.userRolesPending,더함 {{added}} · 뺌 {{removed}} — 아직 저장 안 됨,{{added}} added · {{removed}} removed — not saved yet
@@ -242,16 +242,16 @@ admin,authority.enterValidRoleCode,유효한 역할 코드를 입력하세요.,P
 admin,authority.roleCreated,역할이 생성되었습니다.,Role created successfully
 admin,authority.roleUpdated,역할이 업데이트되었습니다.,Role updated successfully
 admin,authority.roleSaveFailed,역할 저장에 실패했습니다.,Failed to save role
-admin,authority.createRole,역할 생성,Create Role
+admin,authority.createRole,만들기,Create
 admin,authority.saveRole,역할 저장,Save Role
 admin,authority.savePermissions,권한 저장,Save Permissions
 admin,authority.changed,변경됨,Changed
 admin,authority.permissionsUpdated,권한이 저장되었습니다.,Permissions saved successfully
 admin,authority.permissionsUpdatedLocal,권한이 업데이트되었습니다. 역할 생성 시 저장됩니다.,Permissions updated. Will be saved when creating role.
 admin,authority.permissionsSaveFailed,권한 저장에 실패했습니다.,Failed to save permissions
-admin,authority.selectRoleToView,상세 정보를 보려면 역할을 선택하세요.,Select a role to view details
-admin,authority.noRoles,역할이 없습니다,No roles
-admin,authority.noRolesDesc,역할을 추가하여 사용자에게 권한을 부여하세요.,Add roles to grant permissions to users.
+admin,authority.selectRoleToView,상세를 보려면 역할을 골라주세요.,Pick a role to see its details.
+admin,authority.noRoles,역할이 없어요,No roles yet
+admin,authority.noRolesDesc,역할을 만들어 직원에게 권한을 줄 수 있어요.,Create a role to grant permissions to people.
 vacation,title,휴가,Vacation
 vacation,history.title,휴가 현황,Vacation History
 vacation,application.title,휴가 신청,Vacation Application
@@ -401,12 +401,12 @@ culture,dues.calcMinus,출금,Withdrawal
 culture,dues.title,회비,Dues
 admin,user.list,사용자 목록,User List
 admin,user.invite,초대,Invite
-admin,user.inviteEdit,초대정보 수정,Edit Invitation
-admin,user.resendEmail,메일 재전송,Resend Email
-admin,user.resendEmailTitle,초대 메일 재전송,Resend Invitation Email
-admin,user.resendEmailConfirm,{{email}}로 초대 메일을 재전송하시겠습니까?,Would you like to resend the invitation email to {{email}}?
+admin,user.inviteEdit,초대 정보 수정,Edit invitation
+admin,user.resendEmail,초대 메일 다시 보내기,Resend invitation email
+admin,user.resendEmailTitle,초대 메일 다시 보내기,Resend invitation email
+admin,user.resendEmailConfirm,{{email}} 로 초대 메일을 다시 보낼까요?,Resend the invitation email to {{email}}?
 admin,user.sending,전송 중...,Sending...
-admin,user.send,전송,Send
+admin,user.send,보내기,Send
 admin,user.checkingDuplicate,중복 확인 중...,Checking for duplicates...
 admin,user.vacationPolicy,휴가정책 설정,Vacation Policy Settings
 admin,user.vacationPolicyTitle,휴가 정책 관리,Vacation Policy Management
@@ -427,10 +427,10 @@ admin,user.planPolicyCount,정책 {{count}}개,{{count}} policies
 admin,user.planPolicyCount_one,정책 {{count}}개,{{count}} policy
 admin,user.planSaveError,플랜 저장 중 오류,Error saving plan
 admin,user.planError,플랜 정보를 불러오는 중 오류가 발생했습니다.,An error occurred while loading plan data.
-admin,user.statusPending,가입 대기,Pending
+admin,user.statusPending,초대 대기,Invited
 admin,user.statusActive,가입 완료,Active
 admin,user.statusInactive,비활성,Inactive
-admin,user.statusExpired,토큰 만료,Expired
+admin,user.statusExpired,초대 만료,Invitation expired
 admin,user.tableId,ID,ID
 admin,user.tableEmail,Email,Email
 admin,user.tableWorkTime,유연근무시간,Flexible Work Time
@@ -632,10 +632,10 @@ common,excelDownloadFailed,엑셀 다운로드에 실패했습니다.,Excel down
 common,imageFileOnly,이미지 파일만 업로드 가능합니다.,Only image files can be uploaded.
 common,fileSizeLimit,파일 크기는 5MB 이하여야 합니다.,File size must be 5MB or less.
 common,unknownError,알 수 없는 오류가 발생했습니다.,An unknown error occurred.
-user,edit.nameRequired,이름을 입력해주세요.,Please enter a name.
+user,edit.nameRequired,이름을 입력해주세요.,Enter a name.
 user,edit.idRequired,아이디를 입력해주세요.,Please enter an ID.
-user,edit.emailRequired,유효한 이메일을 입력해주세요.,Please enter a valid email.
-user,edit.birthRequired,생년월일을 입력해주세요.,Please enter birth date.
+user,edit.emailRequired,메일 주소를 확인해주세요.,Check the email address.
+user,edit.birthRequired,생일을 골라주세요.,Pick a birthday.
 user,edit.companyRequired,회사를 선택해주세요.,Please select a company.
 user,edit.lunarRequired,음력여부를 선택해주세요.,Please select lunar type.
 user,edit.workTimeRequired,유연근무시간을 선택해주세요.,Please select flexible work time.
@@ -690,8 +690,8 @@ dashboard,saveError,홈 설정을 저장하지 못했어요. 잠시 뒤 다시 �
 user,edit.title,사용자 수정,Edit User
 user,edit.name,이름,Name
 user,edit.id,아이디,ID
-user,edit.email,이메일,Email
-user,edit.birth,생년월일,Birth Date
+user,edit.email,메일,Email
+user,edit.birth,생일,Birthday
 user,edit.lunar,음력여부,Lunar Type
 user,edit.lunarPlaceholder,음력여부 선택,Select Lunar Type
 user,edit.company,회사,Company
@@ -1137,8 +1137,8 @@ vacation,history.empty.typeStats.title,휴가 유형 통계가 없습니다,No V
 vacation,history.empty.typeStats.description,사용 가능한 휴가 유형이 없습니다,No available vacation types
 admin,user.passwordReset,비밀번호 초기화,Reset Password
 admin,user.passwordResetTitle,비밀번호 초기화,Reset Password
-admin,user.passwordResetConfirm,{{name}} 사용자의 비밀번호를 초기화하면 임시 비밀번호가 사용자 이메일로 발송됩니다. 계속하시겠습니까?,Resetting the password for user {{name}} will send a temporary password to their email. Do you want to continue?
-admin,user.passwordResetSuccess,임시 비밀번호를 사용자 이메일로 발송했습니다.,A temporary password has been sent to the user's email.
+admin,user.passwordResetConfirm,"""{{name}}"" 님의 비밀번호를 초기화할까요? 지금 비밀번호로는 더 로그인할 수 없고, 임시 비밀번호를 메일로 보내요.","Reset the password for ""{{name}}""? The current password will stop working and a temporary password is sent by email."
+admin,user.passwordResetSuccess,비밀번호를 초기화했어요.,Reset the password.
 admin,user.passwordResetError,비밀번호 초기화에 실패했습니다.,Failed to reset the password.
 admin,user.resetting,초기화 중...,Resetting...
 admin,user.reset,초기화,Reset
@@ -1646,3 +1646,67 @@ admin,department.leaderLoading,불러오는 중이에요,Loading
 admin,department.leaderFailed,불러오지 못했어요,Could not load
 admin,users.peopleCount,{{count}}명,{{count}} people
 admin,users.peopleCount_one,{{count}}명,{{count}} person
+admin,users.statsTitle,회사별 인원,Headcount by company
+admin,users.listTitle,사용자 {{count}}명,{{count}} users
+admin,users.listTitle_one,사용자 {{count}}명,{{count}} user
+admin,users.listCaption,사용자 목록,User list
+admin,users.colName,이름,Name
+admin,users.colId,아이디,User ID
+admin,users.colWorkTime,근무 시간,Work hours
+admin,users.colCompany,회사 · 부서,Company · Department
+admin,users.colStatus,상태,Status
+admin,users.workTimeLabel,근무 시간,Work hours
+admin,users.emptyTitle,사용자가 없어요,No users yet
+admin,users.emptyDescription,초대하면 여기에 보여요.,Invited users show up here.
+admin,users.failureTitle,사용자를 불러오지 못했어요,Could not load users
+admin,users.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+admin,users.planFailureTitle,휴가 플랜을 불러오지 못했어요,Could not load vacation plans
+admin,users.planEmptyTitle,휴가 플랜이 없어요,No vacation plans
+admin,users.planEmptyDescription,휴가 플랜 화면에서 플랜을 만들면 여기에 보여요.,Plans you create on the vacation plan screen show up here.
+admin,users.planSaved,휴가 플랜을 저장했어요.,Saved the vacation plans.
+admin,users.invited,사용자를 초대했어요.,Invited the user.
+admin,users.inviteEdited,초대 정보를 저장했어요.,Saved the invitation details.
+admin,users.idTaken,이미 쓰는 아이디예요.,This user ID is already taken.
+admin,users.idChecking,확인하는 중…,Checking…
+admin,user.resendEmailDone,초대 메일을 보냈어요.,Sent the invitation email.
+common,failure.reset,초기화하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not reset. Please try again in a moment.
+common,failure.resetInput,초기화하지 못했어요. 내용을 확인해주세요.,Could not reset. Check the details.
+common,failure.resetUnconfirmed,초기화됐는지 확인하지 못했어요. 목록을 확인한 뒤 다시 시도해주세요.,Could not confirm that it was reset. Check the list and try again.
+common,failure.send,보내지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not send. Please try again in a moment.
+common,failure.sendInput,보내지 못했어요. 내용을 확인해주세요.,Could not send. Check the details.
+common,failure.sendUnconfirmed,보냈는지 확인하지 못했어요. 목록을 확인한 뒤 다시 시도해주세요.,Could not confirm that it was sent. Check the list and try again.
+user,edit.lunarBirthday,음력 생일이에요,Lunar birthday
+user,edit.changePhoto,사진 바꾸기,Change photo
+user,edit.removePhoto,사진 지우기,Remove photo
+user,edit.uploadingPhoto,프로필 사진 올리는 중,Uploading profile photo
+user,edit.photoImageOnly,그림 파일만 올릴 수 있어요.,Only image files can be uploaded.
+user,edit.photoTooLarge,사진을 올리지 못했어요. 5MB 이하 그림으로 다시 해주세요.,Could not upload the photo. Use an image of 5MB or less.
+user,edit.photoFailed,사진을 올리지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not upload the photo. Please try again in a moment.
+user,edit.saved,정보를 저장했어요.,Saved your information.
+admin,authority.roleCount,역할 {{count}}개,{{count}} roles
+admin,authority.roleCount_one,역할 {{count}}개,{{count}} role
+admin,authority.permissionCount,권한 {{count}}개,{{count}} permissions
+admin,authority.permissionCount_one,권한 {{count}}개,{{count}} permission
+admin,authority.selectAllShort,모두,All
+admin,authority.selectAllOf,{{name}} 권한 모두 선택,Select all {{name}} permissions
+admin,authority.moreFor,{{name}} 더보기,More for {{name}}
+admin,authority.backToList,역할 목록,Role list
+admin,authority.tabsAria,역할 및 권한,Roles and permissions
+admin,authority.failureTitle,역할을 불러오지 못했어요,Could not load roles
+admin,authority.roleCodeRequired,역할 코드를 입력해주세요.,Enter a role code.
+admin,authority.roleNameRequired,역할 이름을 입력해주세요.,Enter a role name.
+admin,authority.roleSavedToast,역할을 저장했어요.,Saved the role.
+admin,authority.roleCreatedToast,역할을 만들었어요.,Created the role.
+admin,authority.roleDeletedToast,역할을 삭제했어요.,Deleted the role.
+admin,authority.resource.USER,사용자,Users
+admin,authority.resource.VACATION,휴가,Vacation
+admin,authority.resource.WORK,업무,Work
+admin,authority.resource.SCHEDULE,일정,Schedule
+admin,authority.resource.COMPANY,회사,Company
+admin,authority.resource.DEPARTMENT,부서,Departments
+admin,authority.resource.HOLIDAY,공휴일,Holidays
+admin,authority.resource.DUES,회비,Dues
+admin,authority.resource.REGULATION,규정,Regulations
+admin,authority.resource.NOTICE,공지사항,Notices
+admin,authority.resource.ROLE,역할,Roles
+admin,authority.resource.PERMISSION,권한,Permissions

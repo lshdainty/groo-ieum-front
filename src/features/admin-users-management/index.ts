@@ -1,16 +1,11 @@
 export { ManagementContent } from './ui/ManagementContent';
-export { ManagementContentSkeleton } from './ui/ManagementContentSkeleton';
-export { ManagementEmpty } from './ui/ManagementEmpty';
 export { ResendEmailDialog } from './ui/ResendEmailDialog';
 export { UserCompanyCard } from './ui/UserCompanyCard';
-export { UserCompanyCardSkeleton } from './ui/UserCompanyCardSkeleton';
 export { UserCompanyStatsItem, getUserCompanyStatsConfig } from './ui/UserCompanyStatsItem';
 export type { UserCompanyStatsItemProps } from './ui/UserCompanyStatsItem';
-export { UserCompanyStatsSkeleton } from './ui/UserCompanyStatsSkeleton';
 export { UserDeleteDialog } from './ui/UserDeleteDialog';
 export { UserInviteDialog } from './ui/UserInviteDialog';
 export { UserPasswordResetDialog } from './ui/UserPasswordResetDialog';
-export { UserTable } from './ui/UserTable';
-export { UserTableSkeleton } from './ui/UserTableSkeleton';
+export { UserListCard } from './ui/UserTable';
 export { UserVacationPlanDialog } from './ui/UserVacationPlanDialog';
 export { ManagementProvider, useManagementContext } from './model/ManagementContext';

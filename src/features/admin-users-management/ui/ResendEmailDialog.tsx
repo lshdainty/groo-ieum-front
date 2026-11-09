@@ -1,15 +1,9 @@
-import { usePostResendInvitationMutation } from '@/entities/user'
-import { Button } from '@/shared/ui/shadcn/button'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/shadcn/dialog'
-import { Spinner } from '@/shared/ui/shadcn/spinner'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import { useSnackbar } from '@/shared/ds/snackbar'
+import { usePostResendInvitationMutation } from '@/entities/user'
+import { ConfirmDialog } from '@/shared/ui/confirm'
 
 interface ResendEmailDialogProps {
   open: boolean
@@ -18,46 +12,25 @@ interface ResendEmailDialogProps {
   userEmail: string
 }
 
+/** 초대 메일 다시 보내기 — 잃는 것이 없는 일이라 확정 [보내기] neutralSolid(I-24 51). 실패는 확인창 규칙(닫고 Snackbar + [다시 시도]) */
 const ResendEmailDialog = ({ open, onOpenChange, userId, userEmail }: ResendEmailDialogProps) => {
   const { t } = useTranslation('admin')
-  const { t: tc } = useTranslation('common')
-  const { mutateAsync: resendInvitation, isPending } = usePostResendInvitationMutation()
-
-  const handleConfirm = async () => {
-    await resendInvitation(userId)
-    onOpenChange(false)
-  }
+  const snackbar = useSnackbar()
+  const { mutateAsync: resendInvitation } = usePostResendInvitationMutation()
+  const [email] = useState(userEmail)
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-[40rem]:max-w-[28rem]">
-        <DialogHeader>
-          <DialogTitle>{t('user.resendEmailTitle')}</DialogTitle>
-        </DialogHeader>
-        <div className="py-4">
-          <p className="text-sm text-muted-foreground">
-            {t('user.resendEmailConfirm', { email: userEmail })}
-          </p>
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" disabled={isPending}>
-              {tc('cancel')}
-            </Button>
-          </DialogClose>
-          <Button onClick={handleConfirm} disabled={isPending}>
-            {isPending ? (
-              <>
-                <Spinner className="h-4 w-4 mr-2" />
-                {t('user.sending')}
-              </>
-            ) : (
-              t('user.send')
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t('user.resendEmailTitle')}
+      description={t('user.resendEmailConfirm', { email })}
+      confirmLabel={t('user.send')}
+      tone='neutralSolid'
+      kind='send'
+      onConfirm={() => resendInvitation(userId)}
+      onDone={() => snackbar.show({ message: t('user.resendEmailDone'), tone: 'positive' })}
+    />
   )
 }
 

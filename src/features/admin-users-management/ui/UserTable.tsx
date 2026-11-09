@@ -1,382 +1,196 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/shadcn/avatar';
-import { Badge } from '@/shared/ui/shadcn/badge';
-import { Button } from '@/shared/ui/shadcn/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/shadcn/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/shared/ui/shadcn/dropdownMenu';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/shadcn/table';
+import { useRef, useState } from 'react'
+import { Plus, Users } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+
 import { config } from '@/shared/config'
-import { usePermission } from '@/entities/session';
-import { ResendEmailDialog } from '@/features/admin-users-management/ui/ResendEmailDialog';
-import { UserDeleteDialog } from '@/features/admin-users-management/ui/UserDeleteDialog';
-import { UserInviteDialog } from '@/features/admin-users-management/ui/UserInviteDialog';
-import { UserPasswordResetDialog } from '@/features/admin-users-management/ui/UserPasswordResetDialog';
-import { UserVacationPlanDialog } from '@/features/admin-users-management/ui/UserVacationPlanDialog';
-import { useManagementContext } from '@/features/admin-users-management/model/ManagementContext';
-import { UserEditDialog } from '@/features/user-profile/ui/UserEditDialog';
-import { useCompanyTypesQuery } from '@/entities/type';
-import { useDeleteUserMutation, usePutUserMutation } from '@/entities/user';
-import { type GetUsersResp, type PutUserReq } from '@/entities/user';
-import { cn } from '@/shared/lib'
-import { Empty } from 'antd';
-import dayjs from 'dayjs';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, EllipsisVertical, KeyRound, MailPlus, Pencil, ShieldEllipsis, Trash2 } from 'lucide-react';
-import { Activity, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Avatar } from '@/shared/ds/avatar'
+import { Badge } from '@/shared/ds/badge'
+import { Button } from '@/shared/ds/button'
+import { Card, CardHeader, CardTitle } from '@/shared/ds/card'
+import { List, ListButtonItem, ListItem } from '@/shared/ds/list'
+import { ResponsiveMenu } from '@/shared/ds/menu'
+import { ResultSection } from '@/shared/ds/result-section'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableCellContent,
+  TableHead,
+  TableHeader,
+  TableMoreCell,
+  TableMoreHead,
+  TableRow,
+  TableRowHeader,
+} from '@/shared/ds/table'
+import { TablePagination, type TablePaginationValue } from '@/shared/ds/table-pagination'
+import { usePermission } from '@/entities/session'
+import type { GetUsersResp } from '@/entities/user'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { formatWorkTime, userActionsOf, userStatusOf } from '../lib/user-format'
+import { useManagementContext } from '../model/ManagementContext'
+import { hasUserActions, UserRowMenuContent } from './UserRowMenu'
 
-interface UserTableProps {
-  value: GetUsersResp[];
-}
+/** 쪽 크기 선택지 — 가장 작은 쪽 크기 이하면 넘김 줄을 두지 않는다 */
+const PAGE_SIZES = [10, 25, 50] as const
+const WORD = '[overflow-wrap:break-word] [word-break:keep-all]'
+const LONG = '[overflow-wrap:anywhere]'
 
-const ROWS_PER_PAGE = 10;
+const photoOf = (u: GetUsersResp): string | undefined => (u.profile_url ? `${config.baseUrl}${u.profile_url}` : undefined)
 
-const UserTable = ({ value: users }: UserTableProps) => {
-  const { t } = useTranslation('admin');
-  const { t: tc } = useTranslation('common');
-  const { mutate: putUser } = usePutUserMutation();
-  const { mutateAsync: deleteUser } = useDeleteUserMutation();
-  const { data: companyTypes } = useCompanyTypesQuery();
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = users.length > 0 ? Math.ceil(users.length / ROWS_PER_PAGE) : 1;
-  const paginatedUsers = users.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
-
-  const {
-    setShowInviteDialog,
-    showEditDialog, setShowEditDialog,
-    showResendDialog, setShowResendDialog,
-    showPlanDialog, setPlanDialog,
-    showDeleteDialog, setShowDeleteDialog,
-    showInviteEditDialog, setShowInviteEditDialog,
-    showPasswordResetDialog, setShowPasswordResetDialog
-  } = useManagementContext();
-
-  const { hasPermission, hasAllPermissions } = usePermission();
-
-  const handleUpdateUser = (user: PutUserReq) => {
-    putUser({
-      user_id: user.user_id,
-      user_name: user.user_name,
-      user_email: user.user_email,
-      user_birth: dayjs(user.user_birth).format('YYYY-MM-DD'),
-      user_company_type: user.user_company_type,
-      user_work_time: user.user_work_time,
-      lunar_yn: user.lunar_yn,
-      profile_url: user.profile_url,
-      profile_uuid: user.profile_uuid,
-      country_code: user.country_code
-    });
-  };
-
-  const handleDeleteUser = (id: string) => deleteUser(id);
-
+export const UserStatusBadge = ({ status }: { status: string | undefined }) => {
+  const { t } = useTranslation('admin')
+  const s = userStatusOf(status)
+  if (!s) return <span className='text-fg-neutral-subtle'>-</span>
   return (
-    <Card>
-      <CardHeader>
-        <div className='flex items-center justify-between'>
-          <CardTitle>{t('user.list')}</CardTitle>
-          <div className='flex gap-2'>
-            <Activity mode={hasPermission('USER:MANAGE') ? 'visible' : 'hidden'}>
-              <Button className='text-sm h-8' size='sm' onClick={() => setShowInviteDialog(true)}>
-                {t('user.invite')}
-              </Button>
-            </Activity>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {users && users.length > 0 ? (
-          <div className='overflow-x-auto relative'>
-            <Table className='min-w-[1000px]'>
-              <TableHeader>
-                <TableRow>
-                  <TableHead
-                    className={cn(
-                      'min-w-[180px] w-[180px] pl-4',
-                      'sticky left-0 z-5 bg-card'
-                    )}
-                  >
-                    {tc('name')}
-                  </TableHead>
-                  <TableHead className='min-w-[120px]'>{t('user.tableId')}</TableHead>
-                  <TableHead className='min-w-[220px]'>{t('user.tableEmail')}</TableHead>
-                  <TableHead className='min-w-[130px]'>{t('user.tableWorkTime')}</TableHead>
-                  <TableHead className='min-w-[120px]'>{t('user.tableCompany')}</TableHead>
-                  <TableHead className='min-w-[120px]'>{t('user.tableDepartment')}</TableHead>
-                  <TableHead className='min-w-[120px]'>{t('user.tableInviteStatus')}</TableHead>
-                  <TableHead className='min-w-20 pr-4'></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedUsers.map((row: GetUsersResp) => (
-                  <TableRow
-                    key={row.user_id}
-                    className={cn(
-                      'hover:bg-muted/50 hover:text-foreground',
-                      'dark:hover:bg-muted/80 dark:hover:text-foreground'
-                    )}
-                  >
-                    <TableCell 
-                      className={cn(
-                        'pl-4 w-[180px]',
-                        'sticky left-0 z-5 bg-card'
-                      )}
-                    >
-                      <div className='flex items-center gap-3'>
-                        <Avatar className='w-8 h-8 shrink-0'>
-                          <AvatarImage src={`${config.baseUrl}${row.profile_url}`} alt={row.user_name} />
-                          <AvatarFallback>{row.user_name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className='font-medium'>{row.user_name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{row.user_id}</TableCell>
-                    <TableCell>{row.user_email}</TableCell>
-                    <TableCell>
-                      <Badge className={cn(
-                        'text-xs whitespace-nowrap',
-                        {
-                          'bg-rose-500 text-white': row.user_work_time === '8 ~ 17',
-                          'bg-sky-500 text-white': row.user_work_time === '9 ~ 18',
-                          'bg-emerald-500 text-white': row.user_work_time === '10 ~ 19',
-                          'bg-amber-500 text-white': row.user_work_time === '13 ~ 21'
-                        }
-                      )}>
-                        {row.user_work_time}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className='text-sm'>{row.user_origin_company_name}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className='text-sm'>{row.main_department_name_kr || '-'}</span>
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge className={cn(
-                        'text-xs whitespace-nowrap',
-                        {
-                          'bg-yellow-500 text-white': row.invitation_status === 'PENDING',
-                          'bg-green-500 text-white': row.invitation_status === 'ACTIVE',
-                          'bg-gray-500 text-white': row.invitation_status === 'INACTIVE',
-                          'bg-red-500 text-white': row.invitation_status === 'EXPIRED'
-                        }
-                      )}>
-                        {row.invitation_status === 'PENDING' && t('user.statusPending')}
-                        {row.invitation_status === 'ACTIVE' && t('user.statusActive')}
-                        {row.invitation_status === 'INACTIVE' && t('user.statusInactive')}
-                        {row.invitation_status === 'EXPIRED' && t('user.statusExpired')}
-                        {!row.invitation_status && '-'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className='pr-4'>
-                      <div className='flex justify-end'>
-                        <DropdownMenu modal={false}>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant='ghost'
-                              size='sm'
-                              className='h-8 w-8 p-0 data-[state=open]:bg-muted hover:bg-muted'
-                            >
-                              <EllipsisVertical className='w-4 h-4' />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align='end' className='w-32'>
-                            <Activity mode={hasPermission('USER:MANAGE') && row.invitation_status !== 'ACTIVE' ? 'visible' : 'hidden'}>
-                              <DropdownMenuItem
-                                onSelect={() => setShowResendDialog(row.user_id)}
-                              >
-                                <MailPlus className='h-4 w-4' />
-                                <span>{t('user.resendEmail')}</span>
-                              </DropdownMenuItem>
-                            </Activity>
-                            <Activity mode={row.invitation_status === 'ACTIVE' && hasPermission('USER:MANAGE') ? 'visible' : 'hidden'}>
-                              <DropdownMenuItem
-                                onSelect={() => setShowEditDialog(row.user_id)}
-                              >
-                                <Pencil className='h-4 w-4' />
-                                <span>{t('user.editTitle')}</span>
-                              </DropdownMenuItem>
-                            </Activity>
-                            <Activity mode={row.invitation_status === 'PENDING' && hasPermission('USER:MANAGE') ? 'visible' : 'hidden'}>
-                              <DropdownMenuItem
-                                onSelect={() => setShowInviteEditDialog(row.user_id)}
-                              >
-                                <Pencil className='h-4 w-4' />
-                                <span>{t('user.inviteEdit')}</span>
-                              </DropdownMenuItem>
-                            </Activity>
-                            <Activity mode={row.invitation_status !== 'ACTIVE' && row.invitation_status !== 'PENDING' ? 'visible' : 'hidden'}>
-                              <DropdownMenuItem
-                                disabled
-                              >
-                                <Pencil className='h-4 w-4' />
-                                <span>{t('user.editTitle')}</span>
-                              </DropdownMenuItem>
-                            </Activity>
-                            <Activity mode={row.invitation_status === 'ACTIVE' && hasAllPermissions(['USER:MANAGE', 'VACATION:MANAGE']) ? 'visible' : 'hidden'}>
-                              <DropdownMenuItem
-                                onSelect={() => setPlanDialog(row.user_id)}
-                              >
-                                <ShieldEllipsis className='h-4 w-4' />
-                                <span>{t('user.vacationPlan')}</span>
-                              </DropdownMenuItem>
-                            </Activity>
-                            <Activity mode={row.invitation_status === 'ACTIVE' && hasPermission('USER:MANAGE') ? 'visible' : 'hidden'}>
-                              <DropdownMenuItem
-                                onSelect={() => setShowPasswordResetDialog(row.user_id)}
-                              >
-                                <KeyRound className='h-4 w-4' />
-                                <span>{t('user.passwordReset')}</span>
-                              </DropdownMenuItem>
-                            </Activity>
-                            <DropdownMenuSeparator />
-                            <Activity mode={hasPermission('USER:MANAGE') ? 'visible' : 'hidden'}>
-                              <DropdownMenuItem
-                                onSelect={() => setShowDeleteDialog(row.user_id)}
-                                className='text-destructive focus:text-destructive hover:bg-destructive/20!'
-                              >
-                                <Trash2 className='h-4 w-4' />
-                                <span>{tc('delete')}</span>
-                              </DropdownMenuItem>
-                            </Activity>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <Empty />
-        )}
-        {users && users.length > 0 && (
-          <div className='flex items-center justify-between pt-4 border-t mt-4'>
-            <div className='text-sm text-muted-foreground'>
-              {users.length} row(s)
-            </div>
-            <div className='flex items-center space-x-6 min-[64rem]:space-x-8'>
-              <div className='flex items-center space-x-2'>
-                <p className='text-sm font-medium'>
-                  Page {currentPage} of {totalPages}
-                </p>
-              </div>
-              <div className='flex items-center space-x-2'>
-                <Button
-                  variant='outline'
-                  className='h-8 w-8 p-0'
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage <= 1}
-                >
-                  <span className='sr-only'>Go to first page</span>
-                  <ChevronsLeft className='h-4 w-4' />
-                </Button>
-                <Button
-                  variant='outline'
-                  className='h-8 w-8 p-0'
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                  disabled={currentPage <= 1}
-                >
-                  <span className='sr-only'>Go to previous page</span>
-                  <ChevronLeft className='h-4 w-4' />
-                </Button>
-                <Button
-                  variant='outline'
-                  className='h-8 w-8 p-0'
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                  disabled={currentPage >= totalPages}
-                >
-                  <span className='sr-only'>Go to next page</span>
-                  <ChevronRight className='h-4 w-4' />
-                </Button>
-                <Button
-                  variant='outline'
-                  className='h-8 w-8 p-0'
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage >= totalPages}
-                >
-                  <span className='sr-only'>Go to last page</span>
-                  <ChevronsRight className='h-4 w-4' />
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </CardContent>
-
-      {/* 메일 재전송 Dialog */}
-      {showResendDialog && (
-        <ResendEmailDialog
-          open={true}
-          onOpenChange={(open) => !open && setShowResendDialog(null)}
-          userId={showResendDialog}
-          userEmail={users.find(u => u.user_id === showResendDialog)?.user_email || ''}
-        />
-      )}
-
-      {/* ACTIVE 상태 수정 Dialog */}
-      {showEditDialog && (
-        <UserEditDialog
-          open={true}
-          onOpenChange={(open) => !open && setShowEditDialog(null)}
-          user={users.find(u => u.user_id === showEditDialog)!}
-          onSave={handleUpdateUser}
-        />
-      )}
-
-      {showPlanDialog && (
-        <UserVacationPlanDialog
-          open={true}
-          onOpenChange={(open) => !open && setPlanDialog(null)}
-          userId={showPlanDialog}
-          userName={users.find(u => u.user_id === showPlanDialog)?.user_name}
-        />
-      )}
-
-      {/* PENDING 상태 수정 Dialog */}
-      {showInviteEditDialog && (() => {
-        const user = users.find(u => u.user_id === showInviteEditDialog)
-        return user ? (
-          <UserInviteDialog
-            open={true}
-            onOpenChange={(open) => !open && setShowInviteEditDialog(null)}
-            title={t('user.inviteEdit')}
-            companyOptions={companyTypes || []}
-            initialData={{
-              user_id: user.user_id,
-              user_name: user.user_name,
-              user_email: user.user_email,
-              user_company_type: user.user_company_type,
-              user_work_time: user.user_work_time,
-              join_date: user.join_date,
-              country_code: user.country_code
-            }}
-          />
-        ) : null
-      })()}
-
-      {/* 삭제 Dialog */}
-      {showDeleteDialog && (
-        <UserDeleteDialog
-          open={true}
-          onOpenChange={(open) => !open && setShowDeleteDialog(null)}
-          user={users.find(u => u.user_id === showDeleteDialog)!}
-          onDelete={handleDeleteUser}
-        />
-      )}
-
-      {/* 비밀번호 초기화 Dialog */}
-      {showPasswordResetDialog && (
-        <UserPasswordResetDialog
-          open={true}
-          onOpenChange={(open) => !open && setShowPasswordResetDialog(null)}
-          userId={showPasswordResetDialog}
-          userName={users.find(u => u.user_id === showPasswordResetDialog)?.user_name || ''}
-        />
-      )}
-    </Card>
+    <Badge tone={s.tone} data-user-status={status} className='whitespace-nowrap'>
+      {t(s.key)}
+    </Badge>
   )
 }
 
-export { UserTable }
+const UsersEmpty = () => {
+  const { t } = useTranslation('admin')
+  return <ResultSection size='medium' icon={<Users />} title={t('users.emptyTitle')} description={t('users.emptyDescription')} />
+}
+
+/**
+ * 사용자 목록 카드 "사용자 {n}명"(I-24 F 28 · 30 · 31) — 데스크톱: 머리 [초대] + ds Table 여섯 열 + ⋮ + Table Pagination(받은 목록을 화면에서 자른다).
+ * 폰: 띠 하나 — 머리 + List 줄(Avatar 42 · 이름 · "{아이디} · {주 부서}" · 상태). 11-08 A1 — 줄에 ⋮ 를 두지 않고 줄을 누르면 그 사람의 동작 시트가 열린다.
+ * 표 rich 줄은 칸 높이 72 + 위아래 안쪽 여백 0(TABLE_BODY_RICH)이라 칸마다 py-x3 를 다시 준다(가장 나쁜 값 행에서 글이 줄 선에 붙지 않게).
+ */
+export function UserListCard({ users }: { users: GetUsersResp[] }) {
+  const { t } = useTranslation('admin')
+  const desktop = useDesktop()
+  const { hasPermission } = usePermission()
+  const ctx = useManagementContext()
+  const manage = hasPermission('USER:MANAGE')
+  const manageVacation = hasPermission('VACATION:MANAGE')
+  const [pageValue, setPageValue] = useState<TablePaginationValue>({ page: 1, pageSize: PAGE_SIZES[0] })
+  const [menuFor, setMenuFor] = useState<string | null>(null)
+  const tableRef = useRef<HTMLDivElement>(null)
+
+  const can = { manage, manageVacation }
+  const showPagination = users.length > PAGE_SIZES[0]
+  const lastPage = Math.max(1, Math.ceil(users.length / pageValue.pageSize))
+  const page = showPagination ? Math.min(pageValue.page, lastPage) : 1
+  const pageRows = users.slice((page - 1) * pageValue.pageSize, page * pageValue.pageSize)
+  const anyMenu = users.some((u) => hasUserActions(userActionsOf(u, can)))
+  const menuUser = users.find((u) => u.user_id === menuFor)
+
+  const invite = manage ? (
+    <Button variant='neutralOutline' size='small' data-user-invite onClick={() => ctx.setShowInviteDialog(true)}>
+      <Plus />
+      {t('user.invite')}
+    </Button>
+  ) : null
+
+  const header = (
+    <CardHeader className='flex items-center justify-between gap-x3'>
+      <CardTitle>{t('users.listTitle', { count: users.length })}</CardTitle>
+      {invite}
+    </CardHeader>
+  )
+
+  const body =
+    users.length === 0 ? (
+      <UsersEmpty />
+    ) : desktop ? (
+      <Table
+        ref={tableRef}
+        caption={t('users.listCaption')}
+        rowHeight='rich'
+        pagination={
+          showPagination ? (
+            <TablePagination value={{ ...pageValue, page }} onValueChange={setPageValue} totalItems={users.length} pageSizeOptions={PAGE_SIZES} scrollTarget={tableRef} />
+          ) : undefined
+        }
+      >
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t('users.colName')}</TableHead>
+            <TableHead>{t('users.colId')}</TableHead>
+            <TableHead>{t('users.colWorkTime')}</TableHead>
+            <TableHead>{t('users.colCompany')}</TableHead>
+            <TableHead>{t('users.colStatus')}</TableHead>
+            {anyMenu && <TableMoreHead />}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {pageRows.map((u) => {
+            const actions = userActionsOf(u, can)
+            return (
+              <TableRow key={u.user_id} data-user-id={u.user_id}>
+                <TableRowHeader className='min-w-[180px] py-x3'>
+                  <TableCellContent
+                    media={<Avatar name={u.user_name} src={photoOf(u)} size={42} />}
+                    title={<span className={WORD}>{u.user_name}</span>}
+                    detail={<span className={`${LONG} whitespace-normal`}>{u.user_email || '-'}</span>}
+                  />
+                </TableRowHeader>
+                <TableCell className={`max-w-[160px] whitespace-normal py-x3 ${LONG}`}>{u.user_id}</TableCell>
+                <TableCell className='whitespace-nowrap py-x3'>{formatWorkTime(u.user_work_time)}</TableCell>
+                <TableCell className='max-w-[200px] whitespace-normal py-x3'>
+                  <TableCellContent
+                    title={<span className={WORD}>{u.user_origin_company_name}</span>}
+                    detail={<span className={WORD}>{u.main_department_name_kr || '-'}</span>}
+                  />
+                </TableCell>
+                <TableCell className='whitespace-nowrap py-x3'>
+                  <UserStatusBadge status={u.invitation_status} />
+                </TableCell>
+                {anyMenu &&
+                  (hasUserActions(actions) ? (
+                    <TableMoreCell label={u.user_name} className='py-x3'>
+                      <UserRowMenuContent user={u} actions={actions} />
+                    </TableMoreCell>
+                  ) : (
+                    <TableCell className='py-x3' />
+                  ))}
+              </TableRow>
+            )
+          })}
+        </TableBody>
+      </Table>
+    ) : (
+      <>
+        <List>
+          {users.map((u) => {
+            const actions = userActionsOf(u, can)
+            const common = {
+              'data-user-id': u.user_id,
+              prefix: <Avatar name={u.user_name} src={photoOf(u)} size={42} />,
+              title: <span className={WORD}>{u.user_name}</span>,
+              detail: <span className={LONG}>{u.main_department_name_kr ? `${u.user_id} · ${u.main_department_name_kr}` : u.user_id}</span>,
+              suffix: <UserStatusBadge status={u.invitation_status} />,
+              align: 'top' as const,
+            }
+            return hasUserActions(actions) ? (
+              <ListButtonItem key={u.user_id} {...common} aria-haspopup='dialog' onClick={() => setMenuFor(u.user_id)} />
+            ) : (
+              <ListItem key={u.user_id} {...common} />
+            )
+          })}
+        </List>
+        {menuUser && (
+          <ResponsiveMenu open onOpenChange={(open) => !open && setMenuFor(null)}>
+            <UserRowMenuContent user={menuUser} actions={userActionsOf(menuUser, can)} />
+          </ResponsiveMenu>
+        )}
+      </>
+    )
+
+  return desktop ? (
+    <Card body='list' data-user-list>
+      {header}
+      {body}
+    </Card>
+  ) : (
+    <section className='bg-bg-layer-default pb-x2 pt-x1' data-user-list>
+      <div className='flex items-center justify-between gap-x3 px-global-gutter pb-x1 pt-x5'>
+        <h2 className='m-0 text-t5 font-bold text-fg-neutral'>{t('users.listTitle', { count: users.length })}</h2>
+        {invite}
+      </div>
+      {body}
+    </section>
+  )
+}
