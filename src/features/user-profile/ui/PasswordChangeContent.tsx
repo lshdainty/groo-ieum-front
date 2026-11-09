@@ -145,7 +145,7 @@ const PasswordChangeContent = () => {
             </Callout>
           )}
           <div className='flex flex-col gap-x6'>
-            <Field id='current-password' label={t('pwForce.current')} invalid={!!errors.current} errorMessage={errors.current}>
+            <Field id='current-password' label={t('pwForce.current')} description={t('pwForce.currentHelp')} invalid={!!errors.current} errorMessage={errors.current}>
               <Input
                 type='password'
                 value={values.current}
