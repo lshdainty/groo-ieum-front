@@ -1527,3 +1527,41 @@ culture,dues.deleteConfirmNoContent,{{date}} {{amount}} 내역을 삭제할까�
 common,amountTooLarge,금액은 100억원까지 입력할 수 있어요.,Amount can be up to 10 billion won.
 common,amountTooLargeAt,금액은 {{max}}까지 입력할 수 있어요.,Amount can be up to {{max}}.
 common,searchWon,원,KRW
+culture,dues.summaryTitle,회비 현황,Dues overview
+culture,dues.period.this,올해,this year
+culture,dues.period.year,{{year}}년,in {{year}}
+culture,dues.summary.totalDesc,{{period}} 입금에서 출금을 뺀 돈,Deposits minus withdrawals {{period}}
+culture,dues.summary.depositDesc,{{period}} 들어온 돈,Money received {{period}}
+culture,dues.summary.withdrawalDesc,{{period}} 나간 돈,Money paid out {{period}}
+culture,dues.summary.birthDesc,{{period}} {{month}}월에 들어온 생일비,Birthday fees received for month {{month}} {{period}}
+culture,dues.failure.description,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+culture,dues.failure.summary,회비 현황을 불러오지 못했어요,Could not load the dues overview
+culture,dues.failure.matrix,월별 생일비 입금 현황을 불러오지 못했어요,Could not load the monthly birthday dues status
+culture,dues.failure.history,입출금 내역을 불러오지 못했어요,Could not load the transaction history
+culture,dues.empty.history,{{year}}년 입출금 내역이 없어요,No transactions in {{year}}
+culture,birthDues.empty.users,사용자가 없어요,No users
+culture,dues.addAria,입출금 추가,Add transaction
+culture,dues.copyAdd,복사해서 추가,Copy and add
+culture,dues.remaining,남은 {{amount}},{{amount}} left
+culture,dues.yearAria,연도,Year
+culture,dues.yearLabel,{{year}}년,{{year}}
+culture,dues.legend.paid,입금했어요,Paid
+culture,dues.legend.notYet,아직이에요,Not yet
+culture,dues.legend.birthMonth,생일 달,Birthday month
+culture,dues.matrixName,이름,Name
+culture,dues.monthUnit,월,Mo
+culture,dues.tooltip.paid,{{name}} · {{month}}월 · {{amount}} 입금,{{name}} · month {{month}} · {{amount}} paid
+culture,dues.tooltip.none,{{name}} · {{month}}월 · 입금 없음,{{name}} · month {{month}} · no deposit
+culture,dues.form.addTitle,입출금 추가,Add transaction
+culture,dues.form.editTitle,입출금 수정,Edit transaction
+culture,dues.form.calc,구분,Type
+culture,dues.form.amount,금액,Amount
+culture,dues.form.amountRequired,0보다 큰 금액을 입력해주세요,Enter an amount greater than 0
+culture,dues.form.date,날짜,Date
+culture,dues.form.datePlaceholder,날짜 선택,Select a date
+culture,dues.form.dateRequired,날짜를 골라주세요,Select a date
+culture,dues.form.done,완료,Done
+culture,dues.form.type,분류,Category
+culture,dues.form.name,이름,Name
+culture,dues.form.detail,내용,Details
+culture,dues.form.saveFailed,입출금을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save the transaction. Please try again in a moment.
