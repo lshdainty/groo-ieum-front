@@ -1,17 +1,4 @@
 export { Alert, AlertTitle, AlertDescription } from '@/shared/ui/shadcn/alert'
-export {
-  AlertDialog,
-  AlertDialogPortal,
-  AlertDialogOverlay,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from '@/shared/ui/shadcn/alertDialog'
 export { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/shadcn/avatar'
 export { Badge, badgeVariants } from '@/shared/ui/shadcn/badge'
 export {
