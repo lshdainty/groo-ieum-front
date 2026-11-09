@@ -1,316 +1,108 @@
-import { SpeedDial, SpeedDialAction } from '@/shared/ui/speed-dial/SpeedDial';
-import { Button } from '@/shared/ui/shadcn/button';
-import { usePermission } from '@/entities/session';
-import { ApplicationTableWidget } from '@/features/dashboard/ui/widgets/ApplicationTableWidget';
-import { DuesWidget } from '@/features/dashboard/ui/widgets/DuesWidget';
-import { MissingWorkHistoryWidget } from '@/features/dashboard/ui/widgets/MissingWorkHistory/MissingWorkHistoryWidget';
-import { MonthStatsWidget } from '@/features/dashboard/ui/widgets/MonthStatsWidget';
-import { ProfileWidget } from '@/features/dashboard/ui/widgets/ProfileWidget';
-import { ScheduleWidget } from '@/features/dashboard/ui/widgets/ScheduleWidget';
-import { SystemCheckWidget } from '@/features/dashboard/ui/widgets/SystemCheck/SystemCheckWidget';
-import { TodayWorkStatusWidget } from '@/features/dashboard/ui/widgets/TodayWorkStatus/TodayWorkStatusWidget';
-import { TotalDuesWidget } from '@/features/dashboard/ui/widgets/TotalDuesWidget';
-import { TypeStatsWidget } from '@/features/dashboard/ui/widgets/TypeStatsWidget';
-import { UserBirthDuesWidget } from '@/features/dashboard/ui/widgets/UserBirthDuesWidget';
-import { UserCompanyStatsWidget } from '@/features/dashboard/ui/widgets/UserCompanyStatsWidget';
-import { UserVacationStatsWidget } from '@/features/dashboard/ui/widgets/UserVacationStats/UserVacationStatsWidget';
-import { VacationHistoryWidget } from '@/features/dashboard/ui/widgets/VacationHistory/VacationHistoryWidget';
-import { VacationRequestStatsWidget } from '@/features/dashboard/ui/widgets/VacationRequestStatsWidget';
-import { VacationStatsWidget } from '@/features/dashboard/ui/widgets/VacationStatsWidget';
-import { DepartmentChartWidget } from '@/features/dashboard/ui/widgets/DepartmentChartWidget';
-import WidgetWrapper from '@/features/dashboard/ui/WidgetWrapper';
-import { WIDGETS } from '@/features/dashboard/lib/constants';
-import { useDashboardContext } from '@/features/dashboard/model/DashboardContext';
-import { cn } from '@/shared/lib'
-import { GripVertical, Pencil, Plus, Save, Settings, X } from 'lucide-react';
-import { useMemo } from 'react';
-import { Responsive, WidthProvider } from 'react-grid-layout';
-import 'react-grid-layout/css/styles.css';
-import { useTranslation } from 'react-i18next';
-import 'react-resizable/css/styles.css';
+import { useMemo } from 'react'
+import { LayoutDashboard } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
-const ResponsiveGridLayout = WidthProvider(Responsive);
+import { Card } from '@/shared/ds/card'
+import { ResultSection } from '@/shared/ds/result-section'
+import { usePermission } from '@/entities/session'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { useWide } from '@/widgets/layout/lib/use-wide'
+import { Band, ScreenBands } from '@/widgets/layout/ui/ScreenBands'
+import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { readHomeWidgets } from '@/features/dashboard/lib/read-home-widgets'
+import { canSeeWidget, widgetOf, WIDGETS } from '@/features/dashboard/lib/widgets'
+import { HomeSkeleton } from '@/features/dashboard/ui/HomeSkeleton'
+import { WIDGET_VIEWS } from '@/features/dashboard/ui/widget-registry'
 
-const DashboardContent = () => {
+interface DashboardContentProps {
+  /** 서버에 저장된 홈 배치 글(`users.dashboard`) */
+  dashboard: string | undefined
+  /** 저장값(사용자 정보)을 받는 중 — 받기 전에는 위젯 차례를 모른다 */
+  pending: boolean
+  failed: boolean
+  retrying: boolean
+  onRetry: () => void
+}
+
+/**
+ * 홈(I-23 B) — 정해진 자리 + 켠 위젯을 고른 차례대로. 1280 이상 2 : 1 두 열(넓은 위젯 왼쪽 · 좁은 위젯 오른쪽, 열 사이 24 · 카드 사이 8),
+ * 768 ~ 1279 한 칸(최대 720), 768 미만 위젯마다 띠(사이 8). 높이는 내용만큼이다.
+ * 홈 편집(켜고 끄기 · 차례 바꾸기)은 제목 줄 오른쪽 · 폰 상단 바 오른쪽 자리에 다음 묶음(23-1b)이 단다 — 이 묶음은 저장된 배치를 읽어 그리기만 한다.
+ */
+export const DashboardContent = ({ dashboard, pending, failed, retrying, onRetry }: DashboardContentProps) => {
   const { t } = useTranslation('dashboard')
-  const { hasAnyPermission } = usePermission();
-  const {
-    layouts,
-    activeWidgets,
-    isEditing,
-    isToolboxOpen,
-    draggedWidget,
-    handleLayoutChange,
-    handleBreakpointChange,
-    toggleWidget,
-    resetLayout,
-    onDrop,
-    handleSave,
-    handleCancel,
-    setIsEditing,
-    setIsToolboxOpen,
-    setDraggedWidget
-  } = useDashboardContext();
+  const { t: ts } = useTranslation('sidebar')
+  const { t: tc } = useTranslation('common')
+  const desktop = useDesktop()
+  const wide = useWide()
+  const { hasAnyPermission } = usePermission()
 
-  // 권한에 따라 사용 가능한 위젯 필터링
-  const availableWidgets = useMemo(() => {
-    return WIDGETS.filter(widget => {
-      // 권한이 없으면 모든 사용자에게 표시
-      if (!widget.permissions || widget.permissions.length === 0) {
-        return true;
-      }
-      // 권한 중 하나라도 있으면 표시
-      return hasAnyPermission(widget.permissions);
-    });
-  }, [hasAnyPermission]);
+  // 권한이 하나라도 있으면 보이는 위젯 — 권한 밖 id 는 저장값에 남고 그릴 때만 거른다
+  const availableIds = useMemo(() => WIDGETS.filter((w) => canSeeWidget(w, hasAnyPermission)).map((w) => w.id), [hasAnyPermission])
+  const ids = useMemo(() => readHomeWidgets(dashboard, availableIds), [dashboard, availableIds])
 
-  // 사용 가능한 위젯 ID 목록
-  const availableWidgetIds = useMemo(() => {
-    return availableWidgets.map(w => w.id);
-  }, [availableWidgets]);
+  const result = (node: React.ReactNode) =>
+    desktop ? <Card body='content'>{node}</Card> : <Band title={ts('menu.dashboard')}>{node}</Band>
 
-  // Speed Dial Actions Configuration
-  const speedDialActions: SpeedDialAction[] = useMemo(() => {
-    if (isEditing) {
-      return [
-        {
-          icon: <Save className='w-5 h-5' />,
-          label: t('save'),
-          onClick: handleSave,
-          variant: 'default',
-          className: 'bg-green-600 hover:bg-green-700'
-        },
-        {
-          icon: <X className='w-5 h-5' />,
-          label: t('closeSettings'),
-          onClick: handleCancel,
-          variant: 'destructive'
-        },
-        {
-          icon: <Settings className='w-5 h-5' />,
-          label: isToolboxOpen ? t('closeSettings') : t('widgetSettings'),
-          onClick: () => setIsToolboxOpen(!isToolboxOpen),
-          variant: 'secondary'
-        }
-      ];
-    }
-    return [
-      {
-        icon: <Pencil className='w-5 h-5' />,
-        label: t('edit'),
-        onClick: () => setTimeout(() => setIsEditing(true), 300),
-        variant: 'default'
-      }
-    ];
-  }, [isEditing, isToolboxOpen, handleSave, handleCancel, setIsEditing, setIsToolboxOpen, t]);
-
-  const widgetConfig: Record<string, { title: string; component: React.ReactNode }> = {
-    profile: {
-      title: t('widget.myInfo'),
-      component: <ProfileWidget />
-    },
-    'vacation-stats': {
-      title: t('widget.vacationStatus'),
-      component: <VacationStatsWidget />
-    },
-    'month-stats': {
-      title: t('widget.monthlyVacationStats'),
-      component: <MonthStatsWidget />
-    },
-    'type-stats': {
-      title: t('widget.vacationTypeStats'),
-      component: <TypeStatsWidget />
-    },
-    schedule: {
-      title: t('widget.workSchedule'),
-      component: <ScheduleWidget />
-    },
-    'vacation-application': {
-      title: t('widget.vacationApplicationHistory'),
-      component: <ApplicationTableWidget />
-    },
-    'vacation-request-stats': {
-      title: t('widget.vacationApplicationStats'),
-      component: <VacationRequestStatsWidget />
-    },
-    'vacation-history': {
-      title: t('widget.vacationHistory'),
-      component: <VacationHistoryWidget />
-    },
-    'dues': {
-      title: t('widget.duesHistory'),
-      component: <DuesWidget />
-    },
-    'total-dues': {
-      title: t('widget.duesStatus'),
-      component: <TotalDuesWidget />
-    },
-    'user-birth-dues': {
-      title: t('widget.monthlyBirthdayDeposit'),
-      component: <UserBirthDuesWidget />
-    },
-    'user-company-stats': {
-      title: t('widget.companyUserStats'),
-      component: <UserCompanyStatsWidget />
-    },
-    'system-check': {
-      title: t('widget.systemDailyCheck'),
-      component: <SystemCheckWidget />
-    },
-    'today-work-status': {
-      title: t('widget.workHistoryStatus'),
-      component: <TodayWorkStatusWidget />
-    },
-    'missing-work-history': {
-      title: t('widget.monthlyWorkAlert'),
-      component: <MissingWorkHistoryWidget />
-    },
-    'user-vacation-stats': {
-      title: t('widget.allUserVacationStatus'),
-      component: <UserVacationStatsWidget />
-    },
-    'department-chart': {
-      title: t('widget.departmentChart'),
-      component: <DepartmentChartWidget />
-    }
-  };
-
-  const cols = { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 };
-
-  const constrainedLayouts = useMemo(() => {
-    const newLayouts: any = {};
-    Object.keys(layouts).forEach(breakpoint => {
-      newLayouts[breakpoint] = layouts[breakpoint]
-        .filter((item: any) => availableWidgetIds.includes(item.i))
-        .map((item: any) => {
-          const widgetDef = availableWidgets.find(w => w.id === item.i);
-          if (widgetDef) {
-            const breakpointCols = cols[breakpoint as keyof typeof cols] || 12;
-            return {
-              ...item,
-              minW: Math.min(widgetDef.minW, breakpointCols),
-              maxW: widgetDef.maxW,
-              minH: widgetDef.minH,
-              maxH: widgetDef.maxH
-            };
-          }
-          return item;
-        });
-    });
-    return newLayouts;
-  }, [layouts, availableWidgets, availableWidgetIds]);
-
-  return (
-    <div className='min-h-screen bg-background relative overflow-hidden flex flex-col'>
-      <div className='flex-1 overflow-y-auto'>
-        <ResponsiveGridLayout
-          className='layout min-h-screen'
-          layouts={constrainedLayouts}
-          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-          cols={cols}
-          rowHeight={30}
-          draggableHandle='.drag-handle'
-          onLayoutChange={handleLayoutChange}
-          onBreakpointChange={handleBreakpointChange}
-          margin={[16, 16]}
-          isDroppable={isEditing}
-          isDraggable={isEditing}
-          isResizable={isEditing}
-          onDrop={onDrop}
-          droppingItem={draggedWidget ? { i: draggedWidget.id, w: draggedWidget.defaultW, h: draggedWidget.defaultH } : undefined}
-        >
-          {activeWidgets
-            .filter(widgetId => availableWidgetIds.includes(widgetId))
-            .map((widgetId) => {
-              const config = widgetConfig[widgetId];
-              if (!config) return null;
-
-              return (
-                <div key={widgetId}>
-                  <WidgetWrapper
-                    title={config.title}
-                    onClose={() => toggleWidget(widgetId)}
-                    isEditing={isEditing}
-                  >
-                    {config.component}
-                  </WidgetWrapper>
-                </div>
-              );
-            })}
-        </ResponsiveGridLayout>
-      </div>
-
-      {/* Speed Dial Button */}
-      <SpeedDial 
-        actions={speedDialActions}
-        mainIcon={isEditing ? <Settings className='h-6 w-6' /> : <Plus className='h-6 w-6' />}
-        activeIcon={<X className='h-6 w-6' />}
-      />
-
-      {/* Custom Non-Modal Toolbox Panel */}
-      <div 
-        className={cn(
-          'fixed top-0 right-0 bottom-0 w-80 bg-background shadow-2xl border-l transform transition-transform duration-300 ease-in-out z-40 overflow-y-auto',
-          isEditing && isToolboxOpen ? 'translate-x-0' : 'translate-x-full'
-        )}
-      >
-        <div className='p-6 pt-20'>
-          <h2 className='text-lg font-semibold mb-6'>{t('widgetSettings')}</h2>
-
-          <div className='space-y-4'>
-            <div className='space-y-2'>
-              <h4 className='text-sm font-medium text-muted-foreground mb-4'>{t('availableWidgets')}</h4>
-              <p className='text-xs text-muted-foreground mb-4'>
-                {t('widgetDragHint')}
-              </p>
-              
-              {availableWidgets.map(widget => {
-                const isActive = activeWidgets.includes(widget.id);
-                return (
-                  <div
-                    key={widget.id}
-                    className={cn(
-                      'flex items-center justify-between p-3 rounded-lg border bg-card transition-colors select-none',
-                      isActive ? 'opacity-50 cursor-not-allowed bg-muted' : 'hover:bg-accent/50 cursor-grab active:cursor-grabbing'
-                    )}
-                    draggable={!isActive}
-                    onDragStart={(e) => {
-                      if (isActive) {
-                        e.preventDefault();
-                        return;
-                      }
-                      setDraggedWidget(widget);
-                      // Required for Firefox
-                      e.dataTransfer.setData('text/plain', '');
-                    }}
-                    onDragEnd={() => {
-                      setDraggedWidget(null);
-                    }}
-                  >
-                    <div className='flex items-center gap-3'>
-                      <GripVertical className='w-4 h-4 text-muted-foreground' />
-                      <span className='font-medium text-sm'>{t(widget.labelKey)}</span>
-                    </div>
-                    {isActive && <span className='text-xs text-green-600 font-medium'>{t('inUse')}</span>}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className='pt-8 border-t mt-8'>
-              <Button
-                variant='destructive'
-                className='w-full'
-                onClick={resetLayout}
-              >
-                {t('layoutReset')}
-              </Button>
-            </div>
-          </div>
+  let content: React.ReactNode
+  if (failed) {
+    content = result(
+      <ResultSection
+        kind='failure'
+        size='medium'
+        title={t('failureTitle')}
+        description={t('widget.failureDescription')}
+        primaryAction={{ label: tc('retry'), onClick: onRetry, loading: retrying }}
+      />,
+    )
+  } else if (pending) {
+    content = <HomeSkeleton />
+  } else if (ids.length === 0) {
+    content = result(<ResultSection size='medium' icon={<LayoutDashboard />} title={t('emptyTitle')} description={t('emptyDescription')} />)
+  } else if (!desktop) {
+    content = (
+      <ScreenBands>
+        {ids.map((id) => (
+          <WidgetSlot key={id} id={id} />
+        ))}
+      </ScreenBands>
+    )
+  } else if (wide) {
+    const left = ids.filter((id) => widgetOf(id)?.place === 'wide')
+    const right = ids.filter((id) => widgetOf(id)?.place === 'narrow')
+    content = (
+      <div className='grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] items-start gap-x-(--layout-gutter)' data-home-columns>
+        <div className='flex min-w-0 flex-col gap-x2' data-home-column='wide'>
+          {left.map((id) => (
+            <WidgetSlot key={id} id={id} />
+          ))}
+        </div>
+        <div className='flex min-w-0 flex-col gap-x2' data-home-column='narrow'>
+          {right.map((id) => (
+            <WidgetSlot key={id} id={id} />
+          ))}
         </div>
       </div>
-    </div>
-  );
-};
+    )
+  } else {
+    content = (
+      <div className='flex flex-col gap-x2' data-home-columns>
+        {ids.map((id) => (
+          <WidgetSlot key={id} id={id} />
+        ))}
+      </div>
+    )
+  }
 
-export default DashboardContent;
+  return (
+    <ScreenBody density='medium'>
+      <ScreenTitleRow title={ts('menu.dashboard')} />
+      {content}
+    </ScreenBody>
+  )
+}
+
+const WidgetSlot = ({ id }: { id: string }) => {
+  const view = WIDGET_VIEWS[id]
+  return view ? <div className='min-w-0' data-slot-id={id}>{view()}</div> : null
+}

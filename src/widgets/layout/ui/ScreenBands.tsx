@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from 'react'
+import { useId, type HTMLAttributes, type ReactNode } from 'react'
 
 import { cn } from '@/shared/lib/cn'
 import { CARD_TITLE } from '@/shared/ds/card/card-variants'
@@ -23,7 +23,8 @@ export function Band({
   body = 'content',
   children,
   className,
-}: {
+  ...rest
+}: Omit<HTMLAttributes<HTMLElement>, 'title'> & {
   title: ReactNode
   action?: ReactNode
   /** 머리 위의 줄 — 화면 전체를 바꾸는 조절(연도 · 달)을 첫 띠 안 맨 위에(위 16 · 좌우 24, 머리 위 24 는 그대로) */
@@ -34,7 +35,7 @@ export function Band({
 }) {
   const titleId = useId()
   return (
-    <section aria-labelledby={titleId} data-band className={cn('bg-bg-layer-default', className)}>
+    <section aria-labelledby={titleId} data-band className={cn('bg-bg-layer-default', className)} {...rest}>
       {leading != null && <div className='px-x6 pt-x4'>{leading}</div>}
       <div className='flex items-center justify-between gap-x2 px-x6 pb-x1 pt-x6'>
         <h2 id={titleId} className={CARD_TITLE}>

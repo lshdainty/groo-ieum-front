@@ -1566,3 +1566,10 @@ vacation,history.chart.typeName,"유형별 남은 휴가, 합계 {{total}}","Rem
 vacation,history.chart.tableShare,비중,Share
 vacation,history.remainTotal,남은 휴가,Remaining leave
 common,percentBelowShare,0.1% 미만,<0.1%
+dashboard,seeAll,전체 보기,See all
+dashboard,seeAllOf,{{title}} 전체 보기,See all {{title}}
+dashboard,failureTitle,홈을 불러오지 못했어요,Could not load Home
+dashboard,emptyTitle,홈에 보일 위젯이 없어요,No widgets to show on Home
+dashboard,emptyDescription,홈 편집에서 볼 위젯을 켜주세요.,Turn on widgets in Edit Home.
+dashboard,widget.failureTitle,{{name}}{{eulReul}} 불러오지 못했어요,Could not load {{name}}
+dashboard,widget.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
