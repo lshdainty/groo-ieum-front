@@ -73,8 +73,9 @@ const UserInviteDialog = ({ open, onOpenChange, title, companyOptions, initialDa
   const dup = useUserIdDuplicateQuery(checkedId)
 
   const set = <K extends keyof Values>(key: K, v: Values[K]) => setValues((cur) => ({ ...cur, [key]: v }))
-  const checking = !!checkedId && checkedId === values.id && dup.isFetching
-  const idTaken = (!!checkedId && checkedId === values.id && dup.data?.duplicate === true) || serverIdTaken
+  const idTrim = values.id.trim()
+  const checking = !!checkedId && checkedId === idTrim && dup.isFetching
+  const idTaken = (!!checkedId && checkedId === idTrim && dup.data?.duplicate === true) || serverIdTaken
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)
   const errors = {
     id: !values.id.trim(),

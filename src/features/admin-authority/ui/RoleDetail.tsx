@@ -19,6 +19,8 @@ interface RoleDetailProps {
   desktop: boolean
   busy: boolean
   dirty: boolean
+  /** 있는 역할의 설명을 비웠다 — 서버가 비운 설명을 받지 않는다(아무 일도 없이 성공한다) */
+  descEmpty: boolean
   saveError: string | null
   codeError: string | null
   showErrors: boolean
@@ -33,7 +35,7 @@ interface RoleDetailProps {
  * 데스크톱: 머리 오른쪽 [저장](새 역할은 [만들기]). 폰: 머리에 ← + 이름 + ⋮, 바닥에 [저장] 폭 전체(권한 시트는 걷었다 — 저장 시점이 같다).
  * 이름은 서버가 바꾸지 않으므로(PUT 은 설명 · 권한만) 있는 역할에서는 읽기 전용이다.
  */
-const RoleDetail = ({ draft, isNew, permissions, canManage, desktop, busy, dirty, saveError, codeError, showErrors, onChange, onSave, onDelete, onBack }: RoleDetailProps) => {
+const RoleDetail = ({ draft, isNew, permissions, canManage, desktop, busy, dirty, descEmpty, saveError, codeError, showErrors, onChange, onSave, onDelete, onBack }: RoleDetailProps) => {
   const { t } = useTranslation('admin')
   const { t: tc } = useTranslation('common')
   const title = isNew ? t('authority.newRole') : draft.name
@@ -70,7 +72,7 @@ const RoleDetail = ({ draft, isNew, permissions, canManage, desktop, busy, dirty
         </div>
         <div className='flex shrink-0 items-center gap-x1'>
           {desktop && canManage && (
-            <Button variant='neutralSolid' size='small' loading={busy} disabled={!dirty} data-role-save onClick={onSave}>
+            <Button variant='neutralSolid' size='small' loading={busy} disabled={!dirty || descEmpty} data-role-save onClick={onSave}>
               {saveLabel}
             </Button>
           )}
@@ -96,7 +98,7 @@ const RoleDetail = ({ draft, isNew, permissions, canManage, desktop, busy, dirty
         <Field label={t('authority.roleName')} showRequiredIndicator={isNew} readOnly={!isNew} invalid={nameMissing} errorMessage={t('authority.roleNameRequired')}>
           <Input value={draft.name} readOnly={!isNew} placeholder={isNew ? t('authority.roleNamePlaceholder') : undefined} onChange={(e) => onChange({ ...draft, name: e.target.value })} />
         </Field>
-        <Field label={t('authority.roleDesc')} readOnly={!canManage}>
+        <Field label={t('authority.roleDesc')} readOnly={!canManage} invalid={descEmpty} errorMessage={t('authority.roleDescRequired')}>
           <Textarea value={draft.desc} readOnly={!canManage} placeholder={t('authority.roleDescPlaceholder')} onChange={(e) => onChange({ ...draft, desc: e.target.value })} />
         </Field>
       </div>
@@ -109,7 +111,7 @@ const RoleDetail = ({ draft, isNew, permissions, canManage, desktop, busy, dirty
       />
       {!desktop && canManage && (
         <div className='sticky bottom-0 z-10 bg-bg-layer-default px-global-gutter pb-x4 pt-x3'>
-          <Button size='large' variant='neutralSolid' className='w-full' loading={busy} disabled={!dirty} data-role-save onClick={onSave}>
+          <Button size='large' variant='neutralSolid' className='w-full' loading={busy} disabled={!dirty || descEmpty} data-role-save onClick={onSave}>
             {saveLabel}
           </Button>
         </div>

@@ -12,8 +12,8 @@ import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
 type AuthorityTab = 'roles' | 'users'
 
 /**
- * 역할 및 권한(I-24 G 32) — 제목 줄 → Line 탭 "역할 · 사용자"(hug) → 16 → 나눔 상자. 역할 상세에 바뀐 값이 있으면 탭을 바꿀 때
- * "작성한 내용이 사라져요" 를 묻는다.
+ * 역할 및 권한(I-24 G 32) — 제목 줄 → Line 탭 "역할 · 사용자"(hug) → 16 → 나눔 상자. 탭 내용은 forceMount 라 탭을 바꿔도 역할 상세에 고치던 값이 그대로 남는다 —
+ * 탭 전환에는 이탈 확인을 걸지 않는다(역할 · 목록 전환에만 패널이 건다).
  */
 const Authority = () => {
   const { t } = useTranslation('admin')
@@ -28,7 +28,7 @@ const Authority = () => {
       <ScreenBody density='high'>
         <ScreenTitleRow title={t('authority.title')} />
         <div className='bg-bg-layer-default min-[48rem]:bg-transparent'>
-          <Tabs value={tab} onValueChange={(v) => guard(() => setTab(v as AuthorityTab))}>
+          <Tabs value={tab} onValueChange={(v) => setTab(v as AuthorityTab)}>
             <TabsList aria-label={t('authority.tabsAria')} layout={desktop ? 'hug' : 'fill'} size={desktop ? 'medium' : 'small'}>
               <TabsTrigger value='roles'>{t('authority.roles')}</TabsTrigger>
               <TabsTrigger value='users'>{t('authority.users')}</TabsTrigger>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Shield } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/shared/ui/shadcn/resizable'
@@ -43,6 +43,8 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
   const { hasPermission } = usePermission()
   const canManage = hasPermission('ROLE:MANAGE')
   const [params, setParams] = useSearchParams()
+  const navigate = useNavigate()
+  const location = useLocation()
   const rolesQ = useRolesQuery({ quiet: true })
   const permsQ = usePermissionsQuery({ quiet: true })
   const { mutateAsync: createRole } = usePostRoleMutation()
@@ -66,6 +68,7 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
   const base: RoleDraft | null = creating ? EMPTY_DRAFT : selected ? draftOf(selected) : null
   const draft: RoleDraft | null = creating ? (edits ?? EMPTY_DRAFT) : selected ? (edits && edits.code === selected.role_code ? edits : base) : null
   const changes = base && draft ? changesOf(base, draft) : { desc: false, perms: false }
+  const descEmpty = !creating && changes.desc && !draft?.desc.trim()
   const dirty = creating ? !!edits && (!!edits.code || !!edits.name || !!edits.desc || edits.perms.length > 0) : changes.desc || changes.perms
 
   useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange])
@@ -82,10 +85,19 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
     discard(() => {
       resetEdits()
       setCreating(false)
-      const next = new URLSearchParams(params)
-      if (code) next.set('role', code)
-      else next.delete('role')
-      setParams(next, { replace: false })
+      if (code) {
+        // 목록에서 처음 열 때만 기록을 쌓는다(← 가 그 한 칸을 되감는다) — 이미 연 상태에서 다른 역할로 가면 바꿔 쓴다
+        const next = new URLSearchParams(params)
+        next.set('role', code)
+        if (param) setParams(next, { replace: true, state: location.state })
+        else navigate({ search: next.toString() }, { state: { fromList: true } })
+      } else if ((location.state as { fromList?: boolean } | null)?.fromList) {
+        navigate(-1)
+      } else {
+        const next = new URLSearchParams(params)
+        next.delete('role')
+        setParams(next, { replace: true })
+      }
     })
   }
   const add = () =>
@@ -95,7 +107,7 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
     })
 
   const save = async () => {
-    if (!draft || busy || !canManage) return
+    if (!draft || busy || !canManage || descEmpty) return
     if (creating && (!draft.code.trim() || !draft.name.trim())) {
       setShowErrors(true)
       return
@@ -141,6 +153,7 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
       desktop={desktop}
       busy={busy}
       dirty={dirty}
+      descEmpty={descEmpty}
       saveError={saveError}
       codeError={codeError}
       showErrors={showErrors}

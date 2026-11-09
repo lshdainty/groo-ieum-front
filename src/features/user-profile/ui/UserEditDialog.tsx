@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
 
 import { config } from '@/shared/config'
-import { AvatarPhotoEdit } from '@/shared/ds/avatar'
+import { Avatar } from '@/shared/ds/avatar'
 import { Button } from '@/shared/ds/button'
 import { Callout } from '@/shared/ds/callout'
 import { Checkbox } from '@/shared/ds/checkbox'
@@ -79,7 +79,7 @@ const initialOf = (u: GetUsersResp, firstCompany: string): Values => ({
 
 /**
  * 사용자 수정 · 내 정보(I-24 F 29b) — Responsive Dialog `form`(1280 이상 대화상자 · 미만 시트), 한 열. 맨 위 Avatar 108 + 늘 보이는
- * "사진 바꾸기" · "사진 지우기". 칸 차례: 이름 · 아이디(읽기 전용) · 메일 · 생일 · "음력 생일이에요"(서버에는 Y/N 그대로) · 회사 · 근무 시간 · 국가.
+ * "사진 바꾸기" 단추("사진 지우기" 는 서버가 지운 사진을 저장하지 않아 두지 않는다 — 서버 지원 뒤). 칸 차례: 이름 · 아이디(읽기 전용) · 메일 · 생일 · "음력 생일이에요"(서버에는 Y/N 그대로) · 회사 · 근무 시간 · 국가.
  * 역할 칸은 없다. 저장 실패는 맨 위 Callout, 메일 중복은 그 칸 아래. dirty = 칸 · 사진 중 하나라도 바뀜.
  */
 const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFocus }: UserEditDialogProps) => {
@@ -172,20 +172,10 @@ const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFo
             </Callout>
           )}
           <div className='mb-x6 flex flex-col items-center gap-x2' data-user-photo>
-            <AvatarPhotoEdit
-              name={values.name || user.user_name}
-              src={photo ? fullUrl(photo) : null}
-              uploadProgress={uploading ? 0.5 : undefined}
-              changeLabel={t('edit.changePhoto')}
-              removeLabel={t('edit.removePhoto')}
-              uploadLabel={t('edit.uploadingPhoto')}
-              onChange={() => fileRef.current?.click()}
-              onRemove={() => {
-                setPhoto('')
-                setPhotoUuid('')
-                setPhotoError(null)
-              }}
-            />
+            <Avatar name={values.name || user.user_name} src={photo ? fullUrl(photo) : null} size={108} decorative={false} />
+            <Button variant='neutralWeak' size='small' loading={uploading} onClick={() => fileRef.current?.click()}>
+              {t('edit.changePhoto')}
+            </Button>
             <input ref={fileRef} type='file' accept='image/*' className='hidden' aria-hidden tabIndex={-1} onChange={(e) => void pickFile(e.target.files?.[0])} />
             {photoError && (
               <p role='alert' className='m-0 text-center text-t3 font-normal text-fg-critical'>
