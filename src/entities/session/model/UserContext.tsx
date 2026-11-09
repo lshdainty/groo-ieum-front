@@ -4,6 +4,7 @@ import { sessionApi } from '@/entities/session/api/sessionApi'
 import { isAxiosError } from 'axios'
 import { createContext, ReactNode, useContext, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import { saveReturnPath } from '@/shared/lib/return-path'
 
 // 로그인 체크를 건너뛸 경로
 const AUTH_PATHS = ['/login', '/logout', '/auth/callback']
@@ -53,23 +54,29 @@ export function UserProvider({ children }: UserProviderProps) {
 
   // 인증 페이지가 아닐 때 로그인 체크 쿼리 실행 (HttpOnly 쿠키 기반)
   const shouldCheckLogin = !isAuthPage
-  const { data, error, isPending, dataUpdatedAt, refetch } = useLoginCheckQuery(shouldCheckLogin)
+  const { data, error, isPending, isSuccess, dataUpdatedAt, refetch } = useLoginCheckQuery(shouldCheckLogin)
 
   // 로그인 정보는 쿼리 결과에서 바로 꺼낸다 — 상태 + effect 로 복사하면 확인이 끝난 첫 렌더에 아직 null 이라
   // 주소를 직접 연 화면이 /login 을 거쳐 늘 /dashboard 로 떨어졌다(I-22-2 ⓓ)
-  const loginUser: GetLoginCheck | null = override && override.at >= dataUpdatedAt ? override.user : (data ?? null)
+  // 받아 둔 데이터가 있어도 가장 최근 확인이 401 이면 로그인 안 됨이다(재연결 · refreshUser 의 401)
+  const unauthorized = isAxiosError(error) && error.response?.status === 401
+  const loginUser: GetLoginCheck | null =
+    override && override.at >= dataUpdatedAt ? override.user : unauthorized ? null : (data ?? null)
 
   const authenticated = !!loginUser && loginUser.is_login === 'Y'
   const overridden = !!override && override.at >= dataUpdatedAt
   let sessionStatus: SessionStatus
   if (!shouldCheckLogin || overridden) {
     sessionStatus = authenticated ? 'authenticated' : 'unauthenticated'
+  } else if (unauthorized) {
+    sessionStatus = 'unauthenticated'
   } else if (data) {
     sessionStatus = authenticated ? 'authenticated' : 'unauthenticated'
+  } else if (isSuccess) {
+    // 성공 + data null — 다른 곳에서 세션 쿼리를 비운 것(로그아웃)이다. 확인 실패가 아니라 로그인 안 됨
+    sessionStatus = 'unauthenticated'
   } else if (isPending) {
     sessionStatus = retrying ? 'error' : 'checking'
-  } else if (isAxiosError(error) && error.response?.status === 401) {
-    sessionStatus = 'unauthenticated'
   } else {
     sessionStatus = 'error'
   }
@@ -91,6 +98,7 @@ export function UserProvider({ children }: UserProviderProps) {
     } catch (e) {
       // 로그아웃 실패해도 로그인 페이지로 이동
     }
+    saveReturnPath(null)
     setOverride({ user: null, at: Date.now() })
     window.location.href = '/login'
   }
