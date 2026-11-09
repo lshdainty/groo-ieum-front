@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
@@ -28,6 +29,10 @@ export const confirmFailureKey = (error: unknown, kind: ConfirmKind): string | n
   return key
 }
 
+/** [다시 시도] 는 5xx · 네트워크처럼 다시 하면 달라질 수 있는 실패에만 붙인다 — 4xx 사유(지울 수 없음 · 권한 …)는 다시 해도 같다 */
+export const canRetryFailure = (error: unknown): boolean =>
+  !isAxiosError(error) || (error.response?.status ?? 500) >= 500
+
 export interface ConfirmFailOptions {
   /** 실패의 오류 — 사유 글을 고르는 데 쓴다 */
   error: unknown
@@ -52,6 +57,10 @@ export function showConfirmFail(
   if (!key) return
   if (key === `failure.${kind}Unconfirmed`) {
     onUnconfirmed?.()
+    snackbar.show({ message: t(key), tone: 'critical' })
+    return
+  }
+  if (!canRetryFailure(error)) {
     snackbar.show({ message: t(key), tone: 'critical' })
     return
   }
