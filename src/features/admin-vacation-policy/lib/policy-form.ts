@@ -139,14 +139,18 @@ export const toPayload = (method: GrantMethod, v: PolicyFormValues): PostVacatio
   } as unknown as PostVacationPolicyReq
 }
 
-/** 승인 필요 횟수의 상한 — 부서 나무에서 부서장이 있는 부서를 위로 따라가며 센 최댓값(부서장이 하나도 없으면 0) */
+/**
+ * 승인 필요 횟수의 상한 — 서버가 실제로 고를 수 있게 하는 승인자 수(DepartmentQueryDslRepository.findApproversByUserId:155-190 —
+ * 신청자 주 부서의 **상위** 부서들 가운데 부서장이 있는 부서, 자기 부서는 빼고 루트까지)의 최댓값. 부서장이 없으면 0.
+ * 나무의 모든 부서를 신청자 부서로 보고, 자기 위 조상 중 부서장이 있는 수를 센다.
+ */
 export const approvalLimitOf = (tree: { head_user_id?: string | null; children?: unknown[] }[] | undefined): number => {
   type Node = { head_user_id?: string | null; children?: unknown[] }
-  const walk = (nodes: Node[], count: number): number => {
-    let best = count
+  const walk = (nodes: Node[], ancestorHeads: number): number => {
+    let best = 0
     for (const node of nodes) {
-      const here = count + (node.head_user_id ? 1 : 0)
-      best = Math.max(best, here, walk((node.children ?? []) as Node[], here))
+      // 이 부서에 신청하는 사람의 승인자 = 위 조상 부서장(자기 부서장은 빠진다)
+      best = Math.max(best, ancestorHeads, walk((node.children ?? []) as Node[], ancestorHeads + (node.head_user_id ? 1 : 0)))
     }
     return best
   }

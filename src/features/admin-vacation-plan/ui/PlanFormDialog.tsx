@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useLeaveConfirm } from '@/shared/ds/alert-dialog'
 import { isAxiosError } from 'axios'
 import { EllipsisVertical, FileText, ListChecks, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -75,6 +76,7 @@ export function PlanFormDialog({
   const [saveError, setSaveError] = useState<string | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const deleted = useRef(false)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   if (open !== seenOpen) {
     setSeenOpen(open)
@@ -98,6 +100,17 @@ export function PlanFormDialog({
   const codeEmpty = code.trim() === ''
   const codeBad = !editing && !codeEmpty && !CODE_PATTERN.test(code)
   const nameEmpty = name.trim() === ''
+
+  // 정책 관리에서 고른 것을 저장 없이 ← 로 버리면 묻는다(그냥 돌아가면 고른 값이 폼 저장과 함께 조용히 사라진다)
+  const back = useLeaveConfirm({
+    dirty: policiesDirty,
+    contentRef,
+    busy,
+    leave: () => {
+      setPicked(savedIds)
+      setView('form')
+    },
+  })
 
   const failure = (error: unknown): void => {
     claimFailure(error)
@@ -195,7 +208,7 @@ export function PlanFormDialog({
   return (
     <>
       <ResponsiveDialog open={open} form dirty={formDirty || policiesDirty} busy={busy} onOpenChange={onOpenChange}>
-        <ResponsiveDialogContent title={title} headerAction={headerAction} onBack={view === 'policies' ? () => setView('form') : undefined}>
+        <ResponsiveDialogContent title={title} headerAction={headerAction} ref={contentRef} onBack={view === 'policies' ? () => void back.request() : undefined}>
           <ResponsiveDialogBody scrollFog={view === 'policies'}>
             {saveError && (
               <Callout tone='critical' role='alert' className='mb-x4' data-save-failure>
@@ -238,6 +251,7 @@ export function PlanFormDialog({
             )}
           </ResponsiveDialogFooter>
         </ResponsiveDialogContent>
+        {back.node}
       </ResponsiveDialog>
       <ConfirmDialog
         open={confirmOpen}

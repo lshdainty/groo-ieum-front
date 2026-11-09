@@ -635,7 +635,7 @@ vacation,adminPolicy.create.interval,반복 간격,Repeat interval
 vacation,adminPolicy.create.intervalHelp,"1이면 매번, 2면 한 번 걸러 부여해요.","1 grants every time, 2 skips one."
 vacation,adminPolicy.create.when,부여하는 날,Grant day
 vacation,adminPolicy.create.whenYearlyHelp,달을 비우면 첫 부여 날짜의 달에 부여해요. 없는 날짜는 그 달의 마지막 날에 부여해요.,Leave the month empty to use the month of the first grant date. A missing date falls on the last day of the month.
-vacation,adminPolicy.create.whenDayHelp,일을 비우면 첫 부여 날짜의 일에 부여해요. 없는 날짜는 그 달의 마지막 날에 부여해요.,Leave the day empty to use the day of the first grant date. A missing date falls on the last day of the month.
+vacation,adminPolicy.create.whenDayHelp,일을 비우면 1일에 부여해요. 없는 날짜는 그 달의 마지막 날에 부여해요.,Leave the day empty to grant on the 1st. A missing date falls on the last day of the month.
 vacation,adminPolicy.create.monthAria,부여하는 달,Grant month
 vacation,adminPolicy.create.dayAria,부여하는 일,Grant day of month
 vacation,adminPolicy.create.monthUnit,월,month
@@ -673,6 +673,8 @@ vacation,adminPolicy.create.validityEndPlaceholder,만료 시점을 골라주세
 vacation,adminPolicy.create.validityEndRequired,유효 만료를 골라주세요.,Choose when validity ends.
 vacation,adminPolicy.create.listsFailureTitle,고를 목록을 불러오지 못했어요,Couldn't load the choices
 vacation,adminPolicy.create.submit,만들기,Create
+vacation,adminPolicy.create.approvalFailureTitle,승인 단계를 불러오지 못했어요,Couldn't load the approval steps
+vacation,adminPolicy.create.approvalFailureDescription,승인 단계를 알 수 없어 정책을 만들 수 없어요. 잠시 뒤 다시 시도해주세요.,"The approval steps are unknown, so the policy can't be created. Please try again in a moment."
 vacation,adminPlan.title,휴가 플랜,Leave plans
 vacation,adminPlan.add,플랜 추가,Add plan
 vacation,adminPlan.count,플랜 {{count}}개,{{count}} plans

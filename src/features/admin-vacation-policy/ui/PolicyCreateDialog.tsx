@@ -67,6 +67,10 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
   const company = useCompanyQuery({ quiet: true })
   const departments = useCompanyWithDepartmentsQuery(company.data?.company_id ?? '', { quiet: true })
   const approvalLimit = approvalLimitOf(departments.data?.departments)
+  const companyId = company.data?.company_id ?? ''
+  // 승인 상한을 아직 모르는가 — 받는 중이거나 읽지 못했다(권한이 없어 못 읽는 경우도 같다). 모르는 채로는 만들지 못하게 한다
+  const approvalPending = company.isPending || (companyId !== '' && departments.isPending)
+  const approvalFailed = company.isLoadingError || departments.isLoadingError
 
   const [method, setMethod] = useState<GrantMethod | null>(null)
   const [step, setStep] = useState<1 | 2>(1)
@@ -97,11 +101,12 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
     setByMethod((all) => ({ ...all, [method]: { ...(all[method] ?? initialValues()), [key]: value } }))
   }
   const errors = method ? validate(method, values) : {}
-  const dirty = step === 2 && method !== null && JSON.stringify(values) !== JSON.stringify(initialValues())
+  const dirty = Object.values(byMethod).some((v) => JSON.stringify(v) !== JSON.stringify(initialValues()))
   const f = method ? fieldsOf(method) : null
 
   const listsFailed = vacationTypes.isLoadingError || effectiveTypes.isLoadingError || expirationTypes.isLoadingError
   const listsPending = vacationTypes.isPending || effectiveTypes.isPending || expirationTypes.isPending
+  const approvalUnknown = method === 'ON_REQUEST' && (approvalPending || approvalFailed)
 
   const next = () => {
     if (!method) {
@@ -113,7 +118,7 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
   }
 
   const submit = async () => {
-    if (!method || busy) return
+    if (!method || busy || listsPending || listsFailed || approvalUnknown) return
     if (Object.keys(errors).length > 0) {
       setShowErrors(true)
       return
@@ -145,6 +150,8 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
       <RadioBoxGroup
         value={method ?? ''}
         onValueChange={(v) => {
+          // 이름 중복 오류는 그 이름에 대한 것 — 다른 방법의 (다른) 이름 칸에는 남기지 않는다
+          if (v !== method) setDuplicate(false)
           setMethod(v as GrantMethod)
           setMethodError(false)
         }}
@@ -312,11 +319,29 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
               if (checked !== true) set('grantTime', dropMinutes(values.grantTime))
             }}
           />
-          {f.approval && (
-            <Field label={t('adminPolicy.create.approval')} description={approvalLimit === 0 ? t('adminPolicy.create.approvalNone') : t('adminPolicy.create.approvalHelp')}>
-              <QuantityPicker value={Math.min(values.approvalCount, approvalLimit)} min={0} max={approvalLimit} onValueChange={(v) => set('approvalCount', v)} aria-label={t('adminPolicy.create.approval')} />
-            </Field>
-          )}
+          {f.approval &&
+            (approvalFailed ? (
+              <ResultSection
+                kind='failure'
+                size='medium'
+                title={t('adminPolicy.create.approvalFailureTitle')}
+                description={t('adminPolicy.create.approvalFailureDescription')}
+                primaryAction={{
+                  label: tc('retry'),
+                  onClick: () => {
+                    void company.refetch()
+                    void departments.refetch()
+                  },
+                  loading: company.isFetching || departments.isFetching,
+                }}
+              />
+            ) : approvalPending ? (
+              <Skeleton text='t5' className='block h-[40px] w-full' data-approval-loading />
+            ) : (
+              <Field label={t('adminPolicy.create.approval')} description={approvalLimit === 0 ? t('adminPolicy.create.approvalNone') : t('adminPolicy.create.approvalHelp')}>
+                <QuantityPicker value={Math.min(values.approvalCount, approvalLimit)} min={0} max={approvalLimit} onValueChange={(v) => set('approvalCount', v)} aria-label={t('adminPolicy.create.approval')} />
+              </Field>
+            ))}
           <Field label={t('adminPolicy.create.validityStart')} showRequiredIndicator invalid={show('effectiveType')} errorMessage={t('adminPolicy.create.validityStartRequired')}>
             <Select value={values.effectiveType} onValueChange={(v) => set('effectiveType', v)} placeholder={t('adminPolicy.create.validityStartPlaceholder')} aria-invalid={show('effectiveType') || undefined}>
               {typeItems(effectiveTypes.data)}
@@ -354,7 +379,7 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
               {tc('next')}
             </Button>
           ) : (
-            <Button loading={busy} disabled={listsFailed} onClick={() => void submit()} data-policy-submit>
+            <Button loading={busy} disabled={listsFailed || listsPending || approvalUnknown} onClick={() => void submit()} data-policy-submit>
               {t('adminPolicy.create.submit')}
             </Button>
           )}
