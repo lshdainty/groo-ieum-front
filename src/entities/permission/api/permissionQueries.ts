@@ -21,10 +21,12 @@ export const useMyPermissionsQuery = () => {
 }
 
 // 전체 권한 목록 조회 훅
-export const usePermissionsQuery = () => {
+export const usePermissionsQuery = (options?: { quiet?: boolean }) => {
   return useQuery<PermissionResp[]>({
     queryKey: permissionKeys.lists(),
-    queryFn: () => permissionApi.getPermissions()
+    queryFn: () => permissionApi.getPermissions(),
+    // quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다)
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 

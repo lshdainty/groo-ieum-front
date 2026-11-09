@@ -11,16 +11,22 @@ import { usePutUserMutation, useUsersQuery, userApi } from '@/entities/user'
 import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+import { ResultSection } from "@/shared/ds/result-section";
+import { useSnackbar } from "@/shared/ds/snackbar";
 import { claimFailure } from '@/shared/api/failure'
 
 const UserManagementPanel = () => {
   const { t } = useTranslation('admin');
-  const { data: usersData = [], isLoading: isUsersLoading, refetch: refetchUsers } = useUsersQuery();
-  const { data: roles = [], isLoading: isRolesLoading } = useRolesQuery();
-  const { data: authorities = [], isLoading: isPermissionsLoading } = usePermissionsQuery();
+  const { t: tc } = useTranslation('common');
+  const usersQ = useUsersQuery({ quiet: true });
+  const { data: usersData = [], isLoading: isUsersLoading, refetch: refetchUsers } = usersQ;
+  const rolesQ = useRolesQuery({ quiet: true });
+  const { data: roles = [], isLoading: isRolesLoading } = rolesQ;
+  const permsQ = usePermissionsQuery({ quiet: true });
+  const { data: authorities = [], isLoading: isPermissionsLoading } = permsQ;
   const { mutateAsync: updateUser } = usePutUserMutation();
   const isMobile = useIsMobile();
+  const snackbar = useSnackbar();
 
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -80,19 +86,31 @@ const UserManagementPanel = () => {
       // Refetch users to reflect changes
       await refetchUsers();
 
-      toast.success(t('authority.userRolesUpdated'));
+      snackbar.show({ message: t('authority.userRolesUpdated'), tone: 'positive' });
     } catch (error) {
       console.error("Failed to update user roles:", error);
       claimFailure(error);
-      toast.error(t('authority.userRolesUpdateFailed'));
+      snackbar.show({ message: t('authority.userRolesUpdateFailed'), tone: 'critical' });
       // 고르기 화면이 실패를 알아야 고른 것을 그대로 두고 다시 저장하게 할 수 있다
       throw error
     }
   };
 
+  if (usersQ.isLoadingError || rolesQ.isLoadingError || permsQ.isLoadingError) {
+    return (
+      <ResultSection
+        kind='failure'
+        size='medium'
+        title={t('authority.userFailureTitle')}
+        description={t('users.failureDescription')}
+        primaryAction={{ label: tc('retry'), onClick: () => { void usersQ.refetch(); void rolesQ.refetch(); void permsQ.refetch() }, loading: usersQ.isFetching || rolesQ.isFetching || permsQ.isFetching }}
+      />
+    )
+  }
+
   if (isMobile) {
     return (
-      <div className="h-full bg-background">
+      <div className="min-h-[28rem] bg-background">
         {isLoading ? (
           <UserListSkeleton />
         ) : (
@@ -126,7 +144,7 @@ const UserManagementPanel = () => {
   }
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border bg-background">
+    <ResizablePanelGroup direction="horizontal" className="h-[calc(100dvh-16rem)] min-h-[28rem] rounded-r3 border bg-background">
       <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
         {isLoading ? (
           <UserListSkeleton />

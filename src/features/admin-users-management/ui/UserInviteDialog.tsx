@@ -1,300 +1,193 @@
-import type { TypeResp } from '@/entities/type'
-import { useUserIdDuplicateQuery, usePostUserInviteMutation, usePutInvitedUserMutation } from '@/entities/user'
-import { useCountryCodeTypesQuery } from '@/entities/type'
-import { Button } from '@/shared/ui/shadcn/button'
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/shadcn/dialog'
-import { Field, FieldError, FieldLabel } from '@/shared/ui/shadcn/field'
-import { Input } from '@/shared/ui/shadcn/input'
-import { InputDatePicker } from '@/shared/ui/shadcn/inputDatePicker'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/shadcn/select'
-import { Spinner } from '@/shared/ui/shadcn/spinner'
-import { cn } from '@/shared/lib'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Building2, Calendar, Clock, Globe, Mail, User as UserIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { z } from 'zod'
 
-const createFormSchema = (t: (key: string) => string, tc: (key: string) => string) => z.object({
-  user_id: z.string().min(1, t('user.userIdRequired')),
-  user_name: z.string().min(1, t('user.userNameRequired')),
-  user_email: z.string().email(t('user.userEmailRequired')),
-  join_date: z.string().min(1, t('user.joinDateRequired')),
-  user_company_type: z.string().min(1, t('user.companyRequired')),
-  user_work_time: z.string().min(1, t('user.workTimeRequired')),
-  country_code: z.string().min(1, tc('countryRequired'))
-})
+import { Button } from '@/shared/ds/button'
+import { Callout } from '@/shared/ds/callout'
+import { ResponsiveDialog, ResponsiveDialogBody, ResponsiveDialogCancel, ResponsiveDialogContent, ResponsiveDialogFooter } from '@/shared/ds/dialog'
+import { Field } from '@/shared/ds/field'
+import { Input } from '@/shared/ds/input'
+import { useSnackbar } from '@/shared/ds/snackbar'
+import { useCountryCodeTypesQuery, type TypeResp } from '@/entities/type'
+import { useUserIdDuplicateQuery, usePostUserInviteMutation, usePutInvitedUserMutation } from '@/entities/user'
+import { DayField } from '@/shared/ui/groo/day-field'
+import { CompanyField, CountryField, WorkTimeField } from '@/shared/ui/groo/user-select-fields'
+import { readWriteFailure } from '@/shared/ui/groo/write-error'
 
-type UserInviteFormValues = z.infer<ReturnType<typeof createFormSchema>>
+interface InitialData {
+  user_id: string
+  user_name: string
+  user_email: string
+  user_company_type: string
+  user_work_time: string
+  join_date: string
+  country_code: string
+}
 
 interface UserInviteDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
   companyOptions: TypeResp[]
-  initialData?: {
-    user_id: string
-    user_name: string
-    user_email: string
-    user_company_type: string
-    user_work_time: string
-    join_date: string
-    country_code: string
-  }
+  initialData?: InitialData
 }
 
+interface Values {
+  id: string
+  name: string
+  email: string
+  joinDate: string
+  company: string
+  workTime: string
+  country: string
+}
+
+/**
+ * 사용자 초대 · 초대 정보 수정(I-24 F 29) — Responsive Dialog `form`, 바닥 [취소][초대 | 저장]. 칸 차례는 지금 그대로(이름 · 아이디 · 메일 · 입사일 ·
+ * 회사 · 근무 시간 · 국가). 아이디 중복은 칸을 떠난 뒤 확인한다 — 확인하는 동안 설명 "확인하는 중…", 중복이면 칸 오류 + 제출 막음
+ * (지금 `useUserIdDuplicateQuery` 길 그대로, 칸을 떠난 아이디로만 묻는다). 서버가 막은 중복(아이디 · 이메일 코드)은 그 칸 아래.
+ */
 const UserInviteDialog = ({ open, onOpenChange, title, companyOptions, initialData }: UserInviteDialogProps) => {
   const { t } = useTranslation('admin')
   const { t: tc } = useTranslation('common')
-  const [userIdToCheck, setUserIdToCheck] = useState('')
-  const { mutateAsync: inviteUser, isPending: isInvitePending } = usePostUserInviteMutation()
-  const { mutateAsync: updateInvitedUser, isPending: isUpdatePending } = usePutInvitedUserMutation()
-  const { data: countryCodeOptions } = useCountryCodeTypesQuery()
+  const snackbar = useSnackbar()
+  const edit = !!initialData?.user_id
+  const { data: countries = [] } = useCountryCodeTypesQuery()
+  const { mutateAsync: invite } = usePostUserInviteMutation()
+  const { mutateAsync: updateInvited } = usePutInvitedUserMutation()
+  const [initial] = useState<Values>(() => ({
+    id: initialData?.user_id ?? '',
+    name: initialData?.user_name ?? '',
+    email: initialData?.user_email ?? '',
+    joinDate: initialData?.join_date ?? '',
+    company: initialData?.user_company_type || companyOptions[0]?.code || '',
+    workTime: initialData?.user_work_time || '9 ~ 18',
+    country: initialData?.country_code || 'KR',
+  }))
+  const [values, setValues] = useState<Values>(initial)
+  const [checkedId, setCheckedId] = useState('')
+  const [serverIdTaken, setServerIdTaken] = useState(false)
+  const [serverEmailTaken, setServerEmailTaken] = useState(false)
+  const [showErrors, setShowErrors] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const dup = useUserIdDuplicateQuery(checkedId)
 
-  const isEditMode = !!initialData?.user_id
-  const isPending = isInvitePending || isUpdatePending
+  const set = <K extends keyof Values>(key: K, v: Values[K]) => setValues((cur) => ({ ...cur, [key]: v }))
+  const idTrim = values.id.trim()
+  const checking = !!checkedId && checkedId === idTrim && dup.isFetching
+  const idTaken = (!!checkedId && checkedId === idTrim && dup.data?.duplicate === true) || serverIdTaken
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)
+  const errors = {
+    id: !values.id.trim(),
+    name: !values.name.trim(),
+    email: !emailOk,
+    joinDate: !values.joinDate,
+    company: !values.company,
+    workTime: !values.workTime,
+    country: !values.country,
+  }
+  const dirty = JSON.stringify(values) !== JSON.stringify(initial)
 
-  const { data: duplicateCheckResult, isLoading: isCheckingDuplicate } = useUserIdDuplicateQuery(userIdToCheck)
+  const leaveId = () => {
+    const id = values.id.trim()
+    if (!edit && id) setCheckedId(id)
+  }
 
-  const form = useForm<UserInviteFormValues>({
-    resolver: zodResolver(createFormSchema(t, tc)),
-    defaultValues: {
-      user_id: initialData?.user_id || '',
-      user_name: initialData?.user_name || '',
-      user_email: initialData?.user_email || '',
-      user_company_type: initialData?.user_company_type || companyOptions[0]?.code || '',
-      user_work_time: initialData?.user_work_time || '9 ~ 18',
-      join_date: initialData?.join_date || '',
-      country_code: initialData?.country_code || 'KR'
-    }
-  })
-
-  // 중복 체크 결과에 따라 에러 설정
-  useEffect(() => {
-    if (duplicateCheckResult && userIdToCheck) {
-      if (duplicateCheckResult.duplicate) {
-        form.setError('user_id', {
-          type: 'manual',
-          message: t('user.userIdDuplicate')
-        })
-      } else {
-        form.clearErrors('user_id')
-      }
-    }
-  }, [duplicateCheckResult, userIdToCheck, form, t])
-
-  const handleUserIdBlur = () => {
-    const userId = form.getValues('user_id')
-
-    // 빈 값이면 체크하지 않음
-    if (!userId || userId.trim() === '') {
-      setUserIdToCheck('')
+  const submit = async () => {
+    if (busy || checking) return
+    if (Object.values(errors).some(Boolean) || idTaken) {
+      setShowErrors(true)
       return
     }
-
-    // user_id를 설정하면 useGetUserIdDuplicate가 자동으로 호출됨
-    setUserIdToCheck(userId)
+    setBusy(true)
+    setSaveError(null)
+    try {
+      const body = {
+        user_id: values.id.trim(),
+        user_name: values.name.trim(),
+        user_email: values.email.trim(),
+        user_company_type: values.company,
+        user_work_time: values.workTime,
+        join_date: values.joinDate,
+        country_code: values.country,
+      }
+      if (edit) await updateInvited(body)
+      else await invite(body)
+      onOpenChange(false)
+      snackbar.show({ message: edit ? t('users.inviteEdited') : t('users.invited'), tone: 'positive' })
+    } catch (error) {
+      const { code, key } = readWriteFailure(error)
+      if (code === 'USER_002') setServerIdTaken(true)
+      else if (code === 'USER_005') setServerEmailTaken(true)
+      else if (key) setSaveError(tc(key))
+    } finally {
+      setBusy(false)
+    }
   }
 
-  const workTimeOptions = [
-    { value: '8 ~ 17', className: 'text-rose-500 dark:text-rose-400' },
-    { value: '9 ~ 18', className: 'text-sky-500 dark:text-sky-400' },
-    { value: '10 ~ 19', className: 'text-emerald-500 dark:text-emerald-400' },
-    { value: '13 ~ 21', className: 'text-amber-500 dark:text-amber-400' }
-  ]
-
-  const selectedWorkTime = workTimeOptions.find(option => option.value === form.watch('user_work_time'))
-
-  useEffect(() => {
-    if (open) {
-      form.reset({
-        user_id: initialData?.user_id || '',
-        user_name: initialData?.user_name || '',
-        user_email: initialData?.user_email || '',
-        user_company_type: initialData?.user_company_type || companyOptions[0]?.code || '',
-        user_work_time: initialData?.user_work_time || '9 ~ 18',
-        join_date: initialData?.join_date || '',
-        country_code: initialData?.country_code || 'KR'
-      })
-      setUserIdToCheck('') // 다이얼로그 열릴 때 중복 체크 상태 초기화
-    }
-  }, [open, form, companyOptions, initialData])
-
-  const onSubmit = async (values: UserInviteFormValues) => {
-    if (isEditMode) {
-      // 수정 모드: PUT /users/{id}/invitations
-      await updateInvitedUser({
-        user_id: values.user_id,
-        user_name: values.user_name,
-        user_email: values.user_email,
-        user_company_type: values.user_company_type,
-        user_work_time: values.user_work_time,
-        join_date: values.join_date,
-        country_code: values.country_code
-      })
-    } else {
-      // 신규 초대 모드: POST /users/invitations
-      await inviteUser(values)
-    }
-    onOpenChange(false)
-  }
-
+  const idError = errors.id ? t('user.userIdRequired') : t('users.idTaken')
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-[40rem]:max-w-[28rem] max-h-[90vh] flex flex-col">
-        <DialogHeader className="shrink-0">
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1 overflow-y-auto py-6 space-y-4">
-            <Controller
-              control={form.control}
-              name="user_name"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    {t('user.userName')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <Input {...field} />
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="user_id"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    <UserIcon className='h-4 w-4 text-muted-foreground inline-block' /> {t('user.userId')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    onBlur={() => {
-                      field.onBlur()
-                      handleUserIdBlur()
-                    }}
-                    disabled={isCheckingDuplicate || !!initialData?.user_id}
-                  />
-                  {isCheckingDuplicate && (
-                    <div className="text-xs text-muted-foreground mt-1">{t('user.checkingDuplicate')}</div>
-                  )}
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="user_email"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    <Mail className='h-4 w-4 text-muted-foreground inline-block' /> {t('user.userEmail')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <Input {...field} />
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="join_date"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    <Calendar className='h-4 w-4 text-muted-foreground inline-block' /> {t('user.joinDate')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <InputDatePicker
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  />
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="user_company_type"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    <Building2 className='h-4 w-4 text-muted-foreground inline-block' /> {t('user.company')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t('user.companyPlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {companyOptions.map(option => <SelectItem key={option.code} value={option.code}>{option.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="user_work_time"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    <Clock className='h-4 w-4 text-muted-foreground inline-block' /> {t('user.workTime')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className={cn('w-full', selectedWorkTime?.className)}>
-                      <SelectValue placeholder={t('user.workTimePlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {workTimeOptions.map(option => <SelectItem key={option.value} value={option.value} className={option.className}>{option.value}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="country_code"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    <Globe className='h-4 w-4 text-muted-foreground inline-block' /> {tc('country')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={tc('countryPlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countryCodeOptions?.map(option => <SelectItem key={option.code} value={option.code}>{option.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
+    <ResponsiveDialog open={open} form dirty={dirty} busy={busy} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent title={title}>
+        <ResponsiveDialogBody>
+          {saveError && (
+            <Callout tone='critical' role='alert' className='mb-x4' data-save-failure>
+              {saveError}
+            </Callout>
+          )}
+          <div className='flex flex-col gap-x6 pb-x2'>
+            <Field label={t('user.userName')} showRequiredIndicator invalid={showErrors && errors.name} errorMessage={t('user.userNameRequired')}>
+              <Input value={values.name} onChange={(e) => set('name', e.target.value)} />
+            </Field>
+            <Field
+              label={t('user.userId')}
+              showRequiredIndicator
+              readOnly={edit}
+              invalid={(showErrors && errors.id) || idTaken}
+              errorMessage={idError}
+              description={checking ? t('users.idChecking') : undefined}
+            >
+              <Input
+                value={values.id}
+                readOnly={edit}
+                autoCapitalize='none'
+                onChange={(e) => {
+                  setServerIdTaken(false)
+                  set('id', e.target.value)
+                }}
+                onBlur={leaveId}
+              />
+            </Field>
+            <Field
+              label={t('user.userEmail')}
+              showRequiredIndicator
+              invalid={(showErrors && errors.email) || serverEmailTaken}
+              errorMessage={serverEmailTaken ? tc('failure.code.duplicateEmail') : t('user.userEmailRequired')}
+            >
+              <Input
+                type='email'
+                inputMode='email'
+                value={values.email}
+                onChange={(e) => {
+                  setServerEmailTaken(false)
+                  set('email', e.target.value)
+                }}
+              />
+            </Field>
+            <DayField label={t('user.joinDate')} placeholder={t('user.joinDatePlaceholder')} value={values.joinDate} onValueChange={(d) => set('joinDate', d)} invalid={showErrors && errors.joinDate} errorMessage={t('user.joinDateRequired')} />
+            <CompanyField value={values.company} onValueChange={(v) => set('company', v)} options={companyOptions} required invalid={showErrors && errors.company} />
+            <WorkTimeField value={values.workTime} onValueChange={(v) => set('workTime', v)} required invalid={showErrors && errors.workTime} />
+            <CountryField value={values.country} onValueChange={(v) => set('country', v)} options={countries} required invalid={showErrors && errors.country} />
           </div>
-          <DialogFooter className="shrink-0">
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                {tc('cancel')}
-              </Button>
-            </DialogClose>
-            <Button type="submit" disabled={!form.formState.isValid || isPending}>
-              {isPending && <Spinner />}
-              {isPending ? tc('processing') : isEditMode ? tc('edit') : t('user.invite')}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </ResponsiveDialogBody>
+        <ResponsiveDialogFooter>
+          <ResponsiveDialogCancel>{tc('cancel')}</ResponsiveDialogCancel>
+          <Button loading={busy} disabled={checking} onClick={() => void submit()}>
+            {edit ? tc('save') : t('user.invite')}
+          </Button>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   )
 }
 
