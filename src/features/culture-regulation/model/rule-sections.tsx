@@ -25,7 +25,7 @@ export interface RuleSectionData {
 
 const NB = ' '
 /** 눌러 여는 글이었던 낱말 — 굵은 글(700, 밑줄 없음 — 누르는 것처럼 보이지 않게) */
-const Em = ({ children }: { children: ReactNode }) => <b className='font-bold'>{children}</b>
+const em = (children: ReactNode): ReactNode => <b className='font-bold'>{children}</b>
 /** 낱말 풀이 글은 밑줄 없이 그대로 둔다 */
 const noUnderline = <span />
 
@@ -60,7 +60,7 @@ export const buildRuleSections = (t: TFunction<'culture'>, sep: string): RuleSec
           title: t('rule.vacation.timingTitle'),
           body: (
             <>
-              <Em>{t('rule.vacation.timingTrigger')}</Em>
+              {em(t('rule.vacation.timingTrigger'))}
               {sep}
               {t('rule.vacation.timingDesc')}
             </>
@@ -78,11 +78,11 @@ export const buildRuleSections = (t: TFunction<'culture'>, sep: string): RuleSec
           title: t('rule.vacation.specialTitle'),
           body: (
             <>
-              <Em>{t('rule.vacation.happyTrigger')}</Em>
+              {em(t('rule.vacation.happyTrigger'))}
               {sep}
               {t('rule.vacation.or')}
               {NB}
-              <Em>{t('rule.vacation.sadTrigger')}</Em>
+              {em(t('rule.vacation.sadTrigger'))}
               {NB}
               {t('rule.vacation.specialDesc')}
             </>
@@ -98,7 +98,7 @@ export const buildRuleSections = (t: TFunction<'culture'>, sep: string): RuleSec
           title: t('rule.vacation.otherTitle'),
           body: (
             <>
-              🏥<Em>{t('rule.vacation.healthTrigger')}</Em>,{NB}💂‍♂️<Em>{t('rule.vacation.militaryTrigger')}</Em>
+              🏥{em(t('rule.vacation.healthTrigger'))},{NB}💂‍♂️{em(t('rule.vacation.militaryTrigger'))}
               {NB}
               {t('rule.vacation.otherDesc')}
             </>
@@ -131,7 +131,7 @@ export const buildRuleSections = (t: TFunction<'culture'>, sep: string): RuleSec
             <>
               {t('rule.attire.avoidIntro')}
               {NB}
-              <Em>{t('rule.attire.avoidTrigger')}</Em>
+              {em(t('rule.attire.avoidTrigger'))}
               {sep}
               {t('rule.attire.avoidEnd')}
             </>
@@ -156,7 +156,7 @@ export const buildRuleSections = (t: TFunction<'culture'>, sep: string): RuleSec
           title: t('rule.education.externalTitle'),
           body: (
             <>
-              🧑‍🏫<Em>{t('rule.education.externalTrigger')}</Em>
+              🧑‍🏫{em(t('rule.education.externalTrigger'))}
               {sep}
               {t('rule.education.externalDesc')}
             </>
@@ -172,11 +172,11 @@ export const buildRuleSections = (t: TFunction<'culture'>, sep: string): RuleSec
             <>
               {t('rule.education.extraLeaveDesc')}
               {NB}
-              <Em>{t('rule.education.waitTrigger')}</Em>
+              {em(t('rule.education.waitTrigger'))}
               {sep}
               {t('rule.education.excludeText')}
               {NB}
-              <Em>{t('rule.education.hourTrigger')}</Em>
+              {em(t('rule.education.hourTrigger'))}
               {sep}
               {t('rule.education.grantText')}
             </>
@@ -200,7 +200,7 @@ export const buildRuleSections = (t: TFunction<'culture'>, sep: string): RuleSec
             <>
               {t('rule.culture.birthdayIntro')}
               {NB}
-              <Em>{t('rule.culture.earlyLeaveTrigger')}</Em>
+              {em(t('rule.culture.earlyLeaveTrigger'))}
               {sep}
               {t('rule.culture.earlyLeaveEnd')}
             </>
@@ -216,7 +216,7 @@ export const buildRuleSections = (t: TFunction<'culture'>, sep: string): RuleSec
             <>
               {t('rule.culture.familyIntro')}
               {NB}
-              <Em>{t('rule.culture.earlyLeaveTrigger')}</Em>
+              {em(t('rule.culture.earlyLeaveTrigger'))}
               {sep}
               {t('rule.culture.earlyLeaveEnd')}
             </>
@@ -231,7 +231,7 @@ export const buildRuleSections = (t: TFunction<'culture'>, sep: string): RuleSec
             <>
               {t('rule.culture.otherIntro')}
               {NB}
-              <Em>{t('rule.culture.familyTrigger')}</Em>
+              {em(t('rule.culture.familyTrigger'))}
               {sep}
               {t('rule.culture.otherEnd')}
             </>
