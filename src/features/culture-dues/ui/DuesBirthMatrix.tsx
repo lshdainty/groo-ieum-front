@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ds/tooltip'
 import { useUsersMonthBirthDuesQuery, type GetUsersMonthBirthDuesResp } from '@/entities/dues'
 import { useUsersQuery, type GetUsersResp } from '@/entities/user'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
-import { MATRIX_CELL_MAX, MONTH_LABEL_MIN, matrixCellWidth } from '../lib/dues-matrix'
+import { MATRIX_CELL_MAX, MATRIX_CELL_MIN, MONTH_LABEL_MIN, matrixCellWidth } from '../lib/dues-matrix'
 import { DuesFailure, DuesMatrixEmpty, MatrixSkeleton } from './DuesResults'
 import { DuesSection } from './DuesSection'
 
@@ -69,11 +69,13 @@ export const DuesBirthMatrix = ({ year }: { year: number }) => {
   )
 }
 
-const Matrix = ({ rows, nameColumn }: { rows: Row[]; nameColumn: number }) => {
+const Matrix = ({ rows, nameColumn: nameWanted }: { rows: Row[]; nameColumn: number }) => {
   const { t } = useTranslation('culture')
   const [ref, width] = useWidth()
   // 터치로 연 툴팁 하나 — 누르면 열고 다시 누르거나 다른 곳을 누르면 닫는다
   const [openKey, setOpenKey] = useState<string | null>(null)
+  // 폭이 모자라(360) 칸이 18 로도 안 들면 이름 열을 줄인다 — 표가 본문 밖으로 나가지 않게(이름은 줄바꿈)
+  const nameColumn = width > 0 ? Math.max(48, Math.min(nameWanted, width - MATRIX_CELL_MIN * 12 - 60)) : nameWanted
   const cell = width > 0 ? matrixCellWidth(width, nameColumn) : MATRIX_CELL_MAX
   const monthText = cell >= MONTH_LABEL_MIN
 

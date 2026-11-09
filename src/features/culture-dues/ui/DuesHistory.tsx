@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/shared/lib/cn'
 import { Badge } from '@/shared/ds/badge'
 import { CardAction } from '@/shared/ds/card'
+import { InfiniteListEnd } from '@/shared/ds/infinite-list'
 import { List, ListButtonItem, ListItem } from '@/shared/ds/list'
 import { ResponsiveMenuContent, ResponsiveMenuItem } from '@/shared/ds/menu'
 import { LoadingRegion, Skeleton } from '@/shared/ds/skeleton'
@@ -74,7 +75,9 @@ export const DuesHistory = ({ year }: { year: number }) => {
   const after = useRef<number[]>([])
   const lastRowId = useRef<number | null>(null)
 
-  const pageRows = rows.slice((pageValue.page - 1) * pageValue.pageSize, pageValue.page * pageValue.pageSize)
+  // 768 미만은 쪽 넘김이 아니라 끝없이 불러온다(table-pagination.md "768 미만은 List 줄") — 이미 받은 줄을 10개씩 더 보인다
+  const [shown, setShown] = useState<number>(PAGE_SIZES[0])
+  const pageRows = desktop ? rows.slice((pageValue.page - 1) * pageValue.pageSize, pageValue.page * pageValue.pageSize) : rows.slice(0, shown)
   const showPagination = rows.length > PAGE_SIZES[0]
 
   const openForm = (target: DuesFormTarget) => {
@@ -208,7 +211,14 @@ export const DuesHistory = ({ year }: { year: number }) => {
                   )
                 })}
               </List>
-              {pagination && <div className='overflow-x-auto px-x6' ref={tableRef}>{pagination}</div>}
+              {rows.length > PAGE_SIZES[0] && (
+                <InfiniteListEnd
+                  status={shown < rows.length ? 'loading' : 'end'}
+                  endText={t('dues.listEnd')}
+                  onRetry={() => setShown((n) => n + PAGE_SIZES[0])}
+                  onReachEnd={() => setShown((n) => (n < rows.length ? n + PAGE_SIZES[0] : n))}
+                />
+              )}
             </>
           )}
         </LoadingRegion>
