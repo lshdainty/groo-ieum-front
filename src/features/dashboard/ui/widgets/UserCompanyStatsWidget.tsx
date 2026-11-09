@@ -1,33 +1,55 @@
-import QueryAsyncBoundary from '@/shared/ui/async-boundary/QueryAsyncBoundary'
-import { UserCompanyStatsItem, getUserCompanyStatsConfig } from '@/features/admin-users-management/ui/UserCompanyStatsItem'
-import { UserCompanyStatsEmpty } from '@/features/dashboard/ui/widgets/UserCompanyStatsEmpty'
-import { UserCompanyStatsSkeleton } from '@/features/admin-users-management/ui/UserCompanyStatsSkeleton'
+import { Building2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+
+import { List, ListItem } from '@/shared/ds/list'
+import { LogoTile } from '@/shared/ds/logo-tile'
+import { ResultSection } from '@/shared/ds/result-section'
+import { Skeleton } from '@/shared/ds/skeleton'
 import { useUsersQuery } from '@/entities/user'
+import { getUserCompanyStatsConfig } from '@/features/admin-users-management/ui/UserCompanyStatsItem'
+import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
+import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
 
+/**
+ * 회사별 인원 현황(D 29) — 회사마다 List 줄(Logo Tile 32 + 회사 이름 + 뒤 "{n}명" 700). 로고가 안 불러와지면 첫 글자 타일이라
+ * 깨진 그림 · "{회사} logo" 글이 보이지 않는다. 지표 카드(회사 관리 · 사용자 관리)와 한 부품은 I-24 몫이라 홈은 줄로 담는다.
+ */
 export const UserCompanyStatsWidget = () => {
-  const { data: users, isLoading, error } = useUsersQuery()
-
-  const companyStats = getUserCompanyStatsConfig(users)
+  const { t } = useTranslation('admin')
+  const { t: td } = useTranslation('dashboard')
+  const query = useUsersQuery({ quiet: true })
+  const stats = getUserCompanyStatsConfig(query.data)
 
   return (
-    <QueryAsyncBoundary
-      queryState={{ isLoading, error, data: users }}
-      loadingComponent={<UserCompanyStatsSkeleton />}
-      emptyComponent={<UserCompanyStatsEmpty className="h-full" />}
-      isEmpty={(data) => !data || data.length === 0}
-    >
-      <div className="overflow-hidden h-full bg-card">
-        <div className="flex flex-wrap -mt-px -ml-px min-h-full overflow-auto h-full">
-          {companyStats.map((stat) => (
-            <div
-              key={stat.id}
-              className="p-6 min-w-[180px] flex-1 border-l border-t border-border"
-            >
-              <UserCompanyStatsItem {...stat} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </QueryAsyncBoundary>
+    <WidgetFrame id='user-company-stats' body='list'>
+      <WidgetBoundary id='user-company-stats' queries={[query]} fallback={<CompanyStatsSkeleton />}>
+        {query.data && stats.length === 0 ? (
+          <ResultSection size='medium' icon={<Building2 />} title={t('user.companyStats.empty.title')} description={t('user.companyStats.empty.description')} />
+        ) : (
+          <List>
+            {stats.map((stat) => (
+              <ListItem
+                key={stat.id}
+                data-company={stat.id}
+                prefix={<LogoTile name={stat.name} face='name' size={32} src={stat.logo} />}
+                title={stat.name}
+                suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{td('companyCount', { count: stat.count })}</span>}
+              />
+            ))}
+          </List>
+        )}
+      </WidgetBoundary>
+    </WidgetFrame>
   )
 }
+
+const CompanyStatsSkeleton = () => (
+  <div className='flex flex-col'>
+    {[0, 1, 2].map((i) => (
+      <div key={i} className='flex items-center gap-x3 px-x6 py-x3'>
+        <Skeleton radius='8' className='size-x8 shrink-0' />
+        <Skeleton text='t5' className='block w-1/2' />
+      </div>
+    ))}
+  </div>
+)

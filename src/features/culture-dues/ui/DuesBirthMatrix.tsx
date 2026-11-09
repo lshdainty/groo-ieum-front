@@ -6,10 +6,10 @@ import { cn } from '@/shared/lib/cn'
 import { dsMoney } from '@/shared/ds/i18n'
 import { LoadingRegion } from '@/shared/ds/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ds/tooltip'
-import { useUsersMonthBirthDuesQuery, type GetUsersMonthBirthDuesResp } from '@/entities/dues'
-import { useUsersQuery, type GetUsersResp } from '@/entities/user'
+import { useUsersMonthBirthDuesQuery } from '@/entities/dues'
+import { useUsersQuery } from '@/entities/user'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
-import { MATRIX_CELL_MAX, MATRIX_CELL_MIN, MONTH_LABEL_MIN, matrixCellWidth } from '../lib/dues-matrix'
+import { MATRIX_CELL_MAX, MATRIX_CELL_MIN, MONTH_LABEL_MIN, matrixCellWidth, rowsOf, type Row } from '../lib/dues-matrix'
 import { DuesFailure, DuesMatrixEmpty, MatrixSkeleton } from './DuesResults'
 import { DuesSection } from './DuesSection'
 
@@ -27,16 +27,6 @@ const useWidth = () => {
   }, [])
   return [ref, width] as const
 }
-
-type Row = { user: GetUsersResp; amounts: number[]; birthMonth: number | null }
-
-const rowsOf = (users: GetUsersResp[] | undefined, birth: GetUsersMonthBirthDuesResp[] | undefined): Row[] =>
-  (users ?? []).map((user) => ({
-    user,
-    // 응답에 사용자 id 가 없어 이름으로 맞춘다(서버 응답이 바뀌어야 고칠 수 있다 — 지시서 R · 사용자 보고)
-    amounts: birth?.find((d) => d.dues_user_name === user.user_name)?.month_birth_dues ?? Array<number>(12).fill(0),
-    birthMonth: user.user_birth ? parseInt(user.user_birth.split('-')[1] ?? '', 10) || null : null,
-  }))
 
 /**
  * 월별 생일비 입금 현황(E 43) — 범례 + 행렬. 칸은 색만(입금 = 브랜드 채움 · 아님 = 옅은 회색), 칸에 글을 두지 않는다.
@@ -69,7 +59,7 @@ export const DuesBirthMatrix = ({ year }: { year: number }) => {
   )
 }
 
-const Matrix = ({ rows, nameColumn: nameWanted }: { rows: Row[]; nameColumn: number }) => {
+export const Matrix = ({ rows, nameColumn: nameWanted }: { rows: Row[]; nameColumn: number }) => {
   const { t } = useTranslation('culture')
   const [ref, width] = useWidth()
   // 터치로 연 툴팁 하나 — 누르면 열고 다시 누르거나 다른 곳을 누르면 닫는다

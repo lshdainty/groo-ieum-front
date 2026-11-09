@@ -15,7 +15,7 @@ import { AccountDialogsContext } from './account-dialogs-context'
 export function AccountDialogsProvider({ children }: { children: ReactNode }) {
   const { loginUser } = useUser()
   const { mutate: putUser } = usePutUserMutation()
-  const { data: userData } = useUserQuery(loginUser?.user_id || '')
+  const { data: userData } = useUserQuery(loginUser?.user_id || '', { quiet: true })
   const [editOpen, setEditOpen] = useState(false)
   const [passwordOpen, setPasswordOpen] = useState(false)
 

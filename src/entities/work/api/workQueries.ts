@@ -29,28 +29,38 @@ import type {
 
 const workKeys = createQueryKeys('works')
 
+/** quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다 — QueryProvider) */
+interface QuietOptions {
+  quiet?: boolean
+}
+
+const quietMeta = (options?: QuietOptions) => (options?.quiet ? { quiet: true } : undefined)
+
 // 시스템 체크 상태 조회 훅
-export const useSystemCheckStatusQuery = (systemCodes: SystemType[]) => {
+export const useSystemCheckStatusQuery = (systemCodes: SystemType[], options?: QuietOptions) => {
   return useQuery<CheckSystemStatusBatchResp>({
     queryKey: workKeys.list({ type: 'systemCheck', systemCodes }),
     queryFn: () => workApi.getSystemCheckStatus(systemCodes),
-    enabled: systemCodes.length > 0
+    enabled: systemCodes.length > 0,
+    meta: quietMeta(options)
   })
 }
 
 // 오늘 업무 시간 상태 조회 훅
-export const useTodayWorkStatusQuery = () => {
+export const useTodayWorkStatusQuery = (options?: QuietOptions) => {
   return useQuery<TodayWorkStatusResp>({
     queryKey: workKeys.list({ type: 'todayStatus' }),
-    queryFn: () => workApi.getTodayWorkStatus()
+    queryFn: () => workApi.getTodayWorkStatus(),
+    meta: quietMeta(options)
   })
 }
 
 // 미작성 업무 날짜 조회 훅
-export const useUnregisteredWorkDatesQuery = (year: number, month: number) => {
+export const useUnregisteredWorkDatesQuery = (year: number, month: number, options?: QuietOptions) => {
   return useQuery<UnregisteredWorkDatesResp>({
     queryKey: workKeys.list({ type: 'unregisteredDates', year, month }),
-    queryFn: () => workApi.getUnregisteredWorkDates(year, month)
+    queryFn: () => workApi.getUnregisteredWorkDates(year, month),
+    meta: quietMeta(options)
   })
 }
 
@@ -200,10 +210,11 @@ export const useToggleSystemCheckMutation = () => {
 }
 
 // 시스템 타입 목록 조회 훅
-export const useSystemTypesQuery = () => {
+export const useSystemTypesQuery = (options?: QuietOptions) => {
   return useQuery<TypeResp[]>({
     queryKey: ['system-types'],
-    queryFn: () => typeApi.getSystemTypes()
+    queryFn: () => typeApi.getSystemTypes(),
+    meta: quietMeta(options)
   })
 }
 

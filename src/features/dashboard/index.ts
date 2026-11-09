@@ -1,2 +1,2 @@
-export { default as DashboardContent } from './ui/DashboardContent';
-export { DashboardProvider, useDashboardContext } from './model/DashboardContext';
+export { DashboardContent } from './ui/DashboardContent'
+export { readHomeWidgets, parseHomeWidgetIds } from './lib/read-home-widgets'

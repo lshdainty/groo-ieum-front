@@ -1,20 +1,24 @@
-import QueryAsyncBoundary from '@/shared/ui/async-boundary/QueryAsyncBoundary'
-import { ScheduleEmpty } from '@/features/work-schedule/ui/ScheduleEmpty'
-import { ScheduleSkeleton } from '@/features/work-schedule/ui/ScheduleSkeleton'
-import { ScheduleTable } from '@/features/work-schedule/ui/ScheduleTable'
-import { useUsersQuery } from '@/entities/user'
+import { useTranslation } from 'react-i18next'
 
+import { Skeleton } from '@/shared/ds/skeleton'
+import { useUsersQuery } from '@/entities/user'
+import { ScheduleTable } from '@/features/work-schedule/ui/ScheduleTable'
+import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
+import { WidgetScrollBox } from '@/features/dashboard/ui/WidgetScrollBox'
+import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
+
+/** 근무 일정(D 22) — 일정 관리 화면의 부품을 카드에 담는다(주인 지시서 I-25 대기). 부품 안의 읽기는 아직 임시 그물이다 */
 export const ScheduleWidget = () => {
-  const { data: users, isLoading, error } = useUsersQuery()
+  const { t } = useTranslation('dashboard')
+  const query = useUsersQuery({ quiet: true })
 
   return (
-    <QueryAsyncBoundary
-      queryState={{ isLoading, error, data: users }}
-      loadingComponent={<ScheduleSkeleton />}
-      emptyComponent={<ScheduleEmpty className="h-full" />}
-      isEmpty={(data) => !data || data.length === 0}
-    >
-      <ScheduleTable users={users!} />
-    </QueryAsyncBoundary>
+    <WidgetFrame id='schedule' body='list'>
+      <WidgetBoundary id='schedule' queries={[query]} fallback={<Skeleton radius='12' className='mx-x6 block h-[200px]' />}>
+        <WidgetScrollBox label={t('widget.workSchedule')}>
+          <ScheduleTable users={query.data ?? []} />
+        </WidgetScrollBox>
+      </WidgetBoundary>
+    </WidgetFrame>
   )
 }

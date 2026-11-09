@@ -1,38 +1,28 @@
-import QueryAsyncBoundary from '@/shared/ui/async-boundary/QueryAsyncBoundary'
-import { TotalDuesItem, getTotalDuesConfig } from '@/features/culture-dues/ui/TotalDuesItem'
-import { TotalDuesEmpty } from '@/features/culture-dues/ui/TotalDuesEmpty'
-import { TotalDuesWidgetSkeleton } from '@/features/culture-dues/ui/TotalDuesWidgetSkeleton'
-import { useMonthBirthDuesQuery, useYearOperationDuesQuery } from '@/entities/dues'
 import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
 
+import { useMonthBirthDuesQuery, useYearOperationDuesQuery } from '@/entities/dues'
+import { summaryMetricsOf } from '@/features/culture-dues/lib/dues-summary'
+import { SummaryMetrics } from '@/features/culture-dues/ui/DuesSummary'
+import { SummarySkeleton } from '@/features/culture-dues/ui/DuesResults'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
+import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
+
+/** 회비 현황(D 27) — 올해 · 이번 달 지표 넷(홈에는 연도 고르기가 없다). 회비 화면의 회비 현황과 같은 부품 */
 export const TotalDuesWidget = () => {
   const { t } = useTranslation('culture')
-  const currentYear = dayjs().year()
-  const currentMonth = dayjs().month() + 1
-
-  const { data: totalDues, isLoading: totalLoading, error: totalError } = useYearOperationDuesQuery(currentYear)
-  const { data: birthDues, isLoading: birthLoading, error: birthError } = useMonthBirthDuesQuery(currentYear, currentMonth)
-
-  const isLoading = totalLoading || birthLoading
-  const error = totalError || birthError
-
-  const duesConfig = getTotalDuesConfig(totalDues, birthDues, t)
+  const desktop = useDesktop()
+  const now = dayjs()
+  const operation = useYearOperationDuesQuery(now.year(), { quiet: true })
+  const birth = useMonthBirthDuesQuery(now.year(), now.month() + 1, { quiet: true })
+  const metrics = summaryMetricsOf(now.year(), now.month() + 1, operation.data, birth.data, t)
 
   return (
-    <QueryAsyncBoundary
-      queryState={{ isLoading, error, data: totalDues }}
-      loadingComponent={<TotalDuesWidgetSkeleton />}
-      emptyComponent={<TotalDuesEmpty className="h-full" />}
-      isEmpty={(data) => !data || !birthDues}
-    >
-      <div className='flex flex-col min-[64rem]:grid min-[64rem]:grid-cols-4 divide-y min-[64rem]:divide-y-0 min-[64rem]:divide-x divide-border h-full bg-card overflow-y-auto scrollbar-hide'>
-        {duesConfig.map((item) => (
-          <div key={item.id} className='p-4 h-auto min-[64rem]:h-full relative overflow-hidden min-h-[120px] shrink-0'>
-            <TotalDuesItem {...item} />
-          </div>
-        ))}
-      </div>
-    </QueryAsyncBoundary>
+    <WidgetFrame id='total-dues' body={desktop ? 'content' : 'list'}>
+      <WidgetBoundary id='total-dues' queries={[operation, birth]} fallback={<SummarySkeleton desktop={desktop} />}>
+        <SummaryMetrics metrics={metrics} desktop={desktop} />
+      </WidgetBoundary>
+    </WidgetFrame>
   )
 }

@@ -32,14 +32,22 @@ import type {
 
 export const vacationKeys = createQueryKeys('vacations')
 
+/** quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다 — QueryProvider) */
+interface QuietOptions {
+  quiet?: boolean
+}
+
+const quietMeta = (options?: QuietOptions) => (options?.quiet ? { quiet: true } : undefined)
+
 // === Query Hooks ===
 
-export const useUserVacationHistoryQuery = (userId: string, year?: number) => {
+export const useUserVacationHistoryQuery = (userId: string, year?: number, options?: QuietOptions) => {
   const queryYear = year ?? new Date().getFullYear()
   return useQuery<GetUserVacationHistoryResp>({
     queryKey: vacationKeys.list({ type: 'history', userId, year: queryYear }),
     queryFn: () => vacationApi.getUserVacationHistory(userId, queryYear),
-    enabled: !!userId
+    enabled: !!userId,
+    meta: quietMeta(options)
   })
 }
 
@@ -50,19 +58,21 @@ export const useAllUsersVacationHistoryQuery = () => {
   })
 }
 
-export const useAllUsersVacationSummaryQuery = (year: number) => {
+export const useAllUsersVacationSummaryQuery = (year: number, options?: QuietOptions) => {
   return useQuery<GetAllUsersVacationSummaryResp[]>({
     queryKey: vacationKeys.list({ type: 'summary', year }),
     queryFn: () => vacationApi.getAllUsersVacationSummary(year),
-    enabled: !!year
+    enabled: !!year,
+    meta: quietMeta(options)
   })
 }
 
-export const useAvailableVacationsQuery = (userId: string, startDate: string, options?: { enabled?: boolean }) => {
+export const useAvailableVacationsQuery = (userId: string, startDate: string, options?: QuietOptions & { enabled?: boolean }) => {
   return useQuery<GetAvailableVacationsResp>({
     queryKey: vacationKeys.list({ type: 'available', userId, startDate }),
     queryFn: () => vacationApi.getAvailableVacations(userId, startDate),
-    enabled: (options?.enabled ?? true) && !!userId && !!startDate
+    enabled: (options?.enabled ?? true) && !!userId && !!startDate,
+    meta: quietMeta(options)
   })
 }
 
@@ -82,19 +92,21 @@ export const useUserVacationUsagesByPeriodQuery = (userId: string, startDate: st
   })
 }
 
-export const useUserMonthlyVacationStatsQuery = (userId: string, year: string) => {
+export const useUserMonthlyVacationStatsQuery = (userId: string, year: string, options?: QuietOptions) => {
   return useQuery<GetUserMonthlyVacationStatsResp[]>({
     queryKey: vacationKeys.list({ type: 'monthlyStats', userId, year }),
     queryFn: () => vacationApi.getUserMonthlyVacationStats(userId, year),
-    enabled: !!userId && !!year
+    enabled: !!userId && !!year,
+    meta: quietMeta(options)
   })
 }
 
-export const useUserVacationStatsQuery = (userId: string, baseDate: string) => {
+export const useUserVacationStatsQuery = (userId: string, baseDate: string, options?: QuietOptions) => {
   return useQuery<GetUserVacationStatsResp>({
     queryKey: vacationKeys.list({ type: 'stats', userId, baseDate }),
     queryFn: () => vacationApi.getUserVacationStats(userId, baseDate),
-    enabled: !!userId && !!baseDate
+    enabled: !!userId && !!baseDate,
+    meta: quietMeta(options)
   })
 }
 
@@ -107,21 +119,23 @@ export const useAllVacationsByApproverQuery = (approverId: string, year?: number
   })
 }
 
-export const useUserRequestedVacationsQuery = (userId: string, year?: number) => {
+export const useUserRequestedVacationsQuery = (userId: string, year?: number, options?: QuietOptions) => {
   const queryYear = year ?? new Date().getFullYear()
   return useQuery<GetUserRequestedVacationsResp[]>({
     queryKey: vacationKeys.list({ type: 'requests', userId, year: queryYear }),
     queryFn: () => vacationApi.getUserRequestedVacations(userId, queryYear),
-    enabled: !!userId
+    enabled: !!userId,
+    meta: quietMeta(options)
   })
 }
 
-export const useUserRequestedVacationStatsQuery = (userId: string, year?: number) => {
+export const useUserRequestedVacationStatsQuery = (userId: string, year?: number, options?: QuietOptions) => {
   const queryYear = year ?? new Date().getFullYear()
   return useQuery<GetUserRequestedVacationStatsResp>({
     queryKey: vacationKeys.list({ type: 'requestStats', userId, year: queryYear }),
     queryFn: () => vacationApi.getUserRequestedVacationStats(userId, queryYear),
-    enabled: !!userId
+    enabled: !!userId,
+    meta: quietMeta(options)
   })
 }
 

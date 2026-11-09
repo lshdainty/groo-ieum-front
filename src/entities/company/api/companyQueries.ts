@@ -14,20 +14,29 @@ import type {
 
 const companyKeys = createQueryKeys('companies')
 
+/** quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다 — QueryProvider) */
+interface QuietOptions {
+  quiet?: boolean
+}
+
+const quietMeta = (options?: QuietOptions) => (options?.quiet ? { quiet: true } : undefined)
+
 // 회사 정보 조회 훅
-export const useCompanyQuery = () => {
+export const useCompanyQuery = (options?: QuietOptions) => {
   return useQuery<GetCompanyResp>({
     queryKey: companyKeys.details(),
-    queryFn: () => companyApi.getCompany()
+    queryFn: () => companyApi.getCompany(),
+    meta: quietMeta(options)
   })
 }
 
 // 부서 포함 회사 정보 조회 훅
-export const useCompanyWithDepartmentsQuery = (companyId: string) => {
+export const useCompanyWithDepartmentsQuery = (companyId: string, options?: QuietOptions) => {
   return useQuery<GetCompanyWithDepartmentResp>({
     queryKey: companyKeys.detail(companyId),
     queryFn: () => companyApi.getCompanyWithDepartments(companyId),
-    enabled: !!companyId // companyId가 있을 때만 실행
+    enabled: !!companyId, // companyId가 있을 때만 실행
+    meta: quietMeta(options)
   })
 }
 

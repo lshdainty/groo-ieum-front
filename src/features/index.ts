@@ -13,7 +13,6 @@ export { calendarTypes } from '@/features/calendar'
 
 // Dashboard
 export { DashboardContent } from '@/features/dashboard'
-export { DashboardProvider, useDashboardContext } from '@/features/dashboard'
 
 // User Notice
 export { UserNoticeContent } from '@/features/user-notice'

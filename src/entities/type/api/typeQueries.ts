@@ -65,10 +65,11 @@ export const useApprovalStatusTypesQuery = () => {
 }
 
 // Grant Status Types 조회 훅
-export const useGrantStatusTypesQuery = () => {
+export const useGrantStatusTypesQuery = (options?: { quiet?: boolean }) => {
   return useQuery<TypeResp[]>({
     queryKey: typeKeys.list({ type: 'grant-status' }),
-    queryFn: () => typeApi.getGrantStatusTypes()
+    queryFn: () => typeApi.getGrantStatusTypes(),
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 

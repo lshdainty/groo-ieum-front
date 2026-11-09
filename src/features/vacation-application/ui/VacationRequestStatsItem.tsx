@@ -2,9 +2,11 @@ import { Badge } from '@/shared/ui/shadcn/badge';
 import { Progress } from '@/shared/ui/shadcn/progress';
 import { type GetUserRequestedVacationStatsResp } from '@/entities/vacation';
 import { VACATION_STATUS_CONFIG } from '@/shared/lib/vacationStatus'
+import { formatChangeRate, formatShare } from '@/shared/lib/groo/share'
 import {
   CalendarDays,
   FileText,
+  TrendingDown,
   TrendingUp
 } from 'lucide-react';
 import { ReactNode } from 'react';
@@ -67,12 +69,14 @@ export const getVacationRequestStatsConfig = (stats: GetUserRequestedVacationSta
       id: 'total',
       icon: <FileText className='w-6 h-6 text-blue-600' />,
       iconBg: 'bg-blue-100',
-      headerRight: (
-        <div className='flex items-center gap-1 text-xs'>
-          <TrendingUp className='w-3 h-3 text-green-600' />
-          <span className='text-green-600 font-medium'>+{requestGrowth.toFixed(1)}%</span>
-        </div>
-      ),
+      // 증감 방향은 부호를 따르고(0 은 화살표 없음), 휴가 신청은 늘고 줄어드는 것이 좋고 나쁨이 아니라 색은 중립이다
+      headerRight:
+        requestGrowth === 0 ? undefined : (
+          <div className='flex items-center gap-1 text-xs' data-request-growth={requestGrowth > 0 ? 'up' : 'down'}>
+            {requestGrowth > 0 ? <TrendingUp className='w-3 h-3 text-foreground/70' /> : <TrendingDown className='w-3 h-3 text-foreground/70' />}
+            <span className='text-foreground/70 font-medium'>{formatChangeRate(requestGrowth, { sign: 'always' })}</span>
+          </div>
+        ),
       title: t('request.totalRequest'),
       value: totalRequests,
       description: t('request.thisMonth', { count: thisMonthRequests })
@@ -123,7 +127,7 @@ export const getVacationRequestStatsConfig = (stats: GetUserRequestedVacationSta
       headerRight: (
         <div className='text-right'>
           <p className='text-xs text-foreground/70'>{t('request.approvalRate')}</p>
-          <p className='text-sm font-semibold text-foreground'>{approvalRate.toFixed(0)}%</p>
+          <p className='text-sm font-semibold text-foreground' data-approval-rate>{totalRequests > 0 ? formatShare(approvalRate) : '—'}</p>
         </div>
       ),
       title: t('request.approvedLabel'),
