@@ -18,6 +18,8 @@ import { ListCheckGroup, ListCheckItem } from '@/shared/ds/list'
 import { ResultSection } from '@/shared/ds/result-section'
 import { matchesSearch } from '@/shared/ds/searchable-list'
 import { useSnackbar } from '@/shared/ds/snackbar'
+import { PanelFailure } from '@/features/admin-company/ui/DepartmentTreePanel'
+import { MemberListSkeleton } from './DepartmentMembers'
 import { useDepartmentUsersQuery, usePostDepartmentUsersMutation } from '@/entities/department'
 
 /**
@@ -41,7 +43,8 @@ export function AddPeopleDialog({
   const snackbar = useSnackbar()
   const post = usePostDepartmentUsersMutation()
   // 받아 둔 목록(부서 화면이 이미 받은 것)을 그대로 쓴다 — 화면 폭이 바뀌어도 이 시트가 자기 부서를 안다
-  const candidates = useDepartmentUsersQuery(departmentId, { quiet: true }).data?.users_not_in_department ?? []
+  const membersQuery = useDepartmentUsersQuery(departmentId, { quiet: true })
+  const candidates = membersQuery.data?.users_not_in_department ?? []
   const [query, setQuery] = useState('')
   const [picked, setPicked] = useState<string[]>([])
   const [showError, setShowError] = useState(false)
@@ -107,7 +110,11 @@ export function AddPeopleDialog({
             </p>
           )}
           <div className='-mx-x6 pt-x2'>
-            {candidates.length === 0 ? (
+            {membersQuery.isPending ? (
+              <MemberListSkeleton />
+            ) : membersQuery.isError && !membersQuery.data ? (
+              <PanelFailure title={t('department.members.failure', { dept: deptName })} onRetry={() => void membersQuery.refetch()} retrying={membersQuery.isFetching} />
+            ) : candidates.length === 0 ? (
               <ResultSection size='medium' icon={<Search />} title={t('department.members.noneToAdd')} />
             ) : shown.length === 0 ? (
               <ResultSection size='medium' icon={<Search />} title={t('department.members.searchEmpty')} />

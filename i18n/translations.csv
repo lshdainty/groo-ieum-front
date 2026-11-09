@@ -1622,8 +1622,6 @@ admin,department.failureDesc,잠시 뒤 다시 시도해주세요.,Please try ag
 admin,department.members.title,{{name}} {{count}}명,{{name}} · {{count}}
 admin,department.members.add,사람 추가,Add people
 admin,department.members.main,주 부서,Main
-admin,department.members.remove,빼기,Remove
-admin,department.members.removeFor,{{name}} 님을 {{dept}}에서 빼기,Remove {{name}} from {{dept}}
 admin,department.members.removed,{{name}} 님을 {{dept}}에서 뺐어요.,Removed {{name}} from {{dept}}.
 admin,department.members.removedMain,{{name}} 님을 {{dept}}에서 뺐어요. 주 부서도 함께 빠졌어요.,Removed {{name}} from {{dept}}. The main department was removed as well.
 admin,department.members.listLabel,{{dept}} 사람,People in {{dept}}
@@ -1637,3 +1635,12 @@ admin,department.members.submit,{{count}}명 추가,Add {{count}}
 admin,department.members.added,{{count}}명을 {{dept}}에 넣었어요.,Added {{count}} to {{dept}}.
 admin,department.members.addFailed,사람을 추가하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not add people. Please try again in a moment.
 admin,department.members.noCompanyDesc,회사 관리에서 회사를 먼저 만들어주세요.,Create a company in Company first.
+admin,department.members.rowFor,{{name}} 님,{{name}}
+admin,department.members.mainOf,주 부서: {{dept}},Main department: {{dept}}
+admin,department.members.setMain,주 부서로 정하기,Set as main department
+admin,department.members.removeFrom,{{dept}}에서 빼기,Remove from {{dept}}
+admin,department.members.mainSet,{{name}} 님의 주 부서를 {{dept}}(으)로 바꿨어요.,Changed the main department of {{name}} to {{dept}}.
+admin,department.deleteMembers,부서원 {{count}}명도 이 부서에서 빠져요.,{{count}} members are also removed from this department.
+admin,department.deleteMembers_one,부서원 {{count}}명도 이 부서에서 빠져요.,{{count}} member is also removed from this department.
+admin,department.leaderLoading,불러오는 중이에요,Loading
+admin,department.leaderFailed,불러오지 못했어요,Could not load

@@ -94,6 +94,14 @@ export const departmentApi = {
     })
   },
 
+  // 주 부서 옮기기 — 이 부서를 그 사람의 주 부서로 정한다(다른 부서의 주 부서 표시는 서버가 함께 내린다)
+  putMainDepartment: async (departmentId: number, userId: string): Promise<void> => {
+    await apiClient.request({
+      method: 'put',
+      url: `/departments/${departmentId}/users/${userId}/main`
+    })
+  },
+
   getCheckUserMainDepartment: async (userId: string): Promise<CheckUserMainDepartmentResp> => {
     const resp: ApiResponse<CheckUserMainDepartmentResp> = await apiClient.request({
       method: 'get',

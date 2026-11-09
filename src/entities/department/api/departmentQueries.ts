@@ -19,6 +19,14 @@ import type {
 
 const departmentKeys = createQueryKeys('departments')
 const companyKeys = createQueryKeys('companies')
+const userKeys = createQueryKeys('users')
+
+// 끝날 때까지 기다린다 — 줄 로딩이 목록을 다시 받은 뒤에 풀리게(mutateAsync 가 무효화 refetch 를 기다린다)
+const refreshMembers = (queryClient: ReturnType<typeof useQueryClient>) =>
+  Promise.all([
+    queryClient.invalidateQueries({ queryKey: departmentKeys.all() }),
+    queryClient.invalidateQueries({ queryKey: userKeys.all() }),
+  ])
 
 // 부서 상세 조회 훅
 export const useDepartmentQuery = (departmentId: number) => {
@@ -103,9 +111,7 @@ export const usePostDepartmentUsersMutation = () => {
 
   return useMutation<PostDepartmentUsersResp, Error, { departmentId: number; data: PostDepartmentUsersReq }>({
     mutationFn: ({ departmentId, data }) => departmentApi.postDepartmentUsers(departmentId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: departmentKeys.all() })
-    }
+    onSuccess: () => refreshMembers(queryClient)
   })
 }
 
@@ -115,8 +121,16 @@ export const useDeleteDepartmentUsersMutation = () => {
 
   return useMutation<void, Error, { departmentId: number; data: DeleteDepartmentUsersReq }>({
     mutationFn: ({ departmentId, data }) => departmentApi.deleteDepartmentUsers(departmentId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: departmentKeys.all() })
-    }
+    onSuccess: () => refreshMembers(queryClient)
+  })
+}
+
+// 주 부서로 정하기 Mutation 훅 — 부서 사람 목록 · 사용자 목록 질의를 다시 받는다
+export const usePutMainDepartmentMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation<void, Error, { departmentId: number; userId: string }>({
+    mutationFn: ({ departmentId, userId }) => departmentApi.putMainDepartment(departmentId, userId),
+    onSuccess: () => refreshMembers(queryClient)
   })
 }

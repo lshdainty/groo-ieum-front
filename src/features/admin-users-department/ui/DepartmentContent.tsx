@@ -12,7 +12,8 @@ import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useScreenHeader } from '@/widgets/layout/lib/screen-header'
 import { useCompanyQuery, useCompanyWithDepartmentsQuery, type GetCompanyResp } from '@/entities/company'
-import { useDeleteDepartmentUsersMutation, useDepartmentUsersQuery, type UserInfo } from '@/entities/department'
+import { useDeleteDepartmentUsersMutation, useDepartmentUsersQuery, usePutMainDepartmentMutation, type UserInfo } from '@/entities/department'
+import { useUsersQuery } from '@/entities/user'
 import { findDept, firstDeptId, type Dept } from '@/features/admin-company/lib/dept-tree'
 import { DepartmentTreePanel, PanelFailure, TreeSkeleton } from '@/features/admin-company/ui/DepartmentTreePanel'
 import { useDepartmentContext } from '../model/DepartmentContext'
@@ -37,7 +38,18 @@ const DepartmentInner = ({ company }: { company: GetCompanyResp }) => {
 
   const members = useDepartmentUsersQuery(current?.department_id ?? 0, { quiet: true })
   const removeUser = useDeleteDepartmentUsersMutation()
-  const [removing, setRemoving] = useState<string | null>(null)
+  const setMain = usePutMainDepartmentMutation()
+  const users = useUsersQuery({ quiet: true })
+  // 줄마다 로딩 — 두 줄을 빠르게 눌러도 서로의 로딩을 끄지 않는다
+  const [busyIds, setBusyIds] = useState<Set<string>>(new Set())
+  const markBusy = (id: string, on: boolean) =>
+    setBusyIds((prev) => {
+      const next = new Set(prev)
+      if (on) next.add(id)
+      else next.delete(id)
+      return next
+    })
+  const mainDeptOf = (userId: string) => users.data?.find((u) => u.user_id === userId)?.main_department_name_kr ?? null
   const [addForm, setAddForm] = useState<{ key: number; open: boolean; dept: Dept | null }>({ key: 0, open: false, dept: null })
   const currentDept = current
   const openAdd = useCallback(() => setAddForm((f) => ({ key: f.key + 1, open: true, dept: currentDept })), [currentDept])
@@ -64,8 +76,8 @@ const DepartmentInner = ({ company }: { company: GetCompanyResp }) => {
   )
 
   const remove = async (user: UserInfo) => {
-    if (!current) return
-    setRemoving(user.user_id)
+    if (!current || busyIds.has(user.user_id)) return
+    markBusy(user.user_id, true)
     try {
       await removeUser.mutateAsync({ departmentId: current.department_id, data: { user_ids: [user.user_id] } })
       snackbar.show({
@@ -73,9 +85,22 @@ const DepartmentInner = ({ company }: { company: GetCompanyResp }) => {
         tone: 'positive',
       })
     } catch {
-      // 실패는 쓰기 그물(고정 글 Snackbar)이 알린다
+      // 실패는 쓰기 그물(고정 글 Snackbar — 22-1 사유 표)이 알린다
     } finally {
-      setRemoving(null)
+      markBusy(user.user_id, false)
+    }
+  }
+
+  const makeMain = async (user: UserInfo) => {
+    if (!current || busyIds.has(user.user_id)) return
+    markBusy(user.user_id, true)
+    try {
+      await setMain.mutateAsync({ departmentId: current.department_id, userId: user.user_id })
+      snackbar.show({ message: t('department.members.mainSet', { name: user.user_name, dept: current.department_name_kr }), tone: 'positive' })
+    } catch {
+      // 실패는 쓰기 그물이 알린다
+    } finally {
+      markBusy(user.user_id, false)
     }
   }
 
@@ -105,9 +130,11 @@ const DepartmentInner = ({ company }: { company: GetCompanyResp }) => {
       <DepartmentMembers
         deptName={deptName}
         users={members.data?.users_in_department ?? []}
+        mainDeptOf={mainDeptOf}
+        onSetMain={(u) => void makeMain(u)}
         onRemove={(u) => void remove(u)}
         onAdd={openAdd}
-        removing={removing}
+        busyIds={busyIds}
       />
     </LoadingRegion>
   ) : null
