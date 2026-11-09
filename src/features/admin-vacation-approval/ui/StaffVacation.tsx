@@ -16,6 +16,7 @@ import {
   useUserVacationHistoryQuery,
   useUserVacationStatsQuery,
 } from '@/entities/vacation'
+import { UserInfoCard } from '@/features/user-profile/ui/UserInfoCard'
 import { AddEventDialog } from '@/features/calendar/ui/dialogs/add-event-dialog'
 import { ApplicationTable } from '@/features/vacation-application/ui/ApplicationTable'
 import { VacationGrantDialog } from '@/features/vacation-application/ui/VacationGrantDialog'
@@ -46,6 +47,7 @@ export function StaffVacation() {
     [usersQuery.data]
   )
   const selected = people.find((p) => p.id === selectedUserId)
+  const selectedUser = (usersQuery.data ?? []).find((u) => u.user_id === selectedUserId)
   const canGrant = hasAnyPermission(['VACATION:GRANT', 'VACATION:MANAGE'])
   const canUse = hasAnyPermission(['VACATION:USE', 'VACATION:MANAGE', 'SCHEDULE:WRITE', 'SCHEDULE:MANAGE'])
 
@@ -98,19 +100,21 @@ export function StaffVacation() {
       </div>
       {selected && (
         <div className={desktop ? 'flex min-w-0 flex-col gap-x6' : 'flex min-w-0 flex-col gap-x6 overflow-x-auto px-x4'} data-staff-cards>
-          <StaffCards userId={selected.id} year={selectedYear} />
+          {selectedUser && <UserInfoCard value={[selectedUser]} />}
+          <StaffCards userId={selected.id} year={selectedYear} name={selected.name} />
         </div>
       )}
       {selected && canGrant && grantOpen && (
-        <VacationGrantDialog key={selected.id} open={grantOpen} user={{ id: selected.id, name: selected.name }} onOpenChange={setGrantOpen} />
+        <VacationGrantDialog key={selected.id} open={grantOpen} user={{ id: selected.id, name: selected.name, department: selected.department }} onOpenChange={setGrantOpen} />
       )}
-      <AddEventDialog open={useOpen} onOpenChange={setUseOpen} />
+      {/* 열 때만 마운트 — 이 창이 직원 목록을 quiet 없이 부르므로 늘 마운트해 두면 첫 로드 실패에 전역 Snackbar 가 겹친다 */}
+      {useOpen && <AddEventDialog open={useOpen} onOpenChange={setUseOpen} />}
     </div>
   )
 }
 
 /** 고른 직원의 카드들 — 지금 부품 그대로(H-C 가 모양을 정하면 바꾼다) */
-function StaffCards({ userId, year }: { userId: string; year: string }) {
+function StaffCards({ userId, year, name }: { userId: string; year: string; name: string }) {
   const { t } = useTranslation('vacation')
   const baseDate = dayjs().year(parseInt(year)).format('YYYY-MM-DDT23:59:59')
   const { data: vacationTypes } = useAvailableVacationsQuery(userId, baseDate)
@@ -136,6 +140,8 @@ function StaffCards({ userId, year }: { userId: string; year: string }) {
         vacationRequests={requests}
         grantStatusTypes={grantStatusTypes}
         showCancelButton={false}
+        emptyTitle={t('staff.noRequestsTitle', { name })}
+        emptyDescription={t('staff.noRequestsDescription')}
       />
     </>
   )

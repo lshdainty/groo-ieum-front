@@ -85,7 +85,7 @@ export function GrantTimeField({
           incrementAriaLabel={t('grantTime.hourIncrease')}
           onValueChange={(hours) => set({ hours })}
         />
-        {withMinutes && (
+        {(withMinutes || parts.minutes === 30) && (
           <SegmentedControl aria-label={t('grantTime.minute')} value={String(parts.minutes)} disabled={locked} onValueChange={(v) => set({ minutes: v === '30' ? 30 : 0 })}>
             <SegmentedControlItem value='0'>{t('grantTime.nMinutes', { n: 0 })}</SegmentedControlItem>
             <SegmentedControlItem value='30'>{t('grantTime.nMinutes', { n: 30 })}</SegmentedControlItem>

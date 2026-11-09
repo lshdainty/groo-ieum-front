@@ -31,7 +31,7 @@ export function VacationGrantDialog({
   onCloseAutoFocus,
 }: {
   open: boolean
-  user: { id: string; name: string }
+  user: { id: string; name: string; department?: string | null }
   onOpenChange: (open: boolean) => void
   onCloseAutoFocus?: (e: Event) => void
 }) {
@@ -98,7 +98,7 @@ export function VacationGrantDialog({
             </Callout>
           )}
           <p className='mb-x6 mt-0 text-t4 font-normal text-fg-neutral-muted [overflow-wrap:break-word] [word-break:keep-all]' data-grant-recipient>
-            {t('grantForm.recipient', { name: user.name })}
+            {t('grantForm.recipient', { name: user.name, detail: user.department?.trim() ? `${user.id} · ${user.department}` : user.id })}
           </p>
           {policiesQuery.isLoadingError ? (
             <ResultSection

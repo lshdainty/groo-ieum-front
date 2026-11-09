@@ -17,6 +17,9 @@ interface ApplicationTableProps {
   showCancelButton?: boolean
   /** 카드 제목 — 없으면 "신청이력"(휴가 신청 화면) */
   title?: string
+  /** 빈 목록 글 — 없으면 본인 신청 화면의 글(작성 권유 포함) */
+  emptyTitle?: string
+  emptyDescription?: string
 }
 
 const ApplicationTable = ({
@@ -24,7 +27,9 @@ const ApplicationTable = ({
   grantStatusTypes,
   userId,
   showCancelButton = true,
-  title
+  title,
+  emptyTitle,
+  emptyDescription
 }: ApplicationTableProps) => {
   const { t } = useTranslation('vacation')
   const { t: tc } = useTranslation('common')
@@ -67,9 +72,9 @@ const ApplicationTable = ({
                 <EmptyIcon>
                   <CalendarX2 />
                 </EmptyIcon>
-                <EmptyTitle>{t('application.noRequestsTitle')}</EmptyTitle>
+                <EmptyTitle>{emptyTitle ?? t('application.noRequestsTitle')}</EmptyTitle>
                 <EmptyDescription>
-                  {t('application.noRequestsDescription')}
+                  {emptyDescription ?? t('application.noRequestsDescription')}
                 </EmptyDescription>
               </Empty>
             </div>

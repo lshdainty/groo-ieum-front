@@ -294,21 +294,6 @@ vacation,application.approverStep,{{step}}단계 인원 지정,Assign step {{ste
 vacation,application.summary,신청 요약,Application Summary
 vacation,application.submitRequest,결재 요청,Submit Request
 vacation,application.customDateRange,부여일/만료일 직접 지정,Set custom grant/expiry date
-vacation,grant.title,휴가 부여,Grant Vacation
-vacation,grant.targetUser,대상 사용자,Target User
-vacation,grant.targetUserPlaceholder,사용자를 선택하세요,Select user
-vacation,grant.targetUserRequired,사용자를 선택해주세요.,Please select a user.
-vacation,grant.policyRequired,휴가 정책을 선택해주세요.,Please select a vacation policy.
-vacation,grant.customDateRange,부여일/만료일 직접 지정,Set custom grant/expiry date
-vacation,grant.startDate,유효기간 시작일자,Validity Start Date
-vacation,grant.endDate,유효기간 만료일자,Validity End Date
-vacation,grant.grantTime,부여 시간,Grant Time
-vacation,grant.grantReason,부여 사유,Grant Reason
-vacation,grant.noPolicy,할당된 관리자 부여 정책이 없습니다,No admin grant policy assigned
-vacation,grant.policyDefault,정책 기본값,Policy Default
-vacation,grant.startDateRule,휴가 정책의 시작일자 규칙이 적용됩니다,The vacation policy start date rule will be applied
-vacation,grant.endDateRule,휴가 정책의 만료일자 규칙이 적용됩니다,The vacation policy expiry date rule will be applied
-vacation,grant.fixedGrantTime,이 휴가 정책은 고정된 부여 시간을 사용합니다.,This vacation policy uses fixed grant time.
 vacation,policy.title,휴가 정책,Vacation Policy
 vacation,policy.addTitle,휴가 정책 추가,Add Vacation Policy
 vacation,policy.editTitle,휴가 정책 수정,Edit Vacation Policy
@@ -700,12 +685,6 @@ work,report.errorCount,{{count}}개 오류 수정 필요,{{count}} errors need t
 work,report.errorCount_one,{{count}}개 오류 수정 필요,{{count}} error needs to be fixed
 work,report.batchRegister,일괄 등록,Batch Register
 work,report.unregisteredDownloadFailed,미등록 리스트 다운로드에 실패했습니다.,Failed to download unregistered list.
-vacation,grant.userPlaceholder,사용자를 선택하세요,Select user
-vacation,grant.policyPlaceholder,휴가 정책을 선택하세요,Select vacation policy
-vacation,grant.userLoadingPlaceholder,로딩 중...,Loading...
-vacation,grant.grantDateRequired,유효기간 시작일자를 선택해주세요.,Please select validity start date.
-vacation,grant.expiryDateRequired,유효기간 만료일자를 선택해주세요.,Please select validity expiry date.
-vacation,grant.grantReasonPlaceholder,휴가 부여 사유를 입력하세요...,Enter vacation grant reason...
 vacation,approval.rejectReasonRequired,반려 사유를 입력해주세요.,Please enter rejection reason.
 vacation,approval.rejectReasonPlaceholder,반려 사유를 입력해주세요...,Enter rejection reason...
 vacation,approval.nthApproval,{{index}}차 승인,{{index}}st Approval
@@ -818,39 +797,6 @@ work,unregistered.year,연도,Year
 work,unregistered.month,월,Month
 work,unregistered.downloading,다운로드 중...,Downloading...
 work,unregistered.downloadFailed,미등록 리스트 다운로드에 실패했습니다.,Failed to download unregistered list.
-vacation,grant.title,휴가 부여,Grant Vacation
-vacation,grant.selectUser,사용자를 선택해주세요.,Please select a user.
-vacation,grant.selectPolicy,휴가 정책을 선택해주세요.,Please select a vacation policy.
-vacation,grant.enterGrantTime,부여 시간을 입력해주세요.,Please enter grant time.
-vacation,grant.enterReason,부여 사유를 입력해주세요.,Please enter the reason for granting.
-vacation,grant.selectStartDate,유효기간 시작일자를 선택해주세요.,Please select the validity start date.
-vacation,grant.selectEndDate,유효기간 만료일자를 선택해주세요.,Please select the validity end date.
-vacation,grant.targetUser,대상 사용자,Target User
-vacation,grant.selectUserPlaceholder,사용자를 선택하세요,Select a user
-vacation,grant.policyLabel,휴가 정책,Vacation Policy
-vacation,grant.selectPolicyPlaceholder,휴가 정책을 선택하세요,Select a vacation policy
-vacation,grant.noManualGrantPolicy,할당된 관리자 부여 정책이 없습니다,No assigned admin grant policies
-vacation,grant.customDateOption,부여일{{comma}} 만료일 직접 지정,"Specify grant date, expiry date manually"
-vacation,grant.validityStart,유효기간 시작일자,Validity Start Date
-vacation,grant.validityEnd,유효기간 만료일자,Validity End Date
-vacation,grant.policyDefault,정책 기본값,Policy Default
-vacation,grant.startDateRule,휴가 정책의 시작일자 규칙이 적용됩니다,The vacation policy start date rule applies
-vacation,grant.endDateRule,휴가 정책의 만료일자 규칙이 적용됩니다,The vacation policy expiry date rule applies
-vacation,grant.grantTime,부여 시간,Grant Time
-vacation,grant.day,일,Day
-vacation,grant.hour,시간,Hour
-vacation,grant.minute,분,Minute
-vacation,grant.nHours,{{count}}시간,{{count}} hours
-vacation,grant.nHours_one,{{count}}시간,{{count}} hour
-vacation,grant.nMinutes,{{count}}분,{{count}} minutes
-vacation,grant.nMinutes_one,{{count}}분,{{count}} minute
-vacation,grant.fixedTimePolicy,이 휴가 정책은 고정된 부여 시간을 사용합니다.,This vacation policy uses a fixed grant time.
-vacation,grant.selectTimeDesc,부여할 휴가를 일/시간 단위로 선택해주세요.,Select the vacation to grant in days/hours.
-vacation,grant.selectTimeDescWithMin,부여할 휴가를 일/시간/분 단위로 선택해주세요.,Select the vacation to grant in days/hours/minutes.
-vacation,grant.totalTime,총 {{time}},Total {{time}}
-vacation,grant.grantReason,부여 사유,Grant Reason
-vacation,grant.grantReasonPlaceholder,휴가 부여 사유를 입력하세요...,Enter the reason for granting vacation...
-vacation,grant.processing,처리 중...,Processing...
 culture,rule.header.description,휴가 · 복장 · 교육 · 조직문화 규정을 한곳에 모았어요.,"Leave, dress code, training, and team culture rules in one place."
 culture,rule.vacation.title,🏖️ 휴가,🏖️ Vacation
 culture,rule.vacation.daysTitle,휴가 일수,Vacation Days
@@ -932,7 +878,6 @@ vacation,application.pageTitle,휴가 신청 관리,Vacation Application Managem
 vacation,application.pageSubtitle,휴가를 신청하고 현황을 관리하세요,Apply for vacation and manage your requests
 vacation,application.newApplication,새 신청서 작성,New Application
 vacation,application.requestHistory,신청 내역,Request History
-vacation,application.grantVacation,휴가 부여,Grant Vacation
 vacation,application.tableTitle,제목,Title
 vacation,application.tableVacationType,휴가 타입,Vacation Type
 vacation,application.tableRequestDate,신청일,Request Date
@@ -941,8 +886,8 @@ vacation,application.tableGrantDays,보상일수,Grant Days
 vacation,application.tableCurrentApprover,현결재자,Current Approver
 vacation,application.tableStatus,상태,Status
 vacation,application.noRequests,신청한 휴가가 없습니다.,No vacation requests.
-vacation,application.noRequestsTitle,신청 내역이 없습니다,No Requests Yet
-vacation,application.noRequestsDescription,아직 신청한 휴가가 없습니다. 새 신청서를 작성해 보세요.,You haven't submitted any vacation requests yet. Try creating a new request.
+vacation,application.noRequestsTitle,신청 내역이 없어요,No requests yet
+vacation,application.noRequestsDescription,아직 신청한 휴가가 없어요. 새 신청서를 작성해 보세요.,You haven't requested any leave yet. Try writing a new request.
 vacation,application.viewDetail,상세보기,View Detail
 vacation,application.cancelRequest,신청취소,Cancel Request
 common,loadFailed,데이터를 불러오는데 실패했습니다.,Failed to load data.
@@ -988,7 +933,6 @@ common,unknownError,알 수 없는 오류가 발생했습니다.,An unknown erro
 user,empty.title,존재하지 않는 사용자,User Not Found
 user,empty.description,존재하지 않는 사용자입니다.,The user does not exist.
 user,info.title,사용자 정보,User Info
-user,info.selectPlaceholder,사용자 선택,Select User
 user,info.notFound,사용자를 찾을 수 없습니다.,User not found.
 user,info.userId,아이디,ID
 user,info.email,이메일,Email
@@ -1120,10 +1064,6 @@ vacation,application.titleRequired,제목을 입력해주세요.,Please enter a 
 vacation,application.dateRequired,날짜를 선택해주세요.,Please select a date.
 vacation,application.reasonRequired,사유를 입력해주세요.,Please enter a reason.
 vacation,application.applicationHistory,신청이력,Application History
-vacation,application.requestTab,신청내역,My Requests
-vacation,application.approvalTab,승인내역,Pending Approvals
-vacation,application.noApprovalsTitle,승인 대기 내역이 없습니다,No Pending Approvals
-vacation,application.noApprovalsDesc,현재 승인 대기 중인 휴가 신청이 없습니다.,There are no vacation requests pending your approval.
 work,report.fileNamePrefix,업무이력,WorkHistory
 work,unregistered.fileNamePrefix,미등록_업무시간,Unregistered_WorkHours
 work,unregistered.fileNameYear,년,year
@@ -1639,7 +1579,7 @@ vacation,grantTime.nMinutes,{{n}}분,{{n}} min
 vacation,grantTime.hourDecrease,시간 줄이기,Decrease hours
 vacation,grantTime.hourIncrease,시간 늘리기,Increase hours
 vacation,grantForm.title,휴가 부여,Grant leave
-vacation,grantForm.recipient,{{name}} 님에게 휴가를 부여해요.,Grant leave to {{name}}.
+vacation,grantForm.recipient,{{name}} 님({{detail}})에게 휴가를 부여해요.,Grant leave to {{name}} ({{detail}}).
 vacation,grantForm.policy,휴가 정책,Leave policy
 vacation,grantForm.policyPlaceholder,휴가 정책 선택,Choose a leave policy
 vacation,grantForm.policyLoading,불러오는 중,Loading
@@ -1664,6 +1604,7 @@ vacation,grantForm.reasonPlaceholder,휴가를 부여하는 사유를 적어주�
 vacation,grantForm.reasonRequired,부여 사유를 적어주세요.,Write the reason.
 vacation,grantForm.saved,휴가를 부여했어요.,Leave granted.
 vacation,grantForm.saveFailed,휴가를 부여하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't grant the leave. Please try again in a moment.
-vacation,application.noRequestsTitle,신청 내역이 없어요,No requests yet
-vacation,application.noRequestsDescription,아직 신청한 휴가가 없어요. 새 신청서를 작성해 보세요.,You haven't requested any leave yet. Try writing a new request.
 vacation,grantForm.submit,부여,Grant
+
+vacation,staff.noRequestsTitle,{{name}} 님의 신청이 없어요,{{name}} has no requests
+vacation,staff.noRequestsDescription,고른 해에 낸 휴가 신청이 없어요.,There are no leave requests for the selected year.
