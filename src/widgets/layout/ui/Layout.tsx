@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useRef } from 'react'
+import { Outlet, useLocation, useNavigationType } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 import { focusScreenTitle, TopNavigationProvider, useScreenTitle } from '@/shared/ds/top-navigation'
@@ -7,30 +7,45 @@ import { usePermission } from '@/entities/session'
 import { useOAuthLinkResult } from '@/shared/hooks/useOAuthLinkResult'
 import { NoticePopupContainer } from '@/widgets/notice-popup'
 import { useDesktop } from '../lib/use-desktop'
+import { enterScreen, restoreScreen, watchScreen } from '../lib/screen-memory'
 import { buildNav, screenTitleKeyOf } from '../model/nav'
 import { AccountDialogsProvider } from './AccountDialogs'
 import { HrSidebar } from './HrSidebar'
 import { PhoneFrame } from './PhoneFrame'
 
 /**
- * 화면을 옮길 때의 틀 몫 — 문서 제목 "{화면 제목} - 그루 이음" 과, 옮긴 뒤 본문 맨 위 + 제목에 초점(그루 담다 `AppLayout.tsx` ScreenEffects 와 같다).
+ * 화면을 옮길 때의 틀 몫 — 문서 제목 "{화면 제목} - 그루 이음" 과, 옮긴 뒤 본문 맨 위 + 제목에 초점(뒤로 오면 떠날 때 스크롤 + 누른 요소로 — screen-memory, 그루 담다 `AppLayout.tsx` ScreenEffects 와 같다).
  * TopNavigationProvider 안에 둔다(제품 이름을 거기서 읽는다). 처음 열 때는 초점을 훔치지 않는다.
  */
 function ScreenEffects() {
   const { t } = useTranslation('sidebar')
   const { t: tc } = useTranslation('common')
-  const { pathname } = useLocation()
+  const { pathname, key } = useLocation()
+  const navType = useNavigationType()
   const titleKey = screenTitleKeyOf(pathname)
   // 메뉴에 없는 주소(404)는 "페이지를 찾을 수 없어요 - 그루 이음"
   useScreenTitle(titleKey ? t(titleKey) : tc('notFound.title'))
   const last = useRef(pathname)
+  // 스크롤 · 누른 요소를 화면(location.key)마다 적어 둔다 — 뒤로 오면 돌려주려고(top-navigation.md:230)
+  useEffect(() => watchScreen(), [])
+  useLayoutEffect(() => {
+    enterScreen(key)
+  }, [key])
   useEffect(() => {
-    if (last.current === pathname) return
+    // 주소가 그대로인 이동(?page=2 같은 쿼리 · 처음 열기)은 화면을 옮긴 게 아니다 — 제목 초점은 주소가 바뀔 때만
+    const moved = last.current !== pathname
     last.current = pathname
+    // 뒤로(POP) 왔다 — 떠날 때의 스크롤(맨 위였으면 0)로 돌리고 누른 요소에 초점. 적어 둔 게 없으면(새로 고침 뒤 등) 앞으로 갈 때와 같다.
+    // 주소가 같아도 history 칸(location.key)이 다르면 다른 화면이다(공지 → 캘린더 → 공지 를 한꺼번에 되감을 때)
+    if (navType === 'POP') {
+      const stop = restoreScreen(key)
+      if (stop) return stop
+    }
+    if (!moved) return
     // 새 화면이 그려진 다음 프레임에 — 제목(data-screen-title)이 DOM 에 있어야 초점이 간다
     const frame = requestAnimationFrame(() => focusScreenTitle())
     return () => cancelAnimationFrame(frame)
-  }, [pathname])
+  }, [pathname, key, navType])
   return null
 }
 
