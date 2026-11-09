@@ -25,7 +25,7 @@ export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthly
   const legendId = useId()
   const bars = monthBars(data, year)
   const sum = bars.reduce((a, m) => a + m.used_time, 0)
-  const unit = { day: t('history.chart.dayUnit'), hour: t('history.chart.hourUnit') }
+  const unit = { day: t('history.chart.dayUnit'), hour: t('history.chart.hourUnit'), minute: t('history.chart.minuteUnit') }
   const total = formatUsedTime(sum, unit)
   const ticks = dayTicks(Math.max(0, ...bars.map((m) => m.used_time)))
   const axisWidth = useAxisWidth(ticks.map((n) => t('history.chart.dayAxis', { n })))

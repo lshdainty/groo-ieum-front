@@ -2,17 +2,7 @@ import { assignChartColors, type ChartColored } from '@/shared/ds/chart'
 import { vacationTypeColor } from '@/entities/vacation'
 import type { AvailableVacationByType, GetAvailableVacationsResp, GetUserMonthlyVacationStatsResp } from '@/entities/vacation'
 
-/** 하루 = 8시간(서버 휴가 시간 환산과 같다 — 1.75 = 1일 6시간) */
-const HOURS_PER_DAY = 8
-
-/** 쓴 휴가의 합계 글 — "7일 6시간" · "6시간" · "3일" · 0 이면 "0일" */
-export const formatUsedTime = (days: number, unit: { day: string; hour: string } = { day: '일', hour: '시간' }): string => {
-  const total = Math.round(Math.max(0, days) * HOURS_PER_DAY)
-  const d = Math.floor(total / HOURS_PER_DAY)
-  const h = total % HOURS_PER_DAY
-  if (d === 0 && h === 0) return `0${unit.day}`
-  return [d > 0 ? `${d}${unit.day}` : '', h > 0 ? `${h}${unit.hour}` : ''].filter(Boolean).join(' ')
-}
+export { formatUsedTime } from './vacation-time'
 
 /** 월별 막대 — 고른 해가 올해면 이번 달에서 끝난다(지나지 않은 달을 0 막대로 그리지 않는다). 지난 해 · 해를 모르면 열두 달 */
 export const monthBars = (

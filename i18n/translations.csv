@@ -1577,3 +1577,4 @@ dashboard,editPanel.reset,처음 모양으로,Reset to default
 dashboard,editPanel.grip,{{name}} 차례 바꾸기,Reorder {{name}}
 dashboard,editPanel.gripHint,위 · 아래 화살표 키로 옮겨요,Use the up and down arrow keys to move
 dashboard,editPanel.moved,{{name}} {{n}}번째로 옮겼어요.,Moved {{name}} to position {{n}}.
+vacation,history.chart.minuteUnit,분,m
