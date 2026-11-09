@@ -1599,6 +1599,7 @@ admin,company.saved,회사 정보를 저장했어요.,Company info saved.
 admin,company.created,회사를 만들었어요.,Company created.
 admin,company.saveFailed,회사 정보를 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save the company info. Please try again in a moment.
 admin,department.chartCount,부서 {{count}}개,{{count}} departments
+admin,department.chartCount_one,부서 {{count}}개,{{count}} department
 admin,department.resizeLabel,목록 너비,List width
 admin,department.deleteBlocked,하위 부서가 있어 지울 수 없어요,"It has sub-departments, so it cannot be deleted"
 admin,department.parent,상위 부서,Parent department
