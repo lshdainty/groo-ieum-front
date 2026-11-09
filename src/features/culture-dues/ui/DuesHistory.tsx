@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react'
-import dayjs from 'dayjs'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/cn'
@@ -64,7 +63,8 @@ export const DuesHistory = ({ year }: { year: number }) => {
   const manage = hasAnyPermission(['DUES:MANAGE'])
   const query = useYearDuesQuery(year, { quiet: true })
   const deleteDues = useDeleteDuesMutation()
-  const rows = query.data ?? []
+  // 서버는 오래된 것부터(date.asc) 준다 — 화면은 최신부터 보인다. 같은 날은 서버 차례의 반대(나중 것 먼저). 남은 돈은 서버 값 그대로
+  const rows = [...(query.data ?? [])].reverse()
   const [pageValue, setPageValue] = useState<TablePaginationValue>({ page: 1, pageSize: PAGE_SIZES[0] })
   const [form, setForm] = useState<{ target: DuesFormTarget; open: boolean; key: number } | null>(null)
   const deleteConfirm = useConfirmTarget<GetYearDuesResp>()
@@ -72,13 +72,17 @@ export const DuesHistory = ({ year }: { year: number }) => {
   // 확인창을 연 자리와 지운 뒤 초점이 갈 후보(지운 줄의 다음 · 이전 줄)
   const opener = useRef<Element | null>(null)
   const fromSheet = useRef(false)
+  const removed = useRef(false)
   const after = useRef<number[]>([])
   const lastRowId = useRef<number | null>(null)
 
   // 768 미만은 쪽 넘김이 아니라 끝없이 불러온다(table-pagination.md "768 미만은 List 줄") — 이미 받은 줄을 10개씩 더 보인다
   const [shown, setShown] = useState<number>(PAGE_SIZES[0])
-  const pageRows = desktop ? rows.slice((pageValue.page - 1) * pageValue.pageSize, pageValue.page * pageValue.pageSize) : rows.slice(0, shown)
   const showPagination = rows.length > PAGE_SIZES[0]
+  // 쪽 번호는 늘 1 ~ 전체 쪽 수 안 — 줄이 줄어(지움 · 다른 해로 옮김) 지금 쪽이 없어져도 빈 표가 남지 않는다. 넘김 줄이 없으면 1쪽
+  const lastPage = Math.max(1, Math.ceil(rows.length / pageValue.pageSize))
+  const page = showPagination ? Math.min(pageValue.page, lastPage) : 1
+  const pageRows = desktop ? rows.slice((page - 1) * pageValue.pageSize, page * pageValue.pageSize) : rows.slice(0, shown)
 
   const openForm = (target: DuesFormTarget) => {
     lastRowId.current = target.kind === 'edit' ? target.row.dues_id : null
@@ -89,6 +93,7 @@ export const DuesHistory = ({ year }: { year: number }) => {
   const askDelete = (row: GetYearDuesResp, sheet: boolean) => {
     opener.current = document.activeElement
     fromSheet.current = sheet
+    removed.current = false
     const index = rows.findIndex((r) => r.dues_id === row.dues_id)
     after.current = [rows[index + 1]?.dues_id, rows[index - 1]?.dues_id].filter((id): id is number => id !== undefined)
     deleteConfirm.ask(row)
@@ -105,6 +110,8 @@ export const DuesHistory = ({ year }: { year: number }) => {
 
   const onDeleteClosed = (e: Event) => {
     // 연 자리(줄 끝 ⋮)가 그대로 있으면 ds 가 거기로 돌려준다 — 취소 · Esc. 지워서 사라졌거나 시트 안에서 연 것이면 다음 줄로
+    // 지우지 않았으면(취소 · Esc · 실패) ds 가 연 자리로 돌려준다 — 폰이면 시트 안 ⋮ 로
+    if (!removed.current) return
     if (!fromSheet.current && opener.current?.isConnected) return
     e.preventDefault()
     focusAfterRemoval()
@@ -131,7 +138,7 @@ export const DuesHistory = ({ year }: { year: number }) => {
   }
 
   const pagination = showPagination ? (
-    <TablePagination value={pageValue} onValueChange={setPageValue} totalItems={rows.length} pageSizeOptions={PAGE_SIZES} scrollTarget={tableRef} />
+    <TablePagination value={{ ...pageValue, page }} onValueChange={setPageValue} totalItems={rows.length} pageSizeOptions={PAGE_SIZES} scrollTarget={tableRef} />
   ) : undefined
 
   const duesRow = deleteConfirm.target
@@ -240,13 +247,14 @@ export const DuesHistory = ({ year }: { year: number }) => {
         title={t('dues.deleteTitle')}
         // 내용이 비어 있으면 그 조각을 뺀다(빈칸이 겹치지 않게)
         description={t(duesRow?.dues_detail?.trim() ? 'dues.deleteConfirm' : 'dues.deleteConfirmNoContent', {
-          date: duesRow ? duesRowDate(duesRow) : '',
+          date: duesRow ? formatDuesDate(duesRow.dues_date) : '',
           content: duesRow?.dues_detail?.trim(),
           amount: dsMoney(Math.abs(duesRow?.dues_amount ?? 0)),
         })}
         // 실패하면 던진다 — 확인창이 닫히고 실패 알림(Snackbar + 다시 시도)이 뜬다
         onConfirm={async () => {
           if (duesRow) await deleteDues.mutateAsync(duesRow.dues_id)
+          removed.current = true
         }}
         // 시트(폰 수정 폼) 안에서 지웠으면 시트도 닫는다 — 다시 시도로 지운 뒤에도 불린다
         onDone={() => {
@@ -257,9 +265,6 @@ export const DuesHistory = ({ year }: { year: number }) => {
     </div>
   )
 }
-
-// 확인창 글의 날짜는 22-3 이 정한 "YYYY-MM-DD" 그대로 — 글을 바꾸지 않는다
-const duesRowDate = (row: GetYearDuesResp) => dayjs(row.dues_date).format('YYYY-MM-DD')
 
 const HistoryTableSkeleton = () => {
   const { t } = useTranslation('culture')

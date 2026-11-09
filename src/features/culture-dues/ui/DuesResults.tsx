@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { ResultSection } from '@/shared/ds/result-section'
 import { Skeleton } from '@/shared/ds/skeleton'
+import { isThisYear } from '../lib/dues-format'
 
 /** 구역 읽기 실패(U) — 서버 글을 그리지 않는다. 제목은 "{구역}을/를 불러오지 못했어요" 의 구역 이름만 받는다 */
 export const DuesFailure = ({ title, onRetry, retrying }: { title: string; onRetry: () => void; retrying?: boolean }) => {
@@ -27,7 +28,7 @@ export const DuesHistoryEmpty = ({ year, onAdd }: { year: number; onAdd?: () => 
     <ResultSection
       size='medium'
       icon={<Receipt />}
-      title={t('dues.empty.history', { year })}
+      title={t('dues.empty.history', { period: isThisYear(year) ? t('dues.period.this') : t('dues.period.year', { year }) })}
       primaryAction={onAdd ? { label: tc('add'), onClick: onAdd } : undefined}
     />
   )

@@ -1511,7 +1511,7 @@ vacation,application.cancelAction,신청 취소,Cancel request
 admin,department.deleteTitle,부서 삭제,Delete department
 admin,department.deleteConfirm,"""{{name}}"" 부서를 삭제할까요? 삭제한 부서는 되돌릴 수 없어요.","Delete the ""{{name}}"" department? A deleted department can't be restored."
 culture,dues.deleteTitle,회비 내역 삭제,Delete dues record
-culture,dues.deleteConfirm,{{date}} {{content}} {{amount}} 내역을 삭제할까요? 삭제한 회비 내역은 되돌릴 수 없어요.,"Delete the {{amount}} ""{{content}}"" record on {{date}}? A deleted dues record can't be restored."
+culture,dues.deleteConfirm,"{{date}} ""{{content}}"" {{amount}} 내역을 삭제할까요? 삭제한 회비 내역은 되돌릴 수 없어요.","Delete the {{amount}} ""{{content}}"" record on {{date}}? A deleted dues record can't be restored."
 calendar,eventDetails.deleteTitle,일정 삭제,Delete event
 calendar,eventDetails.deleteConfirm,"{{date}} ""{{title}}"" 일정을 삭제할까요? 삭제한 일정은 되돌릴 수 없어요.","Delete the ""{{title}}"" event on {{date}}? A deleted event can't be restored."
 notice,popup.label,공지사항,Notices
@@ -1537,7 +1537,7 @@ culture,dues.failure.description,잠시 뒤 다시 시도해주세요.,Please tr
 culture,dues.failure.summary,회비 현황을 불러오지 못했어요,Could not load the dues overview
 culture,dues.failure.matrix,월별 생일비 입금 현황을 불러오지 못했어요,Could not load the monthly birthday dues status
 culture,dues.failure.history,입출금 내역을 불러오지 못했어요,Could not load the transaction history
-culture,dues.empty.history,{{year}}년 입출금 내역이 없어요,No transactions in {{year}}
+culture,dues.empty.history,{{period}} 입출금 내역이 없어요,No transactions {{period}}
 culture,birthDues.empty.users,사용자가 없어요,No users
 culture,dues.addAria,입출금 추가,Add transaction
 culture,dues.copyAdd,복사해서 추가,Copy and add
