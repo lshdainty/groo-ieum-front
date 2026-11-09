@@ -139,8 +139,8 @@ const CompanyInner = ({ company }: { company: GetCompanyResp }) => {
 
   const editCompany = () => setCompanyForm((f) => ({ key: f.key + 1, open: true }))
 
-  if (!desktop) {
-    return (
+  // 폼 · 확인창(dialogs)은 폭과 상관없이 같은 자리에 둔다 — 768 을 넘나들어도 열린 폼이 다시 만들어지지 않는다
+  const layout = !desktop ? (
       <div className='min-h-full bg-bg-layer-default'>
         <div className='flex items-center justify-between gap-x2 px-x6 py-x3'>
           <p className='m-0 min-w-0 break-keep text-t5 font-bold text-fg-neutral [overflow-wrap:break-word]'>{company.company_name}</p>
@@ -159,12 +159,8 @@ const CompanyInner = ({ company }: { company: GetCompanyResp }) => {
             <div ref={chartScroll} className='overflow-x-auto'>{chartBody}</div>
           </TabsContent>
         </Tabs>
-        {dialogs}
       </div>
-    )
-  }
-
-  return (
+  ) : (
     <ScreenBody density='high'>
       <ScreenTitleRow title={tMenu('menu.adminCompany')} description={company.company_name} action={<EditCompanyButton onClick={editCompany} />} />
       <div className='h-[calc(100svh-180px)] min-h-[480px]'>
@@ -182,8 +178,14 @@ const CompanyInner = ({ company }: { company: GetCompanyResp }) => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
-      {dialogs}
     </ScreenBody>
+  )
+
+  return (
+    <>
+      {layout}
+      {dialogs}
+    </>
   )
 }
 

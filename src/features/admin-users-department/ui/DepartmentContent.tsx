@@ -13,7 +13,7 @@ import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useScreenHeader } from '@/widgets/layout/lib/screen-header'
 import { useCompanyQuery, useCompanyWithDepartmentsQuery, type GetCompanyResp } from '@/entities/company'
 import { useDeleteDepartmentUsersMutation, useDepartmentUsersQuery, type UserInfo } from '@/entities/department'
-import { findDept, firstDeptId } from '@/features/admin-company/lib/dept-tree'
+import { findDept, firstDeptId, type Dept } from '@/features/admin-company/lib/dept-tree'
 import { DepartmentTreePanel, PanelFailure, TreeSkeleton } from '@/features/admin-company/ui/DepartmentTreePanel'
 import { useDepartmentContext } from '../model/DepartmentContext'
 import { AddPeopleDialog } from './AddPeopleDialog'
@@ -38,8 +38,9 @@ const DepartmentInner = ({ company }: { company: GetCompanyResp }) => {
   const members = useDepartmentUsersQuery(current?.department_id ?? 0, { quiet: true })
   const removeUser = useDeleteDepartmentUsersMutation()
   const [removing, setRemoving] = useState<string | null>(null)
-  const [addForm, setAddForm] = useState<{ key: number; open: boolean }>({ key: 0, open: false })
-  const openAdd = useCallback(() => setAddForm((f) => ({ key: f.key + 1, open: true })), [])
+  const [addForm, setAddForm] = useState<{ key: number; open: boolean; dept: Dept | null }>({ key: 0, open: false, dept: null })
+  const currentDept = current
+  const openAdd = useCallback(() => setAddForm((f) => ({ key: f.key + 1, open: true, dept: currentDept })), [currentDept])
 
   const select = (id: number) => {
     if (desktop) setSelectedDeptId(id)
@@ -111,27 +112,22 @@ const DepartmentInner = ({ company }: { company: GetCompanyResp }) => {
     </LoadingRegion>
   ) : null
 
-  const addDialog = current ? (
+  const addDialog = addForm.dept ? (
     <AddPeopleDialog
       key={addForm.key}
       open={addForm.open}
       onOpenChange={(open) => setAddForm((f) => ({ ...f, open }))}
-      departmentId={current.department_id}
-      deptName={deptName}
-      candidates={members.data?.users_not_in_department ?? []}
+      departmentId={addForm.dept.department_id}
+      deptName={addForm.dept.department_name_kr}
     />
   ) : null
 
-  if (!desktop) {
-    return (
-      <div className='min-h-full bg-bg-layer-default'>
-        {phoneDept ? membersBody : <div className='flex flex-col'>{treePanel(true)}</div>}
-        {addDialog}
-      </div>
-    )
-  }
-
-  return (
+  // 사람 추가 시트(addDialog)는 폭과 상관없이 같은 자리에 둔다 — 768 을 넘나들어도 열린 시트가 다시 만들어지지 않는다
+  const layout = !desktop ? (
+    <div className='min-h-full bg-bg-layer-default'>
+      {phoneDept ? membersBody : <div className='flex flex-col'>{treePanel(true)}</div>}
+    </div>
+  ) : (
     <ScreenBody density='high'>
       <ScreenTitleRow title={tMenu('menu.adminUsersDepartment')} />
       <div className='h-[calc(100svh-180px)] min-h-[480px]'>
@@ -153,8 +149,14 @@ const DepartmentInner = ({ company }: { company: GetCompanyResp }) => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
-      {addDialog}
     </ScreenBody>
+  )
+
+  return (
+    <>
+      {layout}
+      {addDialog}
+    </>
   )
 }
 

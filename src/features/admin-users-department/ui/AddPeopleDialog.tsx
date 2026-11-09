@@ -18,7 +18,7 @@ import { ListCheckGroup, ListCheckItem } from '@/shared/ds/list'
 import { ResultSection } from '@/shared/ds/result-section'
 import { matchesSearch } from '@/shared/ds/searchable-list'
 import { useSnackbar } from '@/shared/ds/snackbar'
-import { usePostDepartmentUsersMutation, type UserInfo } from '@/entities/department'
+import { useDepartmentUsersQuery, usePostDepartmentUsersMutation } from '@/entities/department'
 
 /**
  * 사람 추가(E 26) — Responsive Dialog `form`(1280 이상 Dialog 480 · 미만 Bottom Sheet). 위 검색칸 "이름 · 아이디 검색" · 아래 여럿 고르기 줄(체크 24 · Avatar · 이름 · 아이디).
@@ -30,18 +30,18 @@ export function AddPeopleDialog({
   onOpenChange,
   departmentId,
   deptName,
-  candidates,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   departmentId: number
   deptName: string
-  candidates: UserInfo[]
 }) {
   const { t } = useTranslation('admin')
   const { t: tc } = useTranslation('common')
   const snackbar = useSnackbar()
   const post = usePostDepartmentUsersMutation()
+  // 받아 둔 목록(부서 화면이 이미 받은 것)을 그대로 쓴다 — 화면 폭이 바뀌어도 이 시트가 자기 부서를 안다
+  const candidates = useDepartmentUsersQuery(departmentId, { quiet: true }).data?.users_not_in_department ?? []
   const [query, setQuery] = useState('')
   const [picked, setPicked] = useState<string[]>([])
   const [showError, setShowError] = useState(false)
