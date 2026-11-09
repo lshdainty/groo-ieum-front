@@ -673,6 +673,41 @@ vacation,adminPolicy.create.validityEndPlaceholder,만료 시점을 골라주세
 vacation,adminPolicy.create.validityEndRequired,유효 만료를 골라주세요.,Choose when validity ends.
 vacation,adminPolicy.create.listsFailureTitle,고를 목록을 불러오지 못했어요,Couldn't load the choices
 vacation,adminPolicy.create.submit,만들기,Create
+vacation,adminPlan.title,휴가 플랜,Leave plans
+vacation,adminPlan.add,플랜 추가,Add plan
+vacation,adminPlan.count,플랜 {{count}}개,{{count}} plans
+vacation,adminPlan.count_one,플랜 {{count}}개,{{count}} plan
+vacation,adminPlan.searchLabel,플랜 검색,Search plans
+vacation,adminPlan.searchPlaceholder,이름 · 코드 · 설명으로 찾아요,"Search by name, code, or description"
+vacation,adminPlan.listLabel,휴가 플랜 목록,Leave plan list
+vacation,adminPlan.failureTitle,휴가 플랜을 불러오지 못했어요,Couldn't load leave plans
+vacation,adminPlan.emptyTitle,휴가 플랜이 없어요,No leave plans yet
+vacation,adminPlan.emptyDescription,플랜에 정책을 묶어 직원에게 한 번에 걸 수 있어요.,Bundle policies into a plan to assign them to employees at once.
+vacation,adminPlan.noMatch,찾는 플랜이 없어요.,No matching plans.
+vacation,adminPlan.policyCount,정책 {{count}}개,{{count}} policies
+vacation,adminPlan.policyCount_one,정책 {{count}}개,{{count}} policy
+vacation,adminPlan.addTitle,휴가 플랜 추가,Add leave plan
+vacation,adminPlan.editTitle,휴가 플랜 수정,Edit leave plan
+vacation,adminPlan.code,코드,Code
+vacation,adminPlan.codePlaceholder,예: FULL_TIME,e.g. FULL_TIME
+vacation,adminPlan.codeLocked,만든 뒤에는 바꿀 수 없어요.,It can't be changed after it's created.
+vacation,adminPlan.codeRequired,코드를 입력해주세요.,Enter a code.
+vacation,adminPlan.codePattern,"영문, 숫자, 밑줄(_)만 쓸 수 있어요.","Use only letters, numbers, and underscores."
+vacation,adminPlan.codeDuplicate,같은 코드의 휴가 플랜이 있어요.,A leave plan with the same code already exists.
+vacation,adminPlan.name,이름,Name
+vacation,adminPlan.namePlaceholder,예: 정규직 플랜,e.g. Full-time plan
+vacation,adminPlan.nameRequired,이름을 입력해주세요.,Enter a name.
+vacation,adminPlan.desc,설명,Description
+vacation,adminPlan.descPlaceholder,플랜을 알아볼 수 있게 적어주세요.,Describe the plan.
+vacation,adminPlan.created,플랜을 만들었어요.,Plan created.
+vacation,adminPlan.editSaved,플랜을 고쳤어요.,Plan updated.
+vacation,adminPlan.deleted,플랜을 삭제했어요.,Plan deleted.
+vacation,adminPlan.moreFor,{{name}} 더보기,More actions for {{name}}
+vacation,adminPlan.managePolicies,정책 관리,Manage policies
+vacation,adminPlan.policiesTitle,{{name}} 정책,{{name}} policies
+vacation,adminPlan.policyDetail,{{method}} · {{type}},{{method}} · {{type}}
+vacation,adminPlan.policiesSaved,플랜의 정책을 고쳤어요.,Plan policies updated.
+vacation,adminPlan.policiesFailureTitle,휴가 정책을 불러오지 못했어요,Couldn't load leave policies
 vacation,plan.revokeSuccess,플랜이 성공적으로 회수되었습니다.,Plan revoked successfully.
 vacation,plan.createSuccess,플랜이 성공적으로 생성되었습니다.,Plan created successfully.
 vacation,plan.updateSuccess,플랜이 성공적으로 수정되었습니다.,Plan updated successfully.
