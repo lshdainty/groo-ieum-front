@@ -21,6 +21,7 @@ export function DayField({
   invalid,
   errorMessage,
   inputRef,
+  required = true,
 }: {
   label: string
   value: string
@@ -29,6 +30,8 @@ export function DayField({
   invalid?: boolean
   errorMessage?: string
   inputRef?: React.Ref<HTMLButtonElement>
+  /** 필수 점 — 선택 칸이면 false(기본 true) */
+  required?: boolean
 }) {
   const { t: tc } = useTranslation('common')
   const surface = useInputButtonSurface()
@@ -63,7 +66,7 @@ export function DayField({
     </Button>
   )
   return (
-    <Field label={label} showRequiredIndicator invalid={invalid} errorMessage={errorMessage}>
+    <Field label={label} showRequiredIndicator={required} invalid={invalid} errorMessage={errorMessage}>
       {surface === 'sheet' ? (
         <BottomSheet open={open} onOpenChange={setOpen}>
           {trigger}
