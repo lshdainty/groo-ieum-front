@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Building2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -41,6 +41,12 @@ const CompanyInner = ({ company }: { company: GetCompanyResp }) => {
   const deleteConfirm = useConfirmTarget<Dept>()
   const departments = useMemo(() => query.data?.departments ?? [], [query.data])
   const [tab, setTab] = useState('dept')
+  // 조직도가 패널보다 넓으면 가운데(맨 위 부서)부터 보인다 — 왼쪽 끝에서 시작하면 맨 위 상자가 화면 밖이다
+  const chartScroll = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = chartScroll.current
+    if (el) el.scrollLeft = Math.max(0, (el.scrollWidth - el.clientWidth) / 2)
+  }, [query.data, tab, desktop])
 
   // 고른 부서가 없거나(처음) 지워졌으면 최상위 첫 부서 — 방금 만든 부서는 나무를 다시 받으면 고른 줄이 된다
   const selected = selectedDeptId != null ? findDept(departments, selectedDeptId) : null
@@ -150,7 +156,7 @@ const CompanyInner = ({ company }: { company: GetCompanyResp }) => {
           </TabsContent>
           <TabsContent value='chart'>
             {chartHeader}
-            <div className='overflow-x-auto'>{chartBody}</div>
+            <div ref={chartScroll} className='overflow-x-auto'>{chartBody}</div>
           </TabsContent>
         </Tabs>
         {dialogs}
@@ -172,7 +178,7 @@ const CompanyInner = ({ company }: { company: GetCompanyResp }) => {
           <ResizableHandle label={t('department.resizeLabel')} />
           <ResizablePanel className='flex flex-col'>
             {chartHeader}
-            <div className='min-h-0 flex-1 overflow-auto'>{chartBody}</div>
+            <div ref={chartScroll} className='min-h-0 flex-1 overflow-auto'>{chartBody}</div>
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

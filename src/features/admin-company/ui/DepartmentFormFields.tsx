@@ -57,7 +57,7 @@ export function ParentRow({
     >
       {({ close }) => (
         <div className='-mx-x2'>
-          {selfName && <p className='m-0 px-x6 pb-x2 text-t4 text-fg-neutral-subtle'>{t('department.parentSheetDesc', { name: selfName })}</p>}
+          {selfName && <p className='m-0 px-x4 pb-x2 text-t4 text-fg-neutral-subtle'>{t('department.parentSheetDesc', { name: selfName })}</p>}
           <TreeView
             aria-label={title}
             nodes={nodes}

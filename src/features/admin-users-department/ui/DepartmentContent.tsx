@@ -51,12 +51,13 @@ const DepartmentInner = ({ company }: { company: GetCompanyResp }) => {
     else setParams({}, { replace: true })
   }, [setParams])
 
+  const plusIcon = useMemo(() => <Plus />, [])
   useScreenHeader(
     !desktop && phoneDept
       ? {
           title: phoneDept.department_name_kr,
           onBack: back,
-          action: { label: t('department.members.add'), icon: <Plus />, onClick: openAdd },
+          action: { label: t('department.members.add'), icon: plusIcon, onClick: openAdd },
         }
       : null,
   )
