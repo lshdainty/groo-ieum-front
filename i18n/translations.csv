@@ -1506,3 +1506,4 @@ user,pwForce.error.same,임시 비밀번호와 다른 비밀번호를 넣어주�
 user,pwForce.error.mismatch,비밀번호가 서로 달라요.,The passwords do not match.
 user,pwForce.failed.invalid,비밀번호를 바꾸지 못했어요. 임시 비밀번호를 다시 확인해주세요.,Couldn't change your password. Check your temporary password again.
 user,pwForce.failed.later,비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't change your password. Please try again in a moment.
+user,pwForce.error.blank,비밀번호를 입력해주세요.,Enter a password.

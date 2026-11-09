@@ -57,6 +57,8 @@ const PasswordChangeContent = () => {
   const [pending, setPending] = useState(false);
 
   const check = (name: FieldName, v: Record<FieldName, string>): string | undefined => {
+    // 공백만 넣은 값은 서버가 400 으로 거절한다 — 칸에서 먼저 막는다
+    if (v[name] && !v[name].trim()) return t('pwForce.error.blank');
     if (name === 'current') return v.current ? undefined : t('pwForce.error.currentRequired');
     if (name === 'next') {
       if (!v.next) return t('pwForce.error.newRequired');
@@ -100,7 +102,13 @@ const PasswordChangeContent = () => {
       confirm: check('confirm', values),
     };
     setErrors(next);
-    if (next.current || next.next || next.confirm) return;
+    if (next.current || next.next || next.confirm) {
+      // 첫 오류 칸으로 초점 — 낭독이 오류를 읽는다
+      const first: FieldName = next.current ? 'current' : next.next ? 'next' : 'confirm';
+      const id = { current: 'current-password', next: 'new-password', confirm: 'confirm-password' }[first];
+      document.getElementById(id)?.focus();
+      return;
+    }
 
     setPending(true);
     try {
