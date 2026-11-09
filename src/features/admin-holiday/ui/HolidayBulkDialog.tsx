@@ -29,6 +29,7 @@ import {
 } from '@/shared/ds/table'
 import { useBulkSaveHolidaysMutation, useRecurringHolidaysPreviewQuery, type GetRecurringHolidaysPreviewResp } from '@/entities/holiday'
 import { useCountryCodeTypesQuery } from '@/entities/type'
+import { CountryLoadNotice } from './CountryLoadNotice'
 import { HOLIDAY_TYPES, HOLIDAY_TYPE_KEY, formatHolidayDate } from '../lib/holiday-format'
 
 /** 연도 선택지 — 올해부터 5년 뒤까지(지금 그대로) */
@@ -325,6 +326,7 @@ export function HolidayBulkDialog({
               {t('holiday.loadPreview')}
             </Button>
           </div>
+          <CountryLoadNotice />
           {body}
         </ResponsiveDialogBody>
         <ResponsiveDialogFooter>

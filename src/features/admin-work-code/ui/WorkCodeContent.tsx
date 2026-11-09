@@ -58,7 +58,12 @@ export const WorkCodeContent = () => {
   const closeForm = () => setForm((cur) => (cur ? { ...cur, open: false } : cur))
   // 하위 코드 추가 — 라벨 줄 아래. 업무 구분 추가 — 업무 구분 코드 아래(지금 그대로)
   const addChild = (row: WorkCodeRow) => openForm({ kind: 'create', parentId: row.code.work_code_id })
-  const addDivision = () => openForm({ kind: 'create', parentId: divisionLabel.data?.work_code_id })
+  // 구분 라벨을 못 받았으면 부모 없는 코드가 만들어져 어느 탭에도 안 보인다 — 라벨이 있을 때만 연다
+  const divisionParentId = divisionLabel.data?.work_code_id
+  const canAddDivision = divisionParentId !== undefined
+  const addDivision = () => {
+    if (divisionParentId !== undefined) openForm({ kind: 'create', parentId: divisionParentId })
+  }
 
   const askDelete = (row: WorkCodeRow, sheet: boolean) => {
     const list = tab === 'part' ? partRows : divisionRows
@@ -85,10 +90,10 @@ export const WorkCodeContent = () => {
     focusAfterRemoval()
   }
 
-  useScreenAction(!desktop && tab === 'division' ? { label: t('adminWorkCode.add'), onClick: addDivision } : null)
+  useScreenAction(!desktop && tab === 'division' && canAddDivision ? { label: t('adminWorkCode.add'), onClick: addDivision } : null)
 
   const addButton =
-    tab === 'division' ? (
+    tab === 'division' && canAddDivision ? (
       <Button variant='neutralOutline' size='small' onClick={addDivision} data-work-code-add>
         <Plus />
         {t('adminWorkCode.add')}
@@ -125,10 +130,13 @@ export const WorkCodeContent = () => {
             <WorkCodeTable
               caption={t('workDivision')}
               rows={divisionRows}
-              pending={divisions.isPending}
-              failed={divisions.isLoadingError}
-              fetching={divisions.isFetching}
-              onRetry={() => void divisions.refetch()}
+              pending={divisions.isPending || divisionLabel.isPending}
+              failed={divisions.isLoadingError || divisionLabel.isLoadingError}
+              fetching={divisions.isFetching || divisionLabel.isFetching}
+              onRetry={() => {
+                if (divisions.isLoadingError) void divisions.refetch()
+                if (divisionLabel.isLoadingError) void divisionLabel.refetch()
+              }}
               failureTitle={t('adminWorkCode.failureTitle')}
               empty={
                 <ResultSection
@@ -136,7 +144,7 @@ export const WorkCodeContent = () => {
                   icon={<Briefcase />}
                   title={t('adminWorkCode.divisionEmptyTitle')}
                   description={t('adminWorkCode.emptyDescription')}
-                  primaryAction={{ label: t('adminWorkCode.add'), onClick: addDivision }}
+                  primaryAction={canAddDivision ? { label: t('adminWorkCode.add'), onClick: addDivision } : undefined}
                 />
               }
               onAddChild={addChild}

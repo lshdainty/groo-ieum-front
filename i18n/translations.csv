@@ -196,6 +196,7 @@ admin,adminHoliday.type,구분,Type
 admin,adminHoliday.lunarCheck,음력 날짜예요,This is a lunar date
 admin,adminHoliday.country,국가,Country
 admin,adminHoliday.countryRequired,국가를 골라주세요.,Select a country.
+admin,adminHoliday.countryFailure,국가 목록을 불러오지 못했어요.,Could not load the country list.
 admin,adminHoliday.recurringCheck,매년 반복해요,Repeats every year
 admin,adminHoliday.saved,공휴일을 저장했어요.,Holiday saved.
 admin,adminHoliday.deleted,공휴일을 삭제했어요.,Holiday deleted.

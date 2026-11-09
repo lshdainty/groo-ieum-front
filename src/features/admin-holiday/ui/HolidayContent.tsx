@@ -19,6 +19,7 @@ import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useScreenAction } from '@/widgets/layout/lib/screen-action'
 import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
 import { HOLIDAY_TYPE_KEY, formatHolidayDate, holidayRowName, repeatKey } from '../lib/holiday-format'
+import { CountryLoadNotice } from './CountryLoadNotice'
 import { HolidayBulkDialog } from './HolidayBulkDialog'
 import { HolidayFormDialog, type HolidayFormTarget } from './HolidayFormDialog'
 
@@ -121,9 +122,12 @@ export const HolidayContent = () => {
     </Select>
   )
   const controls = (
-    <div className='flex items-center gap-x2' data-holiday-controls>
-      {countrySelect}
-      {yearSelect}
+    <div className='flex flex-col gap-x2' data-holiday-controls>
+      <div className='flex items-center gap-x2'>
+        {countrySelect}
+        {yearSelect}
+      </div>
+      <CountryLoadNotice />
     </div>
   )
 

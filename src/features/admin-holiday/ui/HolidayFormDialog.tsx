@@ -15,6 +15,7 @@ import { useSnackbar } from '@/shared/ds/snackbar'
 import { DayField } from '@/shared/ui/groo/day-field'
 import { usePostHolidayMutation, usePutHolidayMutation, type GetHolidaysResp } from '@/entities/holiday'
 import { useCountryCodeTypesQuery } from '@/entities/type'
+import { CountryLoadNotice } from './CountryLoadNotice'
 import { emptyHolidayForm, holidayFormChanged, holidayFormErrors, holidayFormOf, holidayPayloadOf, type HolidayFormValues } from '../lib/holiday-form'
 import { HOLIDAY_TYPES, HOLIDAY_TYPE_KEY, type HolidayType } from '../lib/holiday-format'
 
@@ -155,6 +156,7 @@ export function HolidayFormDialog({
                 {countryItems}
               </Select>
             </Field>
+            <CountryLoadNotice />
             <Checkbox label={t('adminHoliday.recurringCheck')} checked={values.recurring} onCheckedChange={(c) => set('recurring', c === true)} data-holiday-recurring />
           </div>
         </ResponsiveDialogBody>
