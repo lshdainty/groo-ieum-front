@@ -111,9 +111,6 @@ const WorkDivisionListInner = ({ workDivisions, parentWorkCodeId }: WorkDivision
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
         workCode={deletingCode}
-        onSuccess={() => {
-          setDeletingCode(null);
-        }}
       />
     </div>
   );

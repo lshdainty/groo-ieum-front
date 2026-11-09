@@ -138,8 +138,8 @@ admin,holiday.title,공휴일 관리,Holiday Management
 admin,holiday.description,공휴일을 관리하고 추가/수정/삭제할 수 있습니다,Manage holidays - add/edit/delete
 admin,holiday.addTitle,새 공휴일 추가,Add New Holiday
 admin,holiday.editTitle,공휴일 수정,Edit Holiday
-admin,holiday.deleteTitle,공휴일 삭제,Delete Holiday
-admin,holiday.deleteConfirm,정말 "{{name}}" 공휴일을 삭제하시겠습니까? 이 작업은 되돌릴 수 없으며 공휴일 정보가 영구적으로 삭제됩니다.,Are you sure you want to delete "{{name}}" holiday? This action cannot be undone and the holiday information will be permanently deleted.
+admin,holiday.deleteTitle,공휴일 삭제,Delete holiday
+admin,holiday.deleteConfirm,"""{{name}}"" 공휴일을 삭제할까요? 삭제한 공휴일은 되돌릴 수 없어요.","Delete the ""{{name}}"" holiday? A deleted holiday can't be restored."
 admin,holiday.name,공휴일 이름,Holiday Name
 admin,holiday.nameRequired,공휴일 이름을 입력해주세요.,Please enter the holiday name.
 admin,holiday.date,날짜,Date
@@ -186,8 +186,8 @@ admin,holiday.countryPlaceholder,국가 선택,Select country
 admin,user.title,사용자 관리,User Management
 admin,user.inviteTitle,사용자 초대,Invite User
 admin,user.editTitle,사용자 수정,Edit User
-admin,user.deleteTitle,사용자 삭제,Delete User
-admin,user.deleteConfirm,정말 {{name}} 사용자를 삭제하시겠습니까? 이 작업은 되돌릴 수 없으며 사용자의 모든 데이터가 영구적으로 삭제됩니다.,Are you sure you want to delete user {{name}}? This action cannot be undone and all user data will be permanently deleted.
+admin,user.deleteTitle,사용자 삭제,Delete user
+admin,user.deleteConfirm,"""{{name}}"" 님을 삭제할까요? 삭제한 사용자는 되돌릴 수 없어요.","Delete ""{{name}}""? A deleted user can't be restored."
 admin,user.userId,아이디,User ID
 admin,user.userIdPlaceholder,아이디를 입력하세요,Enter user ID
 admin,user.userIdRequired,아이디를 입력해주세요.,Please enter the user ID.
@@ -315,8 +315,8 @@ vacation,grant.fixedGrantTime,이 휴가 정책은 고정된 부여 시간을 �
 vacation,policy.title,휴가 정책,Vacation Policy
 vacation,policy.addTitle,휴가 정책 추가,Add Vacation Policy
 vacation,policy.editTitle,휴가 정책 수정,Edit Vacation Policy
-vacation,policy.deleteTitle,휴가 정책 삭제,Delete Vacation Policy
-vacation,policy.deleteConfirm,정말 '{{name}}' 휴가 정책을 삭제하시겠습니까? 기존에 부여된 휴가나 사용 내역은 삭제되지 않지만 더 이상 새로운 휴가가 부여되지 않습니다.,Are you sure you want to delete '{{name}}' vacation policy? Previously granted vacations or usage history will not be deleted but no new vacations will be granted.
+vacation,policy.deleteTitle,휴가 정책 삭제,Delete leave policy
+vacation,policy.deleteConfirm,"""{{name}}"" 휴가 정책을 삭제할까요? 이 정책으로 받은 남은 휴가가 회수돼요. 되돌릴 수 없어요.","Delete the ""{{name}}"" leave policy? Remaining leave granted by this policy will be revoked. This can't be undone."
 vacation,policy.name,휴가 정책 이름,Policy Name
 vacation,policy.nameRequired,휴가 정책 이름을 입력해주세요,Please enter the policy name
 vacation,policy.type,휴가 타입,Vacation Type
@@ -370,9 +370,8 @@ work,code,코드,Code
 work,type,타입,Type
 work,order,순서,Order
 work,manage,관리,Manage
-work,codeDelete,업무 코드 삭제,Delete Work Code
-work,codeDeleteConfirm,정말로 '{{name}}' 업무 코드를 삭제하시겠습니까?,Are you sure you want to delete the '{{name}}' work code?
-work,codeDeleteWarning,삭제된 코드는 복구할 수 없습니다.,Deleted code cannot be recovered.
+work,codeDelete,업무 코드 삭제,Delete work code
+work,codeDeleteConfirm,"""{{name}}"" 업무 코드를 삭제할까요? 삭제한 업무 코드는 되돌릴 수 없어요.","Delete the ""{{name}}"" work code? A deleted work code can't be restored."
 work,codeEdit,업무 코드 수정,Edit Work Code
 work,codeCreate,업무 코드 생성,Create Work Code
 work,codeRequired,코드를 입력해주세요.,Please enter the code.
@@ -600,7 +599,7 @@ vacation,plan.management,휴가 플랜 관리,Vacation Plan Management
 vacation,plan.managementDesc,휴가 정책을 그룹화하여 플랜을 만들고 사용자에게 할당합니다.,Group vacation policies into plans and assign them to users.
 vacation,plan.addTitle,새 플랜 추가,Add New Plan
 vacation,plan.editTitle,플랜 수정,Edit Plan
-vacation,plan.deleteTitle,플랜 삭제,Delete Plan
+vacation,plan.deleteTitle,휴가 플랜 삭제,Delete leave plan
 vacation,plan.code,플랜 코드,Plan Code
 vacation,plan.codePlaceholder,예: FULL_TIME,"e.g., FULL_TIME"
 vacation,plan.codeRequired,플랜 코드는 필수입니다.,Plan code is required.
@@ -615,8 +614,7 @@ vacation,plan.policyCount,{{count}}개 정책,{{count}} policies
 vacation,plan.noPolicies,포함된 정책 없음,No policies included
 vacation,plan.managePolicies,정책 관리,Manage Policies
 vacation,plan.selectPolicies,정책 선택,Select Policies
-vacation,plan.deleteConfirm,정말 '{{name}}' 휴가 플랜을 삭제하시겠습니까?,Are you sure you want to delete '{{name}}' vacation plan?
-vacation,plan.deleteWarning,플랜을 삭제하면 이 플랜이 할당된 모든 사용자에게서 회수됩니다.,Deleting this plan will revoke it from all assigned users.
+vacation,plan.deleteConfirm,"""{{name}}"" 휴가 플랜을 삭제할까요? 삭제한 플랜은 되돌릴 수 없어요.","Delete the ""{{name}}"" leave plan? A deleted plan can't be restored."
 vacation,plan.totalCount,총 {{count}}개 플랜,Total {{count}} plans
 vacation,plan.searchPlaceholder,휴가 플랜 검색,Search vacation plans
 vacation,plan.noPlans,등록된 휴가 플랜이 없습니다.,No vacation plans registered.
@@ -781,10 +779,8 @@ work,report.saveFailed,저장에 실패했습니다. 다시 시도해주세요.,
 work,report.invalidDuplicateData,복제할 데이터가 유효하지 않습니다.,Invalid data to duplicate.
 work,report.invalidSelectedData,복제할 데이터 중 유효하지 않은 항목이 있습니다.,Some selected items have invalid data for duplication.
 work,report.duplicateFailed,복제에 실패했습니다. 다시 시도해주세요.,Failed to duplicate. Please try again.
-work,report.deleteFailed,삭제에 실패했습니다. 다시 시도해주세요.,Failed to delete. Please try again.
-work,report.deleteTitle,업무 이력 삭제,Delete Work History
-work,report.deleteConfirm,"{{date}} 업무 이력을 삭제하시겠습니까?","Are you sure you want to delete the work history for {{date}}?"
-work,report.deleteWarning,이 작업은 되돌릴 수 없습니다.,This action cannot be undone.
+work,report.deleteTitle,업무 기록 삭제,Delete work record
+work,report.deleteConfirm,{{date}} 업무 기록을 삭제할까요? 삭제한 업무 기록은 되돌릴 수 없어요.,Delete the work record for {{date}}? A deleted work record can't be restored.
 work,report.batchRegisterFailed,일괄 등록에 실패했습니다.,Failed to batch register.
 work,report.excelDownloadFailed,엑셀 다운로드에 실패했습니다.,Failed to download Excel.
 work,report.excelPeriodInvalid,기간을 1년 안으로 골라주세요.,Please select a period within one year.
@@ -1191,8 +1187,8 @@ admin,notice.title,공지사항 관리,Notice Management
 admin,notice.description,공지사항을 관리하고 추가/수정/삭제할 수 있습니다,Manage notices - add/edit/delete
 admin,notice.addTitle,새 공지사항 추가,Add New Notice
 admin,notice.editTitle,공지사항 수정,Edit Notice
-admin,notice.deleteTitle,공지사항 삭제,Delete Notice
-admin,notice.deleteConfirm,"정말 '{{title}}' 공지사항을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.","Are you sure you want to delete '{{title}}' notice? This action cannot be undone."
+admin,notice.deleteTitle,공지사항 삭제,Delete notice
+admin,notice.deleteConfirm,"""{{title}}"" 공지를 삭제할까요? 삭제한 공지는 되돌릴 수 없어요.","Delete the ""{{title}}"" notice? A deleted notice can't be restored."
 admin,notice.formDescription,공지사항 정보를 입력해주세요.,Please enter notice information.
 admin,notice.titleLabel,제목,Title
 admin,notice.titlePlaceholder,공지사항 제목을 입력하세요,Enter notice title

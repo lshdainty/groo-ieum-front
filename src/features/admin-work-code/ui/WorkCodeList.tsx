@@ -184,9 +184,6 @@ const WorkCodeListInner = ({ workGroups }: WorkCodeListInnerProps) => {
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
         workCode={deletingCode}
-        onSuccess={() => {
-          setDeletingCode(null);
-        }}
       />
     </div>
   );

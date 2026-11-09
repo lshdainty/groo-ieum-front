@@ -76,12 +76,9 @@ const NoticeContent = () => {
     setIsDialogOpen(true)
   }
 
-  const handleDelete = (noticeId: number) => {
-    deleteMutation.mutate(noticeId, {
-      onSuccess: () => {
-        refetch()
-      }
-    })
+  const handleDelete = async (noticeId: number) => {
+    await deleteMutation.mutateAsync(noticeId)
+    refetch()
   }
 
   const handleAddClick = () => {

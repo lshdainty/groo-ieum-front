@@ -1,21 +1,12 @@
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/shared/ui/shadcn/alertDialog';
 import { WorkCodeResp, useDeleteWorkCodeMutation } from '@/entities/work'
-import { useTranslation } from 'react-i18next';
+import { ConfirmDialog } from '@/shared/ui/confirm'
+import { useTranslation } from 'react-i18next'
 
 interface WorkCodeDeleteDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  workCode: WorkCodeResp | null;
-  onSuccess?: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  workCode: WorkCodeResp | null
+  onSuccess?: () => void
 }
 
 const WorkCodeDeleteDialog = ({
@@ -24,48 +15,21 @@ const WorkCodeDeleteDialog = ({
   workCode,
   onSuccess
 }: WorkCodeDeleteDialogProps) => {
-  const { t } = useTranslation('work');
-  const { t: tc } = useTranslation('common');
-  const { mutate: deleteWorkCode, isPending } = useDeleteWorkCodeMutation();
-
-  const handleDelete = () => {
-    if (!workCode) return;
-
-    deleteWorkCode(workCode.work_code_id, {
-      onSuccess: () => {
-        onOpenChange(false);
-        onSuccess?.();
-      }
-    });
-  };
+  const { t } = useTranslation('work')
+  const { mutateAsync: deleteWorkCode } = useDeleteWorkCodeMutation()
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{t('codeDelete')}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {t('codeDeleteConfirm', { name: workCode?.work_code_name })}
-            <br />
-            {t('codeDeleteWarning')}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>{tc('cancel')}</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={(e) => {
-              e.preventDefault();
-              handleDelete();
-            }}
-            disabled={isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {isPending ? tc('deleting') : tc('delete')}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-};
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t('codeDelete')}
+      description={t('codeDeleteConfirm', { name: workCode?.work_code_name })}
+      onConfirm={async () => {
+        if (workCode) await deleteWorkCode(workCode.work_code_id)
+      }}
+      onDone={onSuccess}
+    />
+  )
+}
 
-export { WorkCodeDeleteDialog };
+export { WorkCodeDeleteDialog }

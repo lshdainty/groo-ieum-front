@@ -95,12 +95,9 @@ const HolidayContent = () => {
     setIsDialogOpen(true)
   }
 
-  const handleDelete = (holiday_id: number) => {
-    deleteMutation.mutate(String(holiday_id), {
-      onSuccess: () => {
-        refetch()
-      }
-    })
+  const handleDelete = async (holiday_id: number) => {
+    await deleteMutation.mutateAsync(String(holiday_id))
+    refetch()
   }
 
   const handleAddClick = () => {

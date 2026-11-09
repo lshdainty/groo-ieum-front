@@ -17,7 +17,7 @@ const noticeTypeColors: Record<string, string> = {
 interface NoticeListProps {
   notices?: NoticeListResp[]
   onEdit: (notice: NoticeListResp) => void
-  onDelete: (noticeId: number) => void
+  onDelete: (noticeId: number) => Promise<unknown>
 }
 
 const NoticeList = ({

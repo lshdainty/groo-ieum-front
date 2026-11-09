@@ -17,7 +17,7 @@ const holidayTypeColors = {
 interface HolidayListProps {
   holidays?: GetHolidaysResp[];
   onEdit: (holiday: GetHolidaysResp) => void;
-  onDelete: (holiday_id: number) => void;
+  onDelete: (holiday_id: number) => Promise<unknown> | void;
   onAddClick: () => void;
 }
 
