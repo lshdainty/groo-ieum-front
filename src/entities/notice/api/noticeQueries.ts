@@ -50,11 +50,11 @@ export const useNoticesByTypeQuery = (type: NoticeType, page: number = 0, size: 
 }
 
 // 공지사항 키워드 검색 훅
-export const useSearchNoticesQuery = (keyword: string, page: number = 0, size: number = 10, options?: NoticeQueryOptions & { keepPrevious?: boolean }) => {
+export const useSearchNoticesQuery = (keyword: string, page: number = 0, size: number = 10, options?: NoticeQueryOptions & { keepPrevious?: boolean; enabled?: boolean }) => {
   return useQuery<NoticePageResp>({
     queryKey: noticeKeys.list({ keyword, page, size }),
     queryFn: () => noticeApi.searchNotices(keyword, page, size),
-    enabled: keyword.length > 0,
+    enabled: keyword.length > 0 && (options?.enabled ?? true),
     placeholderData: options?.keepPrevious ? keepPreviousData : undefined,
     meta: options?.quiet ? { quiet: true } : undefined
   })
@@ -77,6 +77,18 @@ export const useActiveNoticesInfiniteQuery = (size: number = 10, options?: Notic
     queryFn: ({ pageParam }) => noticeApi.getActiveNotices(pageParam, size),
     initialPageParam: 0,
     getNextPageParam: (last) => (last.last ? undefined : last.page + 1),
+    meta: options?.quiet ? { quiet: true } : undefined
+  })
+}
+
+// 관리 목록 끝없이 불러오기 훅 — 폰(768 미만)의 공지사항 관리. 서버 쪽 번호를 이어 받는다(검색어가 있으면 검색)
+export const useAdminNoticesInfiniteQuery = (keyword: string, size: number = 10, options?: NoticeQueryOptions & { enabled?: boolean }) => {
+  return useInfiniteQuery<NoticePageResp, Error, { pages: NoticePageResp[] }, ReturnType<typeof noticeKeys.list>, number>({
+    queryKey: noticeKeys.list({ admin: true, infinite: true, keyword, size }),
+    queryFn: ({ pageParam }) => (keyword ? noticeApi.searchNotices(keyword, pageParam, size) : noticeApi.getNotices(pageParam, size)),
+    initialPageParam: 0,
+    getNextPageParam: (last) => (last.last ? undefined : last.page + 1),
+    enabled: options?.enabled ?? true,
     meta: options?.quiet ? { quiet: true } : undefined
   })
 }
