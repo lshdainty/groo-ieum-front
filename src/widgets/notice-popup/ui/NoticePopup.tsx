@@ -2,8 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import type { NoticeListResp } from '@/entities/notice'
-import { Badge } from '@/shared/ds/badge'
+import { NoticeKinds, type NoticeListResp } from '@/entities/notice'
 import { Button, ResponsivePair } from '@/shared/ds/button'
 import {
   ResponsiveDialog,
@@ -47,10 +46,8 @@ export const NoticePopup = ({ open, notice, content, index, total, onPrev, onNex
     bodyRef.current?.scrollTo({ top: 0 })
   }, [notice.notice_id])
 
-  const pinned = notice.is_pinned === 'Y'
-  const kind = (
-    <Badge tone={pinned ? 'brand' : 'neutral'}>{pinned ? t('pinned') : notice.notice_type_name}</Badge>
-  )
+  // 분류 배지는 늘 분류 색 · 고정이면 "고정" 을 더한다(상세 페이지와 같은 한 부품 — Q-i23-a 1)
+  const kind = <NoticeKinds type={notice.notice_type} typeName={notice.notice_type_name} pinned={notice.is_pinned} />
 
   const nav =
     total > 1 ? (
