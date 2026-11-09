@@ -10,6 +10,7 @@ import { useSnackbar } from '@/shared/ds/snackbar'
 import { usePermissionsQuery } from '@/entities/permission'
 import { useDeleteRoleMutation, usePostRoleMutation, usePutRoleMutation, usePutRolePermissionsMutation, useRolesQuery } from '@/entities/role'
 import { usePermission } from '@/entities/session'
+import { useBeforeUnloadWhile } from '@/shared/lib/before-unload'
 import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
 import { useDiscardGuard } from '@/shared/ui/groo/use-discard-guard'
 import { readWriteFailure } from '@/shared/ui/groo/write-error'
@@ -68,6 +69,8 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
   const dirty = creating ? !!edits && (!!edits.code || !!edits.name || !!edits.desc || edits.perms.length > 0) : changes.desc || changes.perms
 
   useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange])
+  // 새로 고침 · 탭 닫기도 바뀐 값이 있거나 저장 중일 때 브라우저 확인을 건다(사이드바 이동은 라우터가 막지 못한다)
+  useBeforeUnloadWhile(dirty || busy)
 
   const resetEdits = () => {
     setEdits(null)

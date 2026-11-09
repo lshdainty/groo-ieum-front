@@ -9,7 +9,7 @@ import { useManagementContext } from '../model/ManagementContext'
 /**
  * 사용자 줄 ⋮ 의 내용(I-24 F 29) — 1280 이상 Menu · 미만 Menu Sheet(머리 = 이름). 상태별 갈래:
  * 가입 완료 = 수정 · 휴가 플랜 · 비밀번호 초기화 · (가름) 삭제 / 초대 대기 = 다시 보내기 · 초대 정보 수정 · (가름) 삭제 /
- * 그 밖(만료 등) = 다시 보내기 · 막힌 수정 · (가름) 삭제. 고른 동작은 ManagementContext 의 표면 상태를 연다(표면은 UserDialogs).
+ * 그 밖(만료 등) = 다시 보내기 · 막힌 수정 · (가름) 삭제. 폰 시트는 제목이 이름이라 머리 설명에는 이름을 다시 쓰지 않는다(아이디 · 주 부서만). 고른 동작은 ManagementContext 의 표면 상태를 연다(표면은 UserDialogs).
  */
 export function UserRowMenuContent({ user, actions }: { user: GetUsersResp; actions: UserActions }) {
   const { t } = useTranslation('admin')
@@ -18,7 +18,7 @@ export function UserRowMenuContent({ user, actions }: { user: GetUsersResp; acti
   const id = user.user_id
   const top = actions.resend || actions.edit || actions.editDisabled || actions.inviteEdit || actions.plan || actions.reset
   return (
-    <ResponsiveMenuContent title={user.user_name} description={id}>
+    <ResponsiveMenuContent title={user.user_name} description={user.main_department_name_kr ? `${id} · ${user.main_department_name_kr}` : id}>
       {top && (
         <ResponsiveMenuGroup>
           {actions.resend && <ResponsiveMenuItem label={t('user.resendEmail')} icon={<MailPlus />} onSelect={() => ctx.setShowResendDialog(id)} />}
