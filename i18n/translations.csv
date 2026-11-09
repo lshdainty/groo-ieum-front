@@ -1529,7 +1529,7 @@ common,searchWon,원,KRW
 culture,dues.summaryTitle,회비 현황,Dues overview
 culture,dues.period.this,올해,this year
 culture,dues.period.year,{{year}}년,in {{year}}
-culture,dues.summary.totalDesc,{{period}} 입금에서 출금을 뺀 돈,Deposits minus withdrawals {{period}}
+culture,dues.summary.totalDesc,생일비를 뺀 {{period}} 운영비 잔액,Operating balance without birthday fees {{period}}
 culture,dues.summary.depositDesc,{{period}} 들어온 돈,Money received {{period}}
 culture,dues.summary.withdrawalDesc,{{period}} 나간 돈,Money paid out {{period}}
 culture,dues.summary.birthDesc,{{period}} {{month}}월에 들어온 생일비,Birthday fees received for month {{month}} {{period}}

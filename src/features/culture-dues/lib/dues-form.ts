@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { parseAmount } from '@/shared/lib/groo/amount'
+import { MAX_AMOUNT, parseAmount } from '@/shared/lib/groo/amount'
 import type { GetYearDuesResp, PostDuesReq } from '@/entities/dues'
 
 /** 서버 칸 길이 — 이름 `Dues.java` dues_user_name 20 · 내용 dues_detail 1000 */
@@ -47,9 +47,9 @@ export const duesFormOf = (row: GetYearDuesResp): DuesFormValues => ({
 export const duesFormChanged = (a: DuesFormValues, b: DuesFormValues): boolean =>
   a.calc !== b.calc || a.amount !== b.amount || a.date !== b.date || a.type !== b.type || a.name !== b.name || a.detail !== b.detail
 
-/** 칸 오류 — 금액은 0 보다 커야 하고 날짜는 필수. 오류가 없으면 빈 객체 */
+/** 칸 오류 — 금액은 0 보다 크고 100억 이하여야 하고(상한 전에 저장된 옛 값을 열어도 막는다 — 서버에 검증이 없다) 날짜는 필수. 오류가 없으면 빈 객체 */
 export const duesFormErrors = (v: DuesFormValues): { amount?: true; date?: true } => ({
-  ...(parseAmount(v.amount) > 0 ? {} : { amount: true as const }),
+  ...(parseAmount(v.amount) > 0 && parseAmount(v.amount) <= MAX_AMOUNT ? {} : { amount: true as const }),
   ...(v.date ? {} : { date: true as const }),
 })
 

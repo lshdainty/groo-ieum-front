@@ -23,7 +23,10 @@ import { ResponsiveMenu, ResponsiveMenuContent, ResponsiveMenuItem, ResponsiveMe
 import { Popover, PopoverBody, PopoverContent, PopoverFooter, PopoverTrigger } from '@/shared/ds/popover'
 import { SegmentedControl, SegmentedControlItem } from '@/shared/ds/segmented-control'
 import { Textarea } from '@/shared/ds/textarea'
+import { useLeaveConfirm } from '@/shared/ds/alert-dialog'
+import { MAX_AMOUNT } from '@/shared/lib/groo/amount'
 import { AmountInput } from '@/shared/ui/groo/amount-input'
+import { parseAmount } from '@/shared/lib/groo/amount'
 import { usePostDuesMutation, usePutDuesMutation, type GetYearDuesResp } from '@/entities/dues'
 import {
   DUES_DETAIL_MAX,
@@ -144,6 +147,10 @@ export function DuesFormDialog({
   const set = <K extends keyof DuesFormValues>(key: K, value: DuesFormValues[K]) => setValues((v) => ({ ...v, [key]: value }))
   const errors = duesFormErrors(values)
   const dirty = duesFormChanged(values, initial)
+  const contentRef = useRef<HTMLDivElement>(null)
+  // 폰 시트 ⋮ > 복사해서 추가 — 고치던 값이 있으면 "작성한 내용이 사라져요" 를 먼저 묻는다(없으면 그대로)
+  const pendingCopy = useRef<GetYearDuesResp | null>(null)
+  const leave = useLeaveConfirm({ dirty, contentRef, leave: () => pendingCopy.current && rowActions?.onCopy(pendingCopy.current) })
   const editing = target.kind === 'edit'
 
   const failureText = (error: unknown): string | null => {
@@ -187,7 +194,10 @@ export function DuesFormDialog({
           </Button>
         </ResponsiveMenuTrigger>
         <ResponsiveMenuContent title={rowName}>
-          <ResponsiveMenuItem icon={<Copy />} label={t('dues.copyAdd')} onSelect={() => rowActions.onCopy(target.row)} />
+          <ResponsiveMenuItem icon={<Copy />} label={t('dues.copyAdd')} onSelect={() => {
+              pendingCopy.current = target.row
+              leave.request()
+            }} />
           <ResponsiveMenuItem icon={<Trash2 />} label={tc('delete')} tone='critical' onSelect={() => rowActions.onDelete(target.row)} />
         </ResponsiveMenuContent>
       </ResponsiveMenu>
@@ -196,6 +206,7 @@ export function DuesFormDialog({
   return (
     <ResponsiveDialog open={open} form dirty={dirty} busy={busy} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent
+        ref={contentRef}
         title={editing ? t('dues.form.editTitle') : t('dues.form.addTitle')}
         headerAction={headerAction}
         onOpenAutoFocus={(e) => {
@@ -222,7 +233,7 @@ export function DuesFormDialog({
               label={t('dues.form.amount')}
               showRequiredIndicator
               invalid={showErrors && !!errors.amount}
-              errorMessage={t('dues.form.amountRequired')}
+              errorMessage={parseAmount(values.amount) > MAX_AMOUNT ? tc('amountTooLarge') : t('dues.form.amountRequired')}
             >
               <AmountInput ref={amountRef} value={values.amount} onValueChange={(digits) => set('amount', digits)} />
             </Field>
@@ -250,6 +261,7 @@ export function DuesFormDialog({
             {tc('save')}
           </Button>
         </ResponsiveDialogFooter>
+        {leave.node}
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   )
