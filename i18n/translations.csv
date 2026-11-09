@@ -167,6 +167,50 @@ admin,holiday.bulkSaveSuccess_one,{{count}}개의 공휴일이 저장되었습�
 admin,holiday.bulkSaveError,공휴일 저장에 실패했습니다,Failed to save holidays
 admin,holiday.yearPlaceholder,연도 선택,Select year
 admin,holiday.countryPlaceholder,국가 선택,Select country
+admin,adminHoliday.countryAria,국가,Country
+admin,adminHoliday.yearAria,연도,Year
+admin,adminHoliday.yearLabel,{{year}}년,{{year}}
+admin,adminHoliday.listTitleBase,공휴일,Holidays
+admin,adminHoliday.listTitle,공휴일 {{count}}개,{{count}} holidays
+admin,adminHoliday.listTitle_one,공휴일 {{count}}개,{{count}} holiday
+admin,adminHoliday.caption,공휴일 목록,Holidays
+admin,adminHoliday.colName,이름,Name
+admin,adminHoliday.colDate,날짜,Date
+admin,adminHoliday.colType,구분,Type
+admin,adminHoliday.colRepeat,반복,Repeat
+admin,adminHoliday.repeatYearly,매년,Yearly
+admin,adminHoliday.repeatLunarYearly,음력 · 매년,Lunar · Yearly
+admin,adminHoliday.repeatLunar,음력,Lunar
+admin,adminHoliday.repeatNone,—,—
+admin,adminHoliday.rowDetail,{{date}} · {{type}} · {{repeat}},{{date}} · {{type}} · {{repeat}}
+admin,adminHoliday.failureTitle,공휴일을 불러오지 못했어요,Could not load holidays
+admin,adminHoliday.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+admin,adminHoliday.emptyTitle,{{year}}년 공휴일이 없어요,No holidays for {{year}}
+admin,adminHoliday.emptyDescription,일괄 생성으로 매년 반복하는 공휴일을 한 번에 만들 수 있어요.,Bulk generate creates the yearly holidays in one go.
+admin,adminHoliday.name,이름,Name
+admin,adminHoliday.nameRequired,이름을 입력해주세요.,Enter a name.
+admin,adminHoliday.date,날짜,Date
+admin,adminHoliday.datePlaceholder,날짜를 골라주세요,Select a date
+admin,adminHoliday.dateRequired,날짜를 골라주세요.,Select a date.
+admin,adminHoliday.type,구분,Type
+admin,adminHoliday.lunarCheck,음력 날짜예요,This is a lunar date
+admin,adminHoliday.country,국가,Country
+admin,adminHoliday.countryRequired,국가를 골라주세요.,Select a country.
+admin,adminHoliday.recurringCheck,매년 반복해요,Repeats every year
+admin,adminHoliday.saved,공휴일을 저장했어요.,Holiday saved.
+admin,adminHoliday.deleted,공휴일을 삭제했어요.,Holiday deleted.
+admin,adminHoliday.saveFailed,저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save. Please try again in a moment.
+admin,adminHoliday.bulkDescription,매년 반복하는 공휴일을 고른 해로 만들어요. 음력 공휴일은 양력 날짜로 바꿔요.,Creates the yearly holidays for the year you choose. Lunar holidays are converted to solar dates.
+admin,adminHoliday.bulkCaption,만들 공휴일,Holidays to create
+admin,adminHoliday.bulkEditCell,{{column}} {{value}} 고치기,Edit {{column}} {{value}}
+admin,adminHoliday.bulkFailureTitle,반복 공휴일을 불러오지 못했어요,Could not load recurring holidays
+admin,adminHoliday.bulkEmpty,{{year}}년에 만들 반복 공휴일이 없어요,No recurring holidays to create for {{year}}
+admin,adminHoliday.bulkPickNone,저장할 공휴일을 골라주세요.,Select the holidays to save.
+admin,adminHoliday.bulkSave,{{count}}개 저장,Save {{count}}
+admin,adminHoliday.bulkSave_one,{{count}}개 저장,Save {{count}}
+admin,adminHoliday.bulkSaved,공휴일 {{count}}개를 저장했어요.,{{count}} holidays saved.
+admin,adminHoliday.bulkSaved_one,공휴일 {{count}}개를 저장했어요.,{{count}} holiday saved.
+admin,adminHoliday.bulkSaveFailed,저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save. Please try again in a moment.
 admin,user.title,사용자 관리,User Management
 admin,user.inviteTitle,사용자 초대,Invite User
 admin,user.editTitle,사용자 수정,Edit User

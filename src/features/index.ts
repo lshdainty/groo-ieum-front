@@ -73,7 +73,6 @@ export { RoleManagementPanel, UserManagementPanel } from '@/features/admin-autho
 
 // Admin - Holiday
 export { HolidayContent } from '@/features/admin-holiday'
-export { HolidayProvider, useHolidayContext } from '@/features/admin-holiday'
 
 // Admin - Work Code
 export { WorkCodeContent } from '@/features/admin-work-code'
