@@ -345,7 +345,7 @@ dashboard,widget.workHistoryStatus,업무이력 작성 현황,Work History Statu
 dashboard,widget.monthlyWorkAlert,월별 업무 미작성 알림,Monthly Work Alert
 dashboard,widget.allUserVacationStatus,전체 유저 휴가 현황,All User Vacation Status
 dashboard,widget.departmentChart,조직도,Organization Chart
-dashboard,widget.empty.monthStats.title,월별 휴가 통계가 없습니다,No Monthly Vacation Statistics
+dashboard,widget.empty.monthStats.title,올해 쓴 휴가가 없어요,No leave used this year
 dashboard,widget.empty.monthStats.description,아직 휴가 사용 내역이 없습니다,No vacation usage history yet
 dashboard,save,저장,Save
 dashboard,hideWidget,위젯 숨기기,Hide Widget
@@ -1044,10 +1044,10 @@ dashboard,workHistory.loading,데이터를 불러오는 중...,Loading data...
 dashboard,workHistory.noData,데이터를 불러올 수 없습니다.,Cannot load data.
 dashboard,workHistory.noDataDesc,오늘 업무 데이터가 없습니다.,No work data available for today.
 dashboard,workHistory.hoursUnit,시간,hours
-dashboard,workHistory.achieved,달성 완료,Achieved
-dashboard,workHistory.inProgress,진행 중,In Progress
-dashboard,workHistory.achievedMessage,오늘 필요한 업무 시간을 모두 채웠습니다!,You've completed all required work hours for today!
-dashboard,workHistory.remainingMessage,목표 달성까지 {{hours}}시간 남았습니다.,{{hours}} hours remaining to reach your goal.
+dashboard,workHistory.achieved,다 채웠어요,Done
+dashboard,workHistory.inProgress,작성 중,In progress
+dashboard,workHistory.achievedMessage,오늘 채워야 할 시간을 다 채웠어요.,You've filled today's required hours.
+dashboard,workHistory.remainingMessage,{{time}} 더 쓰면 오늘 채워야 할 시간을 채워요.,Log {{time}} more to fill today's required hours.
 dashboard,systemCheck.noSystem,등록된 시스템이 없습니다,No registered systems
 dashboard,systemCheck.noSystemDesc,시스템을 등록하면 여기에 표시됩니다.,Systems will be displayed here once registered.
 vacation,approval.title,휴가 신청 상세보기,Vacation Request Details
@@ -1573,3 +1573,22 @@ dashboard,emptyTitle,홈에 보일 위젯이 없어요,No widgets to show on Hom
 dashboard,emptyDescription,홈 편집에서 볼 위젯을 켜주세요.,Turn on widgets in Edit Home.
 dashboard,widget.failureTitle,{{name}}{{eulReul}} 불러오지 못했어요,Could not load {{name}}
 dashboard,widget.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+vacation,history.sinceLastMonth,지난달보다,Since last month
+dashboard,widget.empty.typeStats.title,남은 휴가가 없어요,No leave remaining
+dashboard,systemCheck.toggleFailed,확인 상태를 바꾸지 못했어요.,Could not change the check status.
+dashboard,systemCheck.checked,오늘 확인했어요,Checked today
+dashboard,systemCheck.unchecked,오늘 아직 확인하지 않았어요,Not checked yet today
+dashboard,workHistory.hours,{{h}}시간,{{h}}h
+dashboard,workHistory.minutes,{{m}}분,{{m}}m
+dashboard,workHistory.hoursMinutes,{{h}}시간 {{m}}분,{{h}}h {{m}}m
+dashboard,workHistory.meterName,오늘 업무 시간 {{total}} / {{required}},Work time today {{total}} / {{required}}
+dashboard,missing.monthTitle,{{year}}년 {{month}}월,{{month}}/{{year}}
+dashboard,missing.prev,이전 달,Previous month
+dashboard,missing.next,다음 달,Next month
+dashboard,missing.dayMissing,"{{month}}월 {{day}}일, 업무 보고 안 씀","{{month}}/{{day}}, no work report"
+dashboard,missing.legend,빨간 날은 업무 보고를 아직 쓰지 않은 날이에요 — {{count}}일,Red days have no work report yet — {{count}}
+dashboard,missing.noneThisMonth,이번 달은 빠진 날이 없어요,No missing days this month
+dashboard,missing.noneMonth,{{month}}월은 빠진 날이 없어요,No missing days in month {{month}}
+dashboard,widget.empty.allUsers.title,사용자가 없어요,No users
+dashboard,widget.allUsers.detail,{{department}} · 전체 {{total}} · 쓴 {{used}},{{department}} · Total {{total}} · Used {{used}}
+dashboard,widget.allUsers.listEnd,사용자를 모두 봤어요.,That's everyone.
