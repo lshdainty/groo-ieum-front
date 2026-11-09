@@ -175,3 +175,11 @@ const ALL_LEAVES = navLeaves(FULL_NAV)
 export function screenTitleKeyOf(pathname: string): string | undefined {
   return ALL_LEAVES.find((l) => isPathActive(pathname, l.path))?.labelKey
 }
+
+/**
+ * 하위 화면의 부모 주소 — 메뉴 항목 아래의 상세 주소(예: /notice/12 → /notice). 메뉴 항목 자신이거나 모르는 주소면 undefined.
+ * 폰은 ☰ 대신 ← 를 달고, 데스크톱 화면은 "‹ {부모}" 를 그린다(I-22 D 23).
+ */
+export function parentPathOf(pathname: string): string | undefined {
+  return ALL_LEAVES.find((l) => pathname.startsWith(`${l.path}/`))?.path
+}

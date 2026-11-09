@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { SideNavigationContent } from '@/shared/ds/side-navigation'
 import { SidePanel, SidePanelBody, SidePanelContent, SidePanelFooter } from '@/shared/ds/side-panel'
-import { TopNavigation, TopNavigationMenuButton, TopNavigationTitle } from '@/shared/ds/top-navigation'
+import { hasPreviousEntry } from '@/shared/ds/top-navigation/top-navigation-context'
+import { TopNavigation, TopNavigationBackButton, TopNavigationMenuButton, TopNavigationTitle } from '@/shared/ds/top-navigation'
 import { useDesktop } from '../lib/use-desktop'
-import { screenTitleKeyOf, type NavGroup } from '../model/nav'
+import { parentPathOf, screenTitleKeyOf, type NavGroup } from '../model/nav'
 import { AccountRow } from './AccountRow'
 import { NavGroups } from './NavGroups'
 
@@ -26,15 +27,25 @@ export function PhoneFrame({ groups }: { groups: NavGroup[] }) {
   const open = !desktop && openAt === pathname
   const setOpen = (next: boolean) => setOpenAt(next ? pathname : null)
   const titleKey = screenTitleKeyOf(pathname)
+  const parentPath = parentPathOf(pathname)
+  const navigate = useNavigate()
 
   return (
     <>
       <TopNavigation type='standard'>
-        <TopNavigationMenuButton
-          aria-expanded={open}
-          aria-controls='hr-main-menu-panel'
-          onClick={() => setOpen(true)}
-        />
+        {parentPath ? (
+          // 하위 화면(공지 상세 등)은 ☰ 대신 ← — 앞 화면이 있으면 되감고, 없으면 부모로(I-22 D 23)
+          <TopNavigationBackButton
+            fallbackHref={parentPath}
+            onClick={() => (hasPreviousEntry() ? navigate(-1) : navigate(parentPath, { replace: true }))}
+          />
+        ) : (
+          <TopNavigationMenuButton
+            aria-expanded={open}
+            aria-controls='hr-main-menu-panel'
+            onClick={() => setOpen(true)}
+          />
+        )}
         <TopNavigationTitle>{titleKey ? t(titleKey) : tc('notFound.topBar')}</TopNavigationTitle>
       </TopNavigation>
       <SidePanel open={open} onOpenChange={setOpen}>
