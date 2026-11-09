@@ -1479,23 +1479,23 @@ login,sso.failed,로그인을 시작하지 못했어요. 잠시 뒤 다시 시�
 user,pwForce.title,비밀번호를 바꿔주세요,Change your password
 user,pwForce.description,임시 비밀번호로 로그인했어요. 계속 쓰려면 새 비밀번호로 바꿔주세요.,"You signed in with a temporary password. To keep using 그루 이음, change it to a new password."
 user,pwForce.docTitle,비밀번호 바꾸기,Change password
-user,pwForce.current,메일로 받은 임시 비밀번호,Temporary password from your email
-user,pwForce.currentHelp,비밀번호 찾기로 받은 메일에 있어요.,It is in the email you received from Forgot password.
-user,pwForce.currentPlaceholder,메일로 받은 비밀번호,The password from your email
+user,pwForce.current,현재 비밀번호,Current password
+user,pwForce.currentHelp,메일로 받은 임시 비밀번호나 원래 비밀번호를 넣어주세요.,Enter the temporary password from your email or your original password.
+user,pwForce.currentPlaceholder,현재 비밀번호,Current password
 user,pwForce.new,새 비밀번호,New password
 user,pwForce.confirm,새 비밀번호 확인,Confirm new password
 user,pwForce.confirmPlaceholder,한 번 더 입력해주세요,Enter it once more
 user,pwForce.submit,비밀번호 바꾸기,Change password
 user,pwForce.logout,로그아웃,Log out
 user,pwForce.done,비밀번호를 바꿨어요.,Your password has been changed.
-user,pwForce.error.currentRequired,임시 비밀번호를 입력해주세요.,Enter your temporary password.
+user,pwForce.error.currentRequired,현재 비밀번호를 입력해주세요.,Enter your current password.
 user,pwForce.error.newRequired,새 비밀번호를 입력해주세요.,Enter a new password.
 user,pwForce.error.confirmRequired,새 비밀번호를 한 번 더 입력해주세요.,Enter the new password once more.
 user,pwForce.error.tooShort,비밀번호는 8자 이상이어야 해요.,The password must be at least 8 characters.
 user,pwForce.error.noSpecial,비밀번호에 특수문자를 1자 이상 넣어주세요.,Include at least 1 special character.
-user,pwForce.error.same,임시 비밀번호와 다른 비밀번호를 넣어주세요.,Use a password different from the temporary one.
+user,pwForce.error.same,현재 비밀번호와 다른 비밀번호를 넣어주세요.,Use a password different from the current one.
 user,pwForce.error.mismatch,비밀번호가 서로 달라요.,The passwords do not match.
-user,pwForce.failed.invalid,비밀번호를 바꾸지 못했어요. 임시 비밀번호를 다시 확인해주세요.,Couldn't change your password. Check your temporary password again.
+user,pwForce.failed.invalid,비밀번호를 바꾸지 못했어요. 현재 비밀번호를 다시 확인해주세요.,Couldn't change your password. Check your current password again.
 user,pwForce.failed.later,비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't change your password. Please try again in a moment.
 user,pwForce.error.blank,비밀번호를 입력해주세요.,Enter a password.
 common,retry,다시 시도,Try again
