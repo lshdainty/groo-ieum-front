@@ -140,7 +140,6 @@ const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFo
     setSaveError(null)
     try {
       await onSave({
-        ...user,
         user_id: user.user_id,
         user_name: values.name.trim(),
         user_email: values.email.trim(),
@@ -151,7 +150,7 @@ const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFo
         profile_url: photo.replace(config.baseUrl, ''),
         profile_uuid: photoUuid,
         country_code: values.country,
-      } as PutUserReq)
+      })
       onOpenChange(false)
       snackbar.show({ message: t('edit.saved'), tone: 'positive' })
     } catch (error) {

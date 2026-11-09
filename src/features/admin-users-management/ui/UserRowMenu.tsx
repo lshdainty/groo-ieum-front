@@ -6,9 +6,6 @@ import type { GetUsersResp } from '@/entities/user'
 import type { UserActions } from '../lib/user-format'
 import { useManagementContext } from '../model/ManagementContext'
 
-/** 줄 동작이 하나라도 있는가 — 없으면 ⋮ 를 그리지 않는다 */
-export const hasUserActions = (a: UserActions): boolean => a.resend || a.edit || a.editDisabled || a.inviteEdit || a.plan || a.reset || a.remove
-
 /**
  * 사용자 줄 ⋮ 의 내용(I-24 F 29) — 1280 이상 Menu · 미만 Menu Sheet(머리 = 이름). 상태별 갈래:
  * 가입 완료 = 수정 · 휴가 플랜 · 비밀번호 초기화 · (가름) 삭제 / 초대 대기 = 다시 보내기 · 초대 정보 수정 · (가름) 삭제 /

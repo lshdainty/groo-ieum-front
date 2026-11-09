@@ -26,9 +26,9 @@ import { TablePagination, type TablePaginationValue } from '@/shared/ds/table-pa
 import { usePermission } from '@/entities/session'
 import type { GetUsersResp } from '@/entities/user'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
-import { formatWorkTime, userActionsOf, userStatusOf } from '../lib/user-format'
+import { formatWorkTime, hasUserActions, userActionsOf, userStatusOf } from '../lib/user-format'
 import { useManagementContext } from '../model/ManagementContext'
-import { hasUserActions, UserRowMenuContent } from './UserRowMenu'
+import { UserRowMenuContent } from './UserRowMenu'
 
 /** 쪽 크기 선택지 — 가장 작은 쪽 크기 이하면 넘김 줄을 두지 않는다 */
 const PAGE_SIZES = [10, 25, 50] as const

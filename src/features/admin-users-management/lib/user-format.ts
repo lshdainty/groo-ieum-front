@@ -49,3 +49,7 @@ export const userActionsOf = (
     remove: can.manage,
   }
 }
+
+/** 줄 동작이 하나라도 있는가 — 없으면 ⋮ 를 그리지 않는다 */
+export const hasUserActions = (a: UserActions): boolean => a.resend || a.edit || a.editDisabled || a.inviteEdit || a.plan || a.reset || a.remove
+
