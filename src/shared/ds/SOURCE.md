@@ -1,7 +1,8 @@
 # ds 출처
 - 출처: groo-damda-front c149b5ce (origin/main, 2026-11-08) `src/shared/ds/<폴더>` (아래 38폴더 + `i18n.ts`, 테스트 제외, demo·measure 포함), `src/shared/lib/percent.ts`·`before-unload.ts`·`utils.ts`·`cn.ts` (ds 가 쓴다)
   - 들인 폴더: accordion · alert-dialog · avatar · badge · bottom-sheet · button · callout · card · catalog · checkbox · dialog · divider · field · help-bubble · infinite-list · input · input-button · list · menu · menu-sheet · notification-badge · overlay · pagination · popover · progress-circle · radio-group · result-section · scroll-fog · select · side-navigation · skeleton · snackbar · switch · table · table-pagination · tag-group · textarea · tooltip · top-navigation
-  - 안 들인 것(다음 묶음이 필요할 때 같은 길로): chart · segmented-control · chip · progress · image-frame · aspect-ratio · logo-tile · date-picker · month-picker · time-picker · wheel-picker · tabs · slider · toggle · select-box · searchable-list · icon-picker · attachment-input · input-otp · quantity-picker · swipe-actions · bottom-navigation · floating-action-button · page-banner · collapsible · color-swatch · content-placeholder · institution-colors · scroll-area · scroll-auto-hide · `src/shared/ui/groo`
+  - 안 들인 것(다음 묶음이 필요할 때 같은 길로): chart · progress · image-frame · aspect-ratio · logo-tile · month-picker · time-picker · tabs · slider · toggle · select-box · searchable-list · icon-picker · attachment-input · input-otp · quantity-picker · swipe-actions · bottom-navigation · floating-action-button · page-banner · collapsible · color-swatch · content-placeholder · institution-colors · scroll-area · scroll-auto-hide · `src/shared/ui/groo`
+- 23-2 회비가 더 들인 것(2026-11-09): segmented-control · chip · date-picker · wheel-picker — groo-damda-front c149b5ce 같은 길(테스트 제외, measure 포함). `date-picker.demo.tsx` 는 Desk 의 time-picker 를 쓰는데 이음에 없어 빼고 들였다(Date Picker 의 ds:check 는 데모가 없어 잰 값 0 — Time Picker 를 들일 때 데모를 함께). 손으로 고친 자리 없음, ds 글(`ds,datePicker` 17행)은 이미 들어와 있다.
 - footer, side-panel: groo-sso-front origin/main 1b8847c `src/shared/ds/` (그 폴더는 groo-design 3b51647 `recipes/shadcn/components/ui/` 에서 옮긴 것 — Desk ds 에 없다)
 - 토큰·spec JSON: `npm run design:sync` (groo-design 5193bb3, **DESIGN.hr.md**)
 
@@ -16,4 +17,5 @@
 8. `src/app/index.tsx` — `/dev/ds` 카탈로그(개발 서버 전용, `import.meta.env.DEV` 가드). 로그인·권한 확인 앞에서 그린다.
 9. (sso 의 다크 틀 보정 — snackbar · menu · table-pagination · side-navigation 의 `container` 손질 — 은 가져오지 않았다. 이음은 다크가 문서 루트라 필요 없다. 화면 이관에서 필요해지면 그때 판단.)
 10. `button/button-variants.ts` — 로딩 원의 `var(--color-gray-500)` 3곳을 `#8a91a0` + `dark:#656b78`(groo gray-500 라이트·다크 리터럴)로. 옛 화면이 쓰는 Tailwind gray-500 을 `index.css` 의 body 블록이 되돌리기 때문이다. 그 블록을 걷을 때 `var(--color-gray-500)` 로 되돌린다.
-11. `src/index.css` — 임시 블록(글꼴 · shadow-sm~xl · 팔레트)이 옛 화면의 값을 지킨다. 전역 `word-break: keep-all` · 글리프 보충 글꼴 `GrooNumSymbols` 는 옛 화면을 바꾸므로 이 묶음에서 켜지 않았다(화면 이관 때).
+11. `dialog/dialog.tsx` — `ResponsiveDialogContentProps` 에 `onCloseAutoFocus` 타입 한 줄(두 표면 컨텐츠가 이미 받는 prop 을 반응형 래퍼 타입이 가렸다 — 2026-11-09 I-23 회비). 다시 복사할 때 같은 한 줄을 더한다.
+12. `src/index.css` — 임시 블록(글꼴 · shadow-sm~xl · 팔레트)이 옛 화면의 값을 지킨다. 전역 `word-break: keep-all` · 글리프 보충 글꼴 `GrooNumSymbols` 는 옛 화면을 바꾸므로 이 묶음에서 켜지 않았다(화면 이관 때).

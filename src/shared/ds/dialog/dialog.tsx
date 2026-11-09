@@ -523,6 +523,8 @@ export interface ResponsiveDialogContentProps extends Omit<
   onBack?: () => void;
   /** 열릴 때 초점 — 기본은 표면(컨테이너). 폼이 첫 칸에 초점을 줄 때 e.preventDefault() 하고 직접 옮긴다(두 표면 모두 같다) */
   onOpenAutoFocus?: (event: Event) => void;
+  /** 닫힌 뒤 초점 — 기본은 연 자리로 돌아간다. 연 자리가 사라졌거나(줄을 눌러 연 폼) 다른 자리로 보낼 때 e.preventDefault() 하고 직접 옮긴다(두 표면 모두 같다) */
+  onCloseAutoFocus?: (event: Event) => void;
   /** 시트의 오른쪽 위 닫기 원(기본 켬) — 한 단계 들어간 동안 그 자리를 "완료" 가 쓸 때만 끈다. 입력 폼 대화상자는 원래 닫기 단추가 없다 */
   showCloseButton?: boolean;
 }

@@ -39,6 +39,11 @@ export interface ConfirmDialogProps {
   onConfirm: () => Promise<unknown> | void
   /** 끝난 뒤(열린 채 마친 뒤 닫고 부른다) — 다시 시도가 성공했을 때도 부른다 */
   onDone?: () => void
+  /**
+   * 닫힌 뒤 초점 — 기본은 연 자리(⋮ 단추)로 돌아간다. 지운 줄의 ⋮ 처럼 연 자리가 사라졌으면 호출처가
+   * `e.preventDefault()` 하고 다음 자리로 보낸다(안 하면 초점이 body 로 떨어진다)
+   */
+  onCloseAutoFocus?: (event: Event) => void
 }
 
 /**
@@ -57,6 +62,7 @@ export function ConfirmDialog({
   kind = 'delete',
   onConfirm,
   onDone,
+  onCloseAutoFocus,
 }: ConfirmDialogProps) {
   const { t } = useTranslation('common')
   const fail = useConfirmFail()
@@ -80,7 +86,7 @@ export function ConfirmDialog({
       {trigger != null && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
       {/* 포털 안 누름은 React 트리로는 이 확인창을 연 부모(줄 · 달력 칸 …)까지 올라간다 — 딤을 눌렀는데 뒤 화면이 반응하지 않게 막는다 */}
       <div className='contents' onClick={stop} onMouseDown={stop} onMouseUp={stop}>
-        <AlertDialogContent>
+        <AlertDialogContent onCloseAutoFocus={onCloseAutoFocus}>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
           <AlertDialogFooter>

@@ -12,6 +12,8 @@ export type {
   PutDuesReq,
 } from '@/entities/dues/model/types'
 
+export type { DuesQueryOptions } from '@/entities/dues/api/duesQueries'
+
 // API
 export { duesApi } from '@/entities/dues/api/duesApi'
 
