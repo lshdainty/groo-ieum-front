@@ -34,10 +34,12 @@ export const useUserQuery = (userId: string) => {
 }
 
 // 사용자 목록 조회 훅
-export const useUsersQuery = () => {
+export const useUsersQuery = (options?: { quiet?: boolean }) => {
   return useQuery<GetUsersResp[]>({
     queryKey: userKeys.lists(),
-    queryFn: () => userApi.getUsers()
+    queryFn: () => userApi.getUsers(),
+    // quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다)
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
