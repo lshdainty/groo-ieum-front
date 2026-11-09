@@ -254,19 +254,12 @@ const ReportContent = () => {
     setIsDeleteDialogOpen(true);
   };
 
+  // 실패하면 던진다 — 확인창(ConfirmDialog)이 닫히고 실패 알림(Snackbar + 다시 시도)을 띄운다
   const handleDeleteConfirm = async () => {
     if (!deleteTarget?.work_history_id) return;
 
-    try {
-      await deleteWorkHistory.mutateAsync(deleteTarget.work_history_id);
-      await refetchWorkHistories();
-      setIsDeleteDialogOpen(false);
-      setDeleteTarget(null);
-    } catch (error) {
-      console.error('Delete failed:', error);
-      claimFailure(error);
-      toast.error(t('report.deleteFailed'));
-    }
+    await deleteWorkHistory.mutateAsync(deleteTarget.work_history_id);
+    await refetchWorkHistories();
   };
 
   // Excel Handlers
@@ -379,7 +372,6 @@ const ReportContent = () => {
           onOpenChange={setIsDeleteDialogOpen}
           workHistory={deleteTarget}
           onConfirm={handleDeleteConfirm}
-          isPending={deleteWorkHistory.isPending}
         />
       </div>
     </QueryAsyncBoundary>

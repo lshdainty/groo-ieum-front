@@ -33,7 +33,7 @@ const UserTable = ({ value: users }: UserTableProps) => {
   const { t } = useTranslation('admin');
   const { t: tc } = useTranslation('common');
   const { mutate: putUser } = usePutUserMutation();
-  const { mutate: deleteUser } = useDeleteUserMutation();
+  const { mutateAsync: deleteUser } = useDeleteUserMutation();
   const { data: companyTypes } = useCompanyTypesQuery();
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -67,9 +67,7 @@ const UserTable = ({ value: users }: UserTableProps) => {
     });
   };
 
-  const handleDeleteUser = (id: string) => {
-    deleteUser(id);
-  };
+  const handleDeleteUser = (id: string) => deleteUser(id);
 
   return (
     <Card>
