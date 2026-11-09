@@ -95,6 +95,8 @@ const InboxListSkeleton = () => (
 )
 
 /**
+ * ds Table `rich` 줄은 칸 높이 72 + 위아래 안쪽 여백 0(TABLE_BODY_RICH) 이라 내용이 72 를 넘으면 글이 줄 선에 붙는다 —
+ * 칸마다 위아래 12(table 스펙 TABLE_BODY_CELL 값, 부품 폴더는 건드리지 않는다)를 다시 줘 72 가 최소 높이가 되고 내용이 길면 줄이 자란다.
  * 결재함(I-24 C 12 · 13) — 로그인한 사람이 결재자인 신청(고른 직원과 무관, 고른 해). 줄을 누르면 결재 상세(승인 · 반려).
  * 데스크톱: ds Table 일곱 열 + 줄 끝 [상세 보기] + Table Pagination(동작이 하나뿐이라 ⋮ 가 아니라 글 단추 — 11-08 A1).
  * 폰: List 줄(앞 Avatar 42 · "신청자 · 정책" · 날짜 · 시간 · 신청일 · 상태) — 줄 ⋮ 없음, 줄 누름 = 상세, 끝은 끝없이 불러오기.
@@ -163,24 +165,24 @@ export function ApprovalInbox({
               const open = () => setDetail(row)
               return (
                 <TableRow key={row.vacation_grant_id} data-grant-id={row.vacation_grant_id} onClick={open}>
-                  <TableRowHeader className='min-w-[140px]' onClick={open}>
+                  <TableRowHeader className='min-w-[140px] py-x3' onClick={open}>
                     <TableCellContent media={<Avatar name={row.applicant_name} size={42} />} title={<span className='[overflow-wrap:break-word] [word-break:keep-all]'>{row.applicant_name}</span>} />
                   </TableRowHeader>
-                  <TableCell className='min-w-[160px] max-w-[260px] whitespace-normal'>
+                  <TableCell className='min-w-[160px] max-w-[260px] whitespace-normal py-x3'>
                     <TableCellContent
                       title={<span className='[overflow-wrap:break-word] [word-break:keep-all]'>{row.policy_name}</span>}
                       detail={row.desc?.trim() ? <span className='line-clamp-1 [overflow-wrap:break-word]'>{row.desc}</span> : undefined}
                     />
                   </TableCell>
-                  <TableCell className='whitespace-nowrap'>{formatRequestRange(row.request_start_time, row.request_end_time)}</TableCell>
-                  <TableCell align='end' className='whitespace-nowrap'>
+                  <TableCell className='whitespace-nowrap py-x3'>{formatRequestRange(row.request_start_time, row.request_end_time)}</TableCell>
+                  <TableCell align='end' className='whitespace-nowrap py-x3'>
                     {row.grant_time_str}
                   </TableCell>
-                  <TableCell className='whitespace-nowrap'>{formatRequestedAt(row.create_date)}</TableCell>
-                  <TableCell className='whitespace-nowrap'>
+                  <TableCell className='whitespace-nowrap py-x3'>{formatRequestedAt(row.create_date)}</TableCell>
+                  <TableCell className='whitespace-nowrap py-x3'>
                     <VacationStatusBadge status={row.grant_status} />
                   </TableCell>
-                  <TableCell className='whitespace-nowrap'>
+                  <TableCell className='whitespace-nowrap py-x3'>
                     <Button variant='ghost' size='small' aria-label={t('inbox.detailFor', { name: approvalRowName(row) })} onClick={(e) => { e.stopPropagation(); open() }}>
                       {t('inbox.detail')}
                     </Button>
