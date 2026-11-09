@@ -15,6 +15,8 @@ import {
 
 import { useConfirmFail, type ConfirmKind } from './confirm-fail'
 
+const stop = (e: { stopPropagation: () => void }) => e.stopPropagation()
+
 export interface ConfirmDialogProps {
   /** 제어하는 쪽이 열림을 든다. 없으면 `trigger` 가 연다 */
   open?: boolean
@@ -76,34 +78,37 @@ export function ConfirmDialog({
       }}
     >
       {trigger != null && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
-      <AlertDialogContent>
-        <AlertDialogTitle>{title}</AlertDialogTitle>
-        <AlertDialogDescription>{description}</AlertDialogDescription>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{cancelLabel ?? t('cancel')}</AlertDialogCancel>
-          <AlertDialogAction
-            variant={tone}
-            loading={running}
-            onClick={async (e) => {
-              e.preventDefault()
-              setRunning(true)
-              try {
-                await onConfirm()
-                setOpen(false)
-                onDone?.()
-              } catch (error) {
-                // 창을 다 내린 뒤에 알린다 — 스낵바가 뜨는 순간 확인창이 DOM 에 남아 있지 않게
-                flushSync(() => setOpen(false))
-                fail({ error, kind, retry: onConfirm, onRetried: onDone })
-              } finally {
-                setRunning(false)
-              }
-            }}
-          >
-            {confirmLabel ?? t('delete')}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+      {/* 포털 안 누름은 React 트리로는 이 확인창을 연 부모(줄 · 달력 칸 …)까지 올라간다 — 딤을 눌렀는데 뒤 화면이 반응하지 않게 막는다 */}
+      <div className='contents' onClick={stop} onMouseDown={stop} onMouseUp={stop}>
+        <AlertDialogContent>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{cancelLabel ?? t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              variant={tone}
+              loading={running}
+              onClick={async (e) => {
+                e.preventDefault()
+                setRunning(true)
+                try {
+                  await onConfirm()
+                  setOpen(false)
+                  onDone?.()
+                } catch (error) {
+                  // 창을 다 내린 뒤에 알린다 — 스낵바가 뜨는 순간 확인창이 DOM 에 남아 있지 않게
+                  flushSync(() => setOpen(false))
+                  fail({ error, kind, retry: onConfirm, onRetried: onDone })
+                } finally {
+                  setRunning(false)
+                }
+              }}
+            >
+              {confirmLabel ?? t('delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </div>
     </AlertDialog>
   )
 }
