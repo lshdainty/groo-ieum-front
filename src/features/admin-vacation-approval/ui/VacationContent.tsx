@@ -81,7 +81,7 @@ export const VacationContent = () => {
               {yearItems}
             </Select>
             {tab === 'inbox' && rows.length > 0 && (
-              <span className='text-t3 font-normal text-fg-neutral-subtle'>{t('memberVacation.count', { n: rows.length })}</span>
+              <span className='text-t3 font-normal text-fg-neutral-subtle'>{t('memberVacation.count', { count: rows.length })}</span>
             )}
           </div>
           <TabsContent value='inbox' className='min-[48rem]:mt-x4'>

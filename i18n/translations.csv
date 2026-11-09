@@ -1540,7 +1540,8 @@ vacation,memberVacation.tabStaff,직원 휴가,Staff leave
 vacation,memberVacation.inboxPending,결재할 신청이 있어요,Requests waiting for your approval
 vacation,memberVacation.yearAria,연도,Year
 vacation,memberVacation.yearLabel,{{year}}년,{{year}}
-vacation,memberVacation.count,{{n}}건,{{n}} requests
+vacation,memberVacation.count,{{count}}건,{{count}} requests
+vacation,memberVacation.count_one,{{count}}건,{{count}} request
 vacation,memberVacation.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
 vacation,inbox.caption,결재함,Approvals
 vacation,inbox.colApplicant,신청자,Applicant
