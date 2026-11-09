@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
-import { ListItem, ListLinkItem } from '@/shared/ds/list'
+import { ListButtonItem, ListItem, ListLinkItem } from '@/shared/ds/list'
 import { TagGroup } from '@/shared/ds/tag-group'
 import type { NoticeListResp } from '@/entities/notice/model/types'
 import { formatNoticeDay } from '@/entities/notice/lib/notice-format'
@@ -17,9 +17,12 @@ export const NoticeRow = ({
   href,
   badges,
   suffix,
+  onClick,
 }: {
   notice: NoticeListResp
   href?: string
+  /** 누르면 하는 일 — 관리 폰 목록의 줄(누르면 수정 시트). `href` 와 함께 쓰지 않는다 */
+  onClick?: () => void
   badges?: React.ReactNode
   suffix?: React.ReactNode
 }) => {
@@ -48,5 +51,6 @@ export const NoticeRow = ({
       </ListLinkItem>
     )
   }
+  if (onClick) return <ListButtonItem title={title} detail={meta} align='top' suffix={suffix} onClick={onClick} data-notice-id={notice.notice_id} />
   return <ListItem title={title} detail={meta} align='top' suffix={suffix} />
 }

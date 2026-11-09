@@ -167,6 +167,51 @@ admin,holiday.bulkSaveSuccess_one,{{count}}개의 공휴일이 저장되었습�
 admin,holiday.bulkSaveError,공휴일 저장에 실패했습니다,Failed to save holidays
 admin,holiday.yearPlaceholder,연도 선택,Select year
 admin,holiday.countryPlaceholder,국가 선택,Select country
+admin,adminHoliday.countryAria,국가,Country
+admin,adminHoliday.yearAria,연도,Year
+admin,adminHoliday.yearLabel,{{year}}년,{{year}}
+admin,adminHoliday.listTitleBase,공휴일,Holidays
+admin,adminHoliday.listTitle,공휴일 {{count}}개,{{count}} holidays
+admin,adminHoliday.listTitle_one,공휴일 {{count}}개,{{count}} holiday
+admin,adminHoliday.caption,공휴일 목록,Holidays
+admin,adminHoliday.colName,이름,Name
+admin,adminHoliday.colDate,날짜,Date
+admin,adminHoliday.colType,구분,Type
+admin,adminHoliday.colRepeat,반복,Repeat
+admin,adminHoliday.repeatYearly,매년,Yearly
+admin,adminHoliday.repeatLunarYearly,음력 · 매년,Lunar · Yearly
+admin,adminHoliday.repeatLunar,음력,Lunar
+admin,adminHoliday.repeatNone,—,—
+admin,adminHoliday.rowDetail,{{date}} · {{type}} · {{repeat}},{{date}} · {{type}} · {{repeat}}
+admin,adminHoliday.failureTitle,공휴일을 불러오지 못했어요,Could not load holidays
+admin,adminHoliday.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+admin,adminHoliday.emptyTitle,{{year}}년 공휴일이 없어요,No holidays for {{year}}
+admin,adminHoliday.emptyDescription,일괄 생성으로 매년 반복하는 공휴일을 한 번에 만들 수 있어요.,Bulk generate creates the yearly holidays in one go.
+admin,adminHoliday.name,이름,Name
+admin,adminHoliday.nameRequired,이름을 입력해주세요.,Enter a name.
+admin,adminHoliday.date,날짜,Date
+admin,adminHoliday.datePlaceholder,날짜를 골라주세요,Select a date
+admin,adminHoliday.dateRequired,날짜를 골라주세요.,Select a date.
+admin,adminHoliday.type,구분,Type
+admin,adminHoliday.lunarCheck,음력 날짜예요,This is a lunar date
+admin,adminHoliday.country,국가,Country
+admin,adminHoliday.countryRequired,국가를 골라주세요.,Select a country.
+admin,adminHoliday.countryFailure,국가 목록을 불러오지 못했어요.,Could not load the country list.
+admin,adminHoliday.recurringCheck,매년 반복해요,Repeats every year
+admin,adminHoliday.saved,공휴일을 저장했어요.,Holiday saved.
+admin,adminHoliday.deleted,공휴일을 삭제했어요.,Holiday deleted.
+admin,adminHoliday.saveFailed,저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save. Please try again in a moment.
+admin,adminHoliday.bulkDescription,매년 반복하는 공휴일을 고른 해로 만들어요. 음력 공휴일은 양력 날짜로 바꿔요.,Creates the yearly holidays for the year you choose. Lunar holidays are converted to solar dates.
+admin,adminHoliday.bulkCaption,만들 공휴일,Holidays to create
+admin,adminHoliday.bulkEditCell,{{column}} {{value}} 고치기,Edit {{column}} {{value}}
+admin,adminHoliday.bulkFailureTitle,반복 공휴일을 불러오지 못했어요,Could not load recurring holidays
+admin,adminHoliday.bulkEmpty,{{year}}년에 만들 반복 공휴일이 없어요,No recurring holidays to create for {{year}}
+admin,adminHoliday.bulkPickNone,저장할 공휴일을 골라주세요.,Select the holidays to save.
+admin,adminHoliday.bulkSave,{{count}}개 저장,Save {{count}}
+admin,adminHoliday.bulkSave_one,{{count}}개 저장,Save {{count}}
+admin,adminHoliday.bulkSaved,공휴일 {{count}}개를 저장했어요.,{{count}} holidays saved.
+admin,adminHoliday.bulkSaved_one,공휴일 {{count}}개를 저장했어요.,{{count}} holiday saved.
+admin,adminHoliday.bulkSaveFailed,저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save. Please try again in a moment.
 admin,user.title,사용자 관리,User Management
 admin,user.inviteTitle,사용자 초대,Invite User
 admin,user.editTitle,사용자 수정,Edit User
@@ -344,6 +389,28 @@ work,noWorkCodesDesc,새로운 업무 코드를 추가해보세요.,Try adding a
 work,addWorkCode,업무 코드 추가,Add Work Code
 work,noWorkDivisions,등록된 업무 구분이 없습니다,No work divisions registered
 work,noWorkDivisionsDesc,새로운 업무 구분을 추가해보세요.,Try adding a new work division.
+work,adminWorkCode.title,업무 코드,Work Codes
+work,adminWorkCode.add,코드 추가,Add code
+work,adminWorkCode.tabsAria,업무 코드 종류,Work code kind
+work,adminWorkCode.colName,이름,Name
+work,adminWorkCode.colCode,코드,Code
+work,adminWorkCode.colType,종류,Kind
+work,adminWorkCode.colOrder,순서,Order
+work,adminWorkCode.typeLabel,묶음,Group
+work,adminWorkCode.typeOption,항목,Item
+work,adminWorkCode.rowDetail,{{code}} · {{type}},{{code}} · {{type}}
+work,adminWorkCode.failureTitle,업무 코드를 불러오지 못했어요,Could not load work codes
+work,adminWorkCode.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+work,adminWorkCode.emptyTitle,업무 코드가 없어요,No work codes
+work,adminWorkCode.divisionEmptyTitle,업무 구분이 없어요,No work divisions
+work,adminWorkCode.emptyDescription,코드를 추가하면 업무 보고에서 고를 수 있어요.,Added codes can be chosen in work reports.
+work,adminWorkCode.fieldCode,코드,Code
+work,adminWorkCode.fieldName,이름,Name
+work,adminWorkCode.fieldOrder,순서,Order
+work,adminWorkCode.orderInvalid,순서는 숫자로 입력해주세요.,Enter the order as a number.
+work,adminWorkCode.saved,업무 코드를 저장했어요.,Work code saved.
+work,adminWorkCode.deleted,업무 코드를 삭제했어요.,Work code deleted.
+work,adminWorkCode.saveFailed,저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save. Please try again in a moment.
 work,report.selectPlaceholder,선택,Select
 work,report.assigneePlaceholder,담당자,Assignee
 work,report.filterAll,전체,All
@@ -1233,6 +1300,36 @@ admin,notice.noNoticesDesc,새로운 공지사항을 추가해보세요,Try addi
 admin,notice.addFirst,첫 번째 공지사항 추가,Add First Notice
 admin,notice.addBtn,추가,Add
 admin,notice.searchPlaceholder,제목으로 검색...,Search by title...
+admin,adminNotice.listTitleBase,공지,Notices
+admin,adminNotice.listTitle,공지 {{count}}개,{{count}} notices
+admin,adminNotice.listTitle_one,공지 {{count}}개,{{count}} notice
+admin,adminNotice.caption,공지 목록,Notices
+admin,adminNotice.searchAria,공지 제목 검색,Search notice titles
+admin,adminNotice.colTitle,제목,Title
+admin,adminNotice.colWriter,작성자,Author
+admin,adminNotice.colDate,작성일,Posted
+admin,adminNotice.colViews,조회,Views
+admin,adminNotice.colPeriod,게시 기간,Display period
+admin,adminNotice.periodText,{{start}} ~ {{end}},{{start}} ~ {{end}}
+admin,adminNotice.failureTitle,공지를 불러오지 못했어요,Could not load notices
+admin,adminNotice.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+admin,adminNotice.emptyTitle,공지가 없어요,No notices
+admin,adminNotice.emptyDescription,공지를 추가하면 직원에게 보여요.,Added notices are shown to staff.
+admin,adminNotice.searchEmpty,찾는 공지가 없어요.,No notices found.
+admin,adminNotice.listEnd,공지를 모두 봤어요.,You have seen all notices.
+admin,adminNotice.title,제목,Title
+admin,adminNotice.titleRequired,제목을 입력해주세요.,Enter a title.
+admin,adminNotice.type,종류,Kind
+admin,adminNotice.pinnedCheck,맨 위에 고정해요,Pin to the top
+admin,adminNotice.period,게시 기간,Display period
+admin,adminNotice.periodPlaceholder,기간을 골라주세요,Select a period
+admin,adminNotice.periodRequired,게시 기간을 골라주세요.,Select a display period.
+admin,adminNotice.content,본문,Content
+admin,adminNotice.contentRequired,본문을 입력해주세요.,Enter the content.
+admin,adminNotice.contentEditHint,수정할 때는 본문을 다시 입력해주세요.,Enter the content again when editing.
+admin,adminNotice.saved,공지를 저장했어요.,Notice saved.
+admin,adminNotice.deleted,공지를 삭제했어요.,Notice deleted.
+admin,adminNotice.saveFailed,저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save. Please try again in a moment.
 sidebar,menu.notice,공지사항,Notice
 sidebar,menu.adminNotice,공지사항 관리,Manage notices
 notice,title,공지사항,Notice

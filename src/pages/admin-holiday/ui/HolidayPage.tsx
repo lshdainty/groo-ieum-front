@@ -1,12 +1,7 @@
-import { HolidayContent } from '@/features/admin-holiday/ui/HolidayContent';
-import { HolidayProvider } from '@/features/admin-holiday/model/HolidayContext';
+import { HolidayContent } from '@/features/admin-holiday/ui/HolidayContent'
 
 const HolidayPage = () => {
-  return (
-    <HolidayProvider>
-      <HolidayContent />
-    </HolidayProvider>
-  );
-};
+  return <HolidayContent />
+}
 
-export { HolidayPage };
+export { HolidayPage }

@@ -16,6 +16,7 @@ export { noticeApi } from '@/entities/notice/api/noticeApi'
 // Queries
 export {
   useActiveNoticesInfiniteQuery,
+  useAdminNoticesInfiniteQuery,
   useActiveNoticesQuery,
   useCreateNoticeMutation,
   useDeleteNoticeMutation,

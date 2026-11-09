@@ -104,9 +104,10 @@ export const useCompanyTypesQuery = () => {
 }
 
 // Country Code Types 조회 훅
-export const useCountryCodeTypesQuery = () => {
+export const useCountryCodeTypesQuery = (options?: { quiet?: boolean }) => {
   return useQuery<TypeResp[]>({
     queryKey: typeKeys.list({ type: 'country-code' }),
-    queryFn: () => typeApi.getCountryCodeTypes()
+    queryFn: () => typeApi.getCountryCodeTypes(),
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }

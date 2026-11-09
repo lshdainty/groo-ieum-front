@@ -73,8 +73,9 @@ export const useWorkGroupsQuery = () => {
 }
 
 // 업무 그룹 + Labels + Parts 포함 조회 훅 (모든 Label과 Part를 한번에 조회하여 병합)
-export const useWorkGroupsWithPartsQuery = () => {
+export const useWorkGroupsWithPartsQuery = (options?: QuietOptions) => {
   return useQuery<WorkGroupWithParts[]>({
+    meta: quietMeta(options),
     queryKey: workKeys.list({ type: 'groupsWithParts' }),
     queryFn: async () => {
       // 1. 모든 업무 분류(Groups) 조회
@@ -133,16 +134,18 @@ export const useWorkPartsQuery = (parentWorkCodeId: number) => {
 }
 
 // 업무 구분 조회 훅
-export const useWorkDivisionQuery = () => {
+export const useWorkDivisionQuery = (options?: QuietOptions) => {
   return useQuery<WorkCodeResp[]>({
     queryKey: workKeys.list({ type: 'division' }),
-    queryFn: () => workApi.getWorkDivision()
+    queryFn: () => workApi.getWorkDivision(),
+    meta: quietMeta(options)
   })
 }
 
 // 업무 구분 라벨 조회 훅 (work_division 코드 정보만 반환)
-export const useWorkDivisionLabelsQuery = () => {
+export const useWorkDivisionLabelsQuery = (options?: QuietOptions) => {
   return useQuery<WorkCodeResp | null>({
+    meta: quietMeta(options),
     queryKey: workKeys.list({ type: 'divisionLabel' }),
     queryFn: async () => {
       const rootLabels = await workApi.getRootLabel()
