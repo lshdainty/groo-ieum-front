@@ -9,12 +9,14 @@ import {
   TopNavigation,
   TopNavigationActions,
   TopNavigationBackButton,
+  TopNavigationIconButton,
   TopNavigationMenuButton,
   TopNavigationTextButton,
   TopNavigationTitle,
 } from '@/shared/ds/top-navigation'
 import { useDesktop } from '../lib/use-desktop'
 import { useCurrentScreenAction } from '../lib/screen-action'
+import { useCurrentScreenHeader } from '../lib/screen-header'
 import { parentPathOf, screenTitleKeyOf, type NavGroup } from '../model/nav'
 import { AccountRow } from './AccountRow'
 import { NavGroups } from './NavGroups'
@@ -38,11 +40,15 @@ export function PhoneFrame({ groups }: { groups: NavGroup[] }) {
   const parentPath = parentPathOf(pathname)
   const navigate = useNavigate()
   const action = useCurrentScreenAction()
+  const header = useCurrentScreenHeader()
 
   return (
     <>
       <TopNavigation type='standard'>
-        {parentPath ? (
+        {header?.onBack ? (
+          // 한 화면 안의 상세(부서 배치의 부서 화면)는 ← 가 그 화면의 동작이다
+          <TopNavigationBackButton fallbackHref={pathname} onClick={header.onBack} />
+        ) : parentPath ? (
           // 하위 화면(공지 상세 등)은 ☰ 대신 ← — 앞 화면이 있으면 되감고, 없으면 부모로(I-22 D 23)
           <TopNavigationBackButton
             fallbackHref={parentPath}
@@ -55,11 +61,19 @@ export function PhoneFrame({ groups }: { groups: NavGroup[] }) {
             onClick={() => setOpen(true)}
           />
         )}
-        <TopNavigationTitle>{titleKey ? t(titleKey) : tc('notFound.topBar')}</TopNavigationTitle>
-        {action && (
+        <TopNavigationTitle>{header?.title ?? (titleKey ? t(titleKey) : tc('notFound.topBar'))}</TopNavigationTitle>
+        {header?.action ? (
           <TopNavigationActions>
-            <TopNavigationTextButton onClick={action.onClick}>{action.label}</TopNavigationTextButton>
+            <TopNavigationIconButton aria-label={header.action.label} onClick={header.action.onClick}>
+              {header.action.icon}
+            </TopNavigationIconButton>
           </TopNavigationActions>
+        ) : (
+          action && (
+            <TopNavigationActions>
+              <TopNavigationTextButton onClick={action.onClick}>{action.label}</TopNavigationTextButton>
+            </TopNavigationActions>
+          )
         )}
       </TopNavigation>
       <SidePanel open={open} onOpenChange={setOpen}>
