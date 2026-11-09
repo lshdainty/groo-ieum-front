@@ -791,6 +791,7 @@ vacation,history.expectedVacation,쓸 예정,Planned leave
 vacation,history.comparedDesc,지난 달 대비 {{gap}} {{type}},Compared to last month {{gap}} {{type}}
 vacation,request.totalRequest,총 신청,Total Requests
 vacation,request.thisMonth,이번 달 {{count}}건,{{count}} this month
+vacation,request.sinceLastMonth,지난달보다,Since last month
 vacation,request.canceledLabel,취소,Canceled
 vacation,request.canceledDesc,신청 취소됨,Request canceled
 vacation,request.pendingLabel,대기,Pending

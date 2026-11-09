@@ -2,12 +2,11 @@ import { Badge } from '@/shared/ui/shadcn/badge';
 import { Progress } from '@/shared/ui/shadcn/progress';
 import { type GetUserRequestedVacationStatsResp } from '@/entities/vacation';
 import { VACATION_STATUS_CONFIG } from '@/shared/lib/vacationStatus'
+import { Delta } from '@/shared/ds/card'
 import { formatChangeRate, formatShare } from '@/shared/lib/groo/share'
 import {
   CalendarDays,
   FileText,
-  TrendingDown,
-  TrendingUp
 } from 'lucide-react';
 import { ReactNode } from 'react';
 import { TFunction } from 'i18next';
@@ -69,13 +68,15 @@ export const getVacationRequestStatsConfig = (stats: GetUserRequestedVacationSta
       id: 'total',
       icon: <FileText className='w-6 h-6 text-blue-600' />,
       iconBg: 'bg-blue-100',
-      // 증감 방향은 부호를 따르고(0 은 화살표 없음), 휴가 신청은 늘고 줄어드는 것이 좋고 나쁨이 아니라 색은 중립이다
+      // 증감은 ds Delta — 방향 색(▲ 빨강 · ▼ 파랑, 좋고 나쁨이 아니라 방향). 0 은 줄이 없다
       headerRight:
         requestGrowth === 0 ? undefined : (
-          <div className='flex items-center gap-1 text-xs' data-request-growth={requestGrowth > 0 ? 'up' : 'down'}>
-            {requestGrowth > 0 ? <TrendingUp className='w-3 h-3 text-foreground/70' /> : <TrendingDown className='w-3 h-3 text-foreground/70' />}
-            <span className='text-foreground/70 font-medium'>{formatChangeRate(requestGrowth, { sign: 'always' })}</span>
-          </div>
+          <Delta
+            direction={requestGrowth > 0 ? 'up' : 'down'}
+            value={formatChangeRate(requestGrowth, { sign: 'none' })}
+            text={t('request.sinceLastMonth')}
+            data-request-growth={requestGrowth > 0 ? 'up' : 'down'}
+          />
         ),
       title: t('request.totalRequest'),
       value: totalRequests,
