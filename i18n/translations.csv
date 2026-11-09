@@ -899,8 +899,8 @@ culture,rule.attire.avoidSportswear,🙅‍♂️운동복 츄리닝 안돼요!,
 culture,rule.attire.avoidSlippers,🩴슬리퍼 크록스 안돼요!,🩴No slippers or crocs!
 culture,rule.attire.avoidEnd,은 피해주세요.,should be avoided.
 culture,rule.education.title,👨‍💻 교육 & OT,👨‍💻 Education & Overtime
-culture,rule.education.selfDevTitle,자기개발,Self Development
-culture,rule.education.selfDevDesc,일할 때는 확실하게 일이 없다면 휴대폰은 잠시 내려두고 📖독서와 👨‍💻공부를 해보아요. 자기개발을 지향해요.,Work hard when working. When free put your phone down and try 📖reading and 👨‍💻studying. We encourage self-improvement.
+culture,rule.education.selfDevTitle,자기계발,Self Development
+culture,rule.education.selfDevDesc,일할 때는 확실하게 일이 없다면 휴대폰은 잠시 내려두고 📖독서와 👨‍💻공부를 해보아요. 자기계발을 지향해요.,Work hard when working. When free put your phone down and try 📖reading and 👨‍💻studying. We encourage self-improvement.
 culture,rule.education.externalTitle,외부교육,External Training
 culture,rule.education.externalTrigger,외부 컨퍼런스,External conferences
 culture,rule.education.externalExample,외부 기술 행사 등,External tech events etc.
