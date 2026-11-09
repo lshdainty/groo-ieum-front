@@ -39,7 +39,8 @@ export const UserNoticeDetail = ({ noticeId }: { noticeId: number }) => {
   )
   const body = data && (
     <>
-      <div className='mt-x2'>{meta}</div>
+      {/* flex — 줄 높이 24 안에 인라인으로 놓이면 메타(18)가 위아래로 떠서 제목과의 8 이 12 가 된다 */}
+      <div className='mt-x2 flex'>{meta}</div>
       <Divider className='my-x5' />
       <NoticeContentText>{data.content}</NoticeContentText>
     </>
