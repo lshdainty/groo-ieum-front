@@ -857,8 +857,6 @@ vacation,grant.totalTime,총 {{time}},Total {{time}}
 vacation,grant.grantReason,부여 사유,Grant Reason
 vacation,grant.grantReasonPlaceholder,휴가 부여 사유를 입력하세요...,Enter the reason for granting vacation...
 vacation,grant.processing,처리 중...,Processing...
-culture,rule.header.title,💁 그루 🌲,💁 그루 🌲
-culture,rule.header.subtitle,그루 팀은 이용자분들의 복지를 개선하기 위해 항상 노력하고 있어요,그루 team always strives to improve the welfare of our members
 culture,rule.header.description,휴가 · 복장 · 교육 · 조직문화 규정을 한곳에 모았어요.,"Leave, dress code, training, and team culture rules in one place."
 culture,rule.vacation.title,🏖️ 휴가,🏖️ Vacation
 culture,rule.vacation.daysTitle,휴가 일수,Vacation Days
@@ -905,12 +903,12 @@ culture,rule.education.selfDevTitle,자기개발,Self Development
 culture,rule.education.selfDevDesc,일할 때는 확실하게 일이 없다면 휴대폰은 잠시 내려두고 📖독서와 👨‍💻공부를 해보아요. 자기개발을 지향해요.,Work hard when working. When free put your phone down and try 📖reading and 👨‍💻studying. We encourage self-improvement.
 culture,rule.education.externalTitle,외부교육,External Training
 culture,rule.education.externalTrigger,외부 컨퍼런스,External conferences
-culture,rule.education.externalExample,SK AI Summit AWS summit 등,SK AI Summit AWS Summit etc.
+culture,rule.education.externalExample,외부 기술 행사 등,External tech events etc.
 culture,rule.education.externalDesc,에 참여해서 최신 트랜드를 파악해봐요. 최대 연 2회 기간이 최대 3일 이내면 출근으로 인정돼요.,Participate to stay updated on trends. Up to 2 times/year 3 days max counts as work.
 culture,rule.education.overtimeTitle,연장근무,Overtime
 culture,rule.education.overtimeDesc,운영환경 특성상 🌙야간 작업 주말 작업 등이 발생할 수 있어요.,Due to operational nature 🌙night work and weekend work may occur.
 culture,rule.education.extraLeaveTitle,추가 휴가,Extra Leave
-culture,rule.education.extraLeaveDesc,SK AX와 동일하게 야간 주말 초과 근무에 대한 휴가가 부여돼요.,Like SK AX leave is granted for night and weekend overtime.
+culture,rule.education.extraLeaveDesc,그룹사 기준과 같게 야간 주말 초과 근무에 대한 휴가가 부여돼요.,"Like the group standard, leave is granted for night and weekend overtime."
 culture,rule.education.waitTrigger,대기 시간,Waiting time
 culture,rule.education.waitDesc,시스템 반영 시스템 재부팅 등 작업과 관련없는 시간,Time unrelated to work like system updates and reboots
 culture,rule.education.excludeText,을 제외하고,is excluded and
@@ -926,7 +924,7 @@ culture,rule.culture.earlyLeaveSeoul,서울 거주자: 1시간,Seoul residents: 
 culture,rule.culture.earlyLeaveOther,서울외 거주자: 1시간 30분,Outside Seoul: 1.5 hours
 culture,rule.culture.earlyLeaveEnd,하세요!,enjoy!
 culture,rule.culture.partyTitle,생일파티,Birthday Party
-culture,rule.culture.partyDesc,한 달에 한 번 SK AX에서 제공하는 🎂케이크와 함께 팀원들이 구매한 🎁선물을 전달하는 🎉생일 파티를 진행해요,Once a month we have a 🎉birthday party with 🎂cake from SK AX and 🎁gifts from teammates
+culture,rule.culture.partyDesc,한 달에 한 번 그룹사에서 제공하는 🎂케이크와 함께 팀원들이 구매한 🎁선물을 전달하는 🎉생일 파티를 진행해요,Once a month we have a 🎉birthday party with 🎂cake from the group and 🎁gifts from teammates
 culture,rule.culture.familyTitle,가족기념일,Family Anniversary
 culture,rule.culture.familyIntro,가족생일 결혼기념일엔 가족과 함께 보내야죠! 이 날도,Spend family birthdays and anniversaries with family! You also get
 culture,rule.culture.otherTitle,기타사항,Other Notes
