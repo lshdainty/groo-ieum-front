@@ -82,7 +82,6 @@ function MemberRow({
               <div className='flex items-center gap-x3 pb-x4'>
                 <Avatar name={user.user_name} size={42} />
                 <div className='min-w-0'>
-                  <p className='m-0 break-keep text-t5 font-bold text-fg-neutral [overflow-wrap:break-word]'>{user.user_name}</p>
                   <p className='m-0 break-all text-t3 text-fg-neutral-subtle'>{user.user_id}</p>
                   {mainDeptName && <p className='m-0 text-t3 text-fg-neutral-subtle'>{t('department.members.mainOf', { dept: mainDeptName })}</p>}
                 </div>
