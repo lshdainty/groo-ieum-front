@@ -60,7 +60,7 @@ const UserInfoCard = ({
             </Select>
           )}
         </CardHeader>
-        <CardContent className='p-0'>
+        <CardContent className='px-6 pb-6 pt-2'>
           <UserInfoContent user={selectedUser} />
         </CardContent>
       </Card>
