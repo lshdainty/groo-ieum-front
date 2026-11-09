@@ -21,7 +21,7 @@ export const TypeStatsWidget = () => {
       isEmpty={(data) => !data || !data.vacations || data.vacations.length === 0}
     >
       <div className='h-full w-full p-4'>
-        <VacationTypeStatsContent data={vacationTypes} />
+        <VacationTypeStatsContent data={vacationTypes!} />
       </div>
     </QueryAsyncBoundary>
   )

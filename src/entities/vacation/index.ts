@@ -51,6 +51,7 @@ export type {
 
 // API
 export { vacationApi } from '@/entities/vacation/api/vacationApi'
+export { VACATION_TYPE_COLORS, vacationTypeColor } from '@/entities/vacation/model/typeColors'
 
 // Query keys & hooks
 export {

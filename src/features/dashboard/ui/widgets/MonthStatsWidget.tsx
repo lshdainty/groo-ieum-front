@@ -1,5 +1,7 @@
 import QueryAsyncBoundary from '@/shared/ui/async-boundary/QueryAsyncBoundary'
 import { useUser } from '@/entities/session'
+import { MonthVacationStatsEmpty } from '@/features/vacation-history/ui/MonthVacationStatsEmpty'
+import { hasMonthUsage } from '@/features/vacation-history/lib/vacation-chart'
 import { MonthVacationStatsContent } from '@/features/vacation-history/ui/MonthVacationStatsContent'
 import { MonthVacationStatsSkeleton } from '@/features/vacation-history/ui/MonthVacationStatsSkeleton'
 import { useUserMonthlyVacationStatsQuery } from '@/entities/vacation'
@@ -16,7 +18,7 @@ export const MonthStatsWidget = () => {
       queryState={{ isLoading, error, data: monthStats }}
       loadingComponent={<MonthVacationStatsSkeleton />}
     >
-      <MonthVacationStatsContent data={monthStats!} className="p-4" />
+      <div className="p-4">{hasMonthUsage(monthStats) ? <MonthVacationStatsContent data={monthStats!} year={Number(currentYear)} /> : <MonthVacationStatsEmpty />}</div>
     </QueryAsyncBoundary>
   )
 }

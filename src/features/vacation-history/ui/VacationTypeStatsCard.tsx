@@ -3,6 +3,8 @@ import { type GetAvailableVacationsResp } from '@/entities/vacation';
 import { cn } from '@/shared/lib'
 import { useTranslation } from 'react-i18next';
 import { VacationTypeStatsContent } from './VacationTypeStatsContent'
+import { VacationTypeStatsEmpty } from './VacationTypeStatsEmpty'
+import { typeSlices } from '@/features/vacation-history/lib/vacation-chart'
 
 interface VacationTypeStatsCardProps {
   value: GetAvailableVacationsResp | undefined
@@ -18,7 +20,7 @@ const VacationTypeStatsCard = ({ value, className }: VacationTypeStatsCardProps)
         <CardDescription>{t('history.vacationTypeDesc')}</CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-4 flex flex-col min-h-[350px]'>
-        <VacationTypeStatsContent data={value} />
+        {value && typeSlices(value).length > 0 ? <VacationTypeStatsContent data={value} /> : <VacationTypeStatsEmpty />}
       </CardContent>
     </Card>
   )

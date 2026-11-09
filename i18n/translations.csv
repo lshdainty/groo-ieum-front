@@ -1555,3 +1555,14 @@ culture,dues.form.name,이름,Name
 culture,dues.form.detail,내용,Details
 culture,dues.form.saveFailed,입출금을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save the transaction. Please try again in a moment.
 culture,dues.listEnd,내역을 모두 봤어요.,That's all the transactions.
+vacation,history.chart.dayUnit,일,d
+vacation,history.chart.hourUnit,시간,h
+vacation,history.chart.dayAxis,{{n}}일,{{n}}d
+vacation,history.chart.monthAxis,{{month}}월,{{month}}
+vacation,history.chart.monthName,"{{year}}년 월별 쓴 휴가, 합계 {{total}}","Leave used per month in {{year}}, total {{total}}"
+vacation,history.chart.monthNameNoYear,"월별 쓴 휴가, 합계 {{total}}","Leave used per month, total {{total}}"
+vacation,history.chart.tableMonth,달,Month
+vacation,history.chart.typeName,"유형별 남은 휴가, 합계 {{total}}","Remaining leave by type, total {{total}}"
+vacation,history.chart.tableShare,비중,Share
+vacation,history.remainTotal,남은 휴가,Remaining leave
+common,percentBelowShare,0.1% 미만,<0.1%
