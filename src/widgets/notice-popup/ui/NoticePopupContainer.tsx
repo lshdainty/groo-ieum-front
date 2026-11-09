@@ -24,13 +24,14 @@ const hideAllToday = (): void => {
 
 /**
  * 공지사항 팝업 컨테이너
+ * 불러오지 못하면(목록 · 본문) 띄우지 않고 안내도 하지 않는다 — 저절로 뜨는 보조 표면이라 사용자가 한 일이 아니다(실패는 공지사항 화면이 알린다).
  * 앱 틀이 열릴 때 활성 공지사항이 있으면 창 하나에 띄우고, 한 창 안에서 ‹ › 로 넘겨 본다.
  * 닫으면 이번 진입에서는 다시 뜨지 않고(다음 공지가 이어 뜨지 않는다), [오늘은 그만 보기] 는 이 기기의 모든 공지를 하루 가린다.
  */
 export const NoticePopupContainer = () => {
   // 오늘 그만 보기로 가린 기기는 처음부터 띄우지 않는다
   const [hiddenOnLoad] = useState(() => isAllHiddenToday());
-  const { data: activeNotices, isLoading: isLoadingList } = useActiveNoticesQuery(0, 50);
+  const { data: activeNotices, isLoading: isLoadingList } = useActiveNoticesQuery(0, 50, { quiet: true });
   const [currentIndex, setCurrentIndex] = useState(0);
   // 열려 있다 — 목록이 오면 저절로 열리고, 닫으면 이번 진입에서는 다시 열지 않는다
   const [dismissed, setDismissed] = useState(false);
@@ -44,7 +45,7 @@ export const NoticePopupContainer = () => {
   const current = notices[currentIndex];
 
   // 현재 공지사항 상세 조회 — 보이는 것 하나씩 받는다
-  const { data: currentNotice } = useNoticeQuery(!dismissed && !hiddenOnLoad && current ? current.notice_id : null);
+  const { data: currentNotice } = useNoticeQuery(!dismissed && !hiddenOnLoad && current ? current.notice_id : null, { quiet: true });
 
   // [오늘은 그만 보기]
   const handleHideToday = () => {
