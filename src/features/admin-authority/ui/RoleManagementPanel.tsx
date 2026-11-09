@@ -20,6 +20,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { claimFailure } from '@/shared/api/failure'
+import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
 
 interface RoleManagementPanelInnerProps {
   roles: RoleResp[];
@@ -33,6 +34,7 @@ const RoleManagementPanelInner = ({ roles, authorities }: RoleManagementPanelInn
   const { refetch: refetchRoles } = useRolesQuery();
   const { mutateAsync: createRole, isPending: isCreating } = usePostRoleMutation();
   const { mutateAsync: deleteRole } = useDeleteRoleMutation();
+  const deleteConfirm = useConfirmTarget<RoleResp>();
   const { mutateAsync: updateRoleMutation, isPending: isUpdatingRole } = usePutRoleMutation();
   const { mutateAsync: updateRolePermissionsMutation, isPending: isUpdatingPermissions } = usePutRolePermissionsMutation();
 
@@ -130,23 +132,31 @@ const RoleManagementPanelInner = ({ roles, authorities }: RoleManagementPanelInn
       return;
     }
 
-    if (confirm(t('authority.confirmDeleteRole'))) {
-      try {
-        await deleteRole(roleCode);
-        await refetchRoles();
-
-        if (selectedRoleId === roleCode) {
-          const remainingRoles = roles.filter(r => r.role_code !== roleCode);
-          setSelectedRoleId(remainingRoles[0]?.role_code || null);
-        }
-        toast.success(t('authority.roleDeleted'));
-      } catch (error) {
-        console.error("Failed to delete role:", error);
-        claimFailure(error);
-        toast.error(t('authority.roleDeleteFailed'));
-      }
-    }
+    const role = roles.find(r => r.role_code === roleCode);
+    if (role) deleteConfirm.ask(role);
   };
+
+  // 확인한 뒤 지운다 — 실패하면 던진다(확인창이 닫히고 실패 알림이 뜬다)
+  const performDeleteRole = async (roleCode: string) => {
+    await deleteRole(roleCode);
+    await refetchRoles();
+
+    if (selectedRoleId === roleCode) {
+      const remainingRoles = roles.filter(r => r.role_code !== roleCode);
+      setSelectedRoleId(remainingRoles[0]?.role_code || null);
+    }
+    toast.success(t('authority.roleDeleted'));
+  };
+
+  const deleteConfirmDialog = (
+    <ConfirmDialog
+      open={deleteConfirm.open}
+      onOpenChange={deleteConfirm.onOpenChange}
+      title={t('authority.deleteRoleTitle')}
+      description={t('authority.confirmDeleteRole', { name: deleteConfirm.target?.role_name })}
+      onConfirm={() => performDeleteRole(deleteConfirm.target!.role_code)}
+    />
+  );
 
   const handleUpdateRole = (updatedRole: Role) => {
     setEditingRole(updatedRole);
@@ -278,11 +288,13 @@ const RoleManagementPanelInner = ({ roles, authorities }: RoleManagementPanelInn
             )}
           </DialogContent>
         </Dialog>
+        {deleteConfirmDialog}
       </div>
     );
   }
 
   return (
+    <>
     <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border bg-background">
       <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
         <RoleList
@@ -312,6 +324,8 @@ const RoleManagementPanelInner = ({ roles, authorities }: RoleManagementPanelInn
         )}
       </ResizablePanel>
     </ResizablePanelGroup>
+    {deleteConfirmDialog}
+    </>
   );
 };
 

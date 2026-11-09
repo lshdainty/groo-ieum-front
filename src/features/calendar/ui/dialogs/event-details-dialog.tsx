@@ -2,12 +2,12 @@
 
 import { format, parseISO } from 'date-fns';
 import { Calendar, Clock, Text, User } from 'lucide-react';
-import { Activity } from 'react';
+import { Activity, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/shared/ui/shadcn/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/ui/shadcn/dialog';
-import { Spinner } from '@/shared/ui/shadcn/spinner';
+import { ConfirmDialog } from '@/shared/ui/confirm';
 import { usePermission } from '@/entities/session';
 import { useUser } from '@/entities/session';
 import { EditEventDialog } from '@/features/calendar/ui/dialogs/edit-event-dialog';
@@ -27,7 +27,9 @@ export function EventDetailsDialog({ event, children }: IProps) {
   const startDate = parseISO(event.startDate);
   const endDate = parseISO(event.endDate);
 
-  const { deleteEvent, isPending } = useDeleteEvent();
+  const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const { deleteEvent } = useDeleteEvent();
   const { hasAnyPermission } = usePermission();
   const { loginUser } = useUser();
 
@@ -45,13 +47,10 @@ export function EventDetailsDialog({ event, children }: IProps) {
   // 해당 이벤트 타입에 대한 수정/삭제 권한
   const canModify = eventType === 'vacation' ? canModifyVacation : canModifySchedule;
 
-  const handleDelete = () => {
-    deleteEvent(event);
-  };
 
   return (
     <>
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>{children}</DialogTrigger>
 
         <DialogContent className='min-[40rem]:max-w-[24rem]'>
@@ -102,14 +101,26 @@ export function EventDetailsDialog({ event, children }: IProps) {
               </EditEventDialog>
             </Activity>
             <Activity mode={canModify ? 'visible' : 'hidden'}>
-              <Button type='button' variant='destructive' onClick={handleDelete} disabled={isPending}>
-                {isPending && <Spinner />}
+              <Button type='button' variant='destructive' onClick={() => setConfirmOpen(true)}>
                 {tc('delete')}
               </Button>
             </Activity>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* 일정 상세 위에 뜬다 — 지우면 둘 다 닫힌다 */}
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={t('eventDetails.deleteTitle')}
+        description={t('eventDetails.deleteConfirm', {
+          date: format(startDate, 'yyyy.MM.dd'),
+          title: event.title,
+        })}
+        onConfirm={() => deleteEvent(event)}
+        onDone={() => setOpen(false)}
+      />
     </>
   );
 }

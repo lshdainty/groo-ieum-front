@@ -6,10 +6,11 @@ import { EditEventDialog } from '@/features/calendar/ui/dialogs/edit-event-dialo
 import { IEvent } from '@/features/calendar/model/interfaces';
 import { calendarTypes } from '@/features/calendar/model/types';
 import { useDeleteVacationUsageMutation } from '@/entities/vacation';
-import { type GetUserVacationHistoryResp } from '@/entities/vacation';
+import { type GetUserVacationHistoryResp, type VacationUsageInfo } from '@/entities/vacation';
+import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm';
 import { Activity, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { VacationHistoryContent } from './VacationHistoryContent'
+import { VacationHistoryContent, formatDateTime } from './VacationHistoryContent'
 
 interface VacationHistoryTableProps {
   value: GetUserVacationHistoryResp;
@@ -22,7 +23,8 @@ const VacationHistoryTable = ({ value: data, canAdd = false }: VacationHistoryTa
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<IEvent | null>(null);
 
-  const { mutate: deleteVacationUsage } = useDeleteVacationUsageMutation();
+  const { mutateAsync: deleteVacationUsage } = useDeleteVacationUsageMutation();
+  const deleteConfirm = useConfirmTarget<VacationUsageInfo>();
   const { hasAnyPermission } = usePermission();
 
   // 권한 체크: 둘 중 하나라도 있으면 일정 추가 가능
@@ -49,10 +51,11 @@ const VacationHistoryTable = ({ value: data, canAdd = false }: VacationHistoryTa
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm(t('history.deleteConfirm'))) {
-      deleteVacationUsage(id);
-    }
+    const usage = data.usages.find(u => u.vacation_usage_id === id);
+    if (usage) deleteConfirm.ask(usage);
   };
+
+  const usage = deleteConfirm.target;
 
   return (
     <>
@@ -75,6 +78,17 @@ const VacationHistoryTable = ({ value: data, canAdd = false }: VacationHistoryTa
           />
         </CardContent>
       </Card>
+      <ConfirmDialog
+        open={deleteConfirm.open}
+        onOpenChange={deleteConfirm.onOpenChange}
+        title={t('history.deleteTitle')}
+        description={t(usage?.used_time_str ? 'history.deleteConfirm' : 'history.deleteConfirmNoTime', {
+          date: usage ? formatDateTime(usage.start_date) : '',
+          type: usage?.vacation_time_type_name,
+          time: usage?.used_time_str,
+        })}
+        onConfirm={() => deleteVacationUsage(usage!.vacation_usage_id)}
+      />
       <AddEventDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} />
       {selectedEvent && (
         <EditEventDialog

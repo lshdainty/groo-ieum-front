@@ -19,7 +19,7 @@ interface VacationHistoryContentProps {
   stickyHeader?: boolean;
 }
 
-const formatDateTime = (dateTimeString: string) => {
+export const formatDateTime = (dateTimeString: string) => {
   if (!dateTimeString) {
     return '';
   }

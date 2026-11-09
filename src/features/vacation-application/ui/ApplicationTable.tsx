@@ -9,6 +9,7 @@ import { VacationGrantDialog } from '@/features/vacation-application/ui/Vacation
 import { usePostCancelVacationRequestMutation } from '@/entities/vacation'
 import { TypeResp } from '@/entities/type'
 import { type GetUserRequestedVacationsResp } from '@/entities/vacation'
+import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
 import { CalendarX2 } from 'lucide-react'
 import { Activity, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -33,12 +34,14 @@ const ApplicationTable = ({
   showApprovalTab = false
 }: ApplicationTableProps) => {
   const { t } = useTranslation('vacation')
+  const { t: tc } = useTranslation('common')
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<GetUserRequestedVacationsResp | null>(null)
   const [grantDialogOpen, setGrantDialogOpen] = useState(false)
   const { hasAnyPermission } = usePermission()
 
-  const { mutate: cancelVacationRequest } = usePostCancelVacationRequestMutation()
+  const { mutateAsync: cancelVacationRequest } = usePostCancelVacationRequestMutation()
+  const cancelConfirm = useConfirmTarget<GetUserRequestedVacationsResp>()
 
   const handleDetailView = (request: GetUserRequestedVacationsResp) => {
     setSelectedRequest(request)
@@ -50,14 +53,15 @@ const ApplicationTable = ({
     setSelectedRequest(null)
   }
 
+  // 신청 취소는 여기서 한 번 더 묻는다 — 줄의 ⋮ 가 어디로 옮겨 가도 같은 확인창이다
   const handleCancelRequest = (requestId: number) => {
     if (!userId) return
 
-    cancelVacationRequest({
-      vacationGrantId: requestId,
-      userId: userId
-    })
+    const request = vacationRequests.find(r => r.vacation_grant_id === requestId)
+    if (request) cancelConfirm.ask(request)
   }
+
+  const cancelTarget = cancelConfirm.target
 
   return (
     <>
@@ -143,6 +147,20 @@ const ApplicationTable = ({
       <VacationGrantDialog
         open={grantDialogOpen}
         onClose={() => setGrantDialogOpen(false)}
+      />
+
+      {/* [취소] 와 [신청 취소] 가 헷갈려서 이 확인창만 닫는 단추를 "닫기" 로 한다 */}
+      <ConfirmDialog
+        open={cancelConfirm.open}
+        onOpenChange={cancelConfirm.onOpenChange}
+        kind='cancel'
+        title={t('application.cancelTitle')}
+        description={t('application.cancelConfirm', { title: cancelTarget?.desc || cancelTarget?.policy_name })}
+        confirmLabel={t('application.cancelAction')}
+        cancelLabel={tc('close')}
+        onConfirm={() =>
+          cancelVacationRequest({ vacationGrantId: cancelTarget!.vacation_grant_id, userId: userId! })
+        }
       />
     </>
   )

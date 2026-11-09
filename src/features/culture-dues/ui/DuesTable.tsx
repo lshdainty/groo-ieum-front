@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DuesTableContent, EditableDuesData } from '@/features/culture-dues/ui/DuesTableContent';
+import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm';
 import { claimFailure } from '@/shared/api/failure'
 
 interface DuesTableProps {
@@ -23,7 +24,8 @@ const DuesTable = ({ yearDues = [] }: DuesTableProps) => {
   const { t: tc } = useTranslation('common');
   const { mutate: postDues } = usePostDuesMutation();
   const { mutate: putDues } = usePutDuesMutation();
-  const { mutate: deleteDues } = useDeleteDuesMutation();
+  const { mutateAsync: deleteDues } = useDeleteDuesMutation();
+  const deleteConfirm = useConfirmTarget<EditableDuesData>();
   const [tableData, setTableData] = useState<EditableDuesData[]>([]);
   const [editingRow, setEditingRow] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,18 +56,15 @@ const DuesTable = ({ yearDues = [] }: DuesTableProps) => {
       // 새로 생성된 행 - 로컬에서만 삭제
       setTableData(tableData.filter((dues) => dues.id !== id));
     } else {
-      // 기존 행 - DELETE API 호출
-      deleteDues(rowToDelete.dues_id, {
-        onSuccess: () => {
-          setTableData(tableData.filter((dues) => dues.id !== id));
-        },
-        onError: (error) => {
-          console.error('Dues delete failed:', error);
-          claimFailure(error);
-          toast.error(t('dues.deleteError'));
-        }
-      });
+      // 기존 행 - 확인한 뒤 DELETE API 호출
+      deleteConfirm.ask(rowToDelete);
     }
+  };
+
+  // 실패하면 던진다 — 확인창이 닫히고 실패 알림이 뜬다
+  const performDelete = async (row: EditableDuesData) => {
+    await deleteDues(row.dues_id);
+    setTableData((prev) => prev.filter((dues) => dues.id !== row.id));
   };
 
   const handleCopy = (row: EditableDuesData) => {
@@ -171,7 +170,10 @@ const DuesTable = ({ yearDues = [] }: DuesTableProps) => {
     }));
   };
 
+  const duesRow = deleteConfirm.target;
+
   return (
+    <>
     <Card className='flex-1'>
       <CardHeader>
         <div className='flex items-center justify-between'>
@@ -198,6 +200,18 @@ const DuesTable = ({ yearDues = [] }: DuesTableProps) => {
         />
       </CardContent>
     </Card>
+    <ConfirmDialog
+      open={deleteConfirm.open}
+      onOpenChange={deleteConfirm.onOpenChange}
+      title={t('dues.deleteTitle')}
+      description={t('dues.deleteConfirm', {
+        date: duesRow?.dues_date,
+        content: duesRow?.dues_detail,
+        amount: `${Math.abs(duesRow?.dues_amount ?? 0).toLocaleString('ko-KR')}원`,
+      })}
+      onConfirm={() => performDelete(duesRow!)}
+    />
+    </>
   );
 };
 
