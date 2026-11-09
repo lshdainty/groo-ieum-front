@@ -85,7 +85,7 @@ function DateCell({ value, label, onCommit }: { value: string; label: string; on
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button type='button' className={CELL_BUTTON} aria-label={t('adminHoliday.bulkEditCell', { column: label, value: shown })} data-bulk-date>
+        <button type='button' className={`${CELL_BUTTON} whitespace-nowrap`} aria-label={t('adminHoliday.bulkEditCell', { column: label, value: shown })} data-bulk-date>
           {shown}
         </button>
       </PopoverTrigger>
