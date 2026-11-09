@@ -320,14 +320,7 @@ vacation,policy.typeRequired,휴가 타입을 선택해주세요,Please select t
 vacation,time.hours,{{h}}시간,{{h}} hours
 vacation,time.zeroMin,0분,0 min
 vacation,time.thirtyMin,30분,30 min
-dashboard,title,대시보드,Dashboard
-dashboard,edit,대시보드 편집,Edit Dashboard
-dashboard,widgetSettings,위젯 설정,Widget Settings
-dashboard,closeSettings,설정 닫기,Close Settings
-dashboard,availableWidgets,사용 가능한 위젯,Available Widgets
-dashboard,widgetDragHint,위젯을 드래그하여 대시보드에 추가하세요.,Drag widgets to add them to your dashboard.
-dashboard,inUse,사용 중,In Use
-dashboard,layoutReset,레이아웃 초기화,Reset Layout
+dashboard,edit,홈 편집,Edit Home
 dashboard,widget.myInfo,내 정보,My Info
 dashboard,widget.vacationStatus,휴가 현황,Vacation Status
 dashboard,widget.monthlyVacationStats,월별 휴가 통계,Monthly Vacation Stats
@@ -343,12 +336,11 @@ dashboard,widget.companyUserStats,회사별 인원 현황,Company User Stats
 dashboard,widget.systemDailyCheck,시스템 데일리 체크,System Daily Check
 dashboard,widget.workHistoryStatus,업무이력 작성 현황,Work History Status
 dashboard,widget.monthlyWorkAlert,월별 업무 미작성 알림,Monthly Work Alert
-dashboard,widget.allUserVacationStatus,전체 유저 휴가 현황,All User Vacation Status
+dashboard,widget.allUserVacationStatus,전체 사용자 휴가 현황,All User Vacation Status
 dashboard,widget.departmentChart,조직도,Organization Chart
 dashboard,widget.empty.monthStats.title,올해 쓴 휴가가 없어요,No leave used this year
 dashboard,widget.empty.monthStats.description,아직 휴가 사용 내역이 없습니다,No vacation usage history yet
 dashboard,save,저장,Save
-dashboard,hideWidget,위젯 숨기기,Hide Widget
 work,report.title,업무 보고,Work Report
 work,report.excelImport,엑셀 가져오기,Import Excel
 work,report.excelImportDesc,엑셀 파일에서 업무 보고를 가져옵니다.,Import work reports from Excel file.
@@ -394,7 +386,6 @@ work,schedule.title,팀 근무 일정,Team Work Schedule
 vacation,history.compared,지난 달 대비,Compared to last month
 vacation,history.increase,증가,increase
 vacation,history.decrease,감소,decrease
-vacation,history.totalVacation,총 휴가,Total Vacation
 vacation,application.dayPlaceholder,일,Day
 vacation,application.hourPlaceholder,시간,Hour
 vacation,application.minutePlaceholder,분,Minute
@@ -631,9 +622,9 @@ vacation,stats.title,휴가 관리,Vacation Management
 vacation,stats.noUser,사용자 정보가 없습니다.,No user information available.
 vacation,stats.empty.title,휴가 현황 정보가 없습니다,No Vacation Statistics
 vacation,stats.empty.description,휴가 현황 정보를 불러올 수 없습니다,Unable to load vacation statistics
-vacation,history.remainVacation,잔여 휴가,Remaining Vacation
-vacation,history.usedVacation,사용 휴가,Used Vacation
-vacation,history.expectedVacation,사용 예정 휴가,Expected Vacation
+vacation,history.remainVacation,남은 휴가,Remaining leave
+vacation,history.usedVacation,쓴 휴가,Leave used
+vacation,history.expectedVacation,쓸 예정,Planned leave
 vacation,history.comparedDesc,지난 달 대비 {{gap}} {{type}},Compared to last month {{gap}} {{type}}
 vacation,request.totalRequest,총 신청,Total Requests
 vacation,request.thisMonth,이번 달 {{count}}건,{{count}} this month
@@ -655,17 +646,10 @@ work,schedule.hoursMinutes,{{hours}}시간 {{minutes}}분,{{hours}}h {{minutes}}
 work,schedule.hoursOnly,{{hours}}시간,{{hours}}h
 work,schedule.empty.title,근무 일정이 없습니다,No Work Schedule
 work,schedule.empty.description,등록된 팀원의 근무 일정이 없습니다,No team member work schedules registered
-culture,dues.currencyUnit,원,KRW
 culture,dues.totalOperationFee,전체 운영비,Total Operation Fee
-culture,dues.totalOperationFeeDesc,현재 보유한 총 운영비,Total operation fee currently held
 culture,dues.operationDeposit,운영비 입금,Operation Deposit
-culture,dues.operationDepositDesc,올해 총 입금액,Total deposits this year
 culture,dues.operationWithdrawal,운영비 출금,Operation Withdrawal
-culture,dues.operationWithdrawalDesc,올해 총 출금액,Total withdrawals this year
 culture,dues.monthBirthFee,{{month}}월 생일비,Birthday Fee for {{month}}
-culture,dues.monthBirthFeeDesc,이번 달 생일비,Birthday fee this month
-culture,dues.empty.title,회비 정보가 없습니다,No Dues Information
-culture,dues.empty.description,등록된 회비 정보가 없습니다,No dues information registered
 culture,birthDues.empty.title,생일비 정보가 없습니다,No Birthday Dues Information
 culture,birthDues.empty.description,등록된 생일비 정보가 없습니다,No birthday dues information registered
 login,idPlaceholder,아이디를 입력하세요,Enter your ID
@@ -737,7 +721,7 @@ vacation,application.compReasonDesc,초과근무를 하게 된 사유를 상세�
 vacation,application.vacationReasonDesc,휴가 사용 사유를 상세히 기입해 주세요.,Please describe the reason for vacation in detail.
 vacation,application.approverRequired,승인자를 선택해주세요,Please select an approver
 vacation,application.approverPlaceholder,결재자를 선택해주세요,Select an approver
-dashboard,saveError,대시보드 설정 저장에 실패했습니다.,Failed to save dashboard settings.
+dashboard,saveError,홈 설정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save your Home settings. Please try again in a moment.
 user,edit.title,사용자 수정,Edit User
 user,edit.name,이름,Name
 user,edit.id,아이디,ID
@@ -984,10 +968,7 @@ culture,dues.tableName,이름,Name
 culture,dues.tableCategory,분류,Category
 culture,dues.tableContent,내용,Content
 culture,dues.tableAmount,금액,Amount
-culture,dues.tableType,유형,Type
 culture,dues.tableTotal,남은 돈,Balance
-culture,dues.noDataTitle,회비 내역이 없습니다,No dues history
-culture,dues.noDataDescription,아직 등록된 회비 내역이 없습니다.,No dues records have been registered yet.
 culture,dues.monthBirthDuesTitle,월별 생일비 입금 현황,Monthly Birthday Dues Status
 culture,dues.monthFormat,{{month}}월,{{month}} Mon
 common,copy,복사,Copy
@@ -1039,17 +1020,12 @@ calendar,eventDetails.startDate,시작일,Start Date
 calendar,eventDetails.endDate,종료일,End Date
 calendar,eventDetails.content,내용,Content
 calendar,agenda.dateFormat,yyyy년 M월 dd일 EEEE,EEEE MMM dd yyyy
-dashboard,workHistory.title,업무이력 작성 현황,Work History Status
-dashboard,workHistory.loading,데이터를 불러오는 중...,Loading data...
-dashboard,workHistory.noData,데이터를 불러올 수 없습니다.,Cannot load data.
-dashboard,workHistory.noDataDesc,오늘 업무 데이터가 없습니다.,No work data available for today.
-dashboard,workHistory.hoursUnit,시간,hours
 dashboard,workHistory.achieved,다 채웠어요,Done
 dashboard,workHistory.inProgress,작성 중,In progress
 dashboard,workHistory.achievedMessage,오늘 채워야 할 시간을 다 채웠어요.,You've filled today's required hours.
 dashboard,workHistory.remainingMessage,{{time}} 더 쓰면 오늘 채워야 할 시간을 채워요.,Log {{time}} more to fill today's required hours.
-dashboard,systemCheck.noSystem,등록된 시스템이 없습니다,No registered systems
-dashboard,systemCheck.noSystemDesc,시스템을 등록하면 여기에 표시됩니다.,Systems will be displayed here once registered.
+dashboard,systemCheck.noSystem,확인할 시스템이 없어요,No systems to check
+dashboard,systemCheck.noSystemDesc,시스템을 등록하면 여기에 보여요.,Systems you register will show up here.
 vacation,approval.title,휴가 신청 상세보기,Vacation Request Details
 vacation,approval.basicInfo,기본 정보,Basic Information
 vacation,approval.applicantInfo,신청자 정보,Applicant Information
