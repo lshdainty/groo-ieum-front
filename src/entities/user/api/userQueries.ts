@@ -25,11 +25,12 @@ import type {
 const userKeys = createQueryKeys('users')
 
 // 사용자 상세 조회 훅
-export const useUserQuery = (userId: string) => {
+export const useUserQuery = (userId: string, options?: { quiet?: boolean }) => {
   return useQuery<GetUserResp>({
     queryKey: userKeys.detail(userId),
     queryFn: () => userApi.getUser(userId),
-    enabled: !!userId // userId가 있을 때만 실행
+    enabled: !!userId, // userId가 있을 때만 실행
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
