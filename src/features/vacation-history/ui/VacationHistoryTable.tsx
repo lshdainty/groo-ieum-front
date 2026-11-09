@@ -10,7 +10,8 @@ import { type GetUserVacationHistoryResp, type VacationUsageInfo } from '@/entit
 import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm';
 import { Activity, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { VacationHistoryContent, formatDateTime } from './VacationHistoryContent'
+import { VacationHistoryContent } from './VacationHistoryContent'
+import { formatDateTime } from '@/features/vacation-history/lib/formatDateTime'
 
 interface VacationHistoryTableProps {
   value: GetUserVacationHistoryResp;
