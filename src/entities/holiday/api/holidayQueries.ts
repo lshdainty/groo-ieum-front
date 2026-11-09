@@ -16,11 +16,13 @@ import type {
 const holidayKeys = createQueryKeys('holidays')
 
 // 기간별 공휴일 조회 훅
-export const useHolidaysByPeriodQuery = (startDate: string, endDate: string, countryCode?: string) => {
+export const useHolidaysByPeriodQuery = (startDate: string, endDate: string, countryCode?: string, options?: { quiet?: boolean }) => {
   return useQuery<GetHolidaysResp[]>({
     queryKey: holidayKeys.list({ startDate, endDate, countryCode }),
     queryFn: () => holidayApi.getHolidaysByStartEndDate(startDate, endDate, countryCode),
-    enabled: !!startDate && !!endDate
+    enabled: !!startDate && !!endDate,
+    // quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다)
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
@@ -61,11 +63,12 @@ export const useDeleteHolidayMutation = () => {
 }
 
 // 반복 공휴일 프리뷰 조회 훅
-export const useRecurringHolidaysPreviewQuery = (targetYear: number, countryCode: string, enabled: boolean = false) => {
+export const useRecurringHolidaysPreviewQuery = (targetYear: number, countryCode: string, enabled: boolean = false, options?: { quiet?: boolean }) => {
   return useQuery<GetRecurringHolidaysPreviewResp[]>({
     queryKey: holidayKeys.list({ targetYear, countryCode, type: 'recurringPreview' }),
     queryFn: () => holidayApi.getRecurringHolidaysPreview(targetYear, countryCode),
-    enabled: enabled && !!targetYear && !!countryCode
+    enabled: enabled && !!targetYear && !!countryCode,
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 

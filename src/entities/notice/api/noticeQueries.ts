@@ -15,16 +15,19 @@ import type {
 const noticeKeys = createQueryKeys('notices')
 
 // 공지사항 목록 조회 훅
-export const useNoticesQuery = (page: number = 0, size: number = 10) => {
-  return useQuery<NoticePageResp>({
-    queryKey: noticeKeys.list({ page, size }),
-    queryFn: () => noticeApi.getNotices(page, size)
-  })
-}
-
 /** quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다 — QueryProvider) */
 export interface NoticeQueryOptions {
   quiet?: boolean
+}
+
+export const useNoticesQuery = (page: number = 0, size: number = 10, options?: NoticeQueryOptions & { keepPrevious?: boolean; enabled?: boolean }) => {
+  return useQuery<NoticePageResp>({
+    queryKey: noticeKeys.list({ page, size }),
+    queryFn: () => noticeApi.getNotices(page, size),
+    enabled: options?.enabled ?? true,
+    placeholderData: options?.keepPrevious ? keepPreviousData : undefined,
+    meta: options?.quiet ? { quiet: true } : undefined
+  })
 }
 
 // 공지사항 상세 조회 훅
@@ -47,11 +50,13 @@ export const useNoticesByTypeQuery = (type: NoticeType, page: number = 0, size: 
 }
 
 // 공지사항 키워드 검색 훅
-export const useSearchNoticesQuery = (keyword: string, page: number = 0, size: number = 10) => {
+export const useSearchNoticesQuery = (keyword: string, page: number = 0, size: number = 10, options?: NoticeQueryOptions & { keepPrevious?: boolean }) => {
   return useQuery<NoticePageResp>({
     queryKey: noticeKeys.list({ keyword, page, size }),
     queryFn: () => noticeApi.searchNotices(keyword, page, size),
-    enabled: keyword.length > 0
+    enabled: keyword.length > 0,
+    placeholderData: options?.keepPrevious ? keepPreviousData : undefined,
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
