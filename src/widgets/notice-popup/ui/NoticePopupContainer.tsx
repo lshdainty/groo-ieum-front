@@ -1,5 +1,6 @@
 import { useActiveNoticesQuery, useNoticeQuery } from '@/entities/notice';
 import { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { NoticePopup } from '@/widgets/notice-popup/ui/NoticePopup';
 
 const STORAGE_KEY = 'notice_popup_hidden_date';
@@ -36,6 +37,10 @@ export const NoticePopupContainer = () => {
   // 열려 있다 — 목록이 오면 저절로 열리고, 닫으면 이번 진입에서는 다시 열지 않는다
   const [dismissed, setDismissed] = useState(false);
 
+  // 공지사항 화면(목록 · 상세)에서는 띄우지 않는다 — 같은 공지를 팝업과 화면이 함께 받으면 조회수가 +2 가 된다
+  const { pathname } = useLocation();
+  const onNoticeScreen = pathname === '/notice' || pathname.startsWith('/notice/');
+
   // 활성 공지사항 목록
   const notices = useMemo(() => {
     if (!activeNotices?.content) return [];
@@ -45,7 +50,7 @@ export const NoticePopupContainer = () => {
   const current = notices[currentIndex];
 
   // 현재 공지사항 상세 조회 — 보이는 것 하나씩 받는다
-  const { data: currentNotice } = useNoticeQuery(!dismissed && !hiddenOnLoad && current ? current.notice_id : null, { quiet: true });
+  const { data: currentNotice } = useNoticeQuery(!dismissed && !hiddenOnLoad && !onNoticeScreen && current ? current.notice_id : null, { quiet: true });
 
   // [오늘은 그만 보기]
   const handleHideToday = () => {
@@ -53,7 +58,7 @@ export const NoticePopupContainer = () => {
     setDismissed(true);
   };
 
-  if (hiddenOnLoad || isLoadingList || !current) {
+  if (hiddenOnLoad || onNoticeScreen || isLoadingList || !current) {
     return null;
   }
 
