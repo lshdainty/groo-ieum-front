@@ -1,16 +1,12 @@
 export { DuesContent } from '@/features/culture-dues/ui/DuesContent';
-export { DuesTable } from '@/features/culture-dues/ui/DuesTable';
 export { DuesTableContent } from '@/features/culture-dues/ui/DuesTableContent';
 export type { EditableDuesData } from '@/features/culture-dues/ui/DuesTableContent';
 export { DuesTableSkeleton } from '@/features/culture-dues/ui/DuesTableSkeleton';
-export { TotalDues } from '@/features/culture-dues/ui/TotalDues';
 export { TotalDuesItem, getTotalDuesConfig } from '@/features/culture-dues/ui/TotalDuesItem';
 export type { TotalDuesItemProps } from '@/features/culture-dues/ui/TotalDuesItem';
-export { TotalDuesSkeleton } from '@/features/culture-dues/ui/TotalDuesSkeleton';
 export { TotalDuesEmpty } from '@/features/culture-dues/ui/TotalDuesEmpty';
 export { TotalDuesWidgetSkeleton } from '@/features/culture-dues/ui/TotalDuesWidgetSkeleton';
-export { UserBirthDues } from '@/features/culture-dues/ui/UserBirthDues';
 export { UserBirthDuesContent } from '@/features/culture-dues/ui/UserBirthDuesContent';
-export { UserBirthDuesSkeleton, UserBirthDuesPageSkeleton } from '@/features/culture-dues/ui/UserBirthDuesSkeleton';
+export { UserBirthDuesSkeleton } from '@/features/culture-dues/ui/UserBirthDuesSkeleton';
 export { UserBirthDuesEmpty } from '@/features/culture-dues/ui/UserBirthDuesEmpty';
 export { DuesProvider, useDuesContext } from '@/features/culture-dues/model/DuesContext';

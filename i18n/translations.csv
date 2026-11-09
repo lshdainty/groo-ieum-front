@@ -680,7 +680,6 @@ culture,birthDues.empty.description,등록된 생일비 정보가 없습니다,N
 login,idPlaceholder,아이디를 입력하세요,Enter your ID
 login,orContinueWith,Or continue with,Or continue with
 common,noInfo,정보 없음,No info
-common,saveFailed,저장에 실패했습니다. 다시 시도해주세요.,Save failed. Please try again.
 common,duplicateFailed,복제에 실패했습니다. 다시 시도해주세요.,Clone failed. Please try again.
 common,invalidData,유효하지 않은 데이터입니다.,Invalid data.
 common,batchRegisterFailed,일괄 등록에 실패했습니다.,Batch registration failed.
@@ -996,7 +995,7 @@ culture,dues.tableCategory,분류,Category
 culture,dues.tableContent,내용,Content
 culture,dues.tableAmount,금액,Amount
 culture,dues.tableType,유형,Type
-culture,dues.tableTotal,총액,Total
+culture,dues.tableTotal,남은 돈,Balance
 culture,dues.noDataTitle,회비 내역이 없습니다,No dues history
 culture,dues.noDataDescription,아직 등록된 회비 내역이 없습니다.,No dues records have been registered yet.
 culture,dues.monthBirthDuesTitle,월별 생일비 입금 현황,Monthly Birthday Dues Status

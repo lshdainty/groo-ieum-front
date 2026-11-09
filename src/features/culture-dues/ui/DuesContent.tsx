@@ -1,114 +1,59 @@
-import QueryAsyncBoundary from '@/shared/ui/async-boundary/QueryAsyncBoundary';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/shared/ui/shadcn/select';
-import { DuesTable } from '@/features/culture-dues/ui/DuesTable';
-import { DuesTableSkeleton } from '@/features/culture-dues/ui/DuesTableSkeleton';
-import { TotalDues } from '@/features/culture-dues/ui/TotalDues';
-import { TotalDuesSkeleton } from '@/features/culture-dues/ui/TotalDuesSkeleton';
-import { UserBirthDues } from '@/features/culture-dues/ui/UserBirthDues';
-import { UserBirthDuesPageSkeleton } from '@/features/culture-dues/ui/UserBirthDuesSkeleton';
-import { useDuesContext } from '@/features/culture-dues/model/DuesContext';
-import { useMonthBirthDuesQuery, useUsersMonthBirthDuesQuery, useYearDuesQuery, useYearOperationDuesQuery } from '@/entities/dues';
-import { useUsersQuery } from '@/entities/user';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next'
 
-const getYearOptions = () => {
-  const currentYear = new Date().getFullYear();
-  const years: string[] = [];
-  for (let i = currentYear - 5; i <= currentYear + 1; i++) {
-    years.push(i.toString());
-  }
-  return years;
-};
+import { Select, SelectItem } from '@/shared/ds/select'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { ScreenBands } from '@/widgets/layout/ui/ScreenBands'
+import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { useDuesContext } from '@/features/culture-dues/model/DuesContext'
+import { DuesBirthMatrix } from './DuesBirthMatrix'
+import { DuesHistory } from './DuesHistory'
+import { DuesSummary } from './DuesSummary'
 
-const DuesContent = () => {
-  const { t } = useTranslation('common');
-  const { t: tc } = useTranslation('culture');
-  const { year, setYear, month } = useDuesContext();
+/** 고른 해 선택지 — 5년 전 ~ 1년 뒤(지금 그대로) */
+const yearOptions = (): number[] => {
+  const current = new Date().getFullYear()
+  return Array.from({ length: 7 }, (_, i) => current - 5 + i)
+}
 
-  const { data: totalDues, isLoading: totalDuesLoading, error: totalDuesError } = useYearOperationDuesQuery(year);
-  const { data: birthDues, isLoading: birthDuesLoading, error: birthDuesError } = useMonthBirthDuesQuery(year, month);
-  const { data: usersBirthDues, isLoading: usersBirthDuesLoading, error: usersBirthDuesError } = useUsersMonthBirthDuesQuery(year);
-  const { data: users, isLoading: usersLoading, error: usersError } = useUsersQuery();
-  const { data: yearDues, isLoading: yearDuesLoading, error: yearDuesError } = useYearDuesQuery(year);
+/**
+ * 회비(E 37) — 데스크톱: 제목 줄(h1 + 오른쪽 연도 Select) 아래 카드 셋(사이 8). 폰: 상단 바 제목 아래 띠 셋(사이 8),
+ * 연도 Select 는 첫 띠 맨 위. 구역마다 따로 기다리고 따로 실패한다 — 연도를 바꾸면 머리는 그대로, 숫자 · 행렬 · 표 자리만 기다린다.
+ */
+export const DuesContent = () => {
+  const { t } = useTranslation('culture')
+  const desktop = useDesktop()
+  const { year, setYear, month } = useDuesContext()
 
-  const isLoading = totalDuesLoading || birthDuesLoading || usersBirthDuesLoading || usersLoading || yearDuesLoading;
-  const error = totalDuesError || birthDuesError || usersBirthDuesError || usersError || yearDuesError;
+  const yearSelect = (
+    <Select
+      size={desktop ? 'medium' : 'large'}
+      aria-label={t('dues.yearAria')}
+      value={String(year)}
+      onValueChange={(v) => setYear(parseInt(v, 10))}
+      className={desktop ? 'w-[140px]' : undefined}
+    >
+      {yearOptions().map((y) => (
+        <SelectItem key={y} value={String(y)} label={t('dues.yearLabel', { year: y })} />
+      ))}
+    </Select>
+  )
 
   return (
-    <QueryAsyncBoundary
-      queryState={{ isLoading, error, data: true }}
-      loadingComponent={
-        <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
-          <div className='flex items-center justify-between mb-6'>
-            <h1 className='text-3xl font-bold'>{tc('dues.title')}</h1>
-            <Select value={year.toString()} onValueChange={(value) => setYear(parseInt(value))}>
-              <SelectTrigger className='w-[120px]'>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {getYearOptions().map((y) => (
-                  <SelectItem key={y} value={y}>
-                    {y}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className='mb-6'>
-            <TotalDuesSkeleton />
-          </div>
-          <div className='mb-6'>
-            <UserBirthDuesPageSkeleton />
-          </div>
-          <DuesTableSkeleton />
+    <ScreenBody density='high'>
+      <ScreenTitleRow title={t('dues.title')} action={yearSelect} />
+      {desktop ? (
+        <div className='flex flex-col gap-x2'>
+          <DuesSummary year={year} month={month} />
+          <DuesBirthMatrix year={year} />
+          <DuesHistory key={year} year={year} />
         </div>
-      }
-      errorComponent={
-        <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
-          <div className='p-8 text-center text-red-600'>
-            {t('loadFailed')}
-          </div>
-        </div>
-      }
-    >
-      <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
-        <div className='flex items-center justify-between mb-6'>
-          <h1 className='text-3xl font-bold'>{tc('dues.title')}</h1>
-          <Select value={year.toString()} onValueChange={(value) => setYear(parseInt(value))}>
-            <SelectTrigger className='w-[120px]'>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {getYearOptions().map((y) => (
-                <SelectItem key={y} value={y}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className='mb-6'>
-          <TotalDues
-            totalDues={totalDues}
-            birthDues={birthDues}
-          />
-        </div>
-        <div className='mb-6'>
-          <UserBirthDues
-            usersBirthDues={usersBirthDues}
-            users={users}
-          />
-        </div>
-        <DuesTable yearDues={yearDues} />
-      </div>
-    </QueryAsyncBoundary>
-  );
-};
-
-export { DuesContent };
+      ) : (
+        <ScreenBands>
+          <DuesSummary year={year} month={month} leading={yearSelect} />
+          <DuesBirthMatrix year={year} />
+          <DuesHistory key={year} year={year} />
+        </ScreenBands>
+      )}
+    </ScreenBody>
+  )
+}
