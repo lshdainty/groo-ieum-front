@@ -146,9 +146,8 @@ export const useUpdateDashboardMutation = () => {
 
   return useMutation<UpdateDashboardResp, Error, { userId: string, data: UpdateDashboardReq }>({
     mutationFn: ({ userId, data }) => userApi.updateDashboard(userId, data),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: userKeys.detail(data.user_id) })
-    }
+    // 사용자 정보를 다시 받은 뒤에 끝난다 — 홈 편집 패널이 닫힐 때 홈이 이미 새 배치다
+    onSuccess: (data) => queryClient.invalidateQueries({ queryKey: userKeys.detail(data.user_id) })
   })
 }
 
