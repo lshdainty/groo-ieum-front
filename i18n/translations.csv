@@ -1524,3 +1524,6 @@ common,deleteVacation.confirm,{{date}} 휴가를 삭제할까요? 쓴 시간은 
 common,failure.deleteInput,삭제하지 못했어요. 내용을 확인해주세요.,Could not delete. Check the details.
 common,failure.cancelInput,취소하지 못했어요. 내용을 확인해주세요.,Could not cancel. Check the details.
 culture,dues.deleteConfirmNoContent,{{date}} {{amount}} 내역을 삭제할까요? 삭제한 회비 내역은 되돌릴 수 없어요.,Delete the {{amount}} record on {{date}}? A deleted dues record can't be restored.
+common,amountTooLarge,금액은 100억원까지 입력할 수 있어요.,Amount can be up to 10 billion won.
+common,amountTooLargeAt,금액은 {{max}}까지 입력할 수 있어요.,Amount can be up to {{max}}.
+common,searchWon,원,KRW
