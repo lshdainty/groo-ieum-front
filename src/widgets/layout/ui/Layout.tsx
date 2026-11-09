@@ -32,13 +32,16 @@ function ScreenEffects() {
     enterScreen(key)
   }, [key])
   useEffect(() => {
-    if (last.current === pathname) return
+    // 주소가 그대로인 이동(?page=2 같은 쿼리 · 처음 열기)은 화면을 옮긴 게 아니다 — 제목 초점은 주소가 바뀔 때만
+    const moved = last.current !== pathname
     last.current = pathname
-    // 뒤로(POP) 왔다 — 떠날 때의 스크롤(맨 위였으면 0)로 돌리고 누른 요소에 초점. 적어 둔 게 없으면(새로 고침 뒤 등) 앞으로 갈 때와 같다
+    // 뒤로(POP) 왔다 — 떠날 때의 스크롤(맨 위였으면 0)로 돌리고 누른 요소에 초점. 적어 둔 게 없으면(새로 고침 뒤 등) 앞으로 갈 때와 같다.
+    // 주소가 같아도 history 칸(location.key)이 다르면 다른 화면이다(공지 → 캘린더 → 공지 를 한꺼번에 되감을 때)
     if (navType === 'POP') {
       const stop = restoreScreen(key)
       if (stop) return stop
     }
+    if (!moved) return
     // 새 화면이 그려진 다음 프레임에 — 제목(data-screen-title)이 DOM 에 있어야 초점이 간다
     const frame = requestAnimationFrame(() => focusScreenTitle())
     return () => cancelAnimationFrame(frame)
