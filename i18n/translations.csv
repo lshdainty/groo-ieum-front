@@ -1508,3 +1508,8 @@ user,pwForce.error.mismatch,비밀번호가 서로 달라요.,The passwords do n
 user,pwForce.failed.invalid,비밀번호를 바꾸지 못했어요. 임시 비밀번호를 다시 확인해주세요.,Couldn't change your password. Check your temporary password again.
 user,pwForce.failed.later,비밀번호를 바꾸지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't change your password. Please try again in a moment.
 user,pwForce.error.blank,비밀번호를 입력해주세요.,Enter a password.
+common,retry,다시 시도,Try again
+common,failure.delete,삭제하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not delete. Please try again in a moment.
+common,failure.deleteUnconfirmed,삭제됐는지 확인하지 못했어요. 목록을 확인한 뒤 다시 시도해주세요.,Could not confirm that it was deleted. Check the list and try again.
+common,failure.cancel,취소하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not cancel. Please try again in a moment.
+common,failure.cancelUnconfirmed,취소됐는지 확인하지 못했어요. 목록을 확인한 뒤 다시 시도해주세요.,Could not confirm that it was canceled. Check the list and try again.
