@@ -1,11 +1,15 @@
+import { useTranslation } from 'react-i18next'
+
 import { Skeleton } from '@/shared/ds/skeleton'
 import { useCompanyQuery, useCompanyWithDepartmentsQuery } from '@/entities/company'
 import { DepartmentChartPanel } from '@/features/admin-company/ui/DepartmentChartPanel'
 import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
+import { WidgetScrollBox } from '@/features/dashboard/ui/WidgetScrollBox'
 import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
 
 /** 조직도(D 34) — 회사 관리의 조직도 부품을 카드에 담는다(주인 지시서 I-24 대기). 넓으면 카드 안에서 가로로 스크롤한다 */
 export const DepartmentChartWidget = () => {
+  const { t } = useTranslation('dashboard')
   const company = useCompanyQuery({ quiet: true })
   const companyId = company.data?.company_id || ''
   const departments = useCompanyWithDepartmentsQuery(companyId, { quiet: true })
@@ -15,9 +19,9 @@ export const DepartmentChartWidget = () => {
   return (
     <WidgetFrame id='department-chart'>
       <WidgetBoundary id='department-chart' queries={queries} fallback={<Skeleton radius='12' className='block h-[240px] w-full' />}>
-        <div className='overflow-x-auto'>
+        <WidgetScrollBox label={t('widget.departmentChart')}>
           <DepartmentChartPanel departments={departments.data?.departments ?? []} showHeader={false} />
-        </div>
+        </WidgetScrollBox>
       </WidgetBoundary>
     </WidgetFrame>
   )
