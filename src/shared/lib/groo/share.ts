@@ -19,3 +19,15 @@ export function formatShare(pct: number): string {
 
 /** 몫 ÷ 전체 를 % 로 — 전체가 0 이면 "—" */
 export const shareOf = (part: number, whole: number): string => (whole > 0 ? formatShare((part / whole) * 100) : '—')
+
+/**
+ * 등락률(%) — 소수 둘째 자리(5.00% · 33.33% · −12.30%). 증감 화살표가 방향을 말하는 자리는 sign "none"(절댓값).
+ * 반올림해서 0.00 이 되는 음수는 "−0.00%" 가 아니라 "0.00%", 유한하지 않으면 "—".
+ */
+export function formatChangeRate(pct: number, { sign = 'auto' }: { sign?: 'auto' | 'always' | 'none' } = {}): string {
+  if (!Number.isFinite(pct)) return '—'
+  const body = Math.abs(pct).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const zero = Number(body.replace(/,/g, '')) === 0
+  const prefix = sign === 'none' || zero ? (sign === 'always' && zero ? '+' : '') : pct < 0 ? MINUS : sign === 'always' ? '+' : ''
+  return `${prefix}${body}%`
+}

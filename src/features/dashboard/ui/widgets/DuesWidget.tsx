@@ -1,36 +1,26 @@
-import QueryAsyncBoundary from '@/shared/ui/async-boundary/QueryAsyncBoundary'
-import { DuesTableContent } from '@/features/culture-dues/ui/DuesTableContent'
-import { DuesTableSkeleton } from '@/features/culture-dues/ui/DuesTableSkeleton'
+import dayjs from 'dayjs'
+import { useTranslation } from 'react-i18next'
+
 import { useYearDuesQuery } from '@/entities/dues'
-import { useMemo, useState } from 'react'
+import { DuesRecent, DuesRecentSkeleton, recentDues } from '@/features/culture-dues/ui/DuesRecent'
+import { DuesHistoryEmpty } from '@/features/culture-dues/ui/DuesResults'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
+import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
 
+/** 회비 내역(D 26) — 올해 최근 5줄. 보기만 한다(⋮ · 추가 없음 — 고치기는 회비 화면에서). 나머지는 "전체 보기" */
 export const DuesWidget = () => {
-  const currentYear = new Date().getFullYear()
-  const [currentPage, setCurrentPage] = useState(1)
-
-  const { data: yearDues, isLoading, error } = useYearDuesQuery(currentYear)
-
-  const data = useMemo(() => {
-    return yearDues?.map((dues) => ({
-      ...dues,
-      id: dues.dues_id.toString(),
-    })) || []
-  }, [yearDues])
+  useTranslation('culture')
+  const desktop = useDesktop()
+  const year = dayjs().year()
+  const query = useYearDuesQuery(year, { quiet: true })
+  const rows = recentDues(query.data)
 
   return (
-    <QueryAsyncBoundary
-      queryState={{ isLoading, error, data: yearDues }}
-      loadingComponent={<DuesTableSkeleton />}
-    >
-      <DuesTableContent
-        data={data}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-        rowsPerPage={5}
-        showPagination={false}
-        stickyHeader={true}
-        className='h-full'
-      />
-    </QueryAsyncBoundary>
+    <WidgetFrame id='dues' body='list'>
+      <WidgetBoundary id='dues' queries={[query]} fallback={<DuesRecentSkeleton desktop={desktop} />}>
+        {query.data && query.data.length === 0 ? <DuesHistoryEmpty year={year} /> : <DuesRecent rows={rows} desktop={desktop} />}
+      </WidgetBoundary>
+    </WidgetFrame>
   )
 }

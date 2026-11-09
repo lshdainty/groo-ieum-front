@@ -1592,3 +1592,4 @@ dashboard,missing.noneMonth,{{month}}월은 빠진 날이 없어요,No missing d
 dashboard,widget.empty.allUsers.title,사용자가 없어요,No users
 dashboard,widget.allUsers.detail,{{department}} · 전체 {{total}} · 쓴 {{used}},{{department}} · Total {{total}} · Used {{used}}
 dashboard,widget.allUsers.listEnd,사용자를 모두 봤어요.,That's everyone.
+dashboard,companyCount,{{count}}명,{{count}}

@@ -28,9 +28,9 @@ const useWidth = () => {
   return [ref, width] as const
 }
 
-type Row = { user: GetUsersResp; amounts: number[]; birthMonth: number | null }
+export type Row = { user: GetUsersResp; amounts: number[]; birthMonth: number | null }
 
-const rowsOf = (users: GetUsersResp[] | undefined, birth: GetUsersMonthBirthDuesResp[] | undefined): Row[] =>
+export const rowsOf = (users: GetUsersResp[] | undefined, birth: GetUsersMonthBirthDuesResp[] | undefined): Row[] =>
   (users ?? []).map((user) => ({
     user,
     // 응답에 사용자 id 가 없어 이름으로 맞춘다(서버 응답이 바뀌어야 고칠 수 있다 — 지시서 R · 사용자 보고)
@@ -69,7 +69,7 @@ export const DuesBirthMatrix = ({ year }: { year: number }) => {
   )
 }
 
-const Matrix = ({ rows, nameColumn: nameWanted }: { rows: Row[]; nameColumn: number }) => {
+export const Matrix = ({ rows, nameColumn: nameWanted }: { rows: Row[]; nameColumn: number }) => {
   const { t } = useTranslation('culture')
   const [ref, width] = useWidth()
   // 터치로 연 툴팁 하나 — 누르면 열고 다시 누르거나 다른 곳을 누르면 닫는다

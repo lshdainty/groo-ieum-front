@@ -1,30 +1,25 @@
-import QueryAsyncBoundary from '@/shared/ui/async-boundary/QueryAsyncBoundary'
-import { UserBirthDuesContent } from '@/features/culture-dues/ui/UserBirthDuesContent'
-import { UserBirthDuesEmpty } from '@/features/culture-dues/ui/UserBirthDuesEmpty'
-import { UserBirthDuesSkeleton } from '@/features/culture-dues/ui/UserBirthDuesSkeleton'
-import { useUsersMonthBirthDuesQuery } from '@/entities/dues'
-import { useUsersQuery } from '@/entities/user'
 import dayjs from 'dayjs'
 
+import { useUsersMonthBirthDuesQuery } from '@/entities/dues'
+import { useUsersQuery } from '@/entities/user'
+import { DuesMatrixEmpty, MatrixSkeleton } from '@/features/culture-dues/ui/DuesResults'
+import { Matrix, rowsOf } from '@/features/culture-dues/ui/DuesBirthMatrix'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
+import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
+
+/** 월별 생일비 입금 현황(D 28) — 올해 행렬(칸은 색만 · 범례 · 가리키면 금액). 회비 화면과 같은 부품 */
 export const UserBirthDuesWidget = () => {
-  const currentYear = dayjs().year()
-
-  const { data: usersBirthDues, isLoading: birthDuesLoading, error: birthDuesError } = useUsersMonthBirthDuesQuery(currentYear)
-  const { data: users, isLoading: usersLoading, error: usersError } = useUsersQuery()
-
-  const isLoading = birthDuesLoading || usersLoading
-  const error = birthDuesError || usersError
+  const desktop = useDesktop()
+  const birth = useUsersMonthBirthDuesQuery(dayjs().year(), { quiet: true })
+  const users = useUsersQuery({ quiet: true })
+  const rows = rowsOf(users.data, birth.data)
 
   return (
-    <QueryAsyncBoundary
-      queryState={{ isLoading, error, data: usersBirthDues }}
-      loadingComponent={<UserBirthDuesSkeleton />}
-      emptyComponent={<UserBirthDuesEmpty className="h-full" />}
-      isEmpty={(data) => !data || data.length === 0 || !users || users.length === 0}
-    >
-      <div className="h-full w-full p-4 overflow-auto">
-        <UserBirthDuesContent usersBirthDues={usersBirthDues} users={users} />
-      </div>
-    </QueryAsyncBoundary>
+    <WidgetFrame id='user-birth-dues'>
+      <WidgetBoundary id='user-birth-dues' queries={[birth, users]} fallback={<MatrixSkeleton />}>
+        {users.data && rows.length === 0 ? <DuesMatrixEmpty /> : <Matrix rows={rows} nameColumn={desktop ? 96 : 72} />}
+      </WidgetBoundary>
+    </WidgetFrame>
   )
 }

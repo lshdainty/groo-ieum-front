@@ -2,6 +2,7 @@ import { Badge } from '@/shared/ui/shadcn/badge';
 import { Progress } from '@/shared/ui/shadcn/progress';
 import { type GetUserRequestedVacationStatsResp } from '@/entities/vacation';
 import { VACATION_STATUS_CONFIG } from '@/shared/lib/vacationStatus'
+import { formatChangeRate, formatShare } from '@/shared/lib/groo/share'
 import {
   CalendarDays,
   FileText,
@@ -70,7 +71,7 @@ export const getVacationRequestStatsConfig = (stats: GetUserRequestedVacationSta
       headerRight: (
         <div className='flex items-center gap-1 text-xs'>
           <TrendingUp className='w-3 h-3 text-green-600' />
-          <span className='text-green-600 font-medium'>+{requestGrowth.toFixed(1)}%</span>
+          <span className='text-green-600 font-medium'>{formatChangeRate(requestGrowth, { sign: 'always' })}</span>
         </div>
       ),
       title: t('request.totalRequest'),
@@ -123,7 +124,7 @@ export const getVacationRequestStatsConfig = (stats: GetUserRequestedVacationSta
       headerRight: (
         <div className='text-right'>
           <p className='text-xs text-foreground/70'>{t('request.approvalRate')}</p>
-          <p className='text-sm font-semibold text-foreground'>{approvalRate.toFixed(0)}%</p>
+          <p className='text-sm font-semibold text-foreground' data-approval-rate>{totalRequests > 0 ? formatShare(approvalRate) : '—'}</p>
         </div>
       ),
       title: t('request.approvedLabel'),
