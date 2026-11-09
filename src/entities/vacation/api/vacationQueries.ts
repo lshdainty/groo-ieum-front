@@ -110,12 +110,13 @@ export const useUserVacationStatsQuery = (userId: string, baseDate: string, opti
   })
 }
 
-export const useAllVacationsByApproverQuery = (approverId: string, year?: number, status?: string) => {
+export const useAllVacationsByApproverQuery = (approverId: string, year?: number, status?: string, options?: QuietOptions) => {
   const queryYear = year ?? new Date().getFullYear()
   return useQuery<GetUserRequestedVacationsResp[]>({
     queryKey: vacationKeys.list({ type: 'approvals', approverId, year: queryYear, status }),
     queryFn: () => vacationApi.getAllVacationsByApprover(approverId, queryYear, status),
-    enabled: !!approverId
+    enabled: !!approverId,
+    meta: quietMeta(options)
   })
 }
 

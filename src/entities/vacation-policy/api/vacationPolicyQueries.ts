@@ -46,11 +46,13 @@ export const useUserVacationPoliciesQuery = (userId: string, grantMethod?: strin
   })
 }
 
-export const useUserAssignedVacationPoliciesQuery = (userId: string, vacationType?: string, grantMethod?: string) => {
+export const useUserAssignedVacationPoliciesQuery = (userId: string, vacationType?: string, grantMethod?: string, options?: { quiet?: boolean }) => {
   return useQuery<GetUserAssignedVacationPoliciesResp[]>({
     queryKey: vacationPolicyKeys.list({ type: 'assignedPolicies', userId, vacationType, grantMethod }),
     queryFn: () => vacationPolicyApi.getUserAssignedVacationPolicies(userId, vacationType, grantMethod),
-    enabled: !!userId
+    enabled: !!userId,
+    // quiet — 그 화면이 자기 자리에서 실패를 말한다(읽기 실패 임시 그물 Snackbar 를 건너뛴다)
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
