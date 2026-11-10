@@ -136,7 +136,7 @@ const UserManagementPanel = () => {
   }
 
   return (
-    <ResizablePanelGroup storageKey="hr-admin-authority-users" className="h-[calc(100dvh-16rem)] min-h-[28rem] rounded-r3 border border-solid border-stroke-neutral-subtle bg-bg-layer-default">
+    <ResizablePanelGroup storageKey="hr-admin-authority-users" className="min-h-[28rem] rounded-r3 border border-solid border-stroke-neutral-subtle bg-bg-layer-default">
       <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="flex flex-col">
         {isLoading ? (
           <UserListSkeleton />
