@@ -30,7 +30,6 @@ common,detail,상세,Detail
 common,total,합계,Total
 common,all,전체,All
 common,yes,예,Yes
-common,no,아니오,No
 common,day,일,Day
 common,hour,시간,Hour
 common,minute,분,Minute
@@ -393,8 +392,6 @@ work,report.filterAll,전체,All
 work,report.downloadProgress,다운로드 중...,Downloading...
 work,report.download,다운로드,Download
 work,report.dateRequired,일자,Date
-work,schedule.am,오전,AM
-work,schedule.pm,오후,PM
 work,schedule.title,팀 근무 일정,Team Work Schedule
 user,edit.processing,처리 중...,Processing...
 culture,dues.typeSelect,분류,Category
@@ -728,8 +725,6 @@ vacation,history.remainVacation,남은 휴가,Remaining leave
 vacation,history.usedVacation,쓴 휴가,Leave used
 vacation,history.expectedVacation,쓸 예정,Planned leave
 vacation,request.sinceLastMonth,지난달보다,Since last month
-work,schedule.hoursMinutes,{{hours}}시간 {{minutes}}분,{{hours}}h {{minutes}}m
-work,schedule.hoursOnly,{{hours}}시간,{{hours}}h
 work,schedule.empty.title,근무 일정이 없습니다,No Work Schedule
 work,schedule.empty.description,등록된 팀원의 근무 일정이 없습니다,No team member work schedules registered
 culture,dues.totalOperationFee,전체 운영비,Total Operation Fee
@@ -740,7 +735,6 @@ culture,birthDues.empty.title,생일비 정보가 없습니다,No Birthday Dues 
 culture,birthDues.empty.description,등록된 생일비 정보가 없습니다,No birthday dues information registered
 login,idPlaceholder,아이디를 입력하세요,Enter your ID
 login,orContinueWith,Or continue with,Or continue with
-common,noInfo,정보 없음,No info
 common,duplicateFailed,복제에 실패했습니다. 다시 시도해주세요.,Clone failed. Please try again.
 common,invalidData,유효하지 않은 데이터입니다.,Invalid data.
 common,batchRegisterFailed,일괄 등록에 실패했습니다.,Batch registration failed.
@@ -761,12 +755,9 @@ work,report.workPart,업무 파트,Work Part
 work,report.workDivision,업무 구분,Work Division
 work,report.workContent,업무 내용,Work Content
 work,report.workContentPlaceholder,업무 내용을 입력하세요,Enter work content
-work,report.noHistory,등록된 업무 이력이 없습니다,No work history registered
-work,report.noHistoryDesc,새로운 업무 이력을 등록해주세요.,Please register a new work history.
 work,report.selectDateFirst,날짜 선택,Select date
 work,report.assignee,담당자,Assignee
 work,report.selectWorkGroupFirst,업무 분류를 먼저 선택하세요,Select work group first
-work,report.sortSelect,정렬 선택,Select sort
 work,report.excelDataDesc,엑셀이나 CSV 데이터를 복사하여 아래에 붙여넣으세요. (형식: 날짜 사번 업무분류 업무파트 업무구분 시간 내용),Copy and paste Excel or CSV data below. (Format: Date ID WorkGroup WorkPart WorkDivision Hours Content)
 work,report.checkDataDesc,데이터를 확인하고 오류가 있는 항목을 수정하세요.,Check data and fix items with errors.
 work,report.invalidDateFormat,날짜 형식이 올바르지 않습니다 (YYYY-MM-DD),Invalid date format (YYYY-MM-DD)
@@ -797,81 +788,11 @@ user,edit.imageSuccess,이미지가 성공적으로 처리되었습니다.,Image
 user,edit.changeImage,이미지 변경,Change Image
 user,edit.uploadImage,이미지 업로드,Upload Image
 user,edit.deleteImage,이미지 삭제,Delete Image
-work,report.fieldDate,일자,Date
-work,report.fieldWorkGroup,업무 분류,Work Group
-work,report.fieldWorkPart,업무 파트,Work Part
-work,report.fieldWorkDivision,업무 구분,Work Division
-work,report.missingFields,다음 필드를 입력해주세요: {{fields}},Please fill in the following fields: {{fields}}
-work,report.saveFailed,저장에 실패했습니다. 다시 시도해주세요.,Failed to save. Please try again.
-work,report.invalidDuplicateData,복제할 데이터가 유효하지 않습니다.,Invalid data to duplicate.
-work,report.invalidSelectedData,복제할 데이터 중 유효하지 않은 항목이 있습니다.,Some selected items have invalid data for duplication.
-work,report.duplicateFailed,복제에 실패했습니다. 다시 시도해주세요.,Failed to duplicate. Please try again.
-work,report.deleteTitle,업무 기록 삭제,Delete work record
-work,report.deleteConfirm,{{date}} 업무 기록을 삭제할까요? 삭제한 업무 기록은 되돌릴 수 없어요.,Delete the work record for {{date}}? A deleted work record can't be restored.
-work,report.batchRegisterFailed,일괄 등록에 실패했습니다.,Failed to batch register.
-work,report.excelDownloadFailed,엑셀 다운로드에 실패했습니다.,Failed to download Excel.
-work,report.excelPeriodInvalid,기간을 1년 안으로 골라주세요.,Please select a period within one year.
-work,report.dataLoadFailed,데이터를 불러오는데 실패했습니다.,Failed to load data.
-work,report.tableTitle,업무 이력 테이블,Work History Table
-work,report.duplicate,복제,Duplicate
-work,report.add,추가,Add
-work,report.loading,로딩 중...,Loading...
-work,report.selectDate,날짜 선택,Select Date
-work,report.manager,담당자,Manager
-work,report.selectGroupFirst,업무 분류를 먼저 선택하세요,Select Work Group first
-work,report.hours,소요시간,Hours
 work,report.content,내용,Content
-work,report.contentPlaceholder,업무 내용을 입력하세요,Enter work content
-work,report.noHistory,등록된 업무 이력이 없습니다,No work history registered
-work,report.filterTitle,상세 검색 조건,Advanced Search
-work,report.filtersApplied,{{count}}개 필터 적용 중,{{count}} filters applied
 work,report.filtersApplied_one,{{count}}개 필터 적용 중,{{count}} filter applied
-work,report.reset,초기화,Reset
-work,report.startDate,시작날짜,Start Date
-work,report.endDate,종료날짜,End Date
-work,report.sortBy,정렬 기준,Sort By
-work,report.sortSelect,정렬 선택,Select Sort
-work,report.latest,최신순,Latest First
-work,report.oldest,오래된순,Oldest First
-work,report.search,조회,Search
-work,report.pageTitle,업무 이력 작성,Work History Entry
-work,report.filter,필터,Filter
-work,report.excelImportBtn,엑셀 임포트,Excel Import
-work,report.excelExportBtn,엑셀 익스포트,Excel Export
-work,report.downloadTemplate,예시 파일 다운로드,Download Template
-work,report.downloadUnregistered,미등록 리스트 다운로드,Download Unregistered List
 work,excel.title,엑셀 데이터 임포트,Excel Data Import
-work,excel.inputDesc,엑셀이나 CSV 데이터를 복사하여 아래에 붙여넣으세요. (형식: 날짜{{comma}} 사번{{comma}} 업무분류{{comma}} 업무파트{{comma}} 업무구분{{comma}} 시간{{comma}} 내용),"Copy Excel or CSV data and paste below. (Format: Date, ID, Work Group, Work Part, Work Division, Hours, Content)"
-work,excel.previewDesc,데이터를 확인하고 오류가 있는 항목을 수정하세요.,Review the data and fix any errors.
-work,excel.delimiterLabel,구분자 선택:,Select Delimiter:
-work,excel.tabExcel,Tab (엑셀),Tab (Excel)
-work,excel.invalidDate,날짜 형식이 올바르지 않습니다 (YYYY-MM-DD),Invalid date format (YYYY-MM-DD)
-work,excel.userNotFound,사용자를 찾을 수 없습니다,User not found
-work,excel.invalidWorkGroup,존재하지 않는 업무 분류입니다,Work group does not exist
-work,excel.invalidWorkPart,존재하지 않는 업무 파트이거나 해당 분류에 속하지 않습니다,Work part does not exist or does not belong to the selected group
-work,excel.invalidWorkDivision,존재하지 않는 업무 구분입니다,Work division does not exist
-work,excel.enterData,데이터를 입력해주세요.,Please enter data.
-work,excel.validationComplete,데이터 검증이 완료되었습니다.,Data validation completed.
-work,excel.fixErrors,오류가 있는 항목을 수정해주세요.,Please fix items with errors.
-work,excel.status,상태,Status
-work,excel.date,날짜,Date
-work,excel.user,사용자,User
-work,excel.workGroup,업무분류,Work Group
-work,excel.workPart,업무파트,Work Part
-work,excel.workDivision,업무구분,Work Division
-work,excel.time,시간,Time
-work,excel.verify,확인 및 검증,Verify & Validate
-work,excel.reenter,다시 입력,Re-enter
-work,excel.validate,데이터 검증,Validate Data
-work,excel.errorsNeedFix,{{count}}개 오류 수정 필요,{{count}} errors need to be fixed
 work,excel.errorsNeedFix_one,{{count}}개 오류 수정 필요,{{count}} error needs to be fixed
-work,excel.batchRegister,일괄 등록,Batch Register
 work,unregistered.title,미등록 업무 시간 다운로드,Download Unregistered Work Hours
-work,unregistered.desc,다운로드할 연도와 월을 선택해주세요.,Select the year and month to download.
-work,unregistered.year,연도,Year
-work,unregistered.month,월,Month
-work,unregistered.downloading,다운로드 중...,Downloading...
-work,unregistered.downloadFailed,미등록 리스트 다운로드에 실패했습니다.,Failed to download unregistered list.
 culture,rule.header.description,휴가 · 복장 · 교육 · 조직문화 규정을 한곳에 모았어요.,"Leave, dress code, training, and team culture rules in one place."
 culture,rule.vacation.title,🏖️ 휴가,🏖️ Vacation
 culture,rule.vacation.daysTitle,휴가 일수,Vacation Days
@@ -958,8 +879,6 @@ vacation,history.usageTime,사용 시간,Used Time
 vacation,history.content,내용,Content
 vacation,history.grantTime,부여 시간,Grant Time
 vacation,history.remainTime,남은 시간,Remaining Time
-vacation,history.tableDate,날짜,Date
-vacation,history.tableReason,사유,Reason
 vacation,history.tableName,이름,Name
 vacation,history.tableDepartment,부서,Department
 vacation,history.tableTotalAnnual,총 연차,Total Annual
@@ -1024,7 +943,6 @@ login,idPlaceholder,아이디를 입력하세요,Enter your ID
 login,loginBtn,Login,Login
 login,loadingBtn,Loading...,Loading...
 login,orContinueWith,Or continue with,Or continue with
-vacation,application.cancelBtn,취소,Cancel
 work,report.fileNamePrefix,업무이력,WorkHistory
 work,unregistered.fileNamePrefix,미등록_업무시간,Unregistered_WorkHours
 work,unregistered.fileNameYear,년,year
@@ -1046,7 +964,6 @@ calendar,types.birthparty,생일파티,Birthday Party
 calendar,types.healthcheckhalf,건강검진(반차),Health Check (Half-day)
 calendar,types.defense,민방위,Civil Defense
 calendar,types.defensehalf,민방위(반차),Civil Defense (Half-day)
-common,noInfo,정보 없음,No info
 common,day,일,d
 common,hour,시간,h
 common,minute,분,m
@@ -1879,7 +1796,6 @@ vacation,req.emptyTitle,{{year}}년에 낸 신청이 없어요,No requests in {{
 vacation,req.emptyDescription,휴가 신청으로 보상 · 경조 휴가를 받을 수 있어요.,You can receive compensatory and special leave by requesting it.
 vacation,req.failureTitle,신청 내역을 불러오지 못했어요,Couldn't load your requests
 vacation,req.canceled,신청을 취소했어요.,Request canceled.
-vacation,req.cancelFailed,신청을 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't cancel the request. Please try again in a moment.
 vacation,req.cancelNotPending,대기 중인 신청만 취소할 수 있어요.,Only pending requests can be canceled.
 vacation,req.progressWaiting,결재를 기다려요,Waiting for approval
 vacation,req.progressPending,지금 {{name}} 차례 · {{k}}/{{n}}단계,{{name}}'s turn · step {{k}} of {{n}}
@@ -1891,7 +1807,6 @@ vacation,req.progressRejected,{{k}}단계에서 반려 · {{name}},Rejected at s
 vacation,req.progressRejectedNoName,{{k}}단계에서 반려,Rejected at step {{k}}
 vacation,req.progressCanceled,내가 취소함,Canceled by me
 vacation,req.progressRevoked,회수됨,Revoked
-vacation,req.detailBack,이전,Back
 vacation,req.detailRejectReason,반려 사유,Reason for rejection
 vacation,req.detailProgress,결재 진행,Approval progress
 vacation,req.detailContent,신청 내용,Request details
@@ -1931,7 +1846,6 @@ vacation,req.form.noPolicy,지금 신청할 수 있는 휴가 정책이 없어�
 vacation,req.form.policyFailureTitle,휴가 정책을 불러오지 못했어요,Couldn't load leave policies
 vacation,req.form.next,다음,Next
 vacation,req.form.prev,이전,Back
-vacation,req.form.backAria,정책 다시 고르기,Pick the policy again
 vacation,req.form.titleVacation,휴가 신청,Request leave
 vacation,req.form.titleComp,보상휴가 신청,Request compensatory leave
 vacation,req.form.step2Desc,{{policy}} · {{approval}},{{policy}} · {{approval}}
@@ -1965,8 +1879,6 @@ vacation,req.form.approverStep,{{k}}단계,Step {{k}}
 vacation,req.form.approverPick,고르기,Pick
 vacation,req.form.approverPickTitle,{{k}}단계 결재자,Step {{k}} approver
 vacation,req.form.approverTaken,{{k}}단계에 골랐어요,Picked for step {{k}}
-vacation,req.form.approverSearch,이름 · 부서 검색,Search name or department
-vacation,req.form.approverEmpty,찾는 사람이 없어요,No one found
 vacation,req.form.autoApproval,결재 없이 바로 받아요.,Received right away without approval.
 vacation,req.form.autoApprovalCallout,결재 단계는 있지만 자동으로 승인돼요.,"This policy has approval steps, but they're approved automatically."
 vacation,req.form.reducedCallout,정책은 {{required}}단계지만 결재할 수 있는 사람이 {{available}}명이라 {{available}}단계로 받아요.,"The policy asks for {{required}} steps, but only {{available}} people can approve, so it needs {{available}}."

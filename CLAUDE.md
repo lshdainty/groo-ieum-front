@@ -41,28 +41,21 @@ src/
 - 명시적 반환 타입 선언
 - 인터페이스 우선 사용
 
-## UI 라이브러리 가이드라인
-### 기본 UI 라이브러리
-- **shadcn/ui**를 기본 UI 라이브러리로 사용합니다
-- 모든 컴포넌트 구현 시 shadcn/ui 공식 문서를 우선 참조하세요
-- 컴포넌트 설치: `npx shadcn add [component-name]`
-- 공식 문서: https://ui.shadcn.com/
+## UI 가이드라인
+### ds 한 계통
+- 화면은 **`src/shared/ds`**(그루 디자인 시스템 부품 — 출처 · 손댄 곳은 `src/shared/ds/SOURCE.md`)로 짠다. 새 UI 는 ds 부품을 쓰고, 없으면 먼저 디자인 시스템에 묻는다
+- `src/shared/ds` 는 이 레포에서 직접 고치지 않는다(`npm run ds:check` 가 스펙과 어긋남을 잡는다)
+- `src/shared/ui/shadcn/` 은 아직 ds 로 옮기지 않은 자리(관리 권한 화면 · 사용자 정보 카드 · 비밀번호 변경 대화상자 · 캘린더 주 보기 스크롤 · 접근 불가 화면)만 쓰는 잔재다(열두 파일) — **새로 쓰지 않는다.** 그 화면이 ds 로 옮겨지면 파일마다 쓰임을 grep 해 걷는다
+- antd · sonner · next-themes 는 걷었다(eslint `no-restricted-imports` 가 다시 들이는 걸 막는다)
 
-### shadcn/ui 사용 규칙
-- 새로운 UI 컴포넌트가 필요할 때는 항상 shadcn/ui에서 먼저 확인
-- shadcn/ui에 없는 컴포넌트만 커스텀으로 개발
-- 모든 컴포넌트는 shadcn/ui의 디자인 시스템을 따름
-- Tailwind CSS 클래스 사용으로 일관성 유지
-
-### 컴포넌트 우선순위
-1. **shadcn/ui 컴포넌트** - 첫 번째 선택
-2. **shadcn/ui 기반 커스터마이징** - 필요시 수정
-3. **완전 커스텀 컴포넌트** - 최후의 선택
+### 알림
+- 성공은 ds `Snackbar`(`useSnackbar`), 저장 실패는 열린 표면 맨 위 `Callout`(칸으로 가를 수 있는 것은 그 칸 아래) — 글은 `readWriteFailure`(`shared/ui/groo/write-error.ts`)의 고정 글이다. 서버 글 · axios 영어 글은 그리지 않는다
+- 호출처가 실패를 가져가지 않으면 `QueryProvider` 그물이 고정 글 Snackbar 로 알린다(`claimFailure` — `shared/api/failure.ts`)
+- 토스트는 쓰지 않는다
 
 ### 디자인 토큰
-- CSS 변수 기반 테마 시스템 사용
-- `globals.css`에서 색상 및 스타일 변수 관리
-- 다크/라이트 모드 자동 지원
+- 색 · 간격 · 모서리 · 글자는 `src/shared/styles/groo-tokens.css`(역할 토큰 `bg-bg-layer-default` · `text-fg-neutral` · 간격 `x4` …)를 쓴다. 중단점은 sm 480 · md 768 · lg 1280 · xl 1440
+- 다크/라이트 모드는 `shared/ui/theme` 가 맡는다
 
 ## 다국어(i18n) 작업 가이드라인
 

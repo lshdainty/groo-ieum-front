@@ -247,7 +247,6 @@ body {
   }
   body {
     @apply bg-sidebar text-foreground;
-    /* font-family: 'Noto-M'; */
   }
 
   ::-webkit-scrollbar {

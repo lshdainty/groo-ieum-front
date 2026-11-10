@@ -1,8 +1,4 @@
 import {
-  addDays,
-  addMonths,
-  addWeeks,
-  addYears,
   differenceInDays,
   differenceInMinutes,
   eachDayOfInterval,
@@ -11,31 +7,13 @@ import {
   parseISO,
   startOfDay,
   startOfMonth,
-  subDays,
-  subMonths,
-  subWeeks,
-  subYears,
 } from 'date-fns';
 
 import type { GetEventsByPeriodResp } from '@/entities/calendar-event';
 import type { ICalendarCell, IEvent, IUser } from '@/features/calendar/model/interfaces';
-import type { TCalendarType, TCalendarView, TEventKind, TVisibleHours, TWorkingHours } from '@/features/calendar/model/types';
+import type { TCalendarType, TEventKind, TVisibleHours, TWorkingHours } from '@/features/calendar/model/types';
 import { CHART_HUE, calendarTypes } from '@/features/calendar/model/types';
 import dayjs from 'dayjs';
-
-// ================ Header helper functions ================ //
-
-export function navigateDate(date: Date, view: TCalendarView, direction: 'previous' | 'next'): Date {
-  const operations = {
-    agenda: direction === 'next' ? addMonths : subMonths,
-    year: direction === 'next' ? addYears : subYears,
-    month: direction === 'next' ? addMonths : subMonths,
-    week: direction === 'next' ? addWeeks : subWeeks,
-    day: direction === 'next' ? addDays : subDays,
-  };
-
-  return operations[view](date, 1);
-}
 
 // ================ Week and day view helper functions ================ //
 
@@ -251,12 +229,6 @@ export function getMonthCellEvents(date: Date, events: IEvent[], eventPositions:
 
 // ================ Data transformation functions ================ //
 
-export interface ApiUserResponse {
-  user_id: string;
-  user_name: string;
-  profile_url: string;
-}
-
 /**
  * calendar_type 문자열로 TCalendarType 객체 찾기 — 모르는 코드는 회색 "종일" 종류로 읽되 kind(휴가 / 일정)는 서버 domain_type 을 따른다.
  * (옛 코드는 모르는 코드를 연차로 바꿔 일정 행 번호가 휴가 사용 기록 번호처럼 쓰였다)
@@ -265,17 +237,6 @@ export function getCalendarType(calendarTypeId: string, kind: TEventKind): TCale
   const found = calendarTypes.find(type => type.id === calendarTypeId.toUpperCase() && type.type === kind);
   if (found) return found;
   return { id: calendarTypeId.toUpperCase(), name: calendarTypeId, nameKey: '', type: kind, isDate: true, color: 'gray' };
-}
-
-/**
- * API 사용자 응답을 IUser 인터페이스로 변환
- */
-export function convertApiUserToIUser(apiUser: ApiUserResponse): IUser {
-  return {
-    id: apiUser.user_id,
-    name: apiUser.user_name,
-    picturePath: apiUser.profile_url || null,
-  };
 }
 
 /**
@@ -300,19 +261,6 @@ export function convertApiEventToIEvent(apiEvent: GetEventsByPeriodResp, users: 
     user: user,
     type: calendarType,
   };
-}
-
-/**
- * API 응답 배열을 변환
- */
-export function convertApiEvents(
-  apiEvents: GetEventsByPeriodResp[],
-  apiUsers: ApiUserResponse[]
-): { events: IEvent[], users: IUser[] } {
-  const users = apiUsers.map(convertApiUserToIUser);
-  const events = apiEvents.map(apiEvent => convertApiEventToIEvent(apiEvent, users));
-
-  return { events, users };
 }
 
 // ================ Event tone ================ //
