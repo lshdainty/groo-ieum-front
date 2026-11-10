@@ -13,7 +13,7 @@ const photoOf = (u: GetUsersResp): string | undefined => (u.profile_url ? `${con
 const HATCH = 'repeating-linear-gradient(135deg, var(--color-stroke-neutral-subtle) 0, var(--color-stroke-neutral-subtle) 1px, transparent 1px, transparent 6px)'
 
 const TimeAxis = () => (
-  <div aria-hidden className='relative h-[32px] border-b border-stroke-neutral-subtle text-t2 text-fg-neutral-subtle'>
+  <div aria-hidden className='relative h-[32px] text-t2 text-fg-neutral-subtle'>
     {Array.from({ length: TOTAL_HOURS + 1 }, (_, i) => START_HOUR + i).map((hour) => (
       <span
         key={hour}
@@ -44,8 +44,8 @@ export function ScheduleTable({ users }: { users: GetUsersResp[] }) {
   const { t } = useTranslation('work')
   return (
     <div role='table' aria-label={t('sch.boardAria')} className='min-w-[700px] min-[80rem]:min-w-[740px]'>
-      <div role='row' className='flex'>
-        <div role='columnheader' className='sticky left-0 z-10 w-[180px] shrink-0 border-b border-stroke-neutral-subtle bg-bg-layer-default min-[80rem]:w-[220px]'>
+      <div role='row' className='flex border-b border-stroke-neutral-subtle'>
+        <div role='columnheader' className='sticky left-0 z-10 w-[180px] shrink-0 bg-bg-layer-default min-[80rem]:w-[220px]'>
           <span className='sr-only'>{t('sch.listCaption')}</span>
         </div>
         <div role='columnheader' className='min-w-0 flex-1 px-x4'>

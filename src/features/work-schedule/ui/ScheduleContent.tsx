@@ -35,26 +35,30 @@ export function ScheduleContent() {
   )
   const empty = <ResultSection size='medium' icon={<CalendarX />} title={t('sch.emptyTitle')} description={t('sch.emptyDescription')} />
 
+  // 안내 줄은 기다리는 동안에도 처음부터 둔다(실패 · 비었음에서는 뺀다)
+  const showNote = !users.isLoadingError && (users.isPending || list.length > 0)
+  const note = (className: string, text: string) => (
+    <p className={className} data-break-note>
+      {text}
+    </p>
+  )
+
   const body = (
-    <LoadingRegion pending={users.isPending} failed={users.isLoadingError} fallback={<ScheduleSkeleton desktop={desktop} />} failure={failure}>
-      {list.length === 0 ? empty : desktop ? (
-        <>
+    <>
+      {!desktop && showNote && note('m-0 px-x6 pb-x2 pt-x4 text-t3 text-fg-neutral-subtle', t('sch.breakNotePhone', { lunch: formatHourRange(12, 13), dinner: formatHourRange(18, 19) }))}
+      <LoadingRegion pending={users.isPending} failed={users.isLoadingError} fallback={<ScheduleSkeleton desktop={desktop} />} failure={failure}>
+        {list.length === 0 ? (
+          empty
+        ) : desktop ? (
           <ScrollFog aria-label={t('sch.title')} tabIndex={0} className='overflow-x-auto overflow-y-hidden' data-schedule-scroll>
             <ScheduleTable users={list} />
           </ScrollFog>
-          <p className='m-0 px-x6 pb-x4 pt-x3 text-t3 text-fg-neutral-subtle' data-break-note>
-            {t('sch.breakNote')}
-          </p>
-        </>
-      ) : (
-        <>
-          <p className='m-0 px-x6 pb-x2 pt-x4 text-t3 text-fg-neutral-subtle' data-break-note>
-            {t('sch.breakNotePhone', { lunch: formatHourRange(12, 13), dinner: formatHourRange(18, 19) })}
-          </p>
+        ) : (
           <ScheduleByTime users={list} />
-        </>
-      )}
-    </LoadingRegion>
+        )}
+      </LoadingRegion>
+      {desktop && showNote && note('m-0 px-x6 pb-x4 pt-x3 text-t3 text-fg-neutral-subtle', t('sch.breakNote'))}
+    </>
   )
 
   return (
