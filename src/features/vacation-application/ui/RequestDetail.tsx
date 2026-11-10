@@ -211,7 +211,7 @@ export function RequestDetail({
                   <ApprovalSteps request={r} />
                   <ListHeader as='h3'>{t('req.detailContent')}</ListHeader>
                   <List>
-                    {cancelUserId === undefined && r.applicant_name ? kv(t('req.detailApplicant'), r.applicant_name, 'applicant') : null}
+                    {r.applicant_name && r.applicant_id !== loginUser?.user_id ? kv(t('req.detailApplicant'), r.applicant_name, 'applicant') : null}
                     {kv(t('req.detailPolicy'), r.policy_name, 'policy')}
                     {kv(t('req.detailDate'), requestTargetText(r), 'date')}
                     {kv(t('req.detailGrant'), r.grant_time_str, 'grant')}

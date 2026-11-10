@@ -1,155 +1,128 @@
-import QueryAsyncBoundary from '@/shared/ui/async-boundary/QueryAsyncBoundary';
-import { Button } from '@/shared/ui/shadcn/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/shared/ui/shadcn/select';
-import { useUser } from '@/entities/session';
-import { ApplicationFormDialog } from '@/features/vacation-application/ui/ApplicationFormDialog';
-import { ApplicationTable } from '@/features/vacation-application/ui/ApplicationTable';
-import { ApplicationTableSkeleton } from '@/features/vacation-application/ui/ApplicationTableSkeleton';
-import { VacationRequestStatsCards } from '@/features/vacation-application/ui/VacationRequestStatsCards';
-import { VacationRequestStatsContentSkeleton } from '@/features/vacation-application/ui/VacationRequestStatsCardsSkeleton';
-import { useApplicationContext } from '@/features/vacation-application/model/ApplicationContext';
-import { useGrantStatusTypesQuery } from '@/entities/type';
-import { useUserApproversQuery } from '@/entities/user';
-import { useUserRequestedVacationsQuery, useUserRequestedVacationStatsQuery } from '@/entities/vacation';
-import { useUserVacationPoliciesQuery } from '@/entities/vacation-policy';
-import { Plus } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
-const getYearOptions = () => {
-  const currentYear = new Date().getFullYear();
-  const years: string[] = [];
-  for (let i = currentYear - 5; i <= currentYear + 1; i++) {
-    years.push(i.toString());
-  }
-  return years;
-};
+import { Button } from '@/shared/ds/button'
+import { FloatingActionButton } from '@/shared/ds/floating-action-button'
+import { ResultSection } from '@/shared/ds/result-section'
+import { Select, SelectItem } from '@/shared/ds/select'
+import { LoadingRegion } from '@/shared/ds/skeleton'
+import { useUser } from '@/entities/session'
+import { useUserApproversQuery } from '@/entities/user'
+import { useUserRequestedVacationsQuery, useUserRequestedVacationStatsQuery } from '@/entities/vacation'
+import { useUserVacationPoliciesQuery } from '@/entities/vacation-policy'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { useWide } from '@/widgets/layout/lib/use-wide'
+import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { useApplicationContext } from '../model/ApplicationContext'
+import { ApplicationFormDialog } from './ApplicationFormDialog'
+import { ApplicationTable } from './ApplicationTable'
+import { RequestSummary, RequestSummarySkeleton } from './RequestSummary'
 
+/** 고른 해 선택지 — 5년 전 ~ 1년 뒤(지금 그대로) */
+const yearOptions = (): number[] => {
+  const current = new Date().getFullYear()
+  return Array.from({ length: 7 }, (_, i) => current - 5 + i)
+}
+
+/**
+ * 휴가 신청(I-25 D) — 제목 줄 "휴가 신청" + 연도 Select + [휴가 신청](데스크톱 brandSolid small), 폰은 상단 바가 제목 · 연도는 첫 띠 맨 위 · 오른쪽 아래 떠 있는 +.
+ * 요약(큰 숫자 넷 + 상태 Tag Group)과 신청 내역은 질의가 따로라 구역마다 기다리고 구역마다 실패를 말한다(읽기 quiet · [다시 시도]는 그 질의만).
+ * 트리는 폭과 상관없이 하나 — 신청 폼은 이 컴포넌트에 한 번만 마운트되고 폭이 바뀌어도 열린 채 남는다.
+ */
 const ApplicationContent = () => {
-  const { t } = useTranslation('vacation');
-  const { t: tc } = useTranslation('common');
-  const { isDialogOpen, setIsDialogOpen, selectedYear, setSelectedYear } = useApplicationContext();
-  const { loginUser } = useUser();
+  const { t } = useTranslation('vacation')
+  const { t: tc } = useTranslation('common')
+  const desktop = useDesktop()
+  const wide = useWide()
+  const { isDialogOpen, setIsDialogOpen, selectedYear, setSelectedYear } = useApplicationContext()
+  const { loginUser } = useUser()
+  const userId = loginUser?.user_id || ''
+  const year = parseInt(selectedYear)
 
-  const { data: vacationPolicies = [] } = useUserVacationPoliciesQuery(
-    loginUser?.user_id || '',
-    'ON_REQUEST'
-  );
-  const { data: approversData } = useUserApproversQuery(loginUser?.user_id || '');
-  const { data: vacationRequests = [], isLoading: isLoadingRequests, error: requestsError } = useUserRequestedVacationsQuery(
-    loginUser?.user_id || '',
-    parseInt(selectedYear)
-  );
-  const { data: grantStatusTypes = [] } = useGrantStatusTypesQuery();
-  const { data: stats, isLoading: isLoadingStats, error: statsError } = useUserRequestedVacationStatsQuery(
-    loginUser?.user_id || '',
-    parseInt(selectedYear)
-  );
+  const { data: vacationPolicies = [] } = useUserVacationPoliciesQuery(userId, 'ON_REQUEST')
+  const { data: approversData } = useUserApproversQuery(userId)
+  const requests = useUserRequestedVacationsQuery(userId, year, { quiet: true })
+  const stats = useUserRequestedVacationStatsQuery(userId, year, { quiet: true })
 
-  const isLoading = isLoadingRequests || isLoadingStats;
-  const error = requestsError || statsError;
+  const create = () => setIsDialogOpen(true)
 
-  const handleCreateNew = () => {
-    setIsDialogOpen(true);
-  };
+  const yearSelect = (
+    <Select size='responsive' aria-label={t('req.yearAria')} value={selectedYear} onValueChange={setSelectedYear} className='w-[9rem]'>
+      {yearOptions().map((y) => (
+        <SelectItem key={y} value={String(y)} label={t('req.yearLabel', { year: y })} />
+      ))}
+    </Select>
+  )
 
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-  };
+  const summaryFailure = (
+    <ResultSection
+      kind='failure'
+      size='medium'
+      title={t('req.sumFailureTitle')}
+      description={t('memberVacation.failureDescription')}
+      primaryAction={{ label: tc('retry'), onClick: () => void stats.refetch(), loading: stats.isFetching }}
+    />
+  )
+  const summary = (layout: 'card' | 'band') => (
+    <LoadingRegion
+      pending={stats.isPending}
+      failed={stats.isLoadingError}
+      fallback={<RequestSummarySkeleton layout={layout} />}
+      failure={summaryFailure}
+    >
+      {stats.data && <RequestSummary stats={stats.data} year={year} layout={layout} cols={wide ? 4 : 2} leading={layout === 'band' ? yearSelect : undefined} />}
+    </LoadingRegion>
+  )
 
-  const handleSubmitSuccess = () => {
-    setIsDialogOpen(false);
-  };
-
-  const SkeletonContent = () => (
-    <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
-      <div className='flex flex-col min-[64rem]:flex-row min-[64rem]:items-center min-[64rem]:justify-between mb-8'>
-        <div>
-          <h1 className='text-3xl font-bold mb-2'>{t('application.pageTitle')}</h1>
-          <p className='text-foreground/70'>{t('application.pageSubtitle')}</p>
-        </div>
-        <div className='flex items-center gap-2 mt-4 min-[64rem]:mt-0'>
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className='w-[120px]'>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {getYearOptions().map((year) => (
-                <SelectItem key={year} value={year}>
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <VacationRequestStatsContentSkeleton />
-      <ApplicationTableSkeleton />
-    </div>
-  );
+  const list = (
+    <ApplicationTable
+      requests={requests.data ?? []}
+      year={year}
+      cancelUserId={userId}
+      onCreate={create}
+      status={{ pending: requests.isPending, failed: requests.isLoadingError, fetching: requests.isFetching, onRetry: () => void requests.refetch() }}
+    />
+  )
 
   return (
-    <QueryAsyncBoundary
-      queryState={{ isLoading, error, data: vacationRequests }}
-      loadingComponent={<SkeletonContent />}
-      errorComponent={
-        <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
-          <div className='p-8 text-center text-red-600'>
-            {tc('loadFailed')}
-          </div>
+    <ScreenBody density='high'>
+      <ScreenTitleRow
+        title={t('req.title')}
+        action={
+          desktop ? (
+            <div className='flex items-center gap-x2'>
+              {yearSelect}
+              <Button variant='brandSolid' size='small' onClick={create} data-create-request>
+                <Plus aria-hidden />
+                {t('req.create')}
+              </Button>
+            </div>
+          ) : undefined
+        }
+      />
+      {desktop ? (
+        <div className='flex min-w-0 flex-col gap-x2'>
+          <div data-section='summary'>{summary('card')}</div>
+          {list}
         </div>
-      }
-    >
-      <div className='p-4 min-[40rem]:p-6 min-[48rem]:p-8'>
-        <div className='flex flex-col min-[64rem]:flex-row min-[64rem]:items-center min-[64rem]:justify-between mb-8'>
-          <div>
-            <h1 className='text-3xl font-bold mb-2'>{t('application.pageTitle')}</h1>
-            <p className='text-foreground/70'>{t('application.pageSubtitle')}</p>
-          </div>
-          <div className='flex items-center gap-2 mt-4 min-[64rem]:mt-0'>
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className='w-[120px]'>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {getYearOptions().map((year) => (
-                  <SelectItem key={year} value={year}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={handleCreateNew} className='flex items-center gap-2'>
-              <Plus className='w-4 h-4' />
-              {t('application.newApplication')}
-            </Button>
-          </div>
+      ) : (
+        <div className='flex min-w-0 flex-col gap-x2 pb-[96px]'>
+          <section aria-label={t('req.sumAria')} className='bg-bg-layer-default pb-x3' data-section='summary'>
+            {summary('band')}
+          </section>
+          {list}
         </div>
-        {isLoadingStats ? (
-          <VacationRequestStatsContentSkeleton />
-        ) : (
-          <VacationRequestStatsCards stats={stats} />
-        )}
-        <ApplicationTable
-          vacationRequests={vacationRequests}
-          grantStatusTypes={grantStatusTypes}
-          userId={loginUser?.user_id || ''}
-        />
-        <ApplicationFormDialog
-          open={isDialogOpen}
-          onClose={handleCloseDialog}
-          onSubmitSuccess={handleSubmitSuccess}
-          vacationPolicies={vacationPolicies}
-          approversData={approversData || { approvers: [], max_available_count: 0, is_auto_approval: false }}
-        />
-      </div>
-    </QueryAsyncBoundary>
-  );
-};
+      )}
+      {!desktop && <FloatingActionButton icon={<Plus />} aria-label={t('req.create')} onClick={create} data-create-request />}
+      <ApplicationFormDialog
+        open={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSubmitSuccess={() => setIsDialogOpen(false)}
+        vacationPolicies={vacationPolicies}
+        approversData={approversData || { approvers: [], max_available_count: 0, is_auto_approval: false }}
+      />
+    </ScreenBody>
+  )
+}
 
 export { ApplicationContent }

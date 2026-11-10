@@ -785,23 +785,7 @@ vacation,stats.empty.description,휴가 현황 정보를 불러올 수 없습니
 vacation,history.remainVacation,남은 휴가,Remaining leave
 vacation,history.usedVacation,쓴 휴가,Leave used
 vacation,history.expectedVacation,쓸 예정,Planned leave
-vacation,request.totalRequest,총 신청,Total Requests
-vacation,request.thisMonth,이번 달 {{count}}건,{{count}} this month
 vacation,request.sinceLastMonth,지난달보다,Since last month
-vacation,request.canceledLabel,취소,Canceled
-vacation,request.canceledDesc,신청 취소됨,Request canceled
-vacation,request.pendingLabel,대기,Pending
-vacation,request.avgProcessingTime,평균 처리시간 {{days}}일,Avg. processing time {{days}} days
-vacation,request.progressLabel,진행,In Progress
-vacation,request.progressDesc,처리중인 요청,Processing requests
-vacation,request.approvedLabel,승인,Approved
-vacation,request.approvalRate,승인율,Approval Rate
-vacation,request.rejectedLabel,반려,Rejected
-vacation,request.rejectedDesc,재신청 필요,Resubmission required
-vacation,request.acquiredVacation,획득 휴가,Acquired Vacation
-vacation,request.acquiredDesc,승인된 휴가,Approved vacation
-vacation,request.empty.title,신청 통계 정보가 없습니다,No Request Statistics
-vacation,request.empty.description,휴가 신청 정보가 없습니다,No vacation request information
 work,schedule.hoursMinutes,{{hours}}시간 {{minutes}}분,{{hours}}h {{minutes}}m
 work,schedule.hoursOnly,{{hours}}시간,{{hours}}h
 work,schedule.empty.title,근무 일정이 없습니다,No Work Schedule
@@ -1044,22 +1028,6 @@ culture,rule.culture.familyScope,가족 범위,Family scope
 culture,rule.culture.familyIncluded,🤵‍♂️남편 👰‍♀️아내 👶자녀까지 해당돼요,🤵‍♂️Husband 👰‍♀️Wife 👶Children included
 culture,rule.culture.familyExcluded,👴 👵부모님 👫연인은 해당안돼요.,👴 👵Parents 👫Partners not included.
 culture,rule.culture.otherEnd,만 해당해요. 단 기념일이 공휴일이거나 주말인 경우엔 해당되지 않아요.,only. Not applicable if the anniversary falls on a holiday or weekend.
-vacation,application.pageTitle,휴가 신청 관리,Vacation Application Management
-vacation,application.pageSubtitle,휴가를 신청하고 현황을 관리하세요,Apply for vacation and manage your requests
-vacation,application.newApplication,새 신청서 작성,New Application
-vacation,application.requestHistory,신청 내역,Request History
-vacation,application.tableTitle,제목,Title
-vacation,application.tableVacationType,휴가 타입,Vacation Type
-vacation,application.tableRequestDate,신청일,Request Date
-vacation,application.tableTargetDate,대상일자,Target Date
-vacation,application.tableGrantDays,보상일수,Grant Days
-vacation,application.tableCurrentApprover,현결재자,Current Approver
-vacation,application.tableStatus,상태,Status
-vacation,application.noRequests,신청한 휴가가 없습니다.,No vacation requests.
-vacation,application.noRequestsTitle,신청 내역이 없어요,No requests yet
-vacation,application.noRequestsDescription,아직 신청한 휴가가 없어요. 새 신청서를 작성해 보세요.,You haven't requested any leave yet. Try writing a new request.
-vacation,application.viewDetail,상세보기,View Detail
-vacation,application.cancelRequest,신청취소,Cancel Request
 common,loadFailed,데이터를 불러오는데 실패했습니다.,Failed to load data.
 vacation,history.usageTab,사용 내역,Usage History
 vacation,history.grantTab,부여 내역,Grant History
@@ -1222,7 +1190,6 @@ vacation,application.policyRequired,휴가 정책을 선택해주세요.,Please 
 vacation,application.titleRequired,제목을 입력해주세요.,Please enter a title.
 vacation,application.dateRequired,날짜를 선택해주세요.,Please select a date.
 vacation,application.reasonRequired,사유를 입력해주세요.,Please enter a reason.
-vacation,application.applicationHistory,신청이력,Application History
 work,report.fileNamePrefix,업무이력,WorkHistory
 work,unregistered.fileNamePrefix,미등록_업무시간,Unregistered_WorkHours
 work,unregistered.fileNameYear,년,year

@@ -1,119 +1,80 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/shadcn/card'
-import { Empty, EmptyDescription, EmptyIcon, EmptyTitle } from '@/shared/ui/shadcn/empty'
-import { ApplicationTableContent } from '@/features/vacation-application/ui/ApplicationTableContent'
-import { RequestDetail } from '@/features/vacation-application/ui/RequestDetail'
-import { usePostCancelVacationRequestMutation } from '@/entities/vacation'
-import { TypeResp } from '@/entities/type'
-import { type GetUserRequestedVacationsResp } from '@/entities/vacation'
-import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
 import { CalendarX2 } from 'lucide-react'
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-interface ApplicationTableProps {
-  vacationRequests: GetUserRequestedVacationsResp[]
-  grantStatusTypes: TypeResp[]
-  userId?: string
-  showCancelButton?: boolean
-  /** 카드 제목 — 없으면 "신청이력"(휴가 신청 화면) */
-  title?: string
-  /** 빈 목록 글 — 없으면 본인 신청 화면의 글(작성 권유 포함) */
-  emptyTitle?: string
-  emptyDescription?: string
+import { ResultSection } from '@/shared/ds/result-section'
+import { LoadingRegion } from '@/shared/ds/skeleton'
+import { ScreenCard } from '@/shared/ui/groo/screen-card'
+import type { GetUserRequestedVacationsResp } from '@/entities/vacation'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { useWide } from '@/widgets/layout/lib/use-wide'
+import { RequestListContent, RequestListSkeleton, RequestTableSkeleton } from './RequestListContent'
+
+export interface RequestListStatus {
+  pending: boolean
+  failed: boolean
+  fetching: boolean
+  onRetry: () => void
 }
 
-const ApplicationTable = ({
-  vacationRequests,
-  grantStatusTypes,
-  userId,
-  showCancelButton = true,
+/**
+ * 신청 내역 구역(I-25 D 20) — 데스크톱 카드 "신청 내역" · 폰 띠. 머리는 늘 그리고 내용 자리만 기다린다(읽기는 quiet — 실패는 이 구역이 말한다).
+ * 구성원 휴가의 직원 탭도 같은 부품을 쓴다(취소 없음 `cancelUserId` 안 줌 · 제목 · 빈 글을 인자로).
+ */
+export function ApplicationTable({
+  requests,
+  status,
+  year,
+  cancelUserId,
   title,
   emptyTitle,
-  emptyDescription
-}: ApplicationTableProps) => {
+  emptyDescription,
+  onCreate,
+}: {
+  requests: GetUserRequestedVacationsResp[]
+  status?: RequestListStatus
+  year: number
+  /** 내 신청 화면이면 로그인한 사람의 id — 취소 길이 열린다. 구성원 휴가는 주지 않는다(남의 신청은 취소 못 함) */
+  cancelUserId?: string
+  title?: string
+  emptyTitle?: string
+  emptyDescription?: string
+  /** 빈 목록의 [휴가 신청] — 내 신청 화면만 */
+  onCreate?: () => void
+}) {
   const { t } = useTranslation('vacation')
   const { t: tc } = useTranslation('common')
-  const [detailOpen, setDetailOpen] = useState(false)
-  const [selectedRequest, setSelectedRequest] = useState<GetUserRequestedVacationsResp | null>(null)
-
-  const { mutateAsync: cancelVacationRequest } = usePostCancelVacationRequestMutation()
-  const cancelConfirm = useConfirmTarget<GetUserRequestedVacationsResp>()
-
-  const handleDetailView = (request: GetUserRequestedVacationsResp) => {
-    setSelectedRequest(request)
-    setDetailOpen(true)
-  }
-
-  const handleDetailClose = () => {
-    setDetailOpen(false)
-    setSelectedRequest(null)
-  }
-
-  // 신청 취소는 여기서 한 번 더 묻는다 — 줄의 ⋮ 가 어디로 옮겨 가도 같은 확인창이다
-  const handleCancelRequest = (requestId: number) => {
-    if (!userId) return
-
-    const request = vacationRequests.find(r => r.vacation_grant_id === requestId)
-    if (request) cancelConfirm.ask(request)
-  }
-
-  const cancelTarget = cancelConfirm.target
-
+  const desktop = useDesktop()
+  const wide = useWide()
   return (
-    <>
-      <Card className='flex-1'>
-        <CardHeader>
-          <CardTitle>{title ?? t('application.applicationHistory')}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {vacationRequests.length === 0 ? (
-            <div className="min-h-[300px] flex items-center justify-center">
-              <Empty>
-                <EmptyIcon>
-                  <CalendarX2 />
-                </EmptyIcon>
-                <EmptyTitle>{emptyTitle ?? t('application.noRequestsTitle')}</EmptyTitle>
-                <EmptyDescription>
-                  {emptyDescription ?? t('application.noRequestsDescription')}
-                </EmptyDescription>
-              </Empty>
-            </div>
-          ) : (
-            <ApplicationTableContent
-              vacationRequests={vacationRequests}
-              grantStatusTypes={grantStatusTypes}
-              onDetailView={handleDetailView}
-              onCancelRequest={showCancelButton ? handleCancelRequest : undefined}
+    <ScreenCard title={title ?? t('req.listTitle')}>
+      <div data-section='requests'>
+        <LoadingRegion
+          pending={status?.pending ?? false}
+          failed={status?.failed ?? false}
+          fallback={desktop ? <RequestTableSkeleton wide={wide} /> : <RequestListSkeleton />}
+          failure={
+            <ResultSection
+              kind='failure'
+              size='medium'
+              title={t('req.failureTitle')}
+              description={t('memberVacation.failureDescription')}
+              primaryAction={{ label: tc('retry'), onClick: () => status?.onRetry(), loading: status?.fetching }}
             />
-          )}
-        </CardContent>
-      </Card>
-
-      <RequestDetail
-        open={detailOpen}
-        onClose={handleDetailClose}
-        requestData={selectedRequest || undefined}
-        cancelUserId={showCancelButton ? userId : undefined}
-        latest={(id) => vacationRequests.find((r) => r.vacation_grant_id === id)}
-      />
-
-      {/* [취소] 와 [신청 취소] 가 헷갈려서 이 확인창만 닫는 단추를 "닫기" 로 한다 */}
-      <ConfirmDialog
-        open={cancelConfirm.open}
-        onOpenChange={cancelConfirm.onOpenChange}
-        kind='cancel'
-        title={t('application.cancelTitle')}
-        description={t('application.cancelConfirm', { title: cancelTarget?.desc || cancelTarget?.policy_name })}
-        confirmLabel={t('application.cancelAction')}
-        cancelLabel={tc('close')}
-        onConfirm={async () => {
-          if (cancelTarget && userId) {
-            await cancelVacationRequest({ vacationGrantId: cancelTarget.vacation_grant_id, userId })
           }
-        }}
-      />
-    </>
+        >
+          {requests.length === 0 ? (
+            <ResultSection
+              size='medium'
+              icon={<CalendarX2 />}
+              title={emptyTitle ?? t('req.emptyTitle', { year })}
+              description={emptyDescription ?? t('req.emptyDescription')}
+              primaryAction={onCreate ? { label: t('req.create'), onClick: onCreate } : undefined}
+            />
+          ) : (
+            <RequestListContent rows={requests} cancelUserId={cancelUserId} />
+          )}
+        </LoadingRegion>
+      </div>
+    </ScreenCard>
   )
 }
-
-export { ApplicationTable }
