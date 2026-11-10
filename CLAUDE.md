@@ -10,7 +10,7 @@ React 19 + TypeScript + Vite를 사용하는 프론트엔드 프로젝트:
 
 - **프론트엔드**: React 19, TypeScript, Vite
 - **스타일링**: Tailwind CSS
-- **상태 관리**: Zustand
+- **서버 상태**: TanStack Query
 - **라우팅**: React Router v6
 - **API 통신**: Axios
 

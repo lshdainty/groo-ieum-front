@@ -2047,3 +2047,9 @@ work,rep.xPickPerson,담당자 고르기,Pick assignee
 work,rep.xFixTitle,줄 고치기,Fix row
 work,rep.xFixDone,오류를 모두 고쳤어요.,All errors are fixed.
 work,rep.xTapHint,오류가 있는 줄을 눌러 고칠 수 있어요.,Tap a row with an error to fix it.
+common,accessDenied.title,이 화면을 볼 권한이 없어요,You do not have permission to view this screen
+common,accessDenied.description,관리자에게 권한을 요청해 주세요.,Ask an administrator for access.
+common,accessDenied.required,필요한 권한,Required permission
+common,accessDenied.requiredAll,필요한 권한(모두 필요),Required permissions (all)
+common,accessDenied.requiredAny,필요한 권한(하나 이상),Required permissions (any)
+common,accessDenied.checking,권한을 확인하는 중,Checking permissions

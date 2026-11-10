@@ -3,6 +3,7 @@ import { ProgressCircle } from '@/shared/ds/progress-circle';
 import { ResultSection } from '@/shared/ds/result-section';
 import { Lock } from 'lucide-react';
 import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ProtectedPageProps {
   permission?: string;
@@ -47,13 +48,14 @@ export function ProtectedPage({
   children,
   fallback
 }: ProtectedPageProps) {
+  const { t } = useTranslation('common');
   const { hasPermission, hasAnyPermission, hasAllPermissions, isLoading } = usePermission();
 
   // 로딩 중일 때는 로딩 표시
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <ProgressCircle size="40" />
+        <ProgressCircle size="40" aria-label={t('accessDenied.checking')} />
       </div>
     );
   }
@@ -81,24 +83,20 @@ export function ProtectedPage({
           kind="failure"
           size="medium"
           icon={<Lock />}
-          title="접근 권한이 없습니다"
+          title={t('accessDenied.title')}
           description={
             <>
-              이 페이지에 접근하기 위한 권한이 없습니다.
               {permission && (
-                <span className="mt-x2 block rounded-r1 bg-bg-neutral-weak px-x2 py-x1 font-mono text-t3">
-                  필요한 권한: {permission}
+                <span className="block text-t3">
+                  {t('accessDenied.required')}: <code className="font-mono">{permission}</code>
                 </span>
               )}
               {permissions && permissions.length > 0 && (
-                <span className="mt-x2 block text-t3">
-                  필요한 권한{requireAll ? ' (모두 필요)' : ' (하나 이상)'}:
-                  <span className="mt-x1 block rounded-r1 bg-bg-neutral-weak px-x2 py-x1 font-mono">
-                    {permissions.join(', ')}
-                  </span>
+                <span className="block text-t3">
+                  {t(requireAll ? 'accessDenied.requiredAll' : 'accessDenied.requiredAny')}: <code className="font-mono">{permissions.join(', ')}</code>
                 </span>
               )}
-              <span className="mt-x4 block">관리자에게 문의하여 권한을 요청하세요.</span>
+              <span className="mt-x2 block">{t('accessDenied.description')}</span>
             </>
           }
         />

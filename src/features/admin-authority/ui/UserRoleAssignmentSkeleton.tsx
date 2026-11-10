@@ -29,7 +29,7 @@ const UserRoleAssignmentSkeleton = () => {
           ))}
         </div>
         <div className="mt-x3 flex justify-end">
-          <Skeleton className="h-9 w-16" />
+          <Skeleton className="h-10 w-16" />
         </div>
       </div>
     </div>

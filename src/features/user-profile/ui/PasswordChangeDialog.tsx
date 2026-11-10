@@ -109,7 +109,7 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
                 control={form.control}
                 name='current_password'
                 render={({ field, fieldState }) => (
-                  <Field label={t('currentPassword')} showRequiredIndicator invalid={!!fieldState.error} errorMessage={fieldState.error?.message}>
+                  <Field label={t('currentPassword')} required invalid={!!fieldState.error} errorMessage={fieldState.error?.message}>
                     <Input {...field} type='password' placeholder={t('currentPasswordPlaceholder')} />
                   </Field>
                 )}
@@ -118,10 +118,13 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
                 control={form.control}
                 name='new_password'
                 render={({ field, fieldState }) => (
-                  <Field label={t('newPassword')} showRequiredIndicator invalid={!!fieldState.error} errorMessage={fieldState.error?.message}>
-                    <Input {...field} type='password' placeholder={t('newPasswordPlaceholder')} />
+                  // 오류는 칸 바로 아래(Field 꼬리), 규칙 목록은 그 아래 — Field 밖에 둔다
+                  <div className='flex flex-col gap-x2' data-new-password>
+                    <Field label={t('newPassword')} required invalid={!!fieldState.error} errorMessage={fieldState.error?.message}>
+                      <Input {...field} type='password' placeholder={t('newPasswordPlaceholder')} />
+                    </Field>
                     <PasswordRequirements password={field.value} />
-                  </Field>
+                  </div>
                 )}
               />
               <Controller
@@ -129,7 +132,7 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
                 name='confirm_password'
                 render={({ field, fieldState }) => (
                   // 불일치는 아래 PasswordMatch 가 입력 중에 이미 보여주므로, 여기선 미입력 에러만 남긴다
-                  <Field label={t('confirmPassword')} showRequiredIndicator invalid={!!fieldState.error && !field.value} errorMessage={fieldState.error?.message}>
+                  <Field label={t('confirmPassword')} required invalid={!!fieldState.error && !field.value} errorMessage={fieldState.error?.message}>
                     <Input {...field} type='password' placeholder={t('confirmPasswordPlaceholder')} />
                     <PasswordMatch password={newPassword} confirmPassword={field.value} />
                   </Field>

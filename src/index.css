@@ -36,6 +36,12 @@ html {
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  /* 키보드 초점 링 색 — ds 초점 링 토큰(stroke-focus-ring, 다크는 토큰이 바뀜). 옛 `* { outline-ring/50 }` 를 걷으면서
+   * 색을 따로 정하지 않은 요소의 링이 브라우저 기본(거의 검정)으로 돌아가지 않게 한다. ds 부품은 자기 링 클래스가 이긴다. */
+  * {
+    outline-color: var(--color-stroke-focus-ring);
+  }
+
   /* 바탕 · 글자 — 그루 역할 토큰(25-6: 옛 shadcn 변수 --sidebar · --foreground 를 걷으며 옮김) */
   body {
     @apply bg-bg-layer-basement text-fg-neutral;

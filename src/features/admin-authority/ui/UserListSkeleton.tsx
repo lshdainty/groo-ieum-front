@@ -8,7 +8,7 @@ const UserListSkeleton = () => {
           <Skeleton className="size-4" />
           <Skeleton className="h-5 w-16" />
         </div>
-        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-10 w-full" />
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">
         <div className="flex flex-col gap-x1 p-x2">

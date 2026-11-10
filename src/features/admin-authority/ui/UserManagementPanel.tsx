@@ -8,7 +8,7 @@ import { usePermissionsQuery } from '@/entities/permission';
 import { useRolesQuery } from '@/entities/role';
 import { usePutUserMutation, useUsersQuery, userApi } from '@/entities/user'
 import { useIsMobile } from '@/shared/hooks/useIsMobile'
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ResultSection } from "@/shared/ds/result-section";
 import { useSnackbar } from "@/shared/ds/snackbar";
@@ -29,6 +29,11 @@ const UserManagementPanel = () => {
 
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const detailRef = useRef<HTMLDivElement>(null);
+  // 폰: 목록을 내린 채 사용자를 누르면 상세가 맨 위부터 보이게 — 페이지 스크롤이 목록 자리에 남지 않는다
+  useEffect(() => {
+    if (isMobile && selectedUserId) detailRef.current?.scrollIntoView({ block: "start" });
+  }, [isMobile, selectedUserId]);
 
   // Map API roles to Domain roles
   const domainRoles: Role[] = useMemo(() => roles.map(r => ({
@@ -123,13 +128,15 @@ const UserManagementPanel = () => {
           )}
         </div>
         {selectedUser && (
-          <UserRoleAssignment
-            key={selectedUser.id}
-            user={selectedUser}
-            allRoles={domainRoles}
-            onUpdateUserRole={handleUpdateUserRole}
-            onBack={() => setSelectedUserId(null)}
-          />
+          <div ref={detailRef} className="flex min-h-0 flex-1 flex-col" data-user-detail>
+            <UserRoleAssignment
+              key={selectedUser.id}
+              user={selectedUser}
+              allRoles={domainRoles}
+              onUpdateUserRole={handleUpdateUserRole}
+              onBack={() => setSelectedUserId(null)}
+            />
+          </div>
         )}
       </div>
     );
