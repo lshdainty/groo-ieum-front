@@ -24,6 +24,9 @@ import { ThemeChooser } from './ThemeChooser'
 
 type Surface = 'menu' | 'sheet'
 
+// 768 ~ 1279(터치로 쓰는 폭) 메뉴 줄 누르는 영역 44 — ds Menu 줄은 39 라 호출처에서 키운다(1280 이상은 그대로 39)
+const MENU_ROW_TOUCH = 'md:max-lg:min-h-[44px]'
+
 export function AccountRow({ surface, onOpenDialog }: { surface: Surface; onOpenDialog?: () => void }) {
   const { t } = useTranslation('sidebar')
   const queryClient = useQueryClient()
@@ -97,16 +100,16 @@ export function AccountRow({ surface, onOpenDialog }: { surface: Surface; onOpen
           <MenuContent side='right' align='end'>
             {canEdit && (
               <MenuGroup>
-                <MenuItem {...items.edit} />
-                <MenuItem {...items.password} />
+                <MenuItem {...items.edit} className={MENU_ROW_TOUCH} />
+                <MenuItem {...items.password} className={MENU_ROW_TOUCH} />
               </MenuGroup>
             )}
             <MenuGroup>
               {/* 메뉴는 실행만 한다(고른 표시 없음) — 지금 값은 고르기 창이 보인다 */}
-              <MenuItem {...items.theme} />
+              <MenuItem {...items.theme} className={MENU_ROW_TOUCH} />
             </MenuGroup>
             <MenuGroup>
-              <MenuItem {...items.logout} />
+              <MenuItem {...items.logout} className={MENU_ROW_TOUCH} />
             </MenuGroup>
           </MenuContent>
         </Menu>
