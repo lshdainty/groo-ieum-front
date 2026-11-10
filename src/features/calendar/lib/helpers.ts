@@ -7,24 +7,14 @@ import {
   differenceInMinutes,
   eachDayOfInterval,
   endOfMonth,
-  endOfWeek,
-  endOfYear,
-  format,
   isSameDay,
-  isSameMonth,
-  isSameWeek,
-  isSameYear,
-  isWithinInterval,
   parseISO,
   startOfDay,
   startOfMonth,
-  startOfWeek,
-  startOfYear,
   subDays,
   subMonths,
   subWeeks,
   subYears,
-  type Locale,
 } from 'date-fns';
 
 import type { GetEventsByPeriodResp } from '@/entities/calendar-event';
@@ -34,37 +24,6 @@ import { CHART_HUE, calendarTypes } from '@/features/calendar/model/types';
 import dayjs from 'dayjs';
 
 // ================ Header helper functions ================ //
-
-export function rangeText(view: TCalendarView, date: Date, locale?: Locale) {
-  const formatString = 'yyyy.MM.dd';
-  let start: Date;
-  let end: Date;
-
-  switch (view) {
-    case 'agenda':
-      start = startOfMonth(date);
-      end = endOfMonth(date);
-      break;
-    case 'year':
-      start = startOfYear(date);
-      end = endOfYear(date);
-      break;
-    case 'month':
-      start = startOfMonth(date);
-      end = endOfMonth(date);
-      break;
-    case 'week':
-      start = startOfWeek(date, { locale });
-      end = endOfWeek(date, { locale });
-      break;
-    case 'day':
-      return format(date, formatString, { locale });
-    default:
-      return 'Error while formatting ';
-  }
-
-  return `${format(start, formatString, { locale })} - ${format(end, formatString, { locale })}`;
-}
 
 export function navigateDate(date: Date, view: TCalendarView, direction: 'previous' | 'next'): Date {
   const operations = {
@@ -78,24 +37,7 @@ export function navigateDate(date: Date, view: TCalendarView, direction: 'previo
   return operations[view](date, 1);
 }
 
-export function getEventsCount(events: IEvent[], date: Date, view: TCalendarView): number {
-  const compareFns = {
-    agenda: isSameMonth,
-    year: isSameYear,
-    day: isSameDay,
-    week: isSameWeek,
-    month: isSameMonth,
-  };
-
-  return events.filter(event => compareFns[view](new Date(event.startDate), date)).length;
-}
-
 // ================ Week and day view helper functions ================ //
-
-export function getCurrentEvents(events: IEvent[]) {
-  const now = new Date();
-  return events.filter(event => isWithinInterval(now, { start: parseISO(event.startDate), end: parseISO(event.endDate) })) || null;
-}
 
 export function groupEvents(dayEvents: IEvent[]) {
   const sortedEvents = dayEvents.sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
