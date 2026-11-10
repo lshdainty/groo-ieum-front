@@ -26,6 +26,23 @@ export default tseslint.config(
     },
   },
   {
+    // 걷은 옛 UI 계통(I-25 25-5)을 다시 들여오지 않는다 — 알림은 ds Snackbar · Callout, 다크 모드는 shared/ui/theme
+    files: ['src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            { name: 'sonner', message: '토스트는 쓰지 않는다 — 성공은 ds Snackbar, 실패는 Callout · 칸 오류(write-error)' },
+            { name: 'antd', message: 'antd 는 걷었다 — 화면은 shared/ds 부품으로' },
+            { name: '@ant-design/v5-patch-for-react-19', message: 'antd 와 함께 걷었다' },
+            { name: 'next-themes', message: '테마는 shared/ui/theme 가 맡는다' },
+          ],
+        },
+      ],
+    },
+  },
+  {
     // Desk 판 ds 에서 가져온 부품 — 안 쓰는 자리 인자는 `_` 로 시작한다(Desk eslint.config.js 와 같은 규칙, SOURCE.md)
     files: ['src/shared/ds/**/*.{ts,tsx}'],
     rules: {
