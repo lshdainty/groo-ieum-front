@@ -1,5 +1,7 @@
 import { usePermission } from '@/entities/session';
-import { AlertCircle, Lock } from 'lucide-react';
+import { ProgressCircle } from '@/shared/ds/progress-circle';
+import { ResultSection } from '@/shared/ds/result-section';
+import { Lock } from 'lucide-react';
 import { ReactNode } from 'react';
 
 interface ProtectedPageProps {
@@ -51,7 +53,7 @@ export function ProtectedPage({
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <ProgressCircle size="40" />
       </div>
     );
   }
@@ -74,37 +76,32 @@ export function ProtectedPage({
     }
 
     return (
-      <div className="h-full flex items-center justify-center p-8">
-        <div className="max-w-[28rem] w-full bg-destructive/10 border border-destructive/20 rounded-lg p-8 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-destructive/20 rounded-full flex items-center justify-center">
-              <Lock className="w-8 h-8 text-destructive" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold mb-2 flex items-center justify-center gap-2">
-            <AlertCircle className="w-6 h-6" />
-            접근 권한이 없습니다
-          </h2>
-          <p className="text-muted-foreground mb-4">
-            이 페이지에 접근하기 위한 권한이 없습니다.
-            {permission && (
-              <span className="block mt-2 text-sm font-mono bg-muted px-2 py-1 rounded">
-                필요한 권한: {permission}
-              </span>
-            )}
-            {permissions && permissions.length > 0 && (
-              <span className="block mt-2 text-sm">
-                필요한 권한{requireAll ? ' (모두 필요)' : ' (하나 이상)'}:
-                <span className="block font-mono bg-muted px-2 py-1 rounded mt-1">
-                  {permissions.join(', ')}
+      <div className="flex h-full items-center justify-center p-x8">
+        <ResultSection
+          kind="failure"
+          size="medium"
+          icon={<Lock />}
+          title="접근 권한이 없습니다"
+          description={
+            <>
+              이 페이지에 접근하기 위한 권한이 없습니다.
+              {permission && (
+                <span className="mt-x2 block rounded-r1 bg-bg-neutral-weak px-x2 py-x1 font-mono text-t3">
+                  필요한 권한: {permission}
                 </span>
-              </span>
-            )}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            관리자에게 문의하여 권한을 요청하세요.
-          </p>
-        </div>
+              )}
+              {permissions && permissions.length > 0 && (
+                <span className="mt-x2 block text-t3">
+                  필요한 권한{requireAll ? ' (모두 필요)' : ' (하나 이상)'}:
+                  <span className="mt-x1 block rounded-r1 bg-bg-neutral-weak px-x2 py-x1 font-mono">
+                    {permissions.join(', ')}
+                  </span>
+                </span>
+              )}
+              <span className="mt-x4 block">관리자에게 문의하여 권한을 요청하세요.</span>
+            </>
+          }
+        />
       </div>
     );
   }
