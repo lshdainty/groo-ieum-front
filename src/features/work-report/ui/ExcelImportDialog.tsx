@@ -14,13 +14,13 @@ import { useSnackbar } from '@/shared/ds/snackbar'
 import { readWriteFailure } from '@/shared/ui/groo/write-error'
 import type { GetUsersResp } from '@/entities/user'
 import type { CreateWorkHistoryReq, WorkCodeResp, WorkGroupWithParts } from '@/entities/work'
-import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { useWide } from '@/widgets/layout/lib/use-wide'
 import { importPayload, parseImportRows, type ImportRow } from '../lib/excel-import'
 
 const WORD = '[overflow-wrap:break-word] [word-break:keep-all]'
 
 /**
- * 엑셀로 가져오기(I-25 H 45 · Q1 사용자 결정 11-10) — 1280 이상 대화상자 800 · 미만 시트. 3단계: ① 붙여 넣기 → ② 확인하기 → ③ 등록.
+ * 엑셀로 가져오기(I-25 H 45 · Q1 사용자 결정 11-10) — 1280 이상 대화상자 800(확인 단계는 표) · 미만 시트 480(확인 단계는 줄 목록 — 768 ~ 1279 데스크톱도 같다). 3단계: ① 붙여 넣기 → ② 확인하기 → ③ 등록.
  * 확인 단계는 줄마다 상태(오류 · 확인)와 고칠 것을 보인다 — 오류가 남으면 [N줄 등록] 은 막힌다(줄을 고치려면 이전 단계에서 글을 고쳐 다시 확인).
  * 담당자: `WORK:MANAGE` 는 파일의 이름으로 사람을 찾고, 없으면 담당자는 나로 고정이라 **파일에 남의 이름이 있으면 그 줄을 오류로 보인다**
  * (서버가 남의 이름으로 만들기를 거절하고, 일괄은 한 줄이라도 걸리면 전체를 거절하므로 화면이 올리기 전에 막는다).
@@ -50,7 +50,7 @@ export function ExcelImportDialog({
   const { t } = useTranslation('work')
   const { t: tc } = useTranslation('common')
   const snackbar = useSnackbar()
-  const desktop = useDesktop()
+  const wide = useWide()
   const [step, setStep] = useState<'input' | 'preview'>('input')
   const [text, setText] = useState('')
   const [delimiter, setDelimiter] = useState<string>('\t')
@@ -145,16 +145,13 @@ export function ExcelImportDialog({
                     {t('rep.xErrorsCallout', { count: errorCount })}
                   </Callout>
                 )}
-                {desktop ? (
+                {wide ? (
                   <Table caption={t('rep.xPreviewCaption')}>
                     <TableHeader>
                       <TableRow>
                         <TableHead>{t('rep.xColStatus')}</TableHead>
-                        <TableHead>{t('rep.colDate')}</TableHead>
-                        <TableHead>{t('rep.colManager')}</TableHead>
-                        <TableHead>{t('rep.colGroup')}</TableHead>
-                        <TableHead>{t('rep.colPart')}</TableHead>
-                        <TableHead>{t('rep.colDivision')}</TableHead>
+                        <TableHead>{t('rep.xColWho')}</TableHead>
+                        <TableHead>{t('rep.colWork')}</TableHead>
                         <TableHead align='end'>{t('rep.colHours')}</TableHead>
                         <TableHead>{t('rep.xColFix')}</TableHead>
                         <TableHead>
@@ -166,15 +163,18 @@ export function ExcelImportDialog({
                       {rows.map((r) => (
                         <TableRow key={r.id} data-import-row={r.id} data-import-ok={r.errors.length === 0}>
                           <TableCell className='whitespace-nowrap py-x2_5'>{statusBadge(r)}</TableCell>
-                          <TableCell className='whitespace-nowrap py-x2_5'>{r.date}</TableCell>
-                          <TableCell className={`min-w-[88px] whitespace-normal py-x2_5 ${WORD}`}>{r.userName}</TableCell>
-                          <TableCell className={`min-w-[96px] whitespace-normal py-x2_5 ${WORD}`}>{r.groupName}</TableCell>
-                          <TableCell className={`min-w-[120px] whitespace-normal py-x2_5 ${WORD}`}>{r.partName}</TableCell>
-                          <TableCell className={`min-w-[96px] whitespace-normal py-x2_5 ${WORD}`}>{r.divisionName}</TableCell>
+                          <TableCell className='whitespace-nowrap py-x2_5'>
+                            <span className='block'>{r.date}</span>
+                            <span className={`block text-t3 text-fg-neutral-subtle ${WORD}`}>{r.userName}</span>
+                          </TableCell>
+                          <TableCell className={`min-w-[130px] whitespace-normal py-x2_5 ${WORD}`}>
+                            <span className='block'>{[r.groupName, r.partName].filter(Boolean).join(' › ')}</span>
+                            <span className='block text-t3 text-fg-neutral-subtle'>{r.divisionName}</span>
+                          </TableCell>
                           <TableCell align='end' className='whitespace-nowrap py-x2_5'>
                             {r.hours}
                           </TableCell>
-                          <TableCell className={`min-w-[160px] whitespace-normal py-x2_5 text-fg-critical ${WORD}`}>{errorText(r)}</TableCell>
+                          <TableCell className={`min-w-[140px] whitespace-normal py-x2_5 text-fg-critical [overflow-wrap:anywhere] [word-break:keep-all]`}>{errorText(r)}</TableCell>
                           <TableCell className='whitespace-nowrap py-x2_5'>{dropButton(r)}</TableCell>
                         </TableRow>
                       ))}

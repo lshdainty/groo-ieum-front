@@ -2127,3 +2127,4 @@ work,rep.uSubmit,받기,Download
 work,rep.uDownloading,받는 중…,Downloading…
 work,rep.yearValue,{{year}}년,{{year}}
 work,rep.monthValue,{{month}}월,{{month}}
+work,rep.xColWho,일자 · 담당자,Date · assignee
