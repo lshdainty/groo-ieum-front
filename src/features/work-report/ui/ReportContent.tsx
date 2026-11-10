@@ -30,7 +30,8 @@ import {
 import { useScreenHeader } from '@/widgets/layout/lib/screen-header'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useWide } from '@/widgets/layout/lib/use-wide'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { isExcelPeriodValid } from '../model/excelPeriod'
 import { useReportContext } from '../model/ReportContext'
 import type { WorkDraft, WorkRow } from '../model/types'
@@ -378,9 +379,8 @@ export function ReportContent() {
   return (
     <ResponsiveMenu open={toolsOpen} onOpenChange={setToolsOpen}>
       <ScreenBody density='high'>
-        <ScreenTitleRow
-          title={t('rep.title')}
-          action={
+        <div className={SCREEN_TITLE_BOX}>
+          <ScreenTitle actions={
             desktop ? (
               <div className='flex items-center gap-x2'>
                 {canWrite && (
@@ -396,8 +396,10 @@ export function ReportContent() {
                 </ResponsiveMenuTrigger>
               </div>
             ) : undefined
-          }
-        />
+          }>
+            {t('rep.title')}
+          </ScreenTitle>
+        </div>
         {desktop ? (
           <Card body='list' data-report-card>
             <CardHeader>

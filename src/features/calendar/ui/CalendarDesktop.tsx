@@ -12,7 +12,8 @@ import { dayKey, findEvent, type CalendarScreen } from '@/features/calendar/mode
 import { useCanAddEvent, useCanEditEvent } from '@/features/calendar/model/use-can-edit-event'
 import type { IUser } from '@/features/calendar/model/interfaces'
 import { useWide } from '@/widgets/layout/lib/use-wide'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { CalendarAgendaView } from '@/features/calendar/ui/agenda-view/calendar-agenda-view'
 import { CalendarAgendaViewSkeleton } from '@/features/calendar/ui/agenda-view/calendar-agenda-view-skeleton'
 import { CalendarLoadFailed } from '@/features/calendar/ui/calendar-load-failed'
@@ -96,17 +97,18 @@ export function CalendarDesktop({ screen, people, isLoading, isFailed, onRetry, 
 
   return (
     <ScreenBody density='high'>
-      <ScreenTitleRow
-        title={t('title')}
-        action={
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle actions={
           canAdd ? (
             <Button variant='neutralOutline' size='small' onClick={() => setCreating({ date: new Date() })} data-create-event>
               <Plus aria-hidden />
               {t('header.addEvent')}
             </Button>
           ) : undefined
-        }
-      />
+        }>
+          {t('title')}
+        </ScreenTitle>
+      </div>
       <DndProviderWrapper>
         {view === 'month' &&
           (wide ? <div className='grid grid-cols-[minmax(0,1fr)_320px] items-start gap-x6'>{monthBody}</div> : <div className='flex flex-col gap-x2'>{monthBody}</div>)}

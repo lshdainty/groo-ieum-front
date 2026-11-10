@@ -10,7 +10,8 @@ import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
 import { useDeleteWorkCodeMutation, useWorkDivisionLabelsQuery, useWorkDivisionQuery, useWorkGroupsWithPartsQuery } from '@/entities/work'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useScreenAction } from '@/widgets/layout/lib/screen-action'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { divisionRowsOf, partRowsOf, type WorkCodeRow } from '../lib/work-code-rows'
 import { WorkCodeFormDialog, type WorkCodeFormTarget } from './WorkCodeFormDialog'
 import { WorkCodeTable } from './WorkCodeTable'
@@ -104,7 +105,9 @@ export const WorkCodeContent = () => {
 
   return (
     <ScreenBody density='medium'>
-      <ScreenTitleRow title={t('adminWorkCode.title')} action={addButton} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle actions={addButton}>{t('adminWorkCode.title')}</ScreenTitle>
+      </div>
       <div className='bg-bg-layer-default md:bg-transparent'>
         <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
           <TabsList aria-label={t('adminWorkCode.tabsAria')} layout={desktop ? 'hug' : 'fill'} size={desktop ? 'medium' : 'small'}>

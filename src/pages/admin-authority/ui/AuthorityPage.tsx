@@ -7,7 +7,8 @@ import { useDiscardGuard } from '@/shared/ui/groo/use-discard-guard'
 import { RoleManagementPanel } from '@/features/admin-authority/ui/RoleManagementPanel'
 import { UserManagementPanel } from '@/features/admin-authority/ui/UserManagementPanel'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 
 type AuthorityTab = 'roles' | 'users'
 
@@ -26,7 +27,9 @@ const Authority = () => {
   return (
     <ProtectedPage permission='ROLE:MANAGE'>
       <ScreenBody density='high'>
-        <ScreenTitleRow title={t('authority.title')} />
+        <div className={SCREEN_TITLE_BOX}>
+          <ScreenTitle>{t('authority.title')}</ScreenTitle>
+        </div>
         <div className='bg-bg-layer-default md:bg-transparent'>
           <Tabs value={tab} onValueChange={(v) => setTab(v as AuthorityTab)}>
             <TabsList aria-label={t('authority.tabsAria')} layout={desktop ? 'hug' : 'fill'} size={desktop ? 'medium' : 'small'}>

@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 
 import { cn } from '@/shared/lib/cn'
-import { ScreenTitle } from '@/shared/ds/top-navigation'
 
 /**
  * 본문 여백 틀(I-22 D 22) — 화면이 쓴다. 위 32 · 좌우 32(layout-margin) · 아래 56(spacing-screen-bottom).
@@ -34,25 +33,7 @@ export function ScreenBody({
 }
 
 /**
- * 제목 줄(데스크톱 전용) — h1 26 / 35 · 700 + 아래 설명 16/22 · 400 · fg-neutral-muted(위 4, top-navigation.md:216) + 오른쪽 동작 하나(Button small neutralOutline 또는 Select).
- * 제목 줄 아래 24. 768 미만에서는 그리지 않는다 — 상단 바가 제목이다.
+ * 제목 줄 바깥 상자(데스크톱 전용) — ds `ScreenTitle`(description · actions)을 감싼다. 제목 줄 아래 24, 768 미만에서는 그리지 않는다(상단 바가 제목).
+ * 제목 줄 위 20(머리 아래, ds ScreenTitle 의 mt-nav-to-title)은 이 틀의 위 32(ScreenBody)가 이미 맡아 0 으로 둔다.
  */
-export function ScreenTitleRow({
-  title,
-  description,
-  action,
-}: {
-  title: string
-  description?: ReactNode
-  action?: ReactNode
-}) {
-  return (
-    <div className='mb-x6 hidden items-center justify-between gap-x4 md:flex'>
-      <div className='min-w-0'>
-        <ScreenTitle className='m-0'>{title}</ScreenTitle>
-        {description != null && <p className='mt-x1 mb-0 text-t5 font-normal text-fg-neutral-muted'>{description}</p>}
-      </div>
-      {action != null && <div className='flex shrink-0 items-center'>{action}</div>}
-    </div>
-  )
-}
+export const SCREEN_TITLE_BOX = 'mb-x6 hidden md:block [&>*]:mt-0'

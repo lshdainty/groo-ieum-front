@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next'
 
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { NoticeListDesktop } from './NoticeListDesktop'
 import { NoticeListPhone } from './NoticeListPhone'
 
@@ -14,7 +15,9 @@ export const UserNoticeContent = () => {
   const desktop = useDesktop()
   return (
     <ScreenBody density='medium'>
-      <ScreenTitleRow title={t('menu.notice')} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle>{t('menu.notice')}</ScreenTitle>
+      </div>
       {desktop ? <NoticeListDesktop /> : <NoticeListPhone />}
     </ScreenBody>
   )

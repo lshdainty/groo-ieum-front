@@ -7,7 +7,8 @@ import { ScrollFog } from '@/shared/ds/scroll-fog'
 import { formatHourRange } from '@/shared/lib/date-text'
 import { useUsersQuery } from '@/entities/user'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { ScheduleEmpty } from './ScheduleEmpty'
 import { ScheduleByTime } from './ScheduleByTime'
 import { ScheduleSkeleton } from './ScheduleSkeleton'
@@ -63,7 +64,9 @@ export function ScheduleContent() {
 
   return (
     <ScreenBody density='high'>
-      <ScreenTitleRow title={t('sch.title')} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle>{t('sch.title')}</ScreenTitle>
+      </div>
       {desktop ? (
         <Card body='list' data-schedule-board>
           {body}

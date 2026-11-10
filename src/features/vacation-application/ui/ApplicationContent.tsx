@@ -10,7 +10,8 @@ import { useUser } from '@/entities/session'
 import { useUserRequestedVacationsQuery, useUserRequestedVacationStatsQuery } from '@/entities/vacation'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useWide } from '@/widgets/layout/lib/use-wide'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { useApplicationContext } from '../model/ApplicationContext'
 import { ApplicationFormDialog } from './ApplicationFormDialog'
 import { ApplicationTable } from './ApplicationTable'
@@ -82,9 +83,8 @@ const ApplicationContent = () => {
 
   return (
     <ScreenBody density='high'>
-      <ScreenTitleRow
-        title={t('req.title')}
-        action={
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle actions={
           desktop ? (
             <div className='flex items-center gap-x2'>
               {yearSelect}
@@ -94,8 +94,10 @@ const ApplicationContent = () => {
               </Button>
             </div>
           ) : undefined
-        }
-      />
+        }>
+          {t('req.title')}
+        </ScreenTitle>
+      </div>
       {desktop ? (
         <div className='flex min-w-0 flex-col gap-x2'>
           <div data-section='summary'>{summary('card')}</div>

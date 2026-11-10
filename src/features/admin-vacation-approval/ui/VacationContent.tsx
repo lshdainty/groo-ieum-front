@@ -6,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ds/tabs'
 import { useUser } from '@/entities/session'
 import { useAllVacationsByApproverQuery } from '@/entities/vacation'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { useVacationContext } from '../model/VacationContext'
 import { needsMyApproval } from '../lib/approval-format'
 import { ApprovalInbox } from './ApprovalInbox'
@@ -59,14 +60,15 @@ export const VacationContent = () => {
   // 트리는 폭과 상관없이 하나다 — 768 을 넘나들어도(태블릿 회전) 열린 부여 폼 · 결재 상세 · 쪽이 이어지게, 달라지는 것은 클래스와 속성뿐
   return (
     <ScreenBody density='high'>
-      <ScreenTitleRow
-        title={t('memberVacation.title')}
-        action={
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle actions={
           <Select {...yearSelectProps} className='w-[9rem]'>
             {yearItems}
           </Select>
-        }
-      />
+        }>
+          {t('memberVacation.title')}
+        </ScreenTitle>
+      </div>
       <div className='bg-bg-layer-default md:bg-transparent' data-member-vacation-phone>
         <Tabs value={tab} onValueChange={(v) => setTab(v as VacationTab)}>
           <TabsList aria-label={t('memberVacation.tabsAria')} layout={desktop ? 'hug' : 'fill'} size={desktop ? 'medium' : 'small'}>

@@ -68,7 +68,7 @@ function SkipLink() {
 
 /**
  * 앱 틀(I-22 D 22 · 23) — 768 이상: 사이드바(240 / 56) + 오른쪽 본문(회색 바닥, 본문만 스크롤). 미만: 상단 바 + ☰ 옆 패널, 하단 탭 없음.
- * 머리 · 빵부스러기 · 머리 테마 단추는 없다(HR 은 데스크톱 머리를 두지 않는다). 본문 여백 · 제목 줄은 화면이 ScreenBody · ScreenTitleRow 로 둔다.
+ * 머리 · 빵부스러기 · 머리 테마 단추는 없다(HR 은 데스크톱 머리를 두지 않는다). 본문 여백 · 제목 줄은 화면이 ScreenBody · ScreenTitle 로 둔다.
  */
 function Shell() {
   const desktop = useDesktop()

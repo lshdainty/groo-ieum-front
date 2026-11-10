@@ -27,7 +27,8 @@ import {
 } from '@/entities/notice'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useScreenAction } from '@/widgets/layout/lib/screen-action'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { isNoticeActive } from '../lib/notice-form'
 import { NoticeFormDialog, type NoticeFormTarget } from './NoticeFormDialog'
 
@@ -325,15 +326,16 @@ export const NoticeContent = () => {
 
   return (
     <ScreenBody density='medium'>
-      <ScreenTitleRow
-        title={t('notice.title')}
-        action={
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle actions={
           <Button variant='neutralOutline' size='small' onClick={openAdd} data-notice-add>
             <Plus />
             {tc('add')}
           </Button>
-        }
-      />
+        }>
+          {t('notice.title')}
+        </ScreenTitle>
+      </div>
       {desktop ? (
         <Card body='list'>
           <CardHeader>
