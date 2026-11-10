@@ -299,30 +299,6 @@ admin,authority.noRoles,역할이 없어요,No roles yet
 admin,authority.noRolesDesc,역할을 만들어 직원에게 권한을 줄 수 있어요.,Create a role to grant permissions to people.
 vacation,title,휴가,Vacation
 vacation,history.title,휴가 현황,Vacation History
-vacation,application.title,휴가 신청,Vacation Application
-vacation,application.compTitle,보상휴가 신청,Compensatory Leave Application
-vacation,application.requestTitle,제목,Title
-vacation,application.requestTitlePlaceholder,예: 개인 사유,e.g. Personal reason
-vacation,application.requestTitleRequired,제목을 입력해주세요.,Please enter a title.
-vacation,application.policy,휴가 정책,Vacation Policy
-vacation,application.policyPlaceholder,휴가 정책을 선택하세요,Select vacation policy
-vacation,application.policyRequired,휴가 정책을 선택해주세요.,Please select a vacation policy.
-vacation,application.overtimeDate,초과근무일,Overtime Date
-vacation,application.startTime,시작 시간,Start Time
-vacation,application.endTime,종료 시간,End Time
-vacation,application.grantTime,부여 시간,Grant Time
-vacation,application.dateRequired,날짜를 선택해주세요.,Please select a date.
-vacation,application.overtimeHours,초과근무 시간,Overtime Hours
-vacation,application.expectedCompTime,예상 보상 시간,Expected Compensation Time
-vacation,application.overtimeReason,초과근무 사유,Overtime Reason
-vacation,application.overtimeReasonPlaceholder,예: 프로젝트 마감 초과근무,e.g. Project deadline overtime
-vacation,application.reason,휴가 사유,Vacation Reason
-vacation,application.reasonPlaceholder,휴가 사유를 입력하세요,Enter vacation reason
-vacation,application.approver,승인자 지정,Assign Approver
-vacation,application.approverStep,{{step}}단계 인원 지정,Assign step {{step}} approver
-vacation,application.summary,신청 요약,Application Summary
-vacation,application.submitRequest,결재 요청,Submit Request
-vacation,application.customDateRange,부여일/만료일 직접 지정,Set custom grant/expiry date
 vacation,policy.title,휴가 정책,Vacation Policy
 vacation,policy.addTitle,휴가 정책 추가,Add Vacation Policy
 vacation,policy.editTitle,휴가 정책 수정,Edit Vacation Policy
@@ -420,17 +396,6 @@ work,report.dateRequired,일자,Date
 work,schedule.am,오전,AM
 work,schedule.pm,오후,PM
 work,schedule.title,팀 근무 일정,Team Work Schedule
-vacation,application.dayPlaceholder,일,Day
-vacation,application.hourPlaceholder,시간,Hour
-vacation,application.minutePlaceholder,분,Minute
-vacation,application.processing,처리 중...,Processing...
-vacation,application.approval,승인,Approval
-vacation,application.firstApproval,{{index}}차 승인,{{index}}st Approval
-vacation,request.cancel,취소,Cancel
-vacation,request.waiting,대기,Waiting
-vacation,request.progress,진행,In Progress
-vacation,request.approved,승인,Approved
-vacation,request.rejected,반려,Rejected
 calendar,addEvent.title,일정 등록,Add Event
 calendar,addEvent.description,일정 정보를 입력해주세요.,Please enter event information.
 calendar,addEvent.targetUser,대상 사용자,Target User
@@ -839,27 +804,6 @@ work,report.errorCount,{{count}}개 오류 수정 필요,{{count}} errors need t
 work,report.errorCount_one,{{count}}개 오류 수정 필요,{{count}} error needs to be fixed
 work,report.batchRegister,일괄 등록,Batch Register
 work,report.unregisteredDownloadFailed,미등록 리스트 다운로드에 실패했습니다.,Failed to download unregistered list.
-vacation,approval.rejectReasonRequired,반려 사유를 입력해주세요.,Please enter rejection reason.
-vacation,approval.rejectReasonPlaceholder,반려 사유를 입력해주세요...,Enter rejection reason...
-vacation,approval.nthApproval,{{index}}차 승인,{{index}}st Approval
-vacation,approval.applicant,신청자,Applicant
-vacation,approval.requestDate,신청 일시,Request Date
-vacation,approval.vacationPolicy,휴가 정책,Vacation Policy
-vacation,approval.vacationType,휴가 유형,Vacation Type
-vacation,approval.grantTime,부여 시간,Grant Time
-vacation,approval.reason,사유,Reason
-vacation,approval.period,기간,Period
-vacation,approval.status,상태,Status
-vacation,application.compVacationApplication,보상휴가 신청,Compensatory Vacation Application
-vacation,application.vacationApplication,휴가 신청,Vacation Application
-vacation,application.compVacationInfo,보상휴가 신청 정보,Compensatory Vacation Info
-vacation,application.vacationInfo,휴가 신청 정보,Vacation Info
-vacation,application.compTitleExample,예: 프로젝트 마감 초과근무,e.g. Project deadline overtime
-vacation,application.vacationTitleExample,예: 개인 사유,e.g. Personal reason
-vacation,application.compReasonDesc,초과근무를 하게 된 사유를 상세히 기입해 주세요.,Please describe the reason for overtime in detail.
-vacation,application.vacationReasonDesc,휴가 사용 사유를 상세히 기입해 주세요.,Please describe the reason for vacation in detail.
-vacation,application.approverRequired,승인자를 선택해주세요,Please select an approver
-vacation,application.approverPlaceholder,결재자를 선택해주세요,Select an approver
 dashboard,saveError,홈 설정을 저장하지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not save your Home settings. Please try again in a moment.
 user,edit.title,사용자 수정,Edit User
 user,edit.name,이름,Name
@@ -1109,87 +1053,13 @@ dashboard,workHistory.achievedMessage,오늘 채워야 할 시간을 다 채웠�
 dashboard,workHistory.remainingMessage,{{time}} 더 쓰면 오늘 채워야 할 시간을 채워요.,Log {{time}} more to fill today's required hours.
 dashboard,systemCheck.noSystem,확인할 시스템이 없어요,No systems to check
 dashboard,systemCheck.noSystemDesc,시스템을 등록하면 여기에 보여요.,Systems you register will show up here.
-vacation,approval.title,휴가 신청 상세보기,Vacation Request Details
-vacation,approval.basicInfo,기본 정보,Basic Information
-vacation,approval.applicantInfo,신청자 정보,Applicant Information
-vacation,approval.applicantLabel,신청자,Applicant
-vacation,approval.requestDateLabel,신청일시,Request Date
-vacation,approval.policyInfo,휴가 정책 정보,Vacation Policy Information
-vacation,approval.policyName,정책명,Policy Name
-vacation,approval.vacationType,휴가 종류,Vacation Type
-vacation,approval.grantStandardTime,부여 기준 시간,Grant Standard Time
-vacation,approval.grantDate,부여일,Grant Date
-vacation,approval.expiryDate,만료일,Expiry Date
-vacation,approval.requestDetail,신청 상세,Request Detail
-vacation,approval.titleLabel,제목,Title
-vacation,approval.targetDate,대상 일자,Target Date
-vacation,approval.totalTime,총 {{time}},{{time}} total
-vacation,approval.currentStatus,현재 상태,Current Status
-vacation,approval.currentApprover,현재 결재자,Current Approver
-vacation,approval.requestReason,신청 사유,Request Reason
-vacation,approval.rejectionReason,반려 사유,Rejection Reason
-vacation,approval.approvalLine,결재선,Approval Line
-vacation,approval.canceled,신청 취소됨,Request Canceled
-vacation,approval.canceledDesc,결재 승인이 필요하지 않습니다,No approval required
-vacation,approval.noApprovers,결재자 정보가 없습니다.,No approver information.
-vacation,approval.approvalProcess,결재 처리,Approval Process
-vacation,approval.rejectReasonLabel,반려 사유,Rejection Reason
-vacation,approval.confirmReject,반려 확정,Confirm Rejection
-vacation,approval.approveBtn,승인,Approve
-vacation,approval.rejectBtn,반려,Reject
-vacation,approval.approvalNotice,승인 완료되면 변경 내역이 바로 반영됩니다.,Changes will be applied immediately after approval.
 login,idLabel,ID,ID
 login,passwordLabel,Password,Password
 login,idPlaceholder,아이디를 입력하세요,Enter your ID
 login,loginBtn,Login,Login
 login,loadingBtn,Loading...,Loading...
 login,orContinueWith,Or continue with,Or continue with
-vacation,application.compVacation,보상휴가 신청,Compensatory Leave Request
-vacation,application.vacationRequest,휴가 신청,Vacation Request
-vacation,application.writtenAt,{{dateTime}} 작성,Written at {{dateTime}}
-vacation,application.compVacationInfo,보상휴가 신청 정보,Compensatory Leave Info
-vacation,application.vacationInfo,휴가 신청 정보,Vacation Request Info
-vacation,application.titleLabel,제목,Title
-vacation,application.titleCompPlaceholder,예: 프로젝트 마감 초과근무,e.g. Project deadline overtime
-vacation,application.titleVacationPlaceholder,예: 개인 사유,e.g. Personal reason
-vacation,application.policyLabel,휴가 정책,Vacation Policy
-vacation,application.policySelectPlaceholder,휴가 정책을 선택해주세요,Please select a vacation policy
-vacation,application.overtimeDateLabel,초과근무일,Overtime Date
-vacation,application.startTimeLabel,시작 시간,Start Time
-vacation,application.endTimeLabel,종료 시간,End Time
-vacation,application.grantTimeLabel,부여 시간,Grant Time
-vacation,application.dayUnit,일,Day
-vacation,application.hourUnit,시간,Hour
-vacation,application.minuteUnit,분,Minute
-vacation,application.nHours,{{count}}시간,{{count}} hours
-vacation,application.nHours_one,{{count}}시간,{{count}} hour
-vacation,application.nMinutes,{{count}}분,{{count}} minutes
-vacation,application.nMinutes_one,{{count}}분,{{count}} minute
-vacation,application.timeSelectDesc,부여할 휴가를 일/시간 단위로 선택해주세요.,Select vacation in days/hours.
-vacation,application.timeSelectDescWithMin,부여할 휴가를 일/시간/분 단위로 선택해주세요.,Select vacation in days/hours/minutes.
-vacation,application.totalTimeLabel,총,Total
-vacation,application.overtimeHoursLabel,초과근무 시간,Overtime Hours
-vacation,application.expectedCompTime,예상 보상 시간,Expected Compensation Time
-vacation,application.dateLabel,날짜,Date
-vacation,application.reasonLabel,휴가 사유,Vacation Reason
-vacation,application.compReasonLabel,초과근무 사유,Overtime Reason
-vacation,application.compReasonPlaceholder,초과근무를 하게 된 사유를 상세히 기입해 주세요.,Please describe the overtime reason in detail.
-vacation,application.vacationReasonPlaceholder,휴가 사용 사유를 상세히 기입해 주세요.,Please describe the vacation reason in detail.
-vacation,application.approverTitle,승인자 지정,Assign Approvers
-vacation,application.stepApprover,{{step}}단계 인원 지정,Assign Step {{step}} Approver
-vacation,application.approverSelectPlaceholder,결재자를 선택해주세요,Please select an approver
-vacation,application.selectPolicyFirst,휴가 정책을 먼저 선택해주세요,Please select a vacation policy first
-vacation,application.summaryTitle,신청 요약,Request Summary
-vacation,application.summaryVacationPolicy,휴가 정책,Vacation Policy
-vacation,application.summaryOvertimeHours,초과근무 시간,Overtime Hours
-vacation,application.summaryExpectedComp,예상 보상 시간,Expected Compensation Time
-vacation,application.noticeMessage,승인 완료되면 변경 내역이 바로 반영됩니다.,Changes will be applied immediately after approval.
 vacation,application.cancelBtn,취소,Cancel
-vacation,application.submitBtn,결재 요청,Submit Request
-vacation,application.policyRequired,휴가 정책을 선택해주세요.,Please select a vacation policy.
-vacation,application.titleRequired,제목을 입력해주세요.,Please enter a title.
-vacation,application.dateRequired,날짜를 선택해주세요.,Please select a date.
-vacation,application.reasonRequired,사유를 입력해주세요.,Please enter a reason.
 work,report.fileNamePrefix,업무이력,WorkHistory
 work,unregistered.fileNamePrefix,미등록_업무시간,Unregistered_WorkHours
 work,unregistered.fileNameYear,년,year
@@ -1215,9 +1085,6 @@ common,noInfo,정보 없음,No info
 common,day,일,d
 common,hour,시간,h
 common,minute,분,m
-vacation,approval.rejectReasonRequired,반려 사유를 입력해주세요.,Please enter a rejection reason.
-vacation,approval.rejectReasonPlaceholder,반려 사유를 입력해주세요...,Please enter the rejection reason...
-vacation,approval.nthApproval,{{index}}차 승인,{{index}}st Approval
 admin,notice.title,공지사항 관리,Notice Management
 admin,notice.description,공지사항을 관리하고 추가/수정/삭제할 수 있습니다,Manage notices - add/edit/delete
 admin,notice.addTitle,새 공지사항 추가,Add New Notice
