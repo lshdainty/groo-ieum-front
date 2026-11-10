@@ -17,7 +17,7 @@ import { useSnackbar } from '@/shared/ds/snackbar'
 import { Textarea } from '@/shared/ds/textarea'
 import { DayField } from '@/shared/ui/groo/day-field'
 import { GrantTimeField } from '@/shared/ui/groo/grant-time-field'
-import { RadioBox, RadioBoxGroup } from '@/shared/ui/groo/select-box'
+import { RadioSelectBox, RadioSelectBoxGroup } from '@/shared/ds/select-box'
 import { useCompanyQuery, useCompanyWithDepartmentsQuery } from '@/entities/company'
 import { useEffectiveTypesQuery, useExpirationTypesQuery, useVacationTypesQuery } from '@/entities/type'
 import { usePostVacationPolicyMutation } from '@/entities/vacation-policy'
@@ -147,7 +147,7 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
 
   const stepOne = (
     <Field label={t('adminPolicy.create.methodLabel')} labelHidden invalid={methodError} errorMessage={t('adminPolicy.create.methodRequired')}>
-      <RadioBoxGroup
+      <RadioSelectBoxGroup
         value={method ?? ''}
         onValueChange={(v) => {
           // 이름 중복 오류는 그 이름에 대한 것 — 다른 방법의 (다른) 이름 칸에는 남기지 않는다
@@ -159,9 +159,9 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
         data-method-group
       >
         {GRANT_METHODS.map((m) => (
-          <RadioBox key={m} value={m} label={grantMethodLabel(t, m)} description={t(`adminPolicy.create.methodDesc.${m}`)} data-method={m} />
+          <RadioSelectBox key={m} value={m} label={grantMethodLabel(t, m)} description={t(`adminPolicy.create.methodDesc.${m}`)} data-method={m} />
         ))}
-      </RadioBoxGroup>
+      </RadioSelectBoxGroup>
     </Field>
   )
 
@@ -269,9 +269,9 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
                 errorMessage={t('adminPolicy.create.firstGrantDateRequired')}
               />
               <Field label={t('adminPolicy.create.howMany')}>
-                <RadioBoxGroup value={values.recurring} onValueChange={(v) => set('recurring', v as 'Y' | 'N')} aria-label={t('adminPolicy.create.howMany')} data-recurring-group>
-                  <RadioBox value='Y' label={t('adminPolicy.create.forever')} description={t('adminPolicy.create.foreverDesc')} />
-                  <RadioBox
+                <RadioSelectBoxGroup value={values.recurring} onValueChange={(v) => set('recurring', v as 'Y' | 'N')} aria-label={t('adminPolicy.create.howMany')} data-recurring-group>
+                  <RadioSelectBox value='Y' label={t('adminPolicy.create.forever')} description={t('adminPolicy.create.foreverDesc')} />
+                  <RadioSelectBox
                     value='N'
                     label={t('adminPolicy.create.limited')}
                     description={t('adminPolicy.create.limitedDesc')}
@@ -288,16 +288,16 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
                       ) : undefined
                     }
                   />
-                </RadioBoxGroup>
+                </RadioSelectBoxGroup>
               </Field>
             </>
           )}
           {f.flexible && (
             <Field label={t('adminPolicy.create.timeKind')}>
-              <RadioBoxGroup value={values.flexible} onValueChange={(v) => set('flexible', v as 'N' | 'Y')} aria-label={t('adminPolicy.create.timeKind')} data-flexible-group>
-                <RadioBox value='N' label={t('adminPolicy.create.fixed')} description={t('adminPolicy.create.fixedDesc')} />
-                <RadioBox value='Y' label={t('adminPolicy.create.flexible')} description={t('adminPolicy.create.flexibleDesc')} />
-              </RadioBoxGroup>
+              <RadioSelectBoxGroup value={values.flexible} onValueChange={(v) => set('flexible', v as 'N' | 'Y')} aria-label={t('adminPolicy.create.timeKind')} data-flexible-group>
+                <RadioSelectBox value='N' label={t('adminPolicy.create.fixed')} description={t('adminPolicy.create.fixedDesc')} />
+                <RadioSelectBox value='Y' label={t('adminPolicy.create.flexible')} description={t('adminPolicy.create.flexibleDesc')} />
+              </RadioSelectBoxGroup>
             </Field>
           )}
           {(method === 'REPEAT_GRANT' || values.flexible === 'N') && (
