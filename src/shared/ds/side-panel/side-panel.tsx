@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
 import { useLeaveConfirm } from "@/shared/ds/alert-dialog";
-import { useBackClose } from "@/shared/ds/overlay";
+import { useBackClose, useRefocusAfterBusy } from "@/shared/ds/overlay";
 import { useInputButtonSurface } from "@/shared/ds/input-button";
 import { useScrollFog } from "@/shared/ds/scroll-fog";
 
@@ -29,6 +29,8 @@ import { useScrollFog } from "@/shared/ds/scroll-fog";
  *   - 끌기는 손가락 · 펜만(마우스로 끌면 글 고르기와 겹친다) — 가로로 10 을 먼저 움직여야 끌기로 본다(세로면 본문 스크롤).
  *     놓을 때 0.4px/ms 보다 빨랐거나 폭의 25% 이상 밀었으면 닫고, 아니면 300ms 로 제자리(Bottom Sheet 와 같은 기준). 딤은 손가락을 따라 옅어진다.
  *   - dirty 면 어느 길이든 닫기 전에 "작성한 내용이 사라져요" 를 묻는다 — [계속 작성] 이면 그대로(끌던 패널은 제자리로).
+ *   - busy(저장 중)면 어느 길도 받지 않는다 — 묻지도 않는다(Esc · 바깥 · 닫기 · 끌기 무시, 뒤로 가기는 칸을 다시 쌓는다). 본문 입력도 받지 않는다(inert),
+ *     content 는 aria-busy. 저장 단추의 로딩이 "기다려라" 를 말한다(Bottom Sheet 와 같은 계약 — [sso-front 판에서 손으로 더한 자리, SOURCE.md 13]).
  *   - 왼쪽 패널(주 메뉴)은 창이 768 이상으로 넓어지면 닫힌다 — 사이드바가 그 자리를 맡는다. 주 메뉴의 항목을 누르면 이동하고 닫는 것은
  *     Side Navigation 의 onNavigate 로 쓰는 쪽이 한다.
  *
@@ -130,6 +132,8 @@ function useBodyScroll(ref: React.RefObject<HTMLElement | null>) {
 // ── 패널 문맥 ─────────────────────────────────────────────────
 type PanelContextValue = {
   form: boolean;
+  /** 저장 중 — 끌기 · 본문 입력을 받지 않는다 */
+  busy: boolean;
   /** 닫기를 청한다 — 바로 닫았으면 true, 바뀐 값이 있어 물었으면 false */
   requestClose: () => boolean;
   setSide: (side: Side) => void;
@@ -156,6 +160,11 @@ export interface SidePanelProps {
   form?: boolean;
   /** 바뀐 값이 있다 — 닫기 전에 "작성한 내용이 사라져요" 를 묻는다 */
   dirty?: boolean;
+  /**
+   * 저장하는 중이다(저장 단추가 로딩) — Esc · 바깥 · 닫기 · 끌기 · 뒤로 가기를 받지 않고 본문은 입력을 받지 않는다(Bottom Sheet 의 busy 와 같다).
+   * 뒤로 가기는 칸을 다시 쌓아 다음 뒤로 가기도 이 패널로 온다
+   */
+  busy?: boolean;
   /** 띄울 자리 — 기본 document.body. 카탈로그가 무대 안에 연다 */
   container?: HTMLElement | null;
   /** false 면 초점 가둠 · 바깥 비활성 · 뒤 화면 숨김 · 스크롤 잠금을 끈다(카탈로그 · 문서 전용). 기본 켬 */
@@ -166,14 +175,16 @@ export interface SidePanelProps {
 // 왼쪽 패널(주 메뉴)이 닫히는 폭 — 사이드바가 보이기 시작하는 breakpoint-md
 const SIDEBAR_QUERY = "(min-width: 768px)";
 
-function SidePanel({ open: openProp, defaultOpen, onOpenChange, form = false, dirty = false, container, modal = true, children }: SidePanelProps) {
+function SidePanel({ open: openProp, defaultOpen, onOpenChange, form = false, dirty = false, busy = false, container, modal = true, children }: SidePanelProps) {
   const [open, setOpen] = useOpenState(openProp, defaultOpen, onOpenChange);
   const narrow = useInputButtonSurface() === "sheet";
   const contentRef = React.useRef<HTMLDivElement>(null);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const [side, setSide] = React.useState<Side>("right");
-  const leave = useLeaveConfirm({ dirty, contentRef, leave: () => setOpen(false) });
-  // 뒤로 가기(1280 미만) — 바뀐 값이 있어 물었으면 칸을 다시 쌓는다
+  // busy 면 request() 가 닫지도 묻지도 않고 false 를 돌려준다 — Esc · 닫기 · 딤 · 뒤로 가기가 모두 이 한 자리를 지난다
+  const leave = useLeaveConfirm({ dirty, contentRef, busy, leave: () => setOpen(false) });
+  useRefocusAfterBusy(busy, contentRef);
+  // 뒤로 가기(1280 미만) — 바뀐 값이 있어 물었거나 저장 중이면 칸을 다시 쌓는다
   // (Desk 판 useBackClose 는 칸을 다시 쌓는 함수를 콜백 인자로 준다 — SOURCE.md 손으로 고친 자리 5)
   useBackClose(open && narrow, (keep) => {
     if (!leave.request()) keep();
@@ -190,8 +201,8 @@ function SidePanel({ open: openProp, defaultOpen, onOpenChange, form = false, di
     return () => mql.removeEventListener("change", check);
   }, [open, side, setOpen]);
   const value = React.useMemo<PanelContextValue>(
-    () => ({ form, requestClose: leave.request, setSide, contentRef, triggerRef, container, modal }),
-    [form, leave.request, container, modal],
+    () => ({ form, busy, requestClose: leave.request, setSide, contentRef, triggerRef, container, modal }),
+    [form, busy, leave.request, container, modal],
   );
   return (
     <PanelContext.Provider value={value}>
@@ -384,6 +395,7 @@ const SidePanelContent = React.forwardRef<React.ElementRef<typeof DialogPrimitiv
             data-size={side === "right" ? size : undefined}
             data-form={ctx.form || undefined}
             aria-modal="true"
+            aria-busy={ctx.busy || undefined}
             {...(description == null ? { "aria-describedby": undefined } : null)}
             className={cn(CONTENT, SIDE[side], side === "right" && SIZE[size], className)}
             style={style}
@@ -408,7 +420,7 @@ const SidePanelContent = React.forwardRef<React.ElementRef<typeof DialogPrimitiv
             }}
             onPointerDown={(e) => {
               onPointerDown?.(e);
-              if (ctx.form || e.pointerType === "mouse" || e.button !== 0 || e.defaultPrevented) return;
+              if (ctx.form || ctx.busy || e.pointerType === "mouse" || e.button !== 0 || e.defaultPrevented) return;
               dragRef.current = { id: e.pointerId, x: e.clientX, y: e.clientY, t: e.timeStamp, axis: null, dx: 0, width: e.currentTarget.getBoundingClientRect().width };
             }}
             onPointerMove={(e) => {
@@ -493,12 +505,15 @@ export interface SidePanelBodyProps extends React.HTMLAttributes<HTMLDivElement>
 
 const SidePanelBody = React.forwardRef<HTMLDivElement, SidePanelBodyProps>(({ scrollFog = false, className, ...props }, ref) => {
   const side = React.useContext(SideContext);
+  const busy = React.useContext(PanelContext)?.busy ?? false;
   const own = React.useRef<HTMLDivElement>(null);
   useBodyScroll(own);
   useScrollFog(own, scrollFog ? "overlayBody" : null);
   return (
     <div
       ref={mergeRefs(ref, own)}
+      // 저장 중 — 본문은 입력을 받지 않는다(모양은 그대로)
+      inert={busy || undefined}
       data-slot="side-panel-body"
       data-scroll-fog={scrollFog ? "overlayBody" : undefined}
       className={cn(BODY, BODY_SIDE[side], scrollFog ? BODY_FOG : BODY_PLAIN, className)}
