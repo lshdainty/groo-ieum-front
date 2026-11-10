@@ -1945,6 +1945,5 @@ vacation,req.form.reasonRequired,사유를 적어주세요.,Enter a reason.
 vacation,req.form.approverRequired,{{k}}단계 결재자를 골라주세요.,Pick a step {{k}} approver.
 vacation,req.form.saved,휴가를 신청했어요.,Leave requested.
 vacation,req.form.saveFailed,신청하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't send the request. Please try again in a moment.
-vacation,req.form.hoursMinutes,{{h}}시간 {{m}}분,{{h}} h {{m}} min
 vacation,req.form.minutesValue,{{count}}분,{{count}} minutes
 vacation,req.form.minutesValue_one,{{count}}분,{{count}} minute

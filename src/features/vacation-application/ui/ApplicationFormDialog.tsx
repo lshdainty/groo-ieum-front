@@ -59,7 +59,7 @@ const sumText = (total: number, t: (k: string, o?: Record<string, unknown>) => s
 const durationText = (total: number, t: (k: string, o?: Record<string, unknown>) => string): string => {
   const h = Math.floor(total / 60)
   const m = total % 60
-  if (h > 0 && m > 0) return t('req.form.hoursMinutes', { h, m })
+  if (h > 0 && m > 0) return `${t('req.form.hoursValue', { count: h })} ${t('req.form.minutesValue', { count: m })}`
   if (h > 0) return t('req.form.hoursValue', { count: h })
   if (m > 0) return t('req.form.minutesValue', { count: m })
   return t('req.form.hoursValue', { count: 0 })
