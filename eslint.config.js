@@ -34,6 +34,8 @@ export default tseslint.config(
         {
           paths: [
             { name: 'sonner', message: '토스트는 쓰지 않는다 — 성공은 ds Snackbar, 실패는 Callout · 칸 오류(write-error)' },
+            { name: 'antd', message: 'antd 는 걷었다 — 화면은 shared/ds 부품으로' },
+            { name: '@ant-design/v5-patch-for-react-19', message: 'antd 와 함께 걷었다' },
             { name: 'next-themes', message: '테마는 shared/ui/theme 가 맡는다' },
           ],
         },

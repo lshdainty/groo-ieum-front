@@ -10,11 +10,6 @@ import { QueryProvider, WriteFailureBridge } from '@/app/providers'
 import { AppRouter } from '@/app/router'
 import { BrowserRouter } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
-/*
-  react19에서 antd 호환성 해결
-  https://ant.design/docs/react/v5-for-19
-*/
-import '@ant-design/v5-patch-for-react-19'
 
 // interceptor 초기화를 위해 api import 유지
 void apiClient
