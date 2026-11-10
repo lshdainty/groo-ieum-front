@@ -22,6 +22,7 @@ export function DayField({
   errorMessage,
   inputRef,
   required = true,
+  size,
 }: {
   label: string
   value: string
@@ -32,6 +33,8 @@ export function DayField({
   inputRef?: React.Ref<HTMLButtonElement>
   /** 필수 점 — 선택 칸이면 false(기본 true) */
   required?: boolean
+  /** 칸 크기 — 기본(responsive)은 1280 미만 52 · 이상 40. 표 안 편집 줄처럼 다른 칸과 높이를 맞출 때 */
+  size?: 'large' | 'medium' | 'responsive'
 }) {
   const { t: tc } = useTranslation('common')
   const surface = useInputButtonSurface()
@@ -41,6 +44,7 @@ export function DayField({
   const trigger = (
     <InputButton
       ref={inputRef}
+      size={size}
       placeholder={placeholder}
       value={current ? formatDateValue(current, new Date()) : ''}
       suffixIcon={<CalendarDays />}
