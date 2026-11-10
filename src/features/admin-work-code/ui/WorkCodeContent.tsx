@@ -105,13 +105,13 @@ export const WorkCodeContent = () => {
   return (
     <ScreenBody density='medium'>
       <ScreenTitleRow title={t('adminWorkCode.title')} action={addButton} />
-      <div className='bg-bg-layer-default min-[48rem]:bg-transparent'>
+      <div className='bg-bg-layer-default md:bg-transparent'>
         <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
           <TabsList aria-label={t('adminWorkCode.tabsAria')} layout={desktop ? 'hug' : 'fill'} size={desktop ? 'medium' : 'small'}>
             <TabsTrigger value='part'>{t('workPart')}</TabsTrigger>
             <TabsTrigger value='division'>{t('workDivision')}</TabsTrigger>
           </TabsList>
-          <TabsContent value='part' className='min-[48rem]:mt-x4'>
+          <TabsContent value='part' className='md:mt-x4'>
             <WorkCodeTable
               caption={t('workPart')}
               rows={partRows}
@@ -126,7 +126,7 @@ export const WorkCodeContent = () => {
               onDelete={(r) => askDelete(r, false)}
             />
           </TabsContent>
-          <TabsContent value='division' className='min-[48rem]:mt-x4'>
+          <TabsContent value='division' className='md:mt-x4'>
             <WorkCodeTable
               caption={t('workDivision')}
               rows={divisionRows}

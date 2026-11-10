@@ -27,16 +27,16 @@ const Authority = () => {
     <ProtectedPage permission='ROLE:MANAGE'>
       <ScreenBody density='high'>
         <ScreenTitleRow title={t('authority.title')} />
-        <div className='bg-bg-layer-default min-[48rem]:bg-transparent'>
+        <div className='bg-bg-layer-default md:bg-transparent'>
           <Tabs value={tab} onValueChange={(v) => setTab(v as AuthorityTab)}>
             <TabsList aria-label={t('authority.tabsAria')} layout={desktop ? 'hug' : 'fill'} size={desktop ? 'medium' : 'small'}>
               <TabsTrigger value='roles'>{t('authority.roles')}</TabsTrigger>
               <TabsTrigger value='users'>{t('authority.users')}</TabsTrigger>
             </TabsList>
-            <TabsContent value='roles' className='min-[48rem]:mt-x4'>
+            <TabsContent value='roles' className='md:mt-x4'>
               <RoleManagementPanel onDirtyChange={onDirty} discard={guard} />
             </TabsContent>
-            <TabsContent value='users' className='min-[48rem]:mt-x4'>
+            <TabsContent value='users' className='md:mt-x4'>
               <UserManagementPanel />
             </TabsContent>
           </Tabs>

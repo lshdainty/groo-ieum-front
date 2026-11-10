@@ -67,7 +67,7 @@ export const VacationContent = () => {
           </Select>
         }
       />
-      <div className='bg-bg-layer-default min-[48rem]:bg-transparent' data-member-vacation-phone>
+      <div className='bg-bg-layer-default md:bg-transparent' data-member-vacation-phone>
         <Tabs value={tab} onValueChange={(v) => setTab(v as VacationTab)}>
           <TabsList aria-label={t('memberVacation.tabsAria')} layout={desktop ? 'hug' : 'fill'} size={desktop ? 'medium' : 'small'}>
             <TabsTrigger value='inbox' notification={waiting} aria-describedby={waiting ? 'vacation-inbox-pending' : undefined}>
@@ -76,7 +76,7 @@ export const VacationContent = () => {
             <TabsTrigger value='staff'>{t('memberVacation.tabStaff')}</TabsTrigger>
           </TabsList>
           {pendingNote}
-          <div className='flex items-center justify-between gap-x3 px-x6 pb-x1 pt-x3 min-[48rem]:hidden'>
+          <div className='flex items-center justify-between gap-x3 px-x6 pb-x1 pt-x3 md:hidden'>
             <Select {...yearSelectProps} className='w-[9rem]'>
               {yearItems}
             </Select>
@@ -84,7 +84,7 @@ export const VacationContent = () => {
               <span className='text-t3 font-normal text-fg-neutral-subtle'>{t('memberVacation.count', { count: rows.length })}</span>
             )}
           </div>
-          <TabsContent value='inbox' className='min-[48rem]:mt-x4'>
+          <TabsContent value='inbox' className='md:mt-x4'>
             <ApprovalInbox
               key={selectedYear}
               rows={rows}
@@ -94,7 +94,7 @@ export const VacationContent = () => {
               onRetry={() => void approvals.refetch()}
             />
           </TabsContent>
-          <TabsContent value='staff' className='pt-x3 min-[48rem]:mt-x4 min-[48rem]:pt-0'>
+          <TabsContent value='staff' className='pt-x3 md:mt-x4 md:pt-0'>
             <StaffVacation />
           </TabsContent>
         </Tabs>

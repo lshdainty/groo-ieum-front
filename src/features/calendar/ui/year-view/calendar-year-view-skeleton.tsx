@@ -6,7 +6,7 @@ export const CalendarYearViewSkeleton = () => (
     pending
     className='contents'
     fallback={
-      <div aria-hidden className='grid grid-cols-2 gap-x4 p-x4 min-[64rem]:grid-cols-3 min-[80rem]:grid-cols-4'>
+      <div aria-hidden className='grid grid-cols-2 gap-x4 p-x4 md:grid-cols-3 lg:grid-cols-4'>
         {Array.from({ length: 12 }, (_, i) => (
           <Skeleton key={i} radius='12' className='block h-[200px] w-full' />
         ))}

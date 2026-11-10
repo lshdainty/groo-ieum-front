@@ -37,7 +37,7 @@ const UsersSkeleton = ({ desktop }: { desktop: boolean }) => {
   }
   return (
     <div className='flex flex-col gap-x6'>
-      <div className='grid grid-cols-2 gap-x6 min-[80rem]:grid-cols-4'>
+      <div className='grid grid-cols-2 gap-x6 lg:grid-cols-4'>
         {[0, 1, 2, 3].map((i) => (
           <Card key={i}>
             <div className='flex items-center gap-x3'>

@@ -22,9 +22,9 @@ export function ScreenBody({
     <div
       data-density={density}
       className={cn(
-        'min-[48rem]:px-(--layout-margin) min-[48rem]:pb-(--spacing-screen-bottom) min-[48rem]:pt-(--layout-margin)',
+        'md:px-(--layout-margin) md:pb-(--spacing-screen-bottom) md:pt-(--layout-margin)',
         density === 'medium' &&
-          'min-[48rem]:mx-auto min-[48rem]:w-full min-[48rem]:max-w-(--layout-max-low) min-[80rem]:max-w-(--layout-max-medium)',
+          'md:mx-auto md:w-full md:max-w-(--layout-max-low) lg:max-w-(--layout-max-medium)',
         className
       )}
     >
@@ -47,7 +47,7 @@ export function ScreenTitleRow({
   action?: ReactNode
 }) {
   return (
-    <div className='mb-x6 hidden items-center justify-between gap-x4 min-[48rem]:flex'>
+    <div className='mb-x6 hidden items-center justify-between gap-x4 md:flex'>
       <div className='min-w-0'>
         <ScreenTitle className='m-0'>{title}</ScreenTitle>
         {description != null && <p className='mt-x1 mb-0 text-t5 font-normal text-fg-neutral-muted'>{description}</p>}

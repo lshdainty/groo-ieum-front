@@ -43,9 +43,9 @@ const Breaks = () => (
 export function ScheduleTable({ users }: { users: GetUsersResp[] }) {
   const { t } = useTranslation('work')
   return (
-    <div role='table' aria-label={t('sch.boardAria')} className='min-w-[700px] min-[80rem]:min-w-[740px]'>
+    <div role='table' aria-label={t('sch.boardAria')} className='min-w-[700px] lg:min-w-[740px]'>
       <div role='row' className='flex border-b border-stroke-neutral-subtle'>
-        <div role='columnheader' className='sticky left-0 z-10 w-[180px] shrink-0 bg-bg-layer-default min-[80rem]:w-[220px]'>
+        <div role='columnheader' className='sticky left-0 z-10 w-[180px] shrink-0 bg-bg-layer-default lg:w-[220px]'>
           <span className='sr-only'>{t('sch.listCaption')}</span>
         </div>
         <div role='columnheader' className='min-w-0 flex-1 px-x4'>
@@ -56,7 +56,7 @@ export function ScheduleTable({ users }: { users: GetUsersResp[] }) {
         const span = parseWorkSpan(user.user_work_time)
         return (
           <div role='row' key={user.user_id} data-schedule-row={user.user_id} className='flex min-h-[64px] border-b border-stroke-neutral-subtle last:border-b-0'>
-            <div role='rowheader' className='sticky left-0 z-10 flex w-[180px] shrink-0 items-center gap-x3 bg-bg-layer-default py-x3 pl-x6 pr-x3 min-[80rem]:w-[220px]'>
+            <div role='rowheader' className='sticky left-0 z-10 flex w-[180px] shrink-0 items-center gap-x3 bg-bg-layer-default py-x3 pl-x6 pr-x3 lg:w-[220px]'>
               <Avatar name={user.user_name} src={photoOf(user)} size={36} />
               <div className='min-w-0'>
                 <div className={cn('text-t4 font-bold text-fg-neutral', WORD)}>{user.user_name}</div>

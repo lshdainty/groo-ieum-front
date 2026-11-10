@@ -13,7 +13,7 @@ export function UserCompanyCard({ value: users, desktop }: { value: GetUsersResp
   if (stats.length === 0) return null
   if (desktop) {
     return (
-      <div className='grid grid-cols-2 gap-x6 min-[80rem]:grid-cols-4' data-company-stats>
+      <div className='grid grid-cols-2 gap-x6 lg:grid-cols-4' data-company-stats>
         {stats.map((stat) => (
           <Card key={stat.id} data-company={stat.id}>
             <UserCompanyStatsItem {...stat} />

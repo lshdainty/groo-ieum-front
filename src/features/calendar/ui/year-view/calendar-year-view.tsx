@@ -25,7 +25,7 @@ const CalendarYearView = ({ allEvents, onPickMonth }: IProps) => {
 
   return (
     <div className='h-full w-full overflow-y-auto p-x4'>
-      <div className='grid grid-cols-2 gap-x4 min-[64rem]:grid-cols-3 min-[80rem]:grid-cols-4'>
+      <div className='grid grid-cols-2 gap-x4 md:grid-cols-3 lg:grid-cols-4'>
         {months.map((month) => (
           <YearViewMonth key={month.toString()} month={month} events={startOnly} onPickMonth={onPickMonth} />
         ))}

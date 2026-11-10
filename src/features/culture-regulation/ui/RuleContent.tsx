@@ -30,7 +30,7 @@ export const RuleContent = () => {
               <h2 id={`rule-${s.id}`} className='mt-x2 mb-x3 text-t5 font-bold text-fg-neutral'>
                 {s.title}
               </h2>
-              <div className='grid grid-cols-3 gap-x6 min-[80rem]:grid-cols-4'>
+              <div className='grid grid-cols-3 gap-x6 lg:grid-cols-4'>
                 {s.cards.map((c) => (
                   <RuleCard key={c.id} card={c} />
                 ))}
