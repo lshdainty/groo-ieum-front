@@ -3,13 +3,9 @@
 import dayjs from 'dayjs';
 import { createContext, useCallback, useContext, useState } from 'react';
 
-import { usePermission } from '@/entities/session';
-import { AddEventDialog } from '@/features/calendar/ui/dialogs/add-event-dialog';
-
 interface DragSelectContextType {
-  isSelecting: boolean;
-  selectionStart: Date | null;
-  selectionEnd: Date | null;
+  /** 그 날이 끌고 있는 범위 안에 드는지 */
+  isDateInSelection: (date: Date) => boolean;
   startSelection: (date: Date) => void;
   updateSelection: (date: Date) => void;
   endSelection: () => void;
@@ -19,88 +15,74 @@ const DragSelectContext = createContext<DragSelectContextType | null>(null);
 
 export const useDragSelect = () => {
   const context = useContext(DragSelectContext);
-  if (!context) {
-    throw new Error('useDragSelect must be used within a DragSelectProvider');
-  }
+  if (!context) throw new Error('useDragSelect must be used within a DragSelectProvider');
   return context;
 };
 
-export const DragSelectProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isSelecting, setIsSelecting] = useState(false);
-  const [selectionStart, setSelectionStart] = useState<Date | null>(null);
-  const [selectionEnd, setSelectionEnd] = useState<Date | null>(null);
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogDateRange, setDialogDateRange] = useState<{ start: Date; end: Date } | null>(null);
-
-  const { hasAnyPermission } = usePermission();
-
-  // 권한 체크: 둘 중 하나라도 있으면 일정 추가 가능
-  const canAddEvent = hasAnyPermission(['VACATION:USE', 'VACATION:MANAGE', 'SCHEDULE:WRITE', 'SCHEDULE:MANAGE']);
+/**
+ * 월 격자 누름 · 끌기(768 이상 — G 35). 한 날을 누르면 그 날을 고르고(`onSelectDay`), 이미 고른 날을 다시 누르면 그 날로 일정 폼(`onCreate`).
+ * 두 날 이상을 끌어 놓으면 그 기간으로 일정 폼. 폼을 만들 수 없는 사람(`canCreate` false)은 고르기만 된다.
+ */
+export const DragSelectProvider = ({
+  children,
+  selectedDate,
+  canCreate,
+  onSelectDay,
+  onCreate,
+}: {
+  children: React.ReactNode;
+  selectedDate: Date;
+  canCreate: boolean;
+  onSelectDay: (date: Date) => void;
+  onCreate: (start: Date, end?: Date) => void;
+}) => {
+  const [anchor, setAnchor] = useState<Date | null>(null);
+  const [current, setCurrent] = useState<Date | null>(null);
 
   const startSelection = useCallback((date: Date) => {
-    // 권한 없으면 드래그 선택 비활성화
-    if (!canAddEvent) return;
+    setAnchor(date);
+    setCurrent(date);
+  }, []);
 
-    setIsSelecting(true);
-    setSelectionStart(date);
-    setSelectionEnd(date);
-  }, [canAddEvent]);
-
-  const updateSelection = useCallback((date: Date) => {
-    if (isSelecting) {
-      setSelectionEnd(date);
-    }
-  }, [isSelecting]);
+  const updateSelection = useCallback(
+    (date: Date) => {
+      if (anchor) setCurrent(date);
+    },
+    [anchor]
+  );
 
   const endSelection = useCallback(() => {
-    if (isSelecting && selectionStart && selectionEnd) {
-      setIsSelecting(false);
-      
-      // Calculate actual start and end (handle reverse drag)
-      const start = dayjs(selectionStart).isBefore(selectionEnd) ? selectionStart : selectionEnd;
-      const end = dayjs(selectionStart).isBefore(selectionEnd) ? selectionEnd : selectionStart;
-
-      setDialogDateRange({ start, end });
-      setDialogOpen(true);
-      
-      // Reset selection state after a short delay or immediately?
-      // Keeping them null clears the visual feedback immediately.
-      setSelectionStart(null);
-      setSelectionEnd(null);
-    } else {
-      setIsSelecting(false);
-      setSelectionStart(null);
-      setSelectionEnd(null);
+    if (anchor && current) {
+      if (dayjs(anchor).isSame(current, 'day')) {
+        if (dayjs(anchor).isSame(selectedDate, 'day')) {
+          if (canCreate) onCreate(anchor);
+        } else {
+          onSelectDay(anchor);
+        }
+      } else if (canCreate) {
+        const first = dayjs(anchor).isBefore(current) ? anchor : current;
+        const last = dayjs(anchor).isBefore(current) ? current : anchor;
+        onCreate(first, last);
+      }
     }
-  }, [isSelecting, selectionStart, selectionEnd]);
+    setAnchor(null);
+    setCurrent(null);
+  }, [anchor, current, selectedDate, canCreate, onSelectDay, onCreate]);
+
+  const isDateInSelection = useCallback(
+    (date: Date) => {
+      if (!anchor || !current || dayjs(anchor).isSame(current, 'day')) return false;
+      const first = dayjs(anchor).isBefore(current) ? anchor : current;
+      const last = dayjs(anchor).isBefore(current) ? current : anchor;
+      const d = dayjs(date).startOf('day');
+      return !d.isBefore(dayjs(first).startOf('day')) && !d.isAfter(dayjs(last).startOf('day'));
+    },
+    [anchor, current]
+  );
 
   return (
-    <DragSelectContext.Provider
-      value={{
-        isSelecting,
-        selectionStart,
-        selectionEnd,
-        startSelection,
-        updateSelection,
-        endSelection,
-      }}
-    >
+    <DragSelectContext.Provider value={{ isDateInSelection, startSelection, updateSelection, endSelection }}>
       {children}
-      
-      {dialogDateRange && (
-        <AddEventDialog
-          open={dialogOpen}
-          onOpenChange={(open) => {
-            setDialogOpen(open);
-            if (!open) {
-              setDialogDateRange(null);
-            }
-          }}
-          startDate={dialogDateRange.start}
-          endDate={dialogDateRange.end}
-        />
-      )}
     </DragSelectContext.Provider>
   );
 };

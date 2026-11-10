@@ -1,97 +1,63 @@
-'use client';
+'use client'
 
-import dayjs from 'dayjs';
-import { useEffect, useMemo } from 'react';
+import dayjs from 'dayjs'
+import { useEffect, useMemo } from 'react'
 
-import { ClientContainer } from '@/features/calendar/ui/client-container';
-import { useCalendar } from '@/features/calendar/model/calendar-context';
-import { convertApiEvents } from '@/features/calendar/lib/helpers';
-import { useEventsByPeriodQuery } from '@/entities/calendar-event';
-import { useHolidaysByPeriodQuery } from '@/entities/holiday';
+import { useEventsByPeriodQuery } from '@/entities/calendar-event'
+import { useHolidaysByPeriodQuery } from '@/entities/holiday'
+import { convertApiEventToIEvent } from '@/features/calendar/lib/helpers'
+import { useCalendar } from '@/features/calendar/model/calendar-context'
+import { CalendarScreen } from '@/features/calendar/ui/CalendarScreen'
 
-// CalendarProvider 내부에서 동작하는 컴포넌트
+/**
+ * 캘린더 읽기 — 일정 질의는 quiet(실패는 격자 자리 Result Section + [다시 시도] 가 말한다 · 임시 그물 Snackbar 를 건너뛴다).
+ * 처음 불러올 때만 격자가 Skeleton 이고, 이미 받은 값이 있는 채 다시 받기에 실패하면 지금 값을 그대로 둔다.
+ * 공휴일 질의는 실패해도 공휴일 없이 그린다(quiet).
+ */
 const CalendarContent = () => {
-  const { selectedDate, view, users, setLocalEvents, setHolidays } = useCalendar();
+  const { selectedDate, view, users, setHolidays } = useCalendar()
 
-  // selectedDate와 view에 따라 이벤트 날짜 범위 계산
   const eventRange = useMemo(() => {
-    let start: Date;
-    let end: Date;
-
     switch (view) {
-      case 'month':
-      case 'agenda':
-        start = dayjs(selectedDate).startOf('month').startOf('week').toDate();
-        end = dayjs(selectedDate).endOf('month').endOf('week').toDate();
-        break;
       case 'week':
-      case 'day':
-        start = dayjs(selectedDate).startOf('week').toDate();
-        end = dayjs(selectedDate).endOf('week').toDate();
-        break;
+        return { start: dayjs(selectedDate).startOf('week'), end: dayjs(selectedDate).endOf('week') }
       case 'year':
-        start = dayjs(selectedDate).startOf('year').toDate();
-        end = dayjs(selectedDate).endOf('year').toDate();
-        break;
+        return { start: dayjs(selectedDate).startOf('year'), end: dayjs(selectedDate).endOf('year') }
       default:
-        start = dayjs(selectedDate).startOf('month').startOf('week').toDate();
-        end = dayjs(selectedDate).endOf('month').endOf('week').toDate();
+        // 월 · 목록 — 격자가 보여 주는 앞뒤 달 날까지
+        return { start: dayjs(selectedDate).startOf('month').startOf('week'), end: dayjs(selectedDate).endOf('month').endOf('week') }
     }
+  }, [selectedDate, view])
 
-    return { start, end };
-  }, [selectedDate, view]);
+  const events = useEventsByPeriodQuery(eventRange.start.format('YYYY-MM-DDTHH:mm:ss'), eventRange.end.format('YYYY-MM-DDTHH:mm:ss'), { quiet: true })
+  // 공휴일은 현재 연도 전체
+  const holidays = useHolidaysByPeriodQuery(dayjs(selectedDate).startOf('year').format('YYYY-MM-DD'), dayjs(selectedDate).endOf('year').format('YYYY-MM-DD'), 'KR', { quiet: true })
 
-  // 공휴일은 현재 연도 전체 (1월 1일 ~ 12월 31일)
-  const holidayRange = useMemo(() => {
-    const start = dayjs(selectedDate).startOf('year').toDate();
-    const end = dayjs(selectedDate).endOf('year').toDate();
-    return { start, end };
-  }, [selectedDate]);
+  const converted = useMemo(() => (events.data ?? []).map((e) => convertApiEventToIEvent(e, users)), [events.data, users])
 
-  // 이벤트 API 호출 - eventRange가 변경될 때마다 재호출
-  const { data: apiEvents, isLoading: eventsLoading } = useEventsByPeriodQuery(
-    dayjs(eventRange.start).format('YYYY-MM-DDTHH:mm:ss'),
-    dayjs(eventRange.end).format('YYYY-MM-DDTHH:mm:ss')
-  );
+  // 사람 필터 목록 — 사용자 목록 + 일정이 가진 사람(시스템 계정 · 목록을 못 받았을 때)
+  const people = useMemo(() => {
+    const map = new Map(users.map((u) => [u.id, u]))
+    converted.forEach((e) => {
+      if (!map.has(e.user.id)) map.set(e.user.id, e.user)
+    })
+    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, 'ko'))
+  }, [users, converted])
 
-  // 공휴일 API 호출 - 현재 연도의 1월 1일 ~ 12월 31일
-  const { data: apiHolidays, isLoading: holidaysLoading } = useHolidaysByPeriodQuery(
-    dayjs(holidayRange.start).format('YYYY-MM-DD'),
-    dayjs(holidayRange.end).format('YYYY-MM-DD'),
-    'KR'
-  );
-
-  // API 응답을 받아서 변환 후 context 업데이트
   useEffect(() => {
-    if (apiEvents && !eventsLoading && users.length > 0) {
-      try {
-        // 기존 users 맵 생성
-        const userMap = new Map(users.map(u => [u.id, { user_id: u.id, user_name: u.name, profile_url: u.picturePath || '' }]));
-        // 이벤트에서 누락된 사용자 추가 (SYSTEM 계정 등)
-        apiEvents.forEach(e => {
-          if (!userMap.has(e.user_id)) {
-            userMap.set(e.user_id, { user_id: e.user_id, user_name: e.user_name, profile_url: '' });
-          }
-        });
-        const { events } = convertApiEvents(apiEvents, [...userMap.values()]);
-        setLocalEvents(events);
-      } catch (error) {
-        console.error('Error converting API events:', error);
-        setLocalEvents([]);
-      }
-    }
-  }, [apiEvents, eventsLoading, users, setLocalEvents]);
+    if (holidays.data) setHolidays(holidays.data)
+  }, [holidays.data, setHolidays])
 
-  // 공휴일 응답을 받아서 context 업데이트
-  useEffect(() => {
-    if (apiHolidays && !holidaysLoading) {
-      setHolidays(apiHolidays);
-    }
-  }, [apiHolidays, holidaysLoading, setHolidays]);
-
-  const isLoading = eventsLoading || holidaysLoading
-
-  return <ClientContainer isLoading={isLoading} />
+  return (
+    <CalendarScreen
+      events={converted}
+      people={people}
+      isLoading={events.isPending && !events.isError}
+      isFailed={events.isError && events.data === undefined}
+      retrying={events.isFetching}
+      onRetry={() => void events.refetch()}
+    />
+  )
 }
 
 export { CalendarContent }

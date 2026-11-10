@@ -15,9 +15,11 @@ export const ItemTypes = {
 interface DraggableEventProps {
   event: IEvent;
   children: React.ReactNode;
+  /** 끌 수 없는 일정(권한 없음 · 이미 지난 기록) — 서버가 거절할 이동을 시작하지 않는다 */
+  disabled?: boolean;
 }
 
-const DraggableEvent = ({ event, children }: DraggableEventProps) => {
+const DraggableEvent = ({ event, children, disabled = false }: DraggableEventProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag, preview] = useDrag(() => ({
@@ -27,8 +29,9 @@ const DraggableEvent = ({ event, children }: DraggableEventProps) => {
       const height = ref.current?.offsetHeight || 0;
       return { event, children, width, height };
     },
+    canDrag: !disabled,
     collect: monitor => ({ isDragging: monitor.isDragging() }),
-  }));
+  }), [disabled, event]);
 
   // Hide the default drag preview
   useEffect(() => {

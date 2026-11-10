@@ -1,16 +1,18 @@
-import { addDays, differenceInDays, endOfWeek, isAfter, isBefore, parseISO, startOfDay, startOfWeek } from 'date-fns';
+import { addDays, differenceInDays, endOfWeek, isAfter, isBefore, parseISO, startOfWeek } from 'date-fns';
 import { useMemo } from 'react';
 
-import { MonthEventBadge } from '@/features/calendar/ui/month-view/month-event-badge';
+import { MonthChip } from '@/features/calendar/ui/month-view/month-chip';
+import type { ChipPart } from '@/features/calendar/ui/month-view/month-model';
 
 import type { IEvent } from '@/features/calendar/model/interfaces';
 
 interface IProps {
   selectedDate: Date;
   multiDayEvents: IEvent[];
+  onEventClick: (event: IEvent) => void;
 }
 
-export function WeekViewMultiDayEventsRow({ selectedDate, multiDayEvents }: IProps) {
+export function WeekViewMultiDayEventsRow({ selectedDate, multiDayEvents, onEventClick }: IProps) {
   const weekStart = startOfWeek(selectedDate);
   const weekEnd = endOfWeek(selectedDate);
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -87,10 +89,10 @@ export function WeekViewMultiDayEventsRow({ selectedDate, multiDayEvents }: IPro
               const event = row.find(e => e.startIndex <= dayIndex && e.endIndex >= dayIndex);
 
               if (!event) {
-                return <div key={`${rowIndex}-${dayIndex}`} className='h-6.5' />;
+                return <div key={`${rowIndex}-${dayIndex}`} className='h-x5' />;
               }
 
-              let position: 'first' | 'middle' | 'last' | 'none' = 'none';
+              let position: ChipPart = 'none';
 
               if (dayIndex === event.startIndex && dayIndex === event.endIndex) {
                 position = 'none';
@@ -102,7 +104,9 @@ export function WeekViewMultiDayEventsRow({ selectedDate, multiDayEvents }: IPro
                 position = 'middle';
               }
 
-              return <MonthEventBadge key={`${event.id}-${dayIndex}`} event={event} cellDate={startOfDay(day)} position={position} />;
+              // 제목은 그 주에서 이어지는 띠의 첫 칸에 한 번 — 띠가 걸친 칸 수만큼 가운데에 그린다
+              const labelDays = dayIndex === event.startIndex ? event.endIndex - event.startIndex + 1 : 0;
+              return <MonthChip key={`${event.kind}-${event.id}-${dayIndex}`} slot={{ event, part: position, labelDays }} density='wide' onClick={(ev) => onEventClick(ev)} />;
             })}
           </div>
         ))}

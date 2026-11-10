@@ -7,63 +7,23 @@ import {
   differenceInMinutes,
   eachDayOfInterval,
   endOfMonth,
-  endOfWeek,
-  endOfYear,
-  format,
   isSameDay,
-  isSameMonth,
-  isSameWeek,
-  isSameYear,
-  isWithinInterval,
   parseISO,
   startOfDay,
   startOfMonth,
-  startOfWeek,
-  startOfYear,
   subDays,
   subMonths,
   subWeeks,
   subYears,
-  type Locale,
 } from 'date-fns';
 
 import type { GetEventsByPeriodResp } from '@/entities/calendar-event';
 import type { ICalendarCell, IEvent, IUser } from '@/features/calendar/model/interfaces';
-import type { TCalendarType, TCalendarView, TVisibleHours, TWorkingHours } from '@/features/calendar/model/types';
-import { calendarTypes } from '@/features/calendar/model/types';
+import type { TCalendarType, TCalendarView, TEventKind, TVisibleHours, TWorkingHours } from '@/features/calendar/model/types';
+import { CHART_HUE, calendarTypes } from '@/features/calendar/model/types';
+import dayjs from 'dayjs';
 
 // ================ Header helper functions ================ //
-
-export function rangeText(view: TCalendarView, date: Date, locale?: Locale) {
-  const formatString = 'yyyy.MM.dd';
-  let start: Date;
-  let end: Date;
-
-  switch (view) {
-    case 'agenda':
-      start = startOfMonth(date);
-      end = endOfMonth(date);
-      break;
-    case 'year':
-      start = startOfYear(date);
-      end = endOfYear(date);
-      break;
-    case 'month':
-      start = startOfMonth(date);
-      end = endOfMonth(date);
-      break;
-    case 'week':
-      start = startOfWeek(date, { locale });
-      end = endOfWeek(date, { locale });
-      break;
-    case 'day':
-      return format(date, formatString, { locale });
-    default:
-      return 'Error while formatting ';
-  }
-
-  return `${format(start, formatString, { locale })} - ${format(end, formatString, { locale })}`;
-}
 
 export function navigateDate(date: Date, view: TCalendarView, direction: 'previous' | 'next'): Date {
   const operations = {
@@ -77,24 +37,7 @@ export function navigateDate(date: Date, view: TCalendarView, direction: 'previo
   return operations[view](date, 1);
 }
 
-export function getEventsCount(events: IEvent[], date: Date, view: TCalendarView): number {
-  const compareFns = {
-    agenda: isSameMonth,
-    year: isSameYear,
-    day: isSameDay,
-    week: isSameWeek,
-    month: isSameMonth,
-  };
-
-  return events.filter(event => compareFns[view](new Date(event.startDate), date)).length;
-}
-
 // ================ Week and day view helper functions ================ //
-
-export function getCurrentEvents(events: IEvent[]) {
-  const now = new Date();
-  return events.filter(event => isWithinInterval(now, { start: parseISO(event.startDate), end: parseISO(event.endDate) })) || null;
-}
 
 export function groupEvents(dayEvents: IEvent[]) {
   const sortedEvents = dayEvents.sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
@@ -187,7 +130,7 @@ export function getEventDisplayName(event: IEvent): string {
  * schedule과 vacation 이벤트가 같은 id를 가질 수 있으므로 복합 키 사용
  */
 export function getEventUniqueKey(event: IEvent): string {
-  return `${event.type.type}-${event.id}`;
+  return `${event.kind}-${event.id}`;
 }
 
 export function getCalendarCells(selectedDate: Date): ICalendarCell[] {
@@ -315,17 +258,13 @@ export interface ApiUserResponse {
 }
 
 /**
- * calendar_type 문자열로 TCalendarType 객체 찾기
+ * calendar_type 문자열로 TCalendarType 객체 찾기 — 모르는 코드는 회색 "종일" 종류로 읽되 kind(휴가 / 일정)는 서버 domain_type 을 따른다.
+ * (옛 코드는 모르는 코드를 연차로 바꿔 일정 행 번호가 휴가 사용 기록 번호처럼 쓰였다)
  */
-export function getCalendarType(calendarTypeId: string): TCalendarType {
-  const foundType = calendarTypes.find(type => type.id === calendarTypeId.toUpperCase());
-
-  if (!foundType) {
-    // 기본값 반환 (연차)
-    return calendarTypes[0];
-  }
-
-  return foundType;
+export function getCalendarType(calendarTypeId: string, kind: TEventKind): TCalendarType {
+  const found = calendarTypes.find(type => type.id === calendarTypeId.toUpperCase() && type.type === kind);
+  if (found) return found;
+  return { id: calendarTypeId.toUpperCase(), name: calendarTypeId, nameKey: '', type: kind, isDate: true, color: 'gray' };
 }
 
 /**
@@ -343,21 +282,21 @@ export function convertApiUserToIUser(apiUser: ApiUserResponse): IUser {
  * API 이벤트 응답을 IEvent 인터페이스로 변환
  */
 export function convertApiEventToIEvent(apiEvent: GetEventsByPeriodResp, users: IUser[]): IEvent {
-  const user = users.find(u => u.id === apiEvent.user_id);
+  // 사용자 목록에 없는 사람(시스템 계정 · 목록을 못 받음)은 일정이 가진 이름으로 그린다
+  const user = users.find(u => u.id === apiEvent.user_id) ?? { id: apiEvent.user_id, name: apiEvent.user_name, picturePath: null };
 
-  if (!user) {
-    throw new Error(`User not found for event: ${apiEvent.calendar_id}`);
-  }
-
-  const calendarType = getCalendarType(apiEvent.calendar_type);
+  // 휴가 사용 기록 번호와 일정 번호는 서로 다른 표의 행 번호다 — 어느 쪽인지는 domain_type 이 정한다
+  const kind: TEventKind = apiEvent.domain_type === 'vacation' ? 'vacation' : 'schedule';
+  const calendarType = getCalendarType(apiEvent.calendar_type, kind);
 
   return {
     id: apiEvent.calendar_id,
-    startDate: new Date(apiEvent.start_date).toISOString(),
-    endDate: new Date(apiEvent.end_date).toISOString(),
+    kind,
+    startDate: dayjs(apiEvent.start_date).format('YYYY-MM-DDTHH:mm:ss'),
+    endDate: dayjs(apiEvent.end_date).format('YYYY-MM-DDTHH:mm:ss'),
     title: apiEvent.calendar_name,
     description: apiEvent.calendar_desc || '',
-    vacationType: apiEvent.domain_type === 'vacation' ? apiEvent.vacation_type : undefined,
+    vacationType: kind === 'vacation' ? apiEvent.vacation_type : undefined,
     user: user,
     type: calendarType,
   };
@@ -374,4 +313,20 @@ export function convertApiEvents(
   const events = apiEvents.map(apiEvent => convertApiEventToIEvent(apiEvent, users));
 
   return { events, users };
+}
+
+// ================ Event tone ================ //
+
+/** 칩 · 막대 색 — 종류의 색 이름을 차트 색으로 읽어 바탕 `chart-{색}-weak` · 글 `chart-{색}-contrast` · 막대 `chart-{색}` */
+export function eventTone(event: Pick<IEvent, 'type'>): { color: string; bg: string; fg: string } {
+  const hue = CHART_HUE[event.type.color];
+  return { color: `var(--color-chart-${hue})`, bg: `var(--color-chart-${hue}-weak)`, fg: `var(--color-chart-${hue}-contrast)` };
+}
+
+/** 그 날에 걸친 일정 — 시작 · 끝 날짜 사이에 그날이 든다 */
+export function eventsOnDay(events: IEvent[], day: Date): IEvent[] {
+  const d = startOfDay(day);
+  return events
+    .filter(e => startOfDay(parseISO(e.startDate)) <= d && d <= startOfDay(parseISO(e.endDate)))
+    .sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
 }

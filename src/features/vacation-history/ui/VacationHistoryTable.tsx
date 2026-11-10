@@ -5,7 +5,7 @@ import { usePermission, useUser } from '@/entities/session'
 import { useDeleteVacationUsageMutation, type GetUserVacationHistoryResp, type VacationUsageInfo } from '@/entities/vacation'
 import { IEvent } from '@/features/calendar/model/interfaces'
 import { calendarTypes } from '@/features/calendar/model/types'
-import { EditEventDialog } from '@/features/calendar/ui/dialogs/edit-event-dialog'
+import { EventFormDialog } from '@/features/calendar/ui/event-form-dialog'
 import { isUpcoming } from '@/features/vacation-history/lib/record-format'
 import { useSnackbar } from '@/shared/ds/snackbar'
 import { formatDayText } from '@/shared/lib/date-text'
@@ -63,6 +63,7 @@ export function VacationHistoryTable({
     if (!stillUpcoming(u)) return
     setEditing({
       id: u.vacation_usage_id,
+      kind: 'vacation',
       type: calendarTypes.find((c) => c.id === u.vacation_time_type) ?? calendarTypes.find((c) => c.type === 'vacation') ?? calendarTypes[0],
       title: u.vacation_usage_desc,
       description: u.vacation_usage_desc,
@@ -95,21 +96,16 @@ export function VacationHistoryTable({
         }}
       />
       {editing && (
-        <EditEventDialog
+        <EventFormDialog
           open
-          onOpenChange={(open) => {
-            if (!open) setEditing(null)
-          }}
+          onClose={() => setEditing(null)}
           event={editing}
-          vacationOnly
           onDelete={desktop ? undefined : () => {
             const u = value?.usages.find((x) => x.vacation_usage_id === editing.id)
             setEditing(null)
             if (u && stillUpcoming(u)) deleteConfirm.ask(u)
           }}
-        >
-          <></>
-        </EditEventDialog>
+        />
       )}
     </>
   )

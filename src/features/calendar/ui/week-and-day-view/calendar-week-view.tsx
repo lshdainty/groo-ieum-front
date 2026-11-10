@@ -1,15 +1,15 @@
 import { addDays, areIntervalsOverlapping, format, isSameDay, parseISO, startOfWeek } from 'date-fns';
 import { enUS, ko } from 'date-fns/locale';
 import dayjs from 'dayjs';
-import { Activity } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { usePermission } from '@/entities/session';
+import { dayTone } from '@/features/calendar/ui/month-view/day-tone';
+import { formatDayText, formatHourMinute } from '@/shared/lib/date-text';
+import { useCanAddEvent } from '@/features/calendar/model/use-can-edit-event';
 import { useCalendar } from '@/features/calendar/model/calendar-context';
 
 import { ScrollArea } from '@/shared/ui/shadcn/scrollArea';
 
-import { AddEventDialog } from '@/features/calendar/ui/dialogs/add-event-dialog';
 import { DroppableTimeBlock } from '@/features/calendar/ui/dnd/droppable-time-block';
 import { CalendarTimeline } from '@/features/calendar/ui/week-and-day-view/calendar-time-line';
 import { EventBlock } from '@/features/calendar/ui/week-and-day-view/event-block';
@@ -23,15 +23,15 @@ import type { IEvent } from '@/features/calendar/model/interfaces';
 interface IProps {
   singleDayEvents: IEvent[];
   multiDayEvents: IEvent[];
+  onEventClick: (event: IEvent) => void;
+  /** 빈 시간 칸을 누름 → 그 날 · 시각으로 일정 폼 */
+  onCreate: (date: Date, startTime: { hour: number; minute: number }) => void;
 }
 
-export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
-  const { t, i18n } = useTranslation();
+export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick, onCreate }: IProps) {
+  const { i18n } = useTranslation();
   const { selectedDate, workingHours, visibleHours, findHolidayByDate } = useCalendar();
-  const { hasAnyPermission } = usePermission();
-
-  // 권한 체크: 둘 중 하나라도 있으면 일정 추가 가능
-  const canAddEvent = hasAnyPermission(['VACATION:USE', 'VACATION:MANAGE', 'SCHEDULE:WRITE', 'SCHEDULE:MANAGE']);
+  const canAddEvent = useCanAddEvent();
 
   const locale = i18n.language === 'ko' ? ko : enUS;
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, singleDayEvents);
@@ -41,14 +41,9 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
 
   return (
     <div className='w-full h-full'>
-      <div className='flex flex-col items-center justify-center border-b py-4 text-sm text-muted-foreground min-[40rem]:hidden'>
-        <p>{t('calendar:weekView.notAvailable')}</p>
-        <p>{t('calendar:weekView.switchView')}</p>
-      </div>
-
-      <div className='hidden h-full flex-col min-[40rem]:flex'>
+      <div className='flex h-full flex-col'>
         <div>
-          <WeekViewMultiDayEventsRow selectedDate={selectedDate} multiDayEvents={multiDayEvents} />
+          <WeekViewMultiDayEventsRow selectedDate={selectedDate} multiDayEvents={multiDayEvents} onEventClick={onEventClick} />
 
           {/* Week header */}
           <div className='relative z-20 flex border-b'>
@@ -62,28 +57,14 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                 // 공휴일 정보 가져오기
                 const holiday = findHolidayByDate(dayjs(day).format('YYYY-MM-DD'));
 
-                // 공휴일 색상 결정
-                let holidayColor = '';
-                if (holiday) {
-                  if (holiday.holiday_type === 'PUBLIC' || holiday.holiday_type === 'SUBSTITUTE') {
-                    holidayColor = '#ff6767'; // 빨강
-                  } else if (holiday.holiday_type === 'ETC') {
-                    holidayColor = '#6767ff'; // 파랑
-                  }
-                }
-
-                const textColor = holidayColor || (isSunday ? '#ff6767' : isSaturday ? '#6767ff' : undefined);
+                const tone = dayTone({ currentMonth: true, sunday: isSunday, saturday: isSaturday, holiday });
 
                 return (
                   <div key={index} className='py-2 text-center text-xs font-medium'>
-                    <div style={{ color: textColor }}>
+                    <div className={tone}>
                       {format(day, 'EE', { locale })} <span className='ml-1 font-semibold'>{format(day, 'd')}</span>
                     </div>
-                    {holiday && (
-                      <div className='text-xs mt-0.5' style={{ color: holidayColor }}>
-                        {holiday.holiday_name}
-                      </div>
-                    )}
+                    {holiday && <div className={cn('mt-0.5 text-xs', tone)}>{holiday.holiday_name}</div>}
                   </div>
                 );
               })}
@@ -98,7 +79,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
               {hours.map((hour, index) => (
                 <div key={hour} className='relative' style={{ height: '96px' }}>
                   <div className='absolute -top-3 right-2 flex h-6 items-center'>
-                    {index !== 0 && <span className='text-xs text-muted-foreground'>{format(new Date().setHours(hour, 0, 0, 0), 'hh a')}</span>}
+                    {index !== 0 && <span className='text-xs text-fg-neutral-subtle'>{formatHourMinute(hour)}</span>}
                   </div>
                 </div>
               ))}
@@ -117,25 +98,31 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                         const isDisabled = !isWorkingHour(day, hour, workingHours);
 
                         return (
-                          <div key={hour} className={cn('relative', isDisabled && 'bg-calendar-disabled-hour')} style={{ height: '96px' }}>
+                          <div key={hour} className={cn('relative', isDisabled && 'bg-bg-neutral-weak')} style={{ height: '96px' }}>
                             {index !== 0 && <div className='pointer-events-none absolute inset-x-0 top-0 border-b'></div>}
 
                             <DroppableTimeBlock date={day} hour={hour} minute={0}>
-                              <Activity mode={canAddEvent ? 'visible' : 'hidden'}>
-                                <AddEventDialog startDate={day} startTime={{ hour, minute: 0 }}>
-                                  <div className='absolute inset-x-0 top-0 h-[48px] cursor-pointer transition-colors hover:bg-accent' />
-                                </AddEventDialog>
-                              </Activity>
+                              {canAddEvent && (
+                                <button
+                                  type='button'
+                                  aria-label={`${formatDayText(day)} ${formatHourMinute(hour, 0)}`}
+                                  className='absolute inset-x-0 top-0 h-[48px] cursor-pointer transition-colors hover:bg-bg-neutral-weak focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focus-ring'
+                                  onClick={() => onCreate(day, { hour, minute: 0 })}
+                                />
+                              )}
                             </DroppableTimeBlock>
 
                             <div className='pointer-events-none absolute inset-x-0 top-1/2 border-b border-dashed'></div>
 
                             <DroppableTimeBlock date={day} hour={hour} minute={30}>
-                              <Activity mode={canAddEvent ? 'visible' : 'hidden'}>
-                                <AddEventDialog startDate={day} startTime={{ hour, minute: 30 }}>
-                                  <div className='absolute inset-x-0 top-[48px] h-[48px] cursor-pointer transition-colors hover:bg-accent' />
-                                </AddEventDialog>
-                              </Activity>
+                              {canAddEvent && (
+                                <button
+                                  type='button'
+                                  aria-label={`${formatDayText(day)} ${formatHourMinute(hour, 30)}`}
+                                  className='absolute inset-x-0 top-[48px] h-[48px] cursor-pointer transition-colors hover:bg-bg-neutral-weak focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focus-ring'
+                                  onClick={() => onCreate(day, { hour, minute: 30 })}
+                                />
+                              )}
                             </DroppableTimeBlock>
                           </div>
                         );
@@ -159,7 +146,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
 
                           return (
                             <div key={event.id} className='absolute p-1' style={style}>
-                              <EventBlock event={event} />
+                              <EventBlock event={event} onClick={onEventClick} />
                             </div>
                           );
                         })
