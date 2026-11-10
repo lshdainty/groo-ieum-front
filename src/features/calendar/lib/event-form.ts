@@ -19,6 +19,7 @@ export interface EventFormValues {
 }
 
 export interface EventFormErrors {
+  desc: boolean
   type: boolean
   vacationType: boolean
   endDate: boolean
@@ -45,7 +46,8 @@ export const initialValues = (opts: { date?: Date; endDate?: Date; startTime?: {
 export const valuesOfEvent = (event: IEvent): EventFormValues => {
   const start = dayjs(event.startDate)
   return {
-    desc: event.description,
+    // DB 가 null 을 허용한다 — 빈 글로 받는다
+    desc: event.description ?? '',
     targetUser: event.user.id,
     type: event.type.id,
     vacationType: event.vacationType ?? '',
@@ -58,6 +60,7 @@ export const valuesOfEvent = (event: IEvent): EventFormValues => {
 export const eventFormErrors = (v: EventFormValues): EventFormErrors => {
   const type = typeOf(v.type)
   return {
+    desc: v.desc.trim() === '',
     type: !type,
     vacationType: type?.type === 'vacation' && !v.vacationType,
     endDate: dayjs(v.endDate).isBefore(dayjs(v.startDate), 'day'),
@@ -65,7 +68,7 @@ export const eventFormErrors = (v: EventFormValues): EventFormErrors => {
   }
 }
 
-export const hasEventFormErrors = (e: EventFormErrors): boolean => e.type || e.vacationType || e.endDate || e.startTime
+export const hasEventFormErrors = (e: EventFormErrors): boolean => e.desc || e.type || e.vacationType || e.endDate || e.startTime
 
 /** 바뀐 값이 있나 — 닫을 때 "작성한 내용이 사라져요" 를 묻는 기준(앞뒤 공백은 비교에서 뺀다) */
 export const eventFormChanged = (a: EventFormValues, b: EventFormValues): boolean =>

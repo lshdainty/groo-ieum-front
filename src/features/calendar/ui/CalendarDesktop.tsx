@@ -110,7 +110,7 @@ export function CalendarDesktop({ screen, people, isLoading, isFailed, onRetry, 
       <DndProviderWrapper>
         {view === 'month' &&
           (wide ? <div className='grid grid-cols-[minmax(0,1fr)_320px] items-start gap-x6'>{monthBody}</div> : <div className='flex flex-col gap-x2'>{monthBody}</div>)}
-        {view === 'week' && otherView(isLoading ? <CalendarWeekViewSkeleton /> : <CalendarWeekView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} onEventClick={(e) => openDetail(e)} onCreate={(date, startTime) => setCreating({ date, startTime })} />)}
+        {view === 'week' && otherView(isLoading ? <CalendarWeekViewSkeleton /> : <CalendarWeekView singleDayEvents={singleDayEvents.filter((e) => !e.type.isDate)} multiDayEvents={[...multiDayEvents, ...singleDayEvents.filter((e) => e.type.isDate)]} onEventClick={(e) => openDetail(e)} onCreate={(date, startTime) => setCreating({ date, startTime })} />)}
         {view === 'year' && otherView(isLoading ? <CalendarYearViewSkeleton /> : <CalendarYearView allEvents={filteredEvents} onPickMonth={(d) => { setSelectedDate(d); setView('month') }} />)}
         {view === 'agenda' &&
           otherView(

@@ -126,7 +126,7 @@ export function EventFormDialog({ open, onClose, event, start, fixedUser, onDele
   }
 
   const submit = async () => {
-    if (busy) return
+    if (busy || users.isLoadingError) return
     if (hasEventFormErrors(errors)) {
       setShowErrors(true)
       setTimeout(() => document.querySelector<HTMLElement>('[data-event-form] [aria-invalid="true"]')?.focus(), 0)
@@ -294,8 +294,16 @@ export function EventFormDialog({ open, onClose, event, start, fixedUser, onDele
                 {t('addEvent.fixedUser', { name: fixedUser.name, detail: fixedUser.department?.trim() ? `${fixedUser.id} · ${fixedUser.department}` : fixedUser.id })}
               </p>
             )}
-            <Field label={t('form.desc')}>
-              <Input value={values.desc} placeholder={t('form.descPlaceholder')} onChange={(e) => set('desc', e.target.value)} />
+            {users.isLoadingError && (
+              <Callout tone='critical' role='alert' data-users-failed>
+                <span className='block'>{t('form.usersFailed')}</span>
+                <Button variant='ghost' size='small' flush='left' loading={users.isFetching} onClick={() => void users.refetch()} data-users-retry>
+                  {tc('retry')}
+                </Button>
+              </Callout>
+            )}
+            <Field label={t('form.desc')} showRequiredIndicator invalid={showErrors && errors.desc} errorMessage={t('form.descRequired')}>
+              <Input value={values.desc} placeholder={t('form.descPlaceholder')} aria-invalid={(showErrors && errors.desc) || undefined} onChange={(e) => set('desc', e.target.value)} />
             </Field>
             <div className='-mx-x6 flex flex-col' data-event-rows>
               {targetRow}
@@ -319,7 +327,7 @@ export function EventFormDialog({ open, onClose, event, start, fixedUser, onDele
             </Button>
           )}
           <ResponsiveDialogCancel>{tc('cancel')}</ResponsiveDialogCancel>
-          <Button variant='neutralSolid' loading={busy} onClick={() => void submit()} data-event-submit>
+          <Button variant='neutralSolid' loading={busy} disabled={users.isLoadingError} onClick={() => void submit()} data-event-submit>
             {tc('save')}
           </Button>
         </ResponsiveDialogFooter>

@@ -46,10 +46,10 @@ export const eventRange = (input: EventFormPayloadInput): { start_date: string; 
   const startMinute = Number(input.startMinute)
   const start = dayjs(input.startDate).hour(startHour).minute(startMinute).second(0)
   const minutes = TIMED_MINUTES[input.calendarType] ?? 0
-  // 30분 휴가는 시작에서 30분 뒤(휴식 없음) · 시간 단위 종류는 휴식을 더한 끝 시
+  // 30분 휴가는 끝 날짜의 시작 시각에서 30분 뒤(휴식 없음 · 여러 날이면 끝 날짜까지) · 시간 단위 종류는 휴식을 더한 끝 시
   const end =
     minutes % 60 !== 0
-      ? start.add(minutes, 'minute')
+      ? dayjs(input.endDate).hour(startHour).minute(startMinute).second(0).add(minutes, 'minute')
       : dayjs(input.endDate).hour(endHourWithBreak(startHour, minutes / 60, input.userWorkTime)).minute(startMinute).second(0)
   return { start_date: start.format(FORMAT), end_date: end.format(FORMAT) }
 }

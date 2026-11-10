@@ -1665,6 +1665,8 @@ calendar,form.timePlaceholder,시각을 골라주세요,Pick a time
 calendar,form.startTimeRequired,시작 시각을 골라주세요.,Pick a start time.
 calendar,form.saved,일정을 저장했어요.,Event saved.
 calendar,form.created,일정을 추가했어요.,Event added.
+calendar,form.descRequired,내용을 입력해주세요.,Enter the notes.
+calendar,form.usersFailed,사람 목록을 불러오지 못해 저장할 수 없어요. 근무 시간을 알아야 끝 시각을 바르게 셀 수 있어요.,"Couldn't load the people list, so this can't be saved yet. Work hours are needed to work out the end time."
 admin,company.editBtn,회사 정보 수정,Edit company info
 admin,company.createBtn,회사 만들기,Create company
 admin,company.emptyTitle,회사가 없어요,No company yet
