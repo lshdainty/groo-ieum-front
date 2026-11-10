@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { dsLanguage } from '@/shared/ds/i18n'
+import { dsLanguage, dsText } from '@/shared/ds/i18n'
 
 /**
  * 날짜 · 시각 글(DESIGN.hr 날짜 · 시각 — 시각은 오전 · 오후 12시간, 영어는 AM / PM) — 화면 사이 한 벌.
@@ -11,14 +11,12 @@ type DateInput = string | Date | dayjs.Dayjs
 
 const english = () => dsLanguage().startsWith('en')
 
-/** 한국어 범위 사이 글 — "~" 앞에서 줄이 끊기지 않게 앞에 붙는 공백(NBSP)이고, 뒤는 보통 공백이다 */
-const KO_RANGE_SEP = '\u00A0~ '
-
 /**
- * 범위 사이 글 — 한국어 물결표 "~", 영어 en dash "–"(DESIGN.hr International Design 구간 · 영어는 앞뒤를 붙여 쓴다 "9:00 AM–1:00 PM").
- * en dash 는 뒤에서 줄이 바뀌므로 줄 첫머리에 오지 않는다.
+ * 범위 사이 글 — 구간 기호는 로케일 문구 하나(`ds` datePicker.rangeSeparator — 한국어 "~", 영어 "–")를 그대로 쓴다(코드에 직접 쓰지 않는다).
+ * 앞뒤를 붙여 쓴다("오후 1:00~9:00" · "Oct 20 at 9:00 AM–1:00 PM", DESIGN.hr International Design 구간). 줄은 기호 뒤에서 바꾼다 —
+ * 기호 앞에 이음 문자 U+2060(앞 낱말에 붙여 줄 첫머리 · 혼자 한 줄이 되지 않게), 뒤에 U+200B(줄바꿈 기회). 둘 다 보이지 않는 글자다.
  */
-export const rangeSep = (): string => (english() ? '–' : KO_RANGE_SEP)
+export const rangeSep = (): string => `\u2060${dsText('datePicker.rangeSeparator')}\u200B`
 
 /** 요일 · 시각 사이 — 한국어 공백, 영어 " at "("Tue, Oct 20 at 9:00 AM") */
 const dayClockGap = (): string => (english() ? ' at ' : ' ')
@@ -93,7 +91,7 @@ export const isAllDay = (start: DateInput, end: DateInput | null | undefined): b
  * 기간 글(휴가 사용 · 신청 대상 날짜) —
  * 종일 하루 "10월 30일 (금)" · 종일 여러 날 "10월 8일 (목) ~ 9일 (금)"(해가 다르면 해를 붙인다) ·
  * 같은 날 시각 "10월 20일 (화) 오전 9:00 ~ 오후 1:00" · 시각이 있는 여러 날 "10월 8일 (목) 오전 9:00 ~ 9일 (금) 오후 6:00".
- * 한국어 범위의 "~" 는 앞 낱말에 붙어(rangeSep) 줄이 "~" 앞에서 끊기지 않고, 영어는 en dash 와 " at "(요일 · 시각 형식).
+ * 범위 기호는 rangeSep(로케일 문구 · 붙여 씀), 영어 요일 · 시각은 " at ".
  */
 export const formatPeriodText = (start: string, end: string | null | undefined, now: dayjs.Dayjs = dayjs()): string => {
   const s = dayjs(start)
