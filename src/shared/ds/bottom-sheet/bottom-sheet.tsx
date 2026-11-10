@@ -111,6 +111,8 @@ function useSheetRefs(name: string) {
 
 type SheetContextValue = {
   form: boolean;
+  /** false 면 끌기 · 바깥 누르기로 닫지 않는다 */
+  dismissible: boolean;
   /** 저장 중 — 닫기 · 머리 뒤로를 받지 않고 본문은 입력을 받지 않는다(inert) */
   busy: boolean;
   /** 닫기를 청한다 — 바로 닫았으면 true, 바뀐 값이 있어 물었으면 false */
@@ -140,6 +142,11 @@ export interface BottomSheetProps {
   onOpenChange?: OpenChange;
   /** 입력 폼 — 바깥 누르기 · 끌어내리기로 닫지 않는다(손잡이 없음). 위 닫기 버튼 · Esc · 뒤로 가기로 닫는다 */
   form?: boolean;
+  /**
+   * 끌어내리기 · 바깥(딤) 누르기로 닫을 수 있다(기본 켬 — 지금 동작). 끄면 닫기 ✕ · 바닥 [완료] · Esc · 뒤로 가기로만 닫고
+   * 시트 몸통이 손가락을 따라 내려가지도 않는다 — 휠을 아래로 굴릴 때 시트 끌기로 새지 않게 하려는 휠 시트(시각 · 날짜 · 월)용
+   */
+  dismissible?: boolean;
   /** 바뀐 값이 있다 — 닫기 전에 "작성한 내용이 사라져요" 를 묻는다 */
   dirty?: boolean;
   /**
@@ -164,6 +171,7 @@ function BottomSheet({
   defaultOpen,
   onOpenChange,
   form = false,
+  dismissible = true,
   dirty = false,
   busy = false,
   snapPoints,
@@ -224,6 +232,7 @@ function BottomSheet({
   const value: SheetContextValue = {
     form,
     busy,
+    dismissible,
     requestClose: leave.request,
     setContent: (node) => {
       contentRef.current = node;
@@ -254,7 +263,9 @@ function BottomSheet({
               else if (!leave.request()) snapBack();
             }}
             // 입력 폼은 끌리지 않는다 — 손잡이가 없으므로 어디서도 끌 수 없다
-            handleOnly={form}
+            // dismissible 이 꺼진 시트(휠 시트)도 몸통은 끌리지 않는다 — 손잡이(스냅 높이)로만 움직인다
+            handleOnly={form || !dismissible}
+            dismissible={dismissible}
             snapPoints={snaps}
             activeSnapPoint={snaps ? snap : undefined}
             setActiveSnapPoint={snaps ? setSnap : undefined}
@@ -361,6 +372,7 @@ const BottomSheetSurface = React.forwardRef<
       modal,
       snapPoints,
       form,
+      dismissible,
       requestClose,
       setContent,
       setOverlay,
@@ -423,7 +435,7 @@ const BottomSheetSurface = React.forwardRef<
             e.preventDefault();
             requestClose();
           }}
-          // 바깥(딤) 누르기 — 입력 폼은 무시하고, 조회 · 고르기는 닫는다. 오른쪽 클릭은 닫지 않는다(Radix 와 같다)
+          // 바깥(딤) 누르기 — 입력 폼 · 끌기를 끈 시트(dismissible=false)는 무시하고, 조회 · 고르기는 닫는다. 오른쪽 클릭은 닫지 않는다(Radix 와 같다)
           onPointerDownOutside={(e) => {
             onPointerDownOutside?.(e);
             if (e.defaultPrevented) return;
@@ -431,7 +443,7 @@ const BottomSheetSurface = React.forwardRef<
             const pointer = e.detail.originalEvent;
             const secondary =
               pointer.button === 2 || (pointer.button === 0 && pointer.ctrlKey);
-            if (!form && !secondary) requestClose();
+            if (!form && dismissible && !secondary) requestClose();
           }}
           {...props}
         >

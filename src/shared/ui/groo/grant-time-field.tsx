@@ -4,30 +4,7 @@ import { Field } from '@/shared/ds/field'
 import { Input } from '@/shared/ds/input'
 import { QuantityPicker } from '@/shared/ds/quantity-picker'
 import { SegmentedControl, SegmentedControlItem } from '@/shared/ds/segmented-control'
-
-/** 하루 = 1, 한 시간 = 0.125(8시간 = 하루), 30분 = 0.0625 — 서버 grant_time 단위 */
-const HOUR = 0.125
-const HALF_HOUR = 0.0625
-const GRANT_MAX_DAYS = 365
-const GRANT_MAX_HOURS = 7
-
-interface GrantTimeParts {
-  days: number
-  hours: number
-  /** 0 또는 30 */
-  minutes: 0 | 30
-}
-
-/** 서버 값 → 일 · 시간 · 분. 시간 단위로 떨어지지 않는 나머지는 30분 단위로 올림 없이 버린다 */
-const splitGrantTime = (total: number): GrantTimeParts => {
-  const days = Math.floor(total + 1e-9)
-  const remainder = total - days
-  const hours = Math.min(GRANT_MAX_HOURS, Math.floor(remainder / HOUR + 1e-9))
-  const minutes = remainder - hours * HOUR >= HALF_HOUR - 1e-9 ? 30 : 0
-  return { days, hours, minutes }
-}
-
-const joinGrantTime = ({ days, hours, minutes }: GrantTimeParts): number => days + hours * HOUR + (minutes === 30 ? HALF_HOUR : 0)
+import { GRANT_MAX_DAYS, GRANT_MAX_HOURS, joinGrantTime, splitGrantTime, type GrantTimeParts } from '@/shared/lib/groo/grant-time'
 
 /**
  * 부여 시간 칸(일 · 시간 · 분 공용 — I-25 E 26 의 부품을 이쪽이 먼저 짰다). 일은 숫자 칸 0 ~ 365, 시간은 Quantity Picker 0 ~ 7,

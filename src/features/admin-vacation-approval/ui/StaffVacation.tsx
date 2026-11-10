@@ -5,7 +5,6 @@ import { Button } from '@/shared/ds/button'
 import { ResultSection } from '@/shared/ds/result-section'
 import { Skeleton } from '@/shared/ds/skeleton'
 import { PersonPicker, type PersonOption } from '@/shared/ui/groo/person-picker'
-import { useGrantStatusTypesQuery } from '@/entities/type'
 import { usePermission } from '@/entities/session'
 import { useUsersQuery } from '@/entities/user'
 import { useUserRequestedVacationsQuery } from '@/entities/vacation'
@@ -110,25 +109,21 @@ export function StaffVacation() {
   )
 }
 
-/** 고른 직원의 카드들 — 휴가 현황 구역(휴가 현황 화면과 같은 부품)과 신청 내역(옛 부품 — 25-2 가 바꾼다) */
+/** 고른 직원의 카드들 — 휴가 현황 구역(휴가 현황 화면과 같은 부품)과 신청 내역(내 신청 화면과 같은 부품 — 취소 없음) */
 function StaffCards({ userId, year, name }: { userId: string; year: string; name: string }) {
   const { t } = useTranslation('vacation')
-  const { data: requests = [] } = useUserRequestedVacationsQuery(userId, parseInt(year))
-  const { data: grantStatusTypes = [] } = useGrantStatusTypesQuery()
-  const desktop = useDesktop()
+  const requests = useUserRequestedVacationsQuery(userId, parseInt(year), { quiet: true })
   return (
     <>
       <VacationSections userId={userId} year={year} owner={{ id: userId, name }} />
-      <div className={desktop ? undefined : 'px-x4'}>
-        <ApplicationTable
-          title={t('staff.requestsTitle')}
-          vacationRequests={requests}
-          grantStatusTypes={grantStatusTypes}
-          showCancelButton={false}
-          emptyTitle={t('staff.noRequestsTitle', { name })}
-          emptyDescription={t('staff.noRequestsDescription')}
-        />
-      </div>
+      <ApplicationTable
+        title={t('staff.requestsTitle')}
+        requests={requests.data ?? []}
+        year={parseInt(year)}
+        status={{ pending: requests.isPending, failed: requests.isLoadingError, fetching: requests.isFetching, onRetry: () => void requests.refetch() }}
+        emptyTitle={t('staff.noRequestsTitle', { name })}
+        emptyDescription={t('staff.noRequestsDescription')}
+      />
     </>
   )
 }

@@ -1,777 +1,431 @@
-import { Avatar, AvatarFallback } from '@/shared/ui/shadcn/avatar'
-import { Button } from '@/shared/ui/shadcn/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/shadcn/card'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/shared/ui/shadcn/dialog'
-import { Field, FieldError, FieldLabel } from '@/shared/ui/shadcn/field'
-import { Input } from '@/shared/ui/shadcn/input'
-import { InputDatePicker } from '@/shared/ui/shadcn/inputDatePicker'
-import { InputTimePicker } from '@/shared/ui/shadcn/inputTimePicker'
-import { ScrollArea } from '@/shared/ui/shadcn/scrollArea'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/shared/ui/shadcn/select'
-import { Separator } from '@/shared/ui/shadcn/separator'
-import { Textarea } from '@/shared/ui/shadcn/textarea'
-import { useUser } from '@/entities/session'
-import { usePostRequestVacationMutation } from '@/entities/vacation'
-import type { GetUserApproversResp } from '@/entities/user'
-import type { GetUserVacationPoliciesResp } from '@/entities/vacation-policy'
-import { zodResolver } from '@hookform/resolvers/zod'
-import dayjs from 'dayjs'
-import { AlertCircle, Calendar, Clock, Users } from 'lucide-react'
-import { useEffect } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { CalendarX2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { z } from 'zod'
 
-const createFormSchema = (t: (key: string) => string) => z.object({
-  vacationPolicyId: z.number().min(1, t('application.policyRequired')),
-  title: z.string().min(1, t('application.titleRequired')),
-  overtimeDate: z.string().min(1, t('application.dateRequired')),
-  startTime: z.string().optional(),
-  endTime: z.string().optional(),
-  grantTime: z.number().optional(),
-  reason: z.string().min(1, t('application.reasonRequired')),
-  approvers: z.array(z.string()),
-})
+import { Avatar } from '@/shared/ds/avatar'
+import { Button } from '@/shared/ds/button'
+import { Callout } from '@/shared/ds/callout'
+import { DatePicker, dayKey, formatDateValue, parseDayKey } from '@/shared/ds/date-picker'
+import { ResponsiveDialog, ResponsiveDialogBody, ResponsiveDialogCancel, ResponsiveDialogContent, ResponsiveDialogFooter } from '@/shared/ds/dialog'
+import { Field } from '@/shared/ds/field'
+import { Input } from '@/shared/ds/input'
+import { List, ListButtonItem, ListHeader, ListItem } from '@/shared/ds/list'
+import { ResultSection } from '@/shared/ds/result-section'
+import { RadioSelectBox, RadioSelectBoxGroup } from '@/shared/ds/select-box'
+import { Skeleton } from '@/shared/ds/skeleton'
+import { useSnackbar } from '@/shared/ds/snackbar'
+import { Textarea } from '@/shared/ds/textarea'
+import { TimePicker, formatTimeValue, type TimeValue } from '@/shared/ds/time-picker'
+import { ConfirmDialog } from '@/shared/ui/confirm'
+import { splitGrantTime } from '@/shared/lib/groo/grant-time'
+import { GrantTimeField } from '@/shared/ui/groo/grant-time-field'
+import { PickerRow } from '@/shared/ui/groo/picker-row'
+import { readWriteFailure } from '@/shared/ui/groo/write-error'
+import { useUser } from '@/entities/session'
+import { useUserApproversQuery } from '@/entities/user'
+import { usePostRequestVacationMutation } from '@/entities/vacation'
+import { useUserVacationPoliciesQuery, type GetUserVacationPoliciesResp } from '@/entities/vacation-policy'
+import { useWide } from '@/widgets/layout/lib/use-wide'
+import {
+  emptyRequestForm,
+  hasRequestErrors,
+  isOvertimePolicy,
+  overtimeMinutes,
+  requestFormChanged,
+  requestFormErrors,
+  requestPayloadOf,
+  requiredApprovers,
+  type RequestFormValues,
+} from '../lib/request-form'
 
-type OvertimeFormValues = z.infer<ReturnType<typeof createFormSchema>>
+type Policy = GetUserVacationPoliciesResp
 
-interface ApplicationFormDialogProps {
-  open: boolean
-  onClose: () => void
-  onSubmitSuccess: () => void
-  vacationPolicies: GetUserVacationPoliciesResp[]
-  approversData: GetUserApproversResp
-}
-
-const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess, vacationPolicies, approversData }: ApplicationFormDialogProps) => {
-  const { t } = useTranslation('vacation')
-  const { t: tc } = useTranslation('common')
-  const { loginUser } = useUser()
-  const { mutate: requestVacation } = usePostRequestVacationMutation()
-
-  const formSchema = createFormSchema(t)
-
-  // 승인자 데이터 추출
-  const approvers = approversData?.approvers || []
-  const maxAvailableCount = approversData?.max_available_count || 0
-  const isAutoApproval = approversData?.is_auto_approval || false
-
-  const form = useForm<OvertimeFormValues>({
-    resolver: zodResolver(formSchema),
-    mode: 'onChange',
-    defaultValues: {
-      vacationPolicyId: 0,
-      title: '',
-      overtimeDate: '',
-      startTime: '',
-      endTime: '',
-      grantTime: undefined,
-      reason: '',
-      approvers: []
-    }
+/** 선택지 설명 — "{설명} · {정해진 시간 또는 '시간은 직접 정해요'} · 결재 {n}단계(0 이면 결재 없음)" */
+const policyDescription = (p: Policy, t: (k: string, o?: Record<string, unknown>) => string): string =>
+  t('req.form.policyDesc', {
+    desc: p.vacation_policy_desc?.trim() || p.vacation_policy_name,
+    time: p.is_flexible_grant === 'Y' ? t('req.form.timeFlexible') : p.grant_time_str,
+    approval: p.approval_required_count > 0 ? t('req.form.approvalN', { n: p.approval_required_count }) : t('req.form.approvalNone'),
   })
 
-  const vacationPolicyId = form.watch('vacationPolicyId')
-  const startTime = form.watch('startTime')
-  const endTime = form.watch('endTime')
-  const selectedApprovers = form.watch('approvers')
+/** 받을 휴가 합 글 — 0 칸 생략("4시간 30분"), 모두 0 이면 "0시간" */
+const sumText = (total: number, t: (k: string, o?: Record<string, unknown>) => string): string => {
+  const { days, hours, minutes } = splitGrantTime(total)
+  const parts = [days > 0 ? t('req.form.sumDay', { n: days }) : '', hours > 0 ? t('req.form.sumHour', { n: hours }) : '', minutes > 0 ? t('req.form.sumMinute', { n: minutes }) : ''].filter(Boolean)
+  return parts.length > 0 ? parts.join(' ') : t('req.form.sumZero')
+}
 
-  // 선택된 정책 찾기
-  const selectedPolicy = vacationPolicies.find(
-    policy => policy.vacation_policy_id === vacationPolicyId
+/** 초과근무 시간 글 — 분까지("2시간 40분"), 0분이면 "2시간", 0시간이면 "40분", 0 이면 "0시간". 보이는 글만이고 서버로 가지 않는다 */
+const durationText = (total: number, t: (k: string, o?: Record<string, unknown>) => string): string => {
+  const h = Math.floor(total / 60)
+  const m = total % 60
+  if (h > 0 && m > 0) return t('req.form.hoursMinutes', { h, m })
+  if (h > 0) return t('req.form.hoursValue', { count: h })
+  if (m > 0) return t('req.form.minutesValue', { count: m })
+  return t('req.form.hoursValue', { count: 0 })
+}
+
+/** 날짜 줄 칸 — 값은 "YYYY-MM-DD", 누르면 1280 미만 시트 · 이상 Popover 의 Date Picker + [완료] */
+const DayRow = ({ title, value, onChange, error, rowRef }: { title: string; value: string; onChange: (v: string) => void; error?: string; rowRef?: React.Ref<HTMLButtonElement> }) => {
+  const { t } = useTranslation('vacation')
+  const { t: tc } = useTranslation('common')
+  const [draft, setDraft] = useState<Date | undefined>(value ? parseDayKey(value) : undefined)
+  return (
+    <PickerRow
+      ref={rowRef}
+      title={title}
+      surfaceTitle={title}
+      value={value ? formatDateValue(parseDayKey(value), new Date()) : ''}
+      placeholder={t('req.form.datePlaceholder')}
+      errorMessage={error}
+      onOpen={() => setDraft(value ? parseDayKey(value) : undefined)}
+      pickerActions={({ close }) => (
+        <Button
+          disabled={!draft}
+          onClick={() => {
+            if (draft) onChange(dayKey(draft))
+            close()
+          }}
+        >
+          {tc('done')}
+        </Button>
+      )}
+    >
+      <DatePicker selection='single' visibleRange='month' aria-label={title} value={draft} onValueChange={setDraft} autoFocus />
+    </PickerRow>
   )
+}
 
-  // overtime 타입인지 확인 (대소문자 무관하게 체크)
-  const isOvertimeType = selectedPolicy?.vacation_type?.toLowerCase() === 'overtime'
+/** 시각 줄 칸 — Time Picker 휠(분 간격 1 — 명시). 휠 시트는 끌어서 닫히지 않는다(닫기 · [완료] · Esc 로만) */
+const TimeRow = ({ title, value, onChange, error }: { title: string; value: TimeValue | null; onChange: (v: TimeValue) => void; error?: string }) => {
+  const { t } = useTranslation('vacation')
+  const { t: tc } = useTranslation('common')
+  const [draft, setDraft] = useState<TimeValue | undefined>(value ?? undefined)
+  return (
+    <PickerRow
+      title={title}
+      surfaceTitle={title}
+      value={value ? formatTimeValue(value) : ''}
+      placeholder={t('req.form.timePlaceholder')}
+      errorMessage={error}
+      dismissible={false}
+      onOpen={() => setDraft(value ?? undefined)}
+      pickerActions={({ close }) => (
+        <Button
+          onClick={() => {
+            const now = new Date()
+            onChange(draft ?? { hour: now.getHours(), minute: now.getMinutes() })
+            close()
+          }}
+        >
+          {tc('done')}
+        </Button>
+      )}
+    >
+      <TimePicker aria-label={title} value={draft} onValueChange={setDraft} minuteStep={1} autoFocus />
+    </PickerRow>
+  )
+}
 
-  // 실제 필요한 승인자 수 계산: min(정책 요구 인원, 가용 승인자 수)
-  const policyRequiredCount = selectedPolicy?.approval_required_count || 0
-  const actualRequiredCount = Math.min(policyRequiredCount, maxAvailableCount)
+/**
+ * 휴가 신청 폼(I-25 E) — 정책 먼저 두 단계: ① "어떤 휴가를 신청할까요?"(정책 Select Box 1열 + [다음]) → ② 그 정책의 칸(제목 → 날짜 · 시각 | 받을 휴가 → 사유 → 결재자) + [결재 요청].
+ * 1280 이상 대화상자(머리 ← 없이 바닥 [이전]) · 미만 시트(머리 ←). 정책을 바꿀 때 ② 에 친 값이 있으면 "입력한 내용이 지워져요" 로 묻는다.
+ * 정책 · 결재자 질의는 quiet — 실패하면 표면 안 Result Section + [다시 시도], 그동안 [결재 요청]은 막는다(결재선을 모르면 보낼 수 없다).
+ * 쓰기 실패는 표면 맨 위 Callout(고정 글), 칸 오류는 칸 아래(누르면 첫 오류 칸으로 초점).
+ */
+const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boolean; onClose: () => void; onSubmitSuccess: () => void }) => {
+  const { t } = useTranslation('vacation')
+  const { t: tc } = useTranslation('common')
+  const snackbar = useSnackbar()
+  const wide = useWide()
+  const { loginUser } = useUser()
+  const userId = loginUser?.user_id || ''
+  const request = usePostRequestVacationMutation()
+  const policiesQuery = useUserVacationPoliciesQuery(userId, 'ON_REQUEST', { quiet: true })
+  const approversQuery = useUserApproversQuery(userId, { quiet: true })
+  const policies = policiesQuery.data ?? []
+  const approversData = approversQuery.data
 
-  // 승인자 선택 완료 여부 확인
-  // 자동 승인이거나 실제 필요 인원이 0이면 승인자 선택 불필요
-  const isApproversValid = isAutoApproval || actualRequiredCount === 0 ||
-    (selectedApprovers && selectedApprovers.filter(a => a).length === actualRequiredCount)
+  const [step, setStep] = useState<1 | 2>(1)
+  const [pickedId, setPickedId] = useState('')
+  const [policyId, setPolicyId] = useState('')
+  const [pickError, setPickError] = useState(false)
+  const [values, setValues] = useState<RequestFormValues>(emptyRequestForm())
+  const [showErrors, setShowErrors] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [resetTo, setResetTo] = useState<string | null>(null)
+  const titleRef = useRef<HTMLInputElement>(null)
 
-  // 정책 변경 시 날짜와 시간 필드 초기화
   useEffect(() => {
-    if (vacationPolicyId) {
-      form.setValue('overtimeDate', '')
-      form.setValue('startTime', '')
-      form.setValue('endTime', '')
-      form.setValue('grantTime', undefined)
-      form.setValue('approvers', [])
-    }
-  }, [vacationPolicyId, form])
+    if (!open) return
+    setStep(1)
+    setPickedId('')
+    setPolicyId('')
+    setPickError(false)
+    setValues(emptyRequestForm())
+    setShowErrors(false)
+    setSaveError(null)
+    setResetTo(null)
+  }, [open])
 
-  const calculateHours = (start: string, end: string): number => {
-    if (start && end) {
-      const startDate = dayjs(`2025-01-01 ${start}`)
-      const endDate = dayjs(`2025-01-01 ${end}`)
-      // 분은 버리고 시간만 반환 (Math.floor 사용)
-      const hours = endDate.diff(startDate, 'hour')
-      return hours > 0 ? hours : 0
-    }
-    return 0
+  const policy = policies.find((p) => String(p.vacation_policy_id) === policyId)
+  const overtime = isOvertimePolicy(policy)
+  const flexible = policy?.is_flexible_grant === 'Y'
+  const withMinutes = policy?.minute_grant_yn === 'Y'
+  const empty = { approvers: [], max_available_count: 0, is_auto_approval: false }
+  const approvers = (approversData ?? empty).approvers
+  const required = requiredApprovers(policy, approversData ?? empty)
+  const policyRequired = policy?.approval_required_count || 0
+  const errors = requestFormErrors(values, policy, required)
+  const dirty = step === 2 && requestFormChanged(values)
+  const set = <K extends keyof RequestFormValues>(key: K, value: RequestFormValues[K]) => setValues((v) => ({ ...v, [key]: value }))
+
+  const enter = (id: string) => {
+    setPolicyId(id)
+    setValues(emptyRequestForm())
+    setShowErrors(false)
+    setSaveError(null)
+    setStep(2)
   }
-
-  const overtimeHours = calculateHours(startTime || '', endTime || '')
-
-  useEffect(() => {
-    if (open) {
-      form.reset({
-        vacationPolicyId: 0,
-        title: '',
-        overtimeDate: '',
-        startTime: '',
-        endTime: '',
-        grantTime: undefined,
-        reason: '',
-        approvers: []
-      })
-    }
-  }, [open, form])
-
-  const onSubmit = (values: OvertimeFormValues) => {
-    if (!loginUser?.user_id) {
-      console.error('User not logged in')
+  const next = () => {
+    if (!pickedId) {
+      setPickError(true)
       return
     }
-
-    // 날짜와 시간을 LocalDateTime 형식으로 변환
-    // overtime 타입인 경우: 시작시간과 종료시간 포함
-    // 일반 휴가인 경우: 해당 날짜의 00:00:00, 종료시간은 null
-    const requestStartTime = isOvertimeType && values.startTime
-      ? `${values.overtimeDate}T${values.startTime}:00`
-      : `${values.overtimeDate}T00:00:00`
-    const requestEndTime = isOvertimeType && values.endTime
-      ? `${values.overtimeDate}T${values.endTime}:00`
-      : null
-
-    // API 요청 데이터 생성
-    const baseRequestData = {
-      user_id: loginUser.user_id,
-      policy_id: values.vacationPolicyId,
-      desc: values.title,
-      approver_ids: values.approvers.filter(a => a),
-      request_start_time: requestStartTime,
-      request_end_time: requestEndTime,
-      request_desc: values.reason
+    if (pickedId === policyId) {
+      setStep(2)
+      return
     }
-
-    // is_flexible_grant가 Y이면 grant_time 추가
-    const requestData = selectedPolicy?.is_flexible_grant === 'Y' && values.grantTime
-      ? { ...baseRequestData, grant_time: values.grantTime }
-      : baseRequestData
-
-    requestVacation(requestData, {
-      onSuccess: () => {
-        onSubmitSuccess()
-        onClose()
-      }
-    })
+    // 정책을 바꾸면 ② 에 친 값이 이 정책에 맞지 않는다 — 친 값이 있으면 묻고, 없으면 바로
+    if (policyId && requestFormChanged(values)) setResetTo(pickedId)
+    else enter(pickedId)
   }
 
-  const handleClose = () => {
-    form.reset()
-    onClose()
+  const submit = async () => {
+    if (busy || !policy || !userId) return
+    if (hasRequestErrors(errors)) {
+      setShowErrors(true)
+      setTimeout(() => document.querySelector<HTMLElement>('[data-request-form] [aria-invalid="true"]')?.focus(), 0)
+      return
+    }
+    setBusy(true)
+    setSaveError(null)
+    try {
+      await request.mutateAsync(requestPayloadOf(userId, policy, values))
+      onSubmitSuccess()
+      onClose()
+      snackbar.show({ message: t('req.form.saved'), tone: 'positive' })
+    } catch (error) {
+      readWriteFailure(error)
+      setSaveError(t('req.form.saveFailed'))
+    } finally {
+      setBusy(false)
+    }
   }
+
+  const retryRow = (title: string, q: { isFetching: boolean; refetch: () => unknown }) => (
+    <ResultSection kind='failure' size='medium' title={title} description={t('memberVacation.failureDescription')} primaryAction={{ label: tc('retry'), onClick: () => void q.refetch(), loading: q.isFetching }} />
+  )
+
+  const stepOne = policiesQuery.isLoadingError ? (
+    retryRow(t('req.form.policyFailureTitle'), policiesQuery)
+  ) : policiesQuery.isPending ? (
+    <div className='flex flex-col gap-x3'>
+      {[0, 1, 2].map((i) => (
+        <Skeleton key={i} radius='12' className='block h-[72px] w-full' />
+      ))}
+    </div>
+  ) : policies.length === 0 ? (
+    <ResultSection size='medium' icon={<CalendarX2 />} title={t('req.form.noPolicy')} />
+  ) : (
+    <Field label={t('req.form.policyGroup')} labelHidden invalid={pickError} errorMessage={t('req.form.policyRequired')}>
+      <RadioSelectBoxGroup
+        value={pickedId}
+        onValueChange={(v) => {
+          setPickedId(v)
+          setPickError(false)
+        }}
+        aria-label={t('req.form.policyGroup')}
+        data-policy-group
+      >
+        {policies.map((p) => (
+          <RadioSelectBox key={p.vacation_policy_id} value={String(p.vacation_policy_id)} label={p.vacation_policy_name} description={policyDescription(p, t)} data-policy={p.vacation_policy_id} />
+        ))}
+      </RadioSelectBoxGroup>
+    </Field>
+  )
+
+  const overtimeMin = overtimeMinutes(values.start, values.end)
+  const approverRows = Array.from({ length: required }).map((_, i) => {
+    const k = i + 1
+    const chosen = values.approvers[i] ?? ''
+    const person = approvers.find((a) => a.user_id === chosen)
+    const takenAt = (id: string) => values.approvers.findIndex((a, j) => a === id && j !== i)
+    return (
+      <PickerRow
+        key={k}
+        title={t('req.form.approverStep', { k })}
+        surfaceTitle={t('req.form.approverPickTitle', { k })}
+        value={person ? person.user_name : ''}
+        placeholder={t('req.form.approverPick')}
+        errorMessage={showErrors && errors.approvers.includes(k) ? t('req.form.approverRequired', { k }) : undefined}
+        scrollFog
+      >
+        {({ close }) => (
+          <List>
+            {approvers.map((a) => {
+              const at = takenAt(a.user_id)
+              return (
+                <ListButtonItem
+                  key={a.user_id}
+                  prefix={<Avatar name={a.user_name} size={24} />}
+                  title={a.user_name}
+                  detail={at >= 0 ? t('req.form.approverTaken', { k: at + 1 }) : a.department_name_kr}
+                  disabled={at >= 0}
+                  aria-pressed={chosen === a.user_id}
+                  data-approver={a.user_id}
+                  onClick={() => {
+                    set('approvers', Object.assign([...values.approvers], { [i]: a.user_id }))
+                    close()
+                  }}
+                />
+              )
+            })}
+          </List>
+        )}
+      </PickerRow>
+    )
+  })
+
+  const stepTwo = !policy ? null : (
+    <div className='flex flex-col gap-x6 pb-x2' data-request-form>
+      <Field label={t('req.form.title')} invalid={showErrors && !!errors.title} errorMessage={t('req.form.titleRequired')}>
+        <Input
+          ref={titleRef}
+          value={values.title}
+          placeholder={overtime ? t('req.form.titlePlaceholderComp') : t('req.form.titlePlaceholderVacation')}
+          aria-invalid={(showErrors && !!errors.title) || undefined}
+          onChange={(e) => set('title', e.target.value)}
+        />
+      </Field>
+      <div className='-mx-x6 flex flex-col' data-request-rows>
+        <DayRow title={overtime ? t('req.form.overtimeDay') : t('req.form.day')} value={values.day} onChange={(v) => set('day', v)} error={showErrors && errors.day ? t('req.form.dayRequired') : undefined} />
+        {overtime && (
+          <>
+            <TimeRow title={t('req.form.start')} value={values.start} onChange={(v) => set('start', v)} error={showErrors && errors.start ? t('req.form.startRequired') : undefined} />
+            <TimeRow
+              title={t('req.form.end')}
+              value={values.end}
+              onChange={(v) => set('end', v)}
+              error={showErrors && errors.end ? (errors.end === 'order' ? t('req.form.endAfterStart') : t('req.form.endRequired')) : undefined}
+            />
+            <List>
+              <ListItem title={t('req.form.hours')} data-overtime-hours suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{durationText(overtimeMin, t)}</span>} />
+            </List>
+          </>
+        )}
+      </div>
+      {flexible && (
+        <GrantTimeField
+          label={t('req.form.grant')}
+          required={false}
+          value={values.grantTime}
+          onValueChange={(total) => set('grantTime', total)}
+          withMinutes={withMinutes}
+          description={t('req.form.grantSum', { sum: sumText(values.grantTime, t) })}
+          invalid={showErrors && !!errors.grant}
+          errorMessage={t('req.form.grantRequired')}
+        />
+      )}
+      <Field label={t('req.form.reason')} invalid={showErrors && !!errors.reason} errorMessage={t('req.form.reasonRequired')}>
+        <Textarea
+          value={values.reason}
+          placeholder={overtime ? t('req.form.reasonCompPlaceholder') : t('req.form.reasonVacationPlaceholder')}
+          aria-invalid={(showErrors && !!errors.reason) || undefined}
+          onChange={(e) => set('reason', e.target.value)}
+        />
+      </Field>
+      <div className='flex flex-col gap-x2' data-approvers>
+        {approversQuery.isLoadingError ? (
+          retryRow(t('req.form.approversFailureTitle'), approversQuery)
+        ) : approversQuery.isPending ? (
+          <Skeleton radius='12' className='block h-[56px] w-full' />
+        ) : approversData?.is_auto_approval && policyRequired > 0 ? (
+          <Callout tone='informative'>{t('req.form.autoApprovalCallout')}</Callout>
+        ) : required === 0 ? (
+          <p className='m-0 text-t4 text-fg-neutral-muted'>{t('req.form.autoApproval')}</p>
+        ) : (
+          <>
+            {required < policyRequired && <Callout tone='informative'>{t('req.form.reducedCallout', { required: policyRequired, available: required })}</Callout>}
+            <div className='-mx-x6 flex flex-col' data-approver-rows>
+              <ListHeader as='h3'>{t('req.form.approvers', { n: required })}</ListHeader>
+              {approverRows}
+            </div>
+          </>
+        )}
+      </div>
+      <p className='m-0 text-t3 text-fg-neutral-subtle'>{t('req.form.notice')}</p>
+    </div>
+  )
+
+  const title = step === 1 || !policy ? t('req.form.step1Title') : overtime ? t('req.form.titleComp') : t('req.form.titleVacation')
+  const description =
+    step === 1 || !policy
+      ? t('req.form.step1Desc')
+      : t('req.form.step2Desc', { policy: policy.vacation_policy_name, approval: policyRequired > 0 ? t('req.form.approvalN', { n: policyRequired }) : t('req.form.approvalNone') })
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className='max-w-6xl max-h-[90vh] p-0 grid grid-rows-[auto_1fr_auto]'>
-        <DialogHeader className='p-6 pb-4'>
-          <div>
-            <DialogTitle className='text-2xl font-bold'>
-              {isOvertimeType ? t('application.compVacation') : t('application.vacationRequest')}
-            </DialogTitle>
-            <DialogDescription className='mt-2'>
-              {t('application.writtenAt', { dateTime: dayjs().format('YYYY-MM-DD HH:mm') })}
-            </DialogDescription>
-          </div>
-        </DialogHeader>
-
-        <form onSubmit={form.handleSubmit(onSubmit)} className='contents'>
-          <ScrollArea>
-            <div className='p-6 pt-0'>
-              <div className='grid grid-cols-1 min-[64rem]:grid-cols-3 gap-6'>
-                {/* 메인 폼 */}
-                <div className='min-[64rem]:col-span-2'>
-                  <Card>
-                    <CardHeader>
-                      <div className='flex items-center gap-2'>
-                        <Calendar className='w-5 h-5 text-blue-600' />
-                        <CardTitle>
-                          {isOvertimeType ? t('application.compVacationInfo') : t('application.vacationInfo')}
-                        </CardTitle>
-                      </div>
-                    </CardHeader>
-                    <CardContent className='space-y-6'>
-                      <Controller
-                        control={form.control}
-                        name='title'
-                        render={({ field, fieldState }) => (
-                          <Field data-invalid={!!fieldState.error}>
-                            <FieldLabel>
-                              {t('application.titleLabel')}
-                              <span className='text-destructive ml-0.5'>*</span>
-                            </FieldLabel>
-                            <Input
-                              {...field}
-                              placeholder={
-                                isOvertimeType
-                                  ? t('application.titleCompPlaceholder')
-                                  : t('application.titleVacationPlaceholder')
-                              }
-                            />
-                            <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                          </Field>
-                        )}
-                      />
-
-                      <Controller
-                        control={form.control}
-                        name='vacationPolicyId'
-                        render={({ field, fieldState }) => (
-                          <Field data-invalid={!!fieldState.error}>
-                            <FieldLabel>
-                              {t('application.policyLabel')}
-                              <span className='text-destructive ml-0.5'>*</span>
-                            </FieldLabel>
-                            <Select
-                              value={field.value ? field.value.toString() : ''}
-                              onValueChange={(value) => field.onChange(parseInt(value))}
-                            >
-                              <SelectTrigger>
-                                {selectedPolicy ? (
-                                  <span className='font-medium'>
-                                    {selectedPolicy.vacation_policy_name} ({selectedPolicy.grant_time_str})
-                                  </span>
-                                ) : (
-                                  <span className='text-muted-foreground'>{t('application.policySelectPlaceholder')}</span>
-                                )}
-                              </SelectTrigger>
-                              <SelectContent>
-                                {vacationPolicies.map((policy) => (
-                                  <SelectItem
-                                    key={policy.vacation_policy_id}
-                                    value={policy.vacation_policy_id.toString()}
-                                  >
-                                    <div className='flex flex-col'>
-                                      <div className='font-medium'>{policy.vacation_policy_name}</div>
-                                      <div className='text-xs text-gray-500'>
-                                        {policy.vacation_policy_desc} · {policy.grant_time_str}
-                                      </div>
-                                    </div>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                          </Field>
-                        )}
-                      />
-
-                      {isOvertimeType ? (
-                        <>
-                          <div className='grid grid-cols-1 min-[48rem]:grid-cols-3 gap-4'>
-                            <Controller
-                              control={form.control}
-                              name='overtimeDate'
-                              render={({ field, fieldState }) => (
-                                <Field data-invalid={!!fieldState.error}>
-                                  <FieldLabel>
-                                    {t('application.overtimeDateLabel')}
-                                    <span className='text-destructive ml-0.5'>*</span>
-                                  </FieldLabel>
-                                  <InputDatePicker
-                                    value={field.value}
-                                    onValueChange={field.onChange}
-                                  />
-                                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                                </Field>
-                              )}
-                            />
-                            <Controller
-                              control={form.control}
-                              name='startTime'
-                              render={({ field, fieldState }) => (
-                                <Field data-invalid={!!fieldState.error}>
-                                  <FieldLabel>
-                                    {t('application.startTimeLabel')}
-                                    <span className='text-destructive ml-0.5'>*</span>
-                                  </FieldLabel>
-                                  <InputTimePicker
-                                    value={field.value}
-                                    onValueChange={field.onChange}
-                                    placeholder="HH:mm"
-                                  />
-                                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                                </Field>
-                              )}
-                            />
-                            <Controller
-                              control={form.control}
-                              name='endTime'
-                              render={({ field, fieldState }) => (
-                                <Field data-invalid={!!fieldState.error}>
-                                  <FieldLabel>
-                                    {t('application.endTimeLabel')}
-                                    <span className='text-destructive ml-0.5'>*</span>
-                                  </FieldLabel>
-                                  <InputTimePicker
-                                    value={field.value}
-                                    onValueChange={field.onChange}
-                                    placeholder="HH:mm"
-                                  />
-                                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                                </Field>
-                              )}
-                            />
-                          </div>
-
-                          {/* is_flexible_grant가 Y이면 부여 시간 입력 */}
-                          {selectedPolicy?.is_flexible_grant === 'Y' && (
-                            <Controller
-                              control={form.control}
-                              name='grantTime'
-                              render={({ field, fieldState }) => {
-                                const totalValue = field.value || 0
-                                const days = Math.floor(totalValue)
-                                const remainder = totalValue - days
-                                const hours = Math.floor(remainder / 0.125)
-                                const minutes = (remainder - hours * 0.125) >= 0.0625 ? 30 : 0
-
-                                const handleTimeChange = (newDays: number, newHours: number, newMinutes: number) => {
-                                  const total = newDays + (newHours * 0.125) + (newMinutes === 30 ? 0.0625 : 0)
-                                  field.onChange(total > 0 ? total : undefined)
-                                }
-
-                                return (
-                                  <Field data-invalid={!!fieldState.error}>
-                                    <FieldLabel>
-                                      {t('application.grantTimeLabel')}
-                                      <span className='text-destructive ml-0.5'>*</span>
-                                    </FieldLabel>
-                                    <div className={`grid ${selectedPolicy?.minute_grant_yn === 'Y' ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
-                                      <div className='flex flex-col'>
-                                        <Input
-                                          type='number'
-                                          min='0'
-                                          max='365'
-                                          placeholder={t('application.dayUnit')}
-                                          className='w-full'
-                                          value={days || ''}
-                                          onChange={(e) => {
-                                            const newDays = e.target.value ? parseInt(e.target.value) : 0
-                                            handleTimeChange(newDays, hours, minutes)
-                                          }}
-                                        />
-                                        <p className='text-xs text-muted-foreground mt-1'>{t('application.dayUnit')}</p>
-                                      </div>
-                                      <div className='flex flex-col'>
-                                        <Select
-                                          value={hours.toString()}
-                                          onValueChange={(value) => {
-                                            handleTimeChange(days, parseInt(value), minutes)
-                                          }}
-                                        >
-                                          <SelectTrigger className='w-full'>
-                                            <SelectValue placeholder={t('application.hourUnit')} />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            {[0, 1, 2, 3, 4, 5, 6, 7].map((h) => (
-                                              <SelectItem key={h} value={h.toString()}>
-                                                {t('application.nHours', { count: h })}
-                                              </SelectItem>
-                                            ))}
-                                          </SelectContent>
-                                        </Select>
-                                        <p className='text-xs text-muted-foreground mt-1'>{t('application.hourUnit')}</p>
-                                      </div>
-                                      {selectedPolicy?.minute_grant_yn === 'Y' && (
-                                        <div className='flex flex-col'>
-                                          <Select
-                                            value={minutes.toString()}
-                                            onValueChange={(value) => {
-                                              handleTimeChange(days, hours, parseInt(value))
-                                            }}
-                                          >
-                                            <SelectTrigger className='w-full'>
-                                              <SelectValue placeholder={t('application.minuteUnit')} />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value='0'>{t('application.nMinutes', { count: 0 })}</SelectItem>
-                                              <SelectItem value='30'>{t('application.nMinutes', { count: 30 })}</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                          <p className='text-xs text-muted-foreground mt-1'>{t('application.minuteUnit')}</p>
-                                        </div>
-                                      )}
-                                    </div>
-                                    <p className='text-sm text-muted-foreground mt-2'>
-                                      {selectedPolicy?.minute_grant_yn === 'Y' ? t('application.timeSelectDescWithMin') : t('application.timeSelectDesc')}
-                                      {field.value && field.value > 0 && (
-                                        <span className='block mt-1 font-medium text-primary'>
-                                          {t('application.totalTimeLabel')} {[
-                                            days > 0 ? `${days}${tc('day')}` : '',
-                                            hours > 0 ? `${hours}${tc('hour')}` : '',
-                                            minutes > 0 && selectedPolicy?.minute_grant_yn === 'Y' ? `${minutes}${tc('minute')}` : ''
-                                          ].filter(Boolean).join(' ')}
-                                        </span>
-                                      )}
-                                    </p>
-                                    <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                                  </Field>
-                                )
-                              }}
-                            />
-                          )}
-
-                          <div className='grid grid-cols-1 min-[48rem]:grid-cols-2 gap-4'>
-                            <div className='space-y-2'>
-                              <FieldLabel>{t('application.overtimeHoursLabel')}</FieldLabel>
-                              <div className='h-9 px-3 border rounded-md flex items-center bg-gray-50'>
-                                <Clock className='w-4 h-4 text-gray-400 mr-2' />
-                                <span className='font-semibold'>
-                                  {overtimeHours > 0 ? t('application.nHours', { count: overtimeHours }) : '-'}
-                                </span>
-                              </div>
-                            </div>
-                            <div className='space-y-2'>
-                              <FieldLabel>{t('application.expectedCompTime')}</FieldLabel>
-                              <div className='h-9 px-3 border rounded-md flex items-center bg-gray-50'>
-                                <span className='text-lg font-bold text-blue-600'>
-                                  {selectedPolicy?.is_flexible_grant === 'Y' && form.watch('grantTime')
-                                    ? (() => {
-                                        const grantTime = form.watch('grantTime') || 0
-                                        const days = Math.floor(grantTime)
-                                        const remainder = grantTime - days
-                                        const hours = Math.floor(remainder / 0.125)
-                                        const minutes = (remainder - hours * 0.125) >= 0.0625 ? 30 : 0
-                                        return [
-                                          days > 0 ? `${days}${tc('day')}` : '',
-                                          hours > 0 ? `${hours}${tc('hour')}` : '',
-                                          minutes > 0 && selectedPolicy?.minute_grant_yn === 'Y' ? `${minutes}${tc('minute')}` : ''
-                                        ].filter(Boolean).join(' ') || '-'
-                                      })()
-                                    : overtimeHours > 0 ? t('application.nHours', { count: overtimeHours }) : '-'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <Controller
-                            control={form.control}
-                            name='overtimeDate'
-                            render={({ field, fieldState }) => (
-                              <Field data-invalid={!!fieldState.error}>
-                                <FieldLabel>
-                                  {t('application.dateLabel')}
-                                  <span className='text-destructive ml-0.5'>*</span>
-                                </FieldLabel>
-                                <InputDatePicker
-                                  value={field.value}
-                                  onValueChange={field.onChange}
-                                />
-                                <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                              </Field>
-                            )}
-                          />
-
-                          {/* is_flexible_grant가 Y이면 부여 시간 입력 */}
-                          {selectedPolicy?.is_flexible_grant === 'Y' && (
-                            <Controller
-                              control={form.control}
-                              name='grantTime'
-                              render={({ field, fieldState }) => {
-                                const totalValue = field.value || 0
-                                const days = Math.floor(totalValue)
-                                const remainder = totalValue - days
-                                const hours = Math.floor(remainder / 0.125)
-                                const minutes = (remainder - hours * 0.125) >= 0.0625 ? 30 : 0
-
-                                const handleTimeChange = (newDays: number, newHours: number, newMinutes: number) => {
-                                  const total = newDays + (newHours * 0.125) + (newMinutes === 30 ? 0.0625 : 0)
-                                  field.onChange(total > 0 ? total : undefined)
-                                }
-
-                                return (
-                                  <Field data-invalid={!!fieldState.error}>
-                                    <FieldLabel>
-                                      {t('application.grantTimeLabel')}
-                                      <span className='text-destructive ml-0.5'>*</span>
-                                    </FieldLabel>
-                                    <div className={`grid ${selectedPolicy?.minute_grant_yn === 'Y' ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
-                                      <div className='flex flex-col'>
-                                        <Input
-                                          type='number'
-                                          min='0'
-                                          max='365'
-                                          placeholder={t('application.dayUnit')}
-                                          className='w-full'
-                                          value={days || ''}
-                                          onChange={(e) => {
-                                            const newDays = e.target.value ? parseInt(e.target.value) : 0
-                                            handleTimeChange(newDays, hours, minutes)
-                                          }}
-                                        />
-                                        <p className='text-xs text-muted-foreground mt-1'>{t('application.dayUnit')}</p>
-                                      </div>
-                                      <div className='flex flex-col'>
-                                        <Select
-                                          value={hours.toString()}
-                                          onValueChange={(value) => {
-                                            handleTimeChange(days, parseInt(value), minutes)
-                                          }}
-                                        >
-                                          <SelectTrigger className='w-full'>
-                                            <SelectValue placeholder={t('application.hourUnit')} />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            {[0, 1, 2, 3, 4, 5, 6, 7].map((h) => (
-                                              <SelectItem key={h} value={h.toString()}>
-                                                {t('application.nHours', { count: h })}
-                                              </SelectItem>
-                                            ))}
-                                          </SelectContent>
-                                        </Select>
-                                        <p className='text-xs text-muted-foreground mt-1'>{t('application.hourUnit')}</p>
-                                      </div>
-                                      {selectedPolicy?.minute_grant_yn === 'Y' && (
-                                        <div className='flex flex-col'>
-                                          <Select
-                                            value={minutes.toString()}
-                                            onValueChange={(value) => {
-                                              handleTimeChange(days, hours, parseInt(value))
-                                            }}
-                                          >
-                                            <SelectTrigger className='w-full'>
-                                              <SelectValue placeholder={t('application.minuteUnit')} />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              <SelectItem value='0'>{t('application.nMinutes', { count: 0 })}</SelectItem>
-                                              <SelectItem value='30'>{t('application.nMinutes', { count: 30 })}</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                          <p className='text-xs text-muted-foreground mt-1'>{t('application.minuteUnit')}</p>
-                                        </div>
-                                      )}
-                                    </div>
-                                    <p className='text-sm text-muted-foreground mt-2'>
-                                      {selectedPolicy?.minute_grant_yn === 'Y' ? t('application.timeSelectDescWithMin') : t('application.timeSelectDesc')}
-                                      {field.value && field.value > 0 && (
-                                        <span className='block mt-1 font-medium text-primary'>
-                                          {t('application.totalTimeLabel')} {[
-                                            days > 0 ? `${days}${tc('day')}` : '',
-                                            hours > 0 ? `${hours}${tc('hour')}` : '',
-                                            minutes > 0 && selectedPolicy?.minute_grant_yn === 'Y' ? `${minutes}${tc('minute')}` : ''
-                                          ].filter(Boolean).join(' ')}
-                                        </span>
-                                      )}
-                                    </p>
-                                    <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                                  </Field>
-                                )
-                              }}
-                            />
-                          )}
-                        </>
-                      )}
-
-                      <Controller
-                        control={form.control}
-                        name='reason'
-                        render={({ field, fieldState }) => (
-                          <Field data-invalid={!!fieldState.error}>
-                            <FieldLabel>
-                              {isOvertimeType ? t('application.compReasonLabel') : t('application.reasonLabel')}
-                              <span className='text-destructive ml-0.5'>*</span>
-                            </FieldLabel>
-                            <Textarea
-                              {...field}
-                              rows={4}
-                              placeholder={
-                                isOvertimeType
-                                  ? t('application.compReasonPlaceholder')
-                                  : t('application.vacationReasonPlaceholder')
-                              }
-                            />
-                            <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                          </Field>
-                        )}
-                      />
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* 사이드바 */}
-                <div className='min-[64rem]:col-span-1 space-y-4'>
-                  {/* 승인자 지정 */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className='text-lg flex items-center gap-2'>
-                        <Users className='w-5 h-5' />
-                        {t('application.approverTitle')}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className='space-y-4'>
-                        {/* 자동 승인 안내 메시지 */}
-                        {selectedPolicy && isAutoApproval && policyRequiredCount > 0 && (
-                          <div className='p-3 rounded-md border border-green-200 bg-green-50'>
-                            <p className='text-sm text-green-700 text-center'>
-                              {t('application.autoApprovalMessage')}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* 실제 필요 인원이 정책 요구 인원보다 적은 경우 안내 */}
-                        {selectedPolicy && !isAutoApproval && actualRequiredCount > 0 && actualRequiredCount < policyRequiredCount && (
-                          <div className='p-3 rounded-md border border-yellow-200 bg-yellow-50'>
-                            <p className='text-sm text-yellow-700 text-center'>
-                              {t('application.reducedApproverMessage', {
-                                required: policyRequiredCount,
-                                available: actualRequiredCount
-                              })}
-                            </p>
-                          </div>
-                        )}
-
-                        {selectedPolicy && actualRequiredCount > 0 && !isAutoApproval ? (
-                          Array.from({ length: actualRequiredCount }).map((_, index) => (
-                            <div key={index}>
-                              {index > 0 && <Separator className='my-4' />}
-                              <div className={index > 0 ? 'mt-4' : ''}>
-                                <h4 className='text-sm font-medium text-gray-700 mb-2'>
-                                  {t('application.stepApprover', { step: index + 1 })}
-                                </h4>
-                                <Controller
-                                  control={form.control}
-                                  name={`approvers.${index}` as const}
-                                  rules={{ required: t('application.approverRequired') }}
-                                  render={({ field }) => (
-                                    <Select value={field.value || ''} onValueChange={field.onChange}>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder={t('application.approverSelectPlaceholder')} />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {approvers.map((approver) => (
-                                          <SelectItem key={approver.user_id} value={approver.user_id}>
-                                            <div className='flex items-center gap-2'>
-                                              <Avatar className='w-6 h-6'>
-                                                <AvatarFallback>{approver.user_name.charAt(0)}</AvatarFallback>
-                                              </Avatar>
-                                              <div className='text-left'>
-                                                <div className='font-medium'>{approver.user_name}</div>
-                                                <div className='text-xs text-gray-500'>{approver.department_name_kr}</div>
-                                              </div>
-                                            </div>
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  )}
-                                />
-                              </div>
-                            </div>
-                          ))
-                        ) : !selectedPolicy ? (
-                          <div className='p-3 rounded-md border border-dashed border-gray-300 bg-gray-50'>
-                            <p className='text-sm text-gray-500 text-center'>{t('application.selectPolicyFirst')}</p>
-                          </div>
-                        ) : selectedPolicy && !isAutoApproval && actualRequiredCount === 0 && policyRequiredCount === 0 ? (
-                          <div className='p-3 rounded-md border border-green-200 bg-green-50'>
-                            <p className='text-sm text-green-700 text-center'>
-                              {t('application.noApprovalRequired')}
-                            </p>
-                          </div>
-                        ) : null}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* 신청 요약 */}
-                  {(form.watch('title') || (isOvertimeType && overtimeHours > 0)) && (
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className='text-lg'>{t('application.summaryTitle')}</CardTitle>
-                      </CardHeader>
-                      <CardContent className='space-y-3'>
-                        {form.watch('title') && (
-                          <div>
-                            <p className='text-xs text-gray-500'>{t('application.titleLabel')}</p>
-                            <p className='text-sm font-medium'>{form.watch('title')}</p>
-                          </div>
-                        )}
-                        {selectedPolicy && (
-                          <div>
-                            <p className='text-xs text-gray-500'>{t('application.summaryVacationPolicy')}</p>
-                            <p className='text-sm font-medium'>{selectedPolicy.vacation_policy_name}</p>
-                          </div>
-                        )}
-                        {isOvertimeType && overtimeHours > 0 && (
-                          <>
-                            <div>
-                              <p className='text-xs text-gray-500'>{t('application.summaryOvertimeHours')}</p>
-                              <p className='text-sm font-medium'>{t('application.nHours', { count: overtimeHours })}</p>
-                            </div>
-                            <div>
-                              <p className='text-xs text-gray-500'>{t('application.summaryExpectedComp')}</p>
-                              <p className='text-sm font-bold text-blue-600'>
-                                {t('application.nHours', { count: overtimeHours })}
-                              </p>
-                            </div>
-                          </>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </div>
-            </div>
-          </ScrollArea>
-
-          {/* 하단 버튼 */}
-          <DialogFooter className='p-6 pt-4 border-t bg-gray-50'>
-            <div className='w-full'>
-              <div className='flex items-center gap-2 text-sm text-gray-600 mb-4'>
-                <AlertCircle className='w-4 h-4' />
-                {t('application.noticeMessage')}
-              </div>
-
-              <div className='flex gap-3'>
-                <Button type='button' variant='outline' onClick={handleClose} className='flex-1'>
-                  {t('application.cancelBtn')}
-                </Button>
-                <Button
-                  type='submit'
-                  className='flex-1'
-                  disabled={!form.formState.isValid || !isApproversValid}
-                >
-                  {t('application.submitBtn')}
-                </Button>
-              </div>
-            </div>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <>
+      <ResponsiveDialog open={open} form dirty={dirty} busy={busy} onOpenChange={(o) => !o && onClose()}>
+        <ResponsiveDialogContent title={title} description={description} onBack={step === 2 && !wide ? () => setStep(1) : undefined}>
+          <ResponsiveDialogBody>
+            {saveError && (
+              <Callout tone='critical' role='alert' className='mb-x4' data-save-failure>
+                {saveError}
+              </Callout>
+            )}
+            {step === 1 ? stepOne : stepTwo}
+          </ResponsiveDialogBody>
+          <ResponsiveDialogFooter>
+            {step === 2 && wide && (
+              <Button variant='ghost' disabled={busy} onClick={() => setStep(1)} data-request-prev>
+                {t('req.form.prev')}
+              </Button>
+            )}
+            <ResponsiveDialogCancel>{tc('cancel')}</ResponsiveDialogCancel>
+            {step === 1 ? (
+              <Button variant='neutralSolid' disabled={policiesQuery.isPending || policiesQuery.isLoadingError || policies.length === 0} onClick={next} data-request-next>
+                {t('req.form.next')}
+              </Button>
+            ) : (
+              <Button variant='brandSolid' loading={busy} disabled={approversQuery.isPending || approversQuery.isLoadingError} onClick={() => void submit()} data-request-submit>
+                {t('req.form.submit')}
+              </Button>
+            )}
+          </ResponsiveDialogFooter>
+        </ResponsiveDialogContent>
+      </ResponsiveDialog>
+      <ConfirmDialog
+        open={resetTo !== null}
+        onOpenChange={(o) => {
+          if (!o) {
+            // [계속 작성] — 정책은 그대로 두고 ② 로 돌아간다
+            setResetTo(null)
+            setStep(2)
+          }
+        }}
+        kind='reset'
+        tone='neutralSolid'
+        title={t('req.form.resetTitle')}
+        description={t('req.form.resetDesc')}
+        confirmLabel={t('req.form.change')}
+        cancelLabel={t('req.form.keep')}
+        onConfirm={() => {
+          if (resetTo) enter(resetTo)
+        }}
+      />
+    </>
   )
 }
 
