@@ -18,8 +18,8 @@ import { NavGroups } from './NavGroups'
 export function HrSidebar({ groups }: { groups: NavGroup[] }) {
   const { t } = useTranslation('common')
   return (
-    // z-sticky: 사이드바는 sticky 라 스스로 쌓임 맥락이다 — 접힌 부모의 펼침 메뉴(사이드바 안에 그려진다)가 뒤따르는 본문 카드 아래로 들어가지 않게 본문보다 위에 둔다
-    <SideNavigation className='z-(--z-sticky)'>
+    // 접힌 사이드바의 펼침 메뉴가 본문 카드 아래로 들어가지 않는 층(z-sticky)은 ds 루트가 가진다(side-navigation.yaml root.zIndex)
+    <SideNavigation>
       <SideNavigationHeader
         logo={
           <>
