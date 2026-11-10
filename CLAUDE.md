@@ -10,7 +10,7 @@ React 19 + TypeScript + Vite를 사용하는 프론트엔드 프로젝트:
 
 - **프론트엔드**: React 19, TypeScript, Vite
 - **스타일링**: Tailwind CSS
-- **상태 관리**: Zustand
+- **서버 상태**: TanStack Query
 - **라우팅**: React Router v6
 - **API 통신**: Axios
 
@@ -45,7 +45,6 @@ src/
 ### ds 한 계통
 - 화면은 **`src/shared/ds`**(그루 디자인 시스템 부품 — 출처 · 손댄 곳은 `src/shared/ds/SOURCE.md`)로 짠다. 새 UI 는 ds 부품을 쓰고, 없으면 먼저 디자인 시스템에 묻는다
 - `src/shared/ds` 는 이 레포에서 직접 고치지 않는다(`npm run ds:check` 가 스펙과 어긋남을 잡는다)
-- `src/shared/ui/shadcn/` 은 아직 ds 로 옮기지 않은 자리(관리 권한 화면 · 사용자 정보 카드 · 비밀번호 변경 대화상자 · 캘린더 주 보기 스크롤 · 접근 불가 화면)만 쓰는 잔재다(열두 파일) — **새로 쓰지 않는다.** 그 화면이 ds 로 옮겨지면 파일마다 쓰임을 grep 해 걷는다
 - antd · sonner · next-themes 는 걷었다(eslint `no-restricted-imports` 가 다시 들이는 걸 막는다)
 
 ### 알림

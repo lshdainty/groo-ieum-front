@@ -1,11 +1,11 @@
-import { Button } from '@/shared/ui/shadcn/button'
-import { FieldDescription, FieldLegend, FieldSet } from '@/shared/ui/shadcn/field'
-import { Spinner } from '@/shared/ui/shadcn/spinner'
-import { Role, User } from '@/features/admin-authority/types'
-import { cn } from '@/shared/lib'
-import { ArrowLeft, Check } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
+import { Button } from '@/shared/ds/button'
+import { Field } from '@/shared/ds/field'
+import { CheckSelectBox, CheckSelectBoxGroup } from '@/shared/ds/select-box'
+import { Role, User } from '@/features/admin-authority/types'
 
 interface UserRoleAssignmentProps {
   user: User
@@ -65,102 +65,61 @@ const UserRoleAssignment = ({ user, allRoles, onUpdateUserRole, onBack }: UserRo
   }
 
   return (
-    <div className="flex flex-col h-full min-h-0 min-w-0">
-      <div className="shrink-0 p-4 min-[48rem]:p-6 border-b bg-background">
-        <div className="flex items-start gap-2 mb-1">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="shrink-0 border-b border-stroke-neutral-subtle bg-bg-layer-default p-x4 md:p-x6">
+        <div className="mb-x1 flex items-start gap-x2">
           {onBack && (
-            <Button variant="outline" size="icon" onClick={onBack} className="mr-2 min-[48rem]:hidden shrink-0 h-8 w-8 mt-1">
-              <ArrowLeft className="h-4 w-4" />
+            <Button variant="ghost" layout="iconOnly" size="medium" aria-label={t('authority.backToUserList')} onClick={onBack} className="-ml-x2 shrink-0 md:hidden" data-user-back>
+              <ArrowLeft />
             </Button>
           )}
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">{user.name}</h2>
-            <p className="text-muted-foreground mb-4">{user.email}</p>
+          <div className="min-w-0">
+            <h2 className="m-0 text-t8 font-bold text-fg-neutral [overflow-wrap:anywhere]">{user.name}</h2>
+            <p className="m-0 mb-x4 text-t4 text-fg-neutral-subtle [overflow-wrap:anywhere]">{user.email}</p>
           </div>
         </div>
 
-        <div className="flex gap-4 text-sm text-muted-foreground">
+        <div className="flex gap-x4 text-t4 text-fg-neutral-subtle">
           <div>
-            <span className="font-medium text-foreground">{t('authority.department')}:</span> {user.department || '-'}
+            <span className="font-medium text-fg-neutral">{t('authority.department')}:</span> {user.department || '-'}
           </div>
           <div>
-            <span className="font-medium text-foreground">{t('authority.position')}:</span> {user.position || '-'}
+            <span className="font-medium text-fg-neutral">{t('authority.position')}:</span> {user.position || '-'}
           </div>
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 min-[48rem]:p-6">
-        {/* fieldset 은 기본 min-inline-size 가 min-content 라 띄어쓰기 없는 긴 설명에 폭이 밀린다 — min-w-0 */}
-        <FieldSet className="min-w-0 gap-3">
-          <FieldLegend className="mb-2 leading-[22px]">{t('authority.roles')}</FieldLegend>
-          <FieldDescription className="[[data-variant=legend]+&]:mt-0">
-            {t('authority.userRolesHint')}
-          </FieldDescription>
-
+      <div className="min-h-0 flex-1 overflow-y-auto p-x4 md:p-x6">
+        <Field label={t('authority.roles')} description={t('authority.userRolesHint')}>
           {allRoles.length === 0 ? (
-            <p className="py-4 text-sm text-muted-foreground">{t('authority.noRoles')}</p>
+            <p className="m-0 py-x4 text-t4 text-fg-neutral-muted">{t('authority.noRoles')}</p>
           ) : (
-            allRoles.map(role => {
-              const isSelected = selected.includes(role.role_code)
-              return (
-                <label
+            <CheckSelectBoxGroup>
+              {allRoles.map(role => (
+                <CheckSelectBox
                   key={role.role_code}
-                  className={cn(
-                    'group relative flex cursor-pointer rounded-xl py-4 pl-5 pr-4',
-                    'inset-ring inset-ring-border transition-[background-color,box-shadow] duration-150',
-                    'hover:bg-accent active:bg-accent',
-                    'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring',
-                    isSelected && 'inset-ring-2 inset-ring-foreground'
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    className="sr-only"
-                    checked={isSelected}
-                    onChange={() => handleToggle(role.role_code)}
-                  />
-                  <span className="flex flex-1 min-w-0 items-center gap-1.5 transition-transform duration-150 ease-out motion-safe:group-active:scale-[0.985]">
-                    <span className="flex flex-1 min-w-0 flex-col gap-0.5 pr-1 break-keep wrap-break-word">
-                      <span className="text-base leading-[22px] font-medium text-foreground">{role.role_name}</span>
-                      {role.desc && (
-                        <span className="text-[13px] leading-[18px] text-muted-foreground">{role.desc}</span>
-                      )}
-                    </span>
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        'grid size-5 shrink-0 place-items-center transition-colors duration-150',
-                        isSelected ? 'text-foreground' : 'text-muted-foreground/50'
-                      )}
-                    >
-                      <Check className="size-3.5" strokeWidth={3} />
-                    </span>
-                  </span>
-                </label>
-              )
-            })
+                  label={role.role_name}
+                  description={role.desc || undefined}
+                  checked={selected.includes(role.role_code)}
+                  onCheckedChange={() => handleToggle(role.role_code)}
+                />
+              ))}
+            </CheckSelectBoxGroup>
           )}
-        </FieldSet>
+        </Field>
 
-        <div className="mt-3 flex flex-col gap-3 min-[48rem]:flex-row min-[48rem]:items-center min-[48rem]:justify-end">
-          <p id={hintId} className="text-sm text-muted-foreground">
+        <div className="mt-x3 flex flex-col gap-x3 md:flex-row md:items-center md:justify-end">
+          <p id={hintId} className="m-0 text-t4 text-fg-neutral-subtle">
             {isDirty ? t('authority.userRolesPending', { added, removed }) : t('authority.userRolesNoChanges')}
           </p>
           <Button
-            className="relative w-full min-[48rem]:w-auto"
+            className="w-full md:w-auto"
             onClick={handleSave}
-            disabled={!isDirty || isSaving}
-            aria-busy={isSaving}
+            loading={isSaving}
+            disabled={!isDirty}
             aria-describedby={hintId}
           >
-            {/* 저장 중에도 글자 자리를 남겨 폭을 지키고, 버튼 이름도 "저장" 으로 둔다(진행은 aria-busy) */}
-            <span className={cn(isSaving && 'opacity-0')}>{t('common:save')}</span>
-            {isSaving && (
-              // svg 를 버튼 바로 아래 두면 Button 의 has-[>svg] 여백이 걸려 폭이 준다 — 한 겹 감싼다
-              <span className="absolute inset-0 grid place-items-center">
-                <Spinner aria-hidden />
-              </span>
-            )}
+            {t('common:save')}
           </Button>
         </div>
       </div>

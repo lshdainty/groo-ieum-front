@@ -80,9 +80,9 @@ export function WeekViewMultiDayEventsRow({ selectedDate, multiDayEvents, onEven
   }
 
   return (
-    <div className='hidden overflow-hidden min-[40rem]:flex'>
-      <div className='w-18 border-b'></div>
-      <div className='grid flex-1 grid-cols-7 divide-x border-b border-l'>
+    <div className='flex overflow-hidden'>
+      <div className='w-18 border-b border-stroke-neutral-subtle'></div>
+      <div className='grid flex-1 grid-cols-7 divide-x divide-stroke-neutral-subtle border-b border-l border-stroke-neutral-subtle'>
         {weekDays.map((day, dayIndex) => (
           <div key={day.toISOString()} className='flex h-full flex-col gap-1 py-1'>
             {eventRows.map((row, rowIndex) => {

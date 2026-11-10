@@ -1,10 +1,10 @@
-import { Input } from "@/shared/ui/shadcn/input";
-import { ScrollArea } from "@/shared/ui/shadcn/scrollArea";
-import { User } from "@/features/admin-authority/types";
-import { cn } from "@/shared/lib";
 import { Search, User as UserIcon } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { Input } from "@/shared/ds/input";
+import { List, ListButtonItem } from "@/shared/ds/list";
+import { User } from "@/features/admin-authority/types";
 
 interface UserListProps {
   users: User[];
@@ -22,49 +22,40 @@ const UserList = ({ users, selectedUserId, onSelectUser }: UserListProps) => {
   );
 
   return (
-    <div className="flex flex-col h-full border-r">
-      <div className="p-4 border-b space-y-3 bg-muted/30">
-        <h3 className="font-semibold flex items-center gap-2">
-          <UserIcon className="w-4 h-4" />
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex shrink-0 flex-col gap-x3 px-x4 pb-x2 pt-x3">
+        <h3 className="m-0 flex items-center gap-x2 text-t5 font-bold text-fg-neutral">
+          <UserIcon className="size-4" aria-hidden />
           {t('authority.users')}
         </h3>
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t('authority.searchUsers')}
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        <Input
+          aria-label={t('authority.searchUsers')}
+          placeholder={t('authority.searchUsers')}
+          prefixIcon={<Search />}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
-      <ScrollArea className="flex-1">
-        <div className="p-2 space-y-1">
-          {filteredUsers.length > 0 ? (
-            filteredUsers.map((user) => (
-              <div
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {filteredUsers.length > 0 ? (
+          <List>
+            {filteredUsers.map((user) => (
+              <ListButtonItem
                 key={user.id}
-                className={cn(
-                  "flex items-center justify-between p-3 rounded-md cursor-pointer transition-colors text-sm",
-                  selectedUserId === user.id
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "hover:bg-muted"
-                )}
+                title={<span className="[overflow-wrap:anywhere]">{user.name}</span>}
+                detail={<span className="[overflow-wrap:anywhere]">{user.email}</span>}
+                highlighted={selectedUserId === user.id}
+                aria-current={selectedUserId === user.id || undefined}
                 onClick={() => onSelectUser(user.id)}
-              >
-                <div className="flex flex-col overflow-hidden">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">{user.email}</span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              {t('authority.noUsersFound')}
-            </div>
-          )}
-        </div>
-      </ScrollArea>
+              />
+            ))}
+          </List>
+        ) : (
+          <div className="p-x4 text-center text-t4 text-fg-neutral-muted">
+            {t('authority.noUsersFound')}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

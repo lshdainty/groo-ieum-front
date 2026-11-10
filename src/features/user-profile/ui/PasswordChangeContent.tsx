@@ -132,7 +132,7 @@ const PasswordChangeContent = () => {
     <OutsideShell>
       <div className='flex w-full max-w-[384px] flex-col'>
         <HrLogo />
-        <h1 className='m-0 mt-x8 break-keep text-center text-t8 font-bold text-fg-neutral [overflow-wrap:break-word] min-[48rem]:text-screen-title'>
+        <h1 className='m-0 mt-x8 break-keep text-center text-t8 font-bold text-fg-neutral [overflow-wrap:break-word] md:text-screen-title'>
           {t('pwForce.title')}
         </h1>
         <p className='m-0 mt-x2 break-keep text-center text-t5 font-normal text-fg-neutral-muted [overflow-wrap:break-word]'>

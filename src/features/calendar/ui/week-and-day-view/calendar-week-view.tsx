@@ -8,8 +8,6 @@ import { formatDayText, formatHourMinute } from '@/shared/lib/date-text';
 import { useCanAddEvent } from '@/features/calendar/model/use-can-edit-event';
 import { useCalendar } from '@/features/calendar/model/calendar-context';
 
-import { ScrollArea } from '@/shared/ui/shadcn/scrollArea';
-
 import { DroppableTimeBlock } from '@/features/calendar/ui/dnd/droppable-time-block';
 import { CalendarTimeline } from '@/features/calendar/ui/week-and-day-view/calendar-time-line';
 import { EventBlock } from '@/features/calendar/ui/week-and-day-view/event-block';
@@ -42,13 +40,14 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
   return (
     <div className='w-full h-full'>
       <div className='flex h-full flex-col'>
-        <div>
+        {/* 머리도 스크롤 상자와 같은 스크롤바 자리를 비운다 — 열이 머리 날짜와 어긋나지 않는다 */}
+        <div className='overflow-x-hidden overflow-y-hidden [scrollbar-gutter:stable]'>
           <WeekViewMultiDayEventsRow selectedDate={selectedDate} multiDayEvents={multiDayEvents} onEventClick={onEventClick} />
 
           {/* Week header */}
-          <div className='relative z-20 flex border-b'>
+          <div className='relative z-20 flex border-b border-stroke-neutral-subtle'>
             <div className='w-18'></div>
-            <div className='grid flex-1 grid-cols-7 divide-x border-l'>
+            <div className='grid flex-1 grid-cols-7 divide-x divide-stroke-neutral-subtle border-l border-stroke-neutral-subtle'>
               {weekDays.map((day, index) => {
                 const dayOfWeek = day.getDay();
                 const isSunday = dayOfWeek === 0;
@@ -72,7 +71,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
           </div>
         </div>
 
-        <ScrollArea className='flex-1' type='always'>
+        <div className='min-h-0 flex-1 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]'>
           <div className='flex overflow-hidden'>
             {/* Hours column */}
             <div className='relative w-18'>
@@ -86,8 +85,8 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
             </div>
 
             {/* Week grid */}
-            <div className='relative flex-1 border-l'>
-              <div className='grid grid-cols-7 divide-x'>
+            <div className='relative flex-1 border-l border-stroke-neutral-subtle'>
+              <div className='grid grid-cols-7 divide-x divide-stroke-neutral-subtle'>
                 {weekDays.map((day, dayIndex) => {
                   const dayEvents = singleDayEvents.filter(event => isSameDay(parseISO(event.startDate), day) || isSameDay(parseISO(event.endDate), day));
                   const groupedEvents = groupEvents(dayEvents);
@@ -99,7 +98,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
 
                         return (
                           <div key={hour} className={cn('relative', isDisabled && 'bg-bg-neutral-weak')} style={{ height: '96px' }}>
-                            {index !== 0 && <div className='pointer-events-none absolute inset-x-0 top-0 border-b'></div>}
+                            {index !== 0 && <div className='pointer-events-none absolute inset-x-0 top-0 border-b border-stroke-neutral-subtle'></div>}
 
                             <DroppableTimeBlock date={day} hour={hour} minute={0}>
                               {canAddEvent && (
@@ -112,7 +111,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
                               )}
                             </DroppableTimeBlock>
 
-                            <div className='pointer-events-none absolute inset-x-0 top-1/2 border-b border-dashed'></div>
+                            <div className='pointer-events-none absolute inset-x-0 top-1/2 border-b border-dashed border-stroke-neutral-subtle'></div>
 
                             <DroppableTimeBlock date={day} hour={hour} minute={30}>
                               {canAddEvent && (
@@ -159,7 +158,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
               <CalendarTimeline firstVisibleHour={earliestEventHour} lastVisibleHour={latestEventHour} />
             </div>
           </div>
-        </ScrollArea>
+        </div>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ export const EnvWatermark = () => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-[9999]">
-      <span className="text-7xl font-bold text-gray-500/10 select-none tracking-widest">
+      <span className="text-7xl font-bold text-fg-neutral-subtle/10 select-none tracking-widest">
         DEVELOPMENT
       </span>
     </div>

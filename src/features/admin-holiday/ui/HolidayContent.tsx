@@ -183,8 +183,8 @@ export const HolidayContent = () => {
   return (
     <ScreenBody density='medium'>
       <ScreenTitleRow title={t('holiday.title')} action={titleActions} />
-      <div className='bg-bg-layer-default min-[48rem]:bg-transparent'>
-        <div className='mb-x4 hidden min-[48rem]:block'>{controls}</div>
+      <div className='bg-bg-layer-default md:bg-transparent'>
+        <div className='mb-x4 hidden md:block'>{controls}</div>
         <ScreenCard
           title={cardTitle}
           leading={desktop ? undefined : controls}

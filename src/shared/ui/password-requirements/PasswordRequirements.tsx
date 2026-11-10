@@ -29,7 +29,7 @@ const PasswordRequirements = ({ password, className }: PasswordRequirementsProps
             key={rule.key}
             className={cn(
               'flex items-center gap-1.5 text-xs',
-              satisfied ? 'text-emerald-600 dark:text-emerald-500' : 'text-muted-foreground'
+              satisfied ? 'text-fg-positive' : 'text-fg-neutral-muted'
             )}
           >
             <Icon className='h-3.5 w-3.5 shrink-0' aria-hidden />

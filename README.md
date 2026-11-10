@@ -21,7 +21,7 @@
 
 **그루 이음 Frontend**는 [그루](https://github.com/lshdainty/groo) 서비스의 HR(인사관리) 프론트엔드입니다.
 
-React 19와 TypeScript를 기반으로 하며, shadcn/ui 컴포넌트와 Tailwind CSS를 사용하여 모던한 UI를 구현했습니다.
+React 19와 TypeScript를 기반으로 하며, 그루 디자인 시스템(`src/shared/ds`) 부품과 Tailwind CSS를 사용하여 모던한 UI를 구현했습니다.
 
 ---
 
@@ -32,13 +32,12 @@ React 19와 TypeScript를 기반으로 하며, shadcn/ui 컴포넌트와 Tailwin
 | **Language** | ![TypeScript](https://img.shields.io/badge/TypeScript_5.9-3178C6?style=flat-square&logo=typescript&logoColor=white) |
 | **Framework** | ![React](https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=black) |
 | **Build Tool** | ![Vite](https://img.shields.io/badge/Vite_8-646CFF?style=flat-square&logo=vite&logoColor=white) |
-| **Styling** | ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white) ![shadcn/ui](https://img.shields.io/badge/shadcn/ui-000000?style=flat-square&logo=shadcnui&logoColor=white) |
-| **UI Library** | ![MUI](https://img.shields.io/badge/MUI_7-007FFF?style=flat-square&logo=mui&logoColor=white) |
-| **State Management** | ![React Query](https://img.shields.io/badge/React_Query-FF4154?style=flat-square&logo=reactquery&logoColor=white) ![Zustand](https://img.shields.io/badge/Zustand-000000?style=flat-square) ![Jotai](https://img.shields.io/badge/Jotai-000000?style=flat-square) |
+| **Styling** | ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white) |
+| **Server State** | ![React Query](https://img.shields.io/badge/React_Query-FF4154?style=flat-square&logo=reactquery&logoColor=white) |
 | **Routing** | ![React Router](https://img.shields.io/badge/React_Router_7-CA4245?style=flat-square&logo=reactrouter&logoColor=white) |
 | **Form** | ![React Hook Form](https://img.shields.io/badge/React_Hook_Form-EC5990?style=flat-square&logo=reacthookform&logoColor=white) ![Zod](https://img.shields.io/badge/Zod-3E67B1?style=flat-square&logo=zod&logoColor=white) |
 | **Chart** | ![Recharts](https://img.shields.io/badge/Recharts-22B5BF?style=flat-square) |
-| **DnD** | ![dnd-kit](https://img.shields.io/badge/dnd--kit-EF4444?style=flat-square) ![react-dnd](https://img.shields.io/badge/react--dnd-CA4245?style=flat-square) |
+| **DnD** | ![react-dnd](https://img.shields.io/badge/react--dnd-CA4245?style=flat-square) |
 | **i18n** | ![i18next](https://img.shields.io/badge/i18next-26A69A?style=flat-square&logo=i18next&logoColor=white) |
 
 ---

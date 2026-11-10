@@ -232,7 +232,7 @@ export function VacationHistoryContent({
 
   return (
     <Tabs value={tab} onValueChange={changeTab} data-vacation-records>
-      <div className='px-x6 min-[48rem]:pt-x1'>
+      <div className='px-x6 md:pt-x1'>
         <TabsList aria-label={t('history.recordsTabsAria')} layout={desktop ? 'hug' : 'fill'} size={desktop ? 'medium' : 'small'}>
           <TabsTrigger value='usages'>{t('history.usageTab')}</TabsTrigger>
           <TabsTrigger value='grants'>{t('history.grantTab')}</TabsTrigger>
