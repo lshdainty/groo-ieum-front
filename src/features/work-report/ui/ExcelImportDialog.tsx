@@ -128,7 +128,13 @@ export function ExcelImportDialog({
 
   const fixingRow = fixingId === null ? undefined : rows.find((r) => r.id === fixingId)
   const fieldLabel = (field: string, r: ImportRow) => `${field}, ${r.date} ${r.userName}`
-  const errorText = (r: ImportRow) => r.errors.map((k) => t(`rep.${k}`)).join(' · ')
+  /** 이유마다 한 줄씩 — 이어 붙인 한 문장이 "·" 로 시작하거나 줄 끝에서 끊기지 않게 */
+  const errorLines = (r: ImportRow) =>
+    r.errors.map((k) => (
+      <span key={k} className='block' data-import-error-line>
+        {t(`rep.${k}`)}
+      </span>
+    ))
   const statusBadge = (r: ImportRow) => (
     <Badge tone={r.errors.length > 0 ? 'critical' : 'positive'} className='whitespace-nowrap'>
       {r.errors.length > 0 ? t('rep.xBadgeError') : t('rep.xBadgeOk')}
@@ -283,7 +289,7 @@ export function ExcelImportDialog({
                           <TableCell align='end' className='whitespace-nowrap py-x2_5'>
                             {r.hours}
                           </TableCell>
-                          <TableCell className={`min-w-[140px] whitespace-normal py-x2_5 text-fg-critical [overflow-wrap:anywhere] [word-break:keep-all]`}>{errorText(r)}</TableCell>
+                          <TableCell className={`min-w-[140px] whitespace-normal py-x2_5 text-fg-critical [overflow-wrap:anywhere] [word-break:keep-all]`}>{errorLines(r)}</TableCell>
                           <TableCell className='whitespace-nowrap py-x2_5'>{dropButton(r)}</TableCell>
                         </TableRow>
                       ))}
@@ -299,7 +305,7 @@ export function ExcelImportDialog({
                         detail: (
                           <>
                             <span className={`block ${WORD}`}>{t('rep.xRowDetail', { path: [r.groupName, r.partName, r.divisionName].join(' › '), hours: r.hours || 0 })}</span>
-                            {r.errors.length > 0 && <span className={`block text-fg-critical ${WORD}`}>{errorText(r)}</span>}
+                            {r.errors.length > 0 && <span className={`block text-fg-critical ${WORD}`}>{errorLines(r)}</span>}
                           </>
                         ),
                         align: 'top' as const,
@@ -351,7 +357,7 @@ export function ExcelImportDialog({
               <div className='flex flex-col gap-x4 pb-x2' data-import-fix-sheet>
                 {fixingRow.errors.length > 0 ? (
                   <Callout tone='critical' role='alert' data-import-fix-errors>
-                    {errorText(fixingRow)}
+                    {errorLines(fixingRow)}
                   </Callout>
                 ) : (
                   <Callout tone='positive' data-import-fix-ok>
