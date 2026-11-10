@@ -1986,3 +1986,21 @@ vacation,req.form.saved,휴가를 신청했어요.,Leave requested.
 vacation,req.form.saveFailed,신청하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't send the request. Please try again in a moment.
 vacation,req.form.minutesValue,{{count}}분,{{count}} minutes
 vacation,req.form.minutesValue_one,{{count}}분,{{count}} minute
+work,sch.title,근무 일정,Work schedule
+work,sch.listCaption,사람별 근무 시간,Working hours by person
+work,sch.boardAria,근무 시간표,Working hours timeline
+work,sch.breakNote,빗금은 쉬는 시간이에요(점심 · 저녁).,Hatched areas are break times (lunch and dinner).
+work,sch.breakNotePhone,쉬는 시간은 점심 {{lunch}} · 저녁 {{dinner}}예요.,Breaks are lunch {{lunch}} and dinner {{dinner}}.
+work,sch.hoursValue,{{count}}시간,{{count}} hours
+work,sch.hoursValue_one,{{count}}시간,{{count}} hour
+work,sch.minutesValue,{{count}}분,{{count}} minutes
+work,sch.minutesValue_one,{{count}}분,{{count}} minute
+work,sch.barText,{{range}} · {{hours}},{{range}} · {{hours}}
+work,sch.groupTitle,{{range}} · {{count}}명,{{range}} · {{count}} people
+work,sch.groupTitle_one,{{range}} · {{count}}명,{{range}} · {{count}} person
+work,sch.noTime,근무 시간이 없는 사람 · {{count}}명,No working hours set · {{count}} people
+work,sch.noTime_one,근무 시간이 없는 사람 · {{count}}명,No working hours set · {{count}} person
+work,sch.emptyTitle,근무 일정이 없어요,No work schedules
+work,sch.emptyDescription,등록된 사람이 생기면 근무 시간이 여기에 보여요.,Working hours show up here once people are added.
+work,sch.failureTitle,근무 일정을 불러오지 못했어요,Could not load the work schedule
+work,sch.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
