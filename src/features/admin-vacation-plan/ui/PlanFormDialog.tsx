@@ -16,7 +16,7 @@ import { Skeleton } from '@/shared/ds/skeleton'
 import { useSnackbar } from '@/shared/ds/snackbar'
 import { Textarea } from '@/shared/ds/textarea'
 import { ConfirmDialog } from '@/shared/ui/confirm'
-import { CheckBox, CheckBoxGroup } from '@/shared/ui/groo/select-box'
+import { CheckSelectBox, CheckSelectBoxGroup } from '@/shared/ds/select-box'
 import { useVacationTypesQuery } from '@/entities/type'
 import {
   useDeleteVacationPlanMutation,
@@ -175,9 +175,9 @@ export function PlanFormDialog({
   ) : all.length === 0 ? (
     <ResultSection size='medium' icon={<FileText />} title={t('adminPolicy.emptyTitle')} description={t('adminPolicy.emptyDescription')} />
   ) : (
-    <CheckBoxGroup aria-label={plan ? t('adminPlan.policiesTitle', { name: plan.name }) : ''} data-plan-policy-group>
+    <CheckSelectBoxGroup aria-label={plan ? t('adminPlan.policiesTitle', { name: plan.name }) : ''} data-plan-policy-group>
       {all.map((p) => (
-        <CheckBox
+        <CheckSelectBox
           key={p.vacation_policy_id}
           label={p.vacation_policy_name}
           description={t('adminPlan.policyDetail', { method: grantMethodLabel(t, p.grant_method), type: nameOf(vacationTypes, p.vacation_type) })}
@@ -185,7 +185,7 @@ export function PlanFormDialog({
           onCheckedChange={(checked) => setPicked((ids) => (checked ? [...ids, p.vacation_policy_id] : ids.filter((id) => id !== p.vacation_policy_id)))}
         />
       ))}
-    </CheckBoxGroup>
+    </CheckSelectBoxGroup>
   )
 
   const headerAction =
