@@ -13,9 +13,10 @@ import type { ICalendarCell, IEvent } from '@/features/calendar/model/interfaces
 interface DroppableDayCellProps {
   cell: ICalendarCell;
   children: React.ReactNode;
+  className?: string;
 }
 
-const DroppableDayCell = ({ cell, children }: DroppableDayCellProps) => {
+const DroppableDayCell = ({ cell, children, className }: DroppableDayCellProps) => {
   const { updateEvent } = useUpdateEvent();
 
   const [{ isOver, canDrop }, drop] = useDrop(
@@ -50,7 +51,7 @@ const DroppableDayCell = ({ cell, children }: DroppableDayCellProps) => {
   );
 
   return (
-    <div ref={drop as unknown as React.RefObject<HTMLDivElement>} className={cn(isOver && canDrop && 'bg-accent/50')}>
+    <div ref={drop as unknown as React.RefObject<HTMLDivElement>} className={cn(className, isOver && canDrop && 'bg-bg-brand-weak')}>
       {children}
     </div>
   )

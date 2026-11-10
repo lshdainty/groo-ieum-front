@@ -340,11 +340,8 @@ export function convertApiUserToIUser(apiUser: ApiUserResponse): IUser {
  * API 이벤트 응답을 IEvent 인터페이스로 변환
  */
 export function convertApiEventToIEvent(apiEvent: GetEventsByPeriodResp, users: IUser[]): IEvent {
-  const user = users.find(u => u.id === apiEvent.user_id);
-
-  if (!user) {
-    throw new Error(`User not found for event: ${apiEvent.calendar_id}`);
-  }
+  // 사용자 목록에 없는 사람(시스템 계정 · 목록을 못 받음)은 일정이 가진 이름으로 그린다
+  const user = users.find(u => u.id === apiEvent.user_id) ?? { id: apiEvent.user_id, name: apiEvent.user_name, picturePath: null };
 
   // 휴가 사용 기록 번호와 일정 번호는 서로 다른 표의 행 번호다 — 어느 쪽인지는 domain_type 이 정한다
   const kind: TEventKind = apiEvent.domain_type === 'vacation' ? 'vacation' : 'schedule';

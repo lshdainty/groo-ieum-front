@@ -9,7 +9,7 @@ import { usePermission } from '@/entities/session'
 import { useUsersQuery } from '@/entities/user'
 import { useUserRequestedVacationsQuery } from '@/entities/vacation'
 import { UserInfoCard } from '@/features/user-profile/ui/UserInfoCard'
-import { AddEventDialog } from '@/features/calendar/ui/dialogs/add-event-dialog'
+import { EventFormDialog } from '@/features/calendar/ui/event-form-dialog'
 import { ApplicationTable } from '@/features/vacation-application/ui/ApplicationTable'
 import { VacationGrantDialog } from '@/features/vacation-application/ui/VacationGrantDialog'
 import { VacationSections } from '@/features/vacation-history/ui/VacationSections'
@@ -103,7 +103,7 @@ export function StaffVacation() {
       )}
       {/* 열 때만 마운트 — 이 창이 직원 목록을 quiet 없이 부르므로 늘 마운트해 두면 첫 로드 실패에 전역 Snackbar 가 겹친다 */}
       {useOpen && selected && (
-        <AddEventDialog key={selected.id} open={useOpen} onOpenChange={setUseOpen} fixedUser={{ id: selected.id, name: selected.name, department: selected.department }} />
+        <EventFormDialog key={selected.id} open={useOpen} onClose={() => setUseOpen(false)} fixedUser={{ id: selected.id, name: selected.name, department: selected.department }} />
       )}
     </div>
   )

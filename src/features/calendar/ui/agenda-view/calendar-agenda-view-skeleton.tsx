@@ -1,50 +1,26 @@
-import { Skeleton } from '@/shared/ui/shadcn/skeleton'
+import { List, ListHeader, ListItem } from '@/shared/ds/list'
+import { LoadingRegion, Skeleton } from '@/shared/ds/skeleton'
 
-const AgendaDayGroupSkeleton = () => {
-  return (
-    <div className='space-y-3'>
-      {/* Date header */}
-      <div className='flex items-center gap-3'>
-        <Skeleton className='h-10 w-10 rounded-lg' />
-        <div className='space-y-1'>
-          <Skeleton className='h-4 w-24' />
-          <Skeleton className='h-3 w-16' />
-        </div>
-      </div>
-
-      {/* Events */}
-      <div className='ml-[52px] space-y-2'>
-        <div className='rounded-lg border p-3 space-y-2'>
-          <Skeleton className='h-4 w-3/4' />
-          <div className='flex items-center gap-2'>
-            <Skeleton className='h-3 w-3 rounded-full' />
-            <Skeleton className='h-3 w-20' />
+/** 목록 보기의 첫 불러오기 자리 — 날 머리 + 줄 둘 셋 묶음. 다시 받는 중에는 쓰지 않는다 */
+export const CalendarAgendaViewSkeleton = () => (
+  <LoadingRegion
+    pending
+    className='contents'
+    fallback={
+      <div aria-hidden className='flex flex-col'>
+        {[2, 1, 2].map((rows, g) => (
+          <div key={g}>
+            <ListHeader as='h3'>
+              <Skeleton text='t3' className='w-x16' />
+            </ListHeader>
+            <List>
+              {Array.from({ length: rows }, (_, i) => (
+                <ListItem key={i} prefix={<Skeleton radius='full' className='h-x8 w-[3px]' />} title={<Skeleton text='t5' className='w-32 max-w-full' />} detail={<Skeleton text='t3' className='w-24 max-w-full' />} />
+              ))}
+            </List>
           </div>
-          <div className='flex items-center gap-2'>
-            <Skeleton className='h-3 w-3 rounded-full' />
-            <Skeleton className='h-3 w-32' />
-          </div>
-        </div>
-        <div className='rounded-lg border p-3 space-y-2'>
-          <Skeleton className='h-4 w-1/2' />
-          <div className='flex items-center gap-2'>
-            <Skeleton className='h-3 w-3 rounded-full' />
-            <Skeleton className='h-3 w-24' />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export const CalendarAgendaViewSkeleton = () => {
-  return (
-    <div className='w-full h-full overflow-hidden'>
-      <div className='space-y-6 p-4'>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <AgendaDayGroupSkeleton key={i} />
         ))}
       </div>
-    </div>
-  )
-}
+    }
+  />
+)

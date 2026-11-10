@@ -8,7 +8,7 @@ export { LoginProvider, useLoginContext } from '@/features/auth'
 export { CalendarContent } from '@/features/calendar'
 export { CalendarProvider, useCalendar } from '@/features/calendar'
 export type { IEvent, IUser, ICalendarCell } from '@/features/calendar'
-export type { TCalendarView, TEventColor, TCalendarType, TBadgeVariant, TWorkingHours, TVisibleHours } from '@/features/calendar'
+export type { TCalendarView, TEventColor, TCalendarType, TWorkingHours, TVisibleHours } from '@/features/calendar'
 export { calendarTypes } from '@/features/calendar'
 
 // Dashboard

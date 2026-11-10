@@ -1,96 +1,49 @@
-import { cva } from 'class-variance-authority';
-import { differenceInMinutes, format, parseISO } from 'date-fns';
+import { differenceInMinutes, parseISO } from 'date-fns'
+import { useTranslation } from 'react-i18next'
 
-import { useCalendar } from '@/features/calendar/model/calendar-context';
+import { cn } from '@/shared/lib/cn'
+import { formatClockRange } from '@/shared/lib/date-text'
+import { isAllDayEvent, personName, typeName } from '@/features/calendar/lib/event-text'
+import { eventTone } from '@/features/calendar/lib/helpers'
+import { useCanEditEvent } from '@/features/calendar/model/use-can-edit-event'
+import { DraggableEvent } from '@/features/calendar/ui/dnd/draggable-event'
 
-import { EventDetailsDialog } from '@/features/calendar/ui/dialogs/event-details-dialog';
-import { DraggableEvent } from '@/features/calendar/ui/dnd/draggable-event';
+import type { IEvent } from '@/features/calendar/model/interfaces'
 
-import { cn } from '@/shared/lib'
-import { getEventDisplayName } from '@/features/calendar/lib/helpers';
-
-import type { IEvent } from '@/features/calendar/model/interfaces';
-import type { VariantProps } from 'class-variance-authority';
-import type { HTMLAttributes } from 'react';
-
-const calendarWeekEventCardVariants = cva(
-  'flex select-none flex-col gap-0.5 truncate whitespace-nowrap rounded-md border px-2 py-1.5 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-  {
-    variants: {
-      color: {
-        // Colored and mixed variants
-        blue: 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300 [&_.event-dot]:fill-blue-600',
-        green: 'border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-300 [&_.event-dot]:fill-green-600',
-        red: 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300 [&_.event-dot]:fill-red-600',
-        yellow: 'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-300 [&_.event-dot]:fill-yellow-600',
-        purple: 'border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300 [&_.event-dot]:fill-purple-600',
-        orange: 'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300 [&_.event-dot]:fill-orange-600',
-        pink: 'border-pink-200 bg-pink-50 text-pink-700 dark:border-pink-800 dark:bg-pink-950 dark:text-pink-300 [&_.event-dot]:fill-pink-600',
-        gray: 'border-neutral-200 bg-neutral-50 text-neutral-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 [&_.event-dot]:fill-neutral-600',
-        teal: 'border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-300 [&_.event-dot]:fill-teal-600',
-
-        // Dot variants
-        'blue-dot': 'bg-neutral-50 dark:bg-neutral-900 [&_.event-dot]:fill-blue-600',
-        'green-dot': 'bg-neutral-50 dark:bg-neutral-900 [&_.event-dot]:fill-green-600',
-        'red-dot': 'bg-neutral-50 dark:bg-neutral-900 [&_.event-dot]:fill-red-600',
-        'orange-dot': 'bg-neutral-50 dark:bg-neutral-900 [&_.event-dot]:fill-orange-600',
-        'purple-dot': 'bg-neutral-50 dark:bg-neutral-900 [&_.event-dot]:fill-purple-600',
-        'yellow-dot': 'bg-neutral-50 dark:bg-neutral-900 [&_.event-dot]:fill-yellow-600',
-        'pink-dot': 'bg-neutral-50 dark:bg-neutral-900 [&_.event-dot]:fill-pink-600',
-        'gray-dot': 'bg-neutral-50 dark:bg-neutral-900 [&_.event-dot]:fill-neutral-600',
-        'teal-dot': 'bg-neutral-50 dark:bg-neutral-900 [&_.event-dot]:fill-teal-600',
-      },
-    },
-    defaultVariants: {
-      color: 'blue-dot',
-    },
-  }
-);
-
-interface IProps extends HTMLAttributes<HTMLDivElement>, Omit<VariantProps<typeof calendarWeekEventCardVariants>, 'color'> {
-  event: IEvent;
-}
-
-export function EventBlock({ event, className }: IProps) {
-  const { badgeVariant } = useCalendar();
-
-  const start = parseISO(event.startDate);
-  const end = parseISO(event.endDate);
-  const durationInMinutes = differenceInMinutes(end, start);
-  const heightInPixels = (durationInMinutes / 60) * 96 - 8;
-
-  const color = (badgeVariant === 'dot' ? `${event.type.color}-dot` : event.type.color) as VariantProps<typeof calendarWeekEventCardVariants>['color'];
-
-  const calendarWeekEventCardClasses = cn(calendarWeekEventCardVariants({ color, className }), durationInMinutes < 35 && 'py-0 justify-center');
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      if (e.currentTarget instanceof HTMLElement) e.currentTarget.click();
-    }
-  };
+/** 주 보기 시간 막대 — 종류 색 옅은 바탕 + 글(칩과 같은 색 짝). 누르면 상세. 끌어서 다른 시각 · 날로 옮길 수 있다(지금 기능 그대로) */
+export function EventBlock({ event, onClick }: { event: IEvent; onClick: (event: IEvent) => void }) {
+  const { t } = useTranslation('calendar')
+  const canEdit = useCanEditEvent()
+  const start = parseISO(event.startDate)
+  const end = parseISO(event.endDate)
+  const durationInMinutes = differenceInMinutes(end, start)
+  const heightInPixels = (durationInMinutes / 60) * 96 - 8
+  const tone = eventTone(event)
 
   return (
-    <DraggableEvent event={event}>
-      <EventDetailsDialog event={event}>
-        <div role='button' tabIndex={0} className={calendarWeekEventCardClasses} style={{ height: `${heightInPixels}px` }} onKeyDown={handleKeyDown}>
-          <div className='flex items-center gap-1.5 truncate'>
-            {['mixed', 'dot'].includes(badgeVariant) && (
-              <svg width='8' height='8' viewBox='0 0 8 8' className='event-dot shrink-0'>
-                <circle cx='4' cy='4' r='4' />
-              </svg>
-            )}
-
-            <p className='truncate font-semibold'>{getEventDisplayName(event)}</p>
-          </div>
-
-          {durationInMinutes > 25 && (
-            <p>
-              {format(start, 'h:mm a')} - {format(end, 'h:mm a')}
-            </p>
-          )}
-        </div>
-      </EventDetailsDialog>
+    <DraggableEvent event={event} disabled={!canEdit(event)}>
+      <div
+        role='button'
+        tabIndex={0}
+        data-slot='week-event'
+        className={cn(
+          'flex cursor-pointer select-none flex-col gap-x0_5 overflow-hidden whitespace-nowrap rounded-sm px-x2 py-x1_5 text-t2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring',
+          durationInMinutes < 35 && 'justify-center py-0'
+        )}
+        style={{ height: `${heightInPixels}px`, background: tone.bg, color: tone.fg }}
+        onClick={() => onClick(event)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onClick(event)
+          }
+        }}
+      >
+        <p className='m-0 truncate font-bold'>
+          {personName(event, t)} · {typeName(event, t)}
+        </p>
+        {durationInMinutes > 25 && <p className='m-0 truncate'>{isAllDayEvent(event) ? t('allDay') : formatClockRange(event.startDate, event.endDate)}</p>}
+      </div>
     </DraggableEvent>
-  );
+  )
 }

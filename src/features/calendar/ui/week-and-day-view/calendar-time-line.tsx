@@ -1,5 +1,6 @@
-import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
+
+import { formatClock } from '@/shared/lib/date-text';
 
 interface IProps {
   firstVisibleHour: number;
@@ -25,16 +26,16 @@ const CalendarTimeline = ({ firstVisibleHour, lastVisibleHour }: IProps) => {
   };
 
   const formatCurrentTime = () => {
-    return format(currentTime, 'h:mm a');
+    return formatClock(currentTime);
   };
 
   const currentHour = currentTime.getHours();
   if (currentHour < firstVisibleHour || currentHour >= lastVisibleHour) return null;
 
   return (
-    <div className='pointer-events-none absolute inset-x-0 z-50 border-t border-primary' style={{ top: `${getCurrentTimePosition()}%` }}>
-      <div className='absolute left-0 top-0 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary'></div>
-      <div className='absolute -left-18 flex w-16 -translate-y-1/2 justify-end bg-background pr-1 text-xs font-medium text-primary'>{formatCurrentTime()}</div>
+    <div className='pointer-events-none absolute inset-x-0 z-50 border-t border-stroke-brand-solid' style={{ top: `${getCurrentTimePosition()}%` }}>
+      <div className='absolute left-0 top-0 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-bg-brand-solid'></div>
+      <div className='absolute -left-18 flex w-16 -translate-y-1/2 justify-end bg-bg-layer-default pr-1 text-xs font-medium text-fg-brand'>{formatCurrentTime()}</div>
     </div>
   )
 }

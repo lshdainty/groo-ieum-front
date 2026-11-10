@@ -396,29 +396,6 @@ work,report.dateRequired,일자,Date
 work,schedule.am,오전,AM
 work,schedule.pm,오후,PM
 work,schedule.title,팀 근무 일정,Team Work Schedule
-calendar,addEvent.title,일정 등록,Add Event
-calendar,addEvent.description,일정 정보를 입력해주세요.,Please enter event information.
-calendar,addEvent.targetUser,대상 사용자,Target User
-calendar,addEvent.selectUserPlaceholder,사용자를 선택해주세요,Select a user
-calendar,addEvent.calendarType,일정 타입,Event Type
-calendar,addEvent.calendarTypeRequired,일정 타입을 선택해주세요.,Please select an event type.
-calendar,addEvent.vacation,휴가,Vacation
-calendar,addEvent.schedule,스케줄,Schedule
-calendar,addEvent.useVacation,사용 휴가,Use Vacation
-calendar,addEvent.useVacationRequired,사용 휴가를 선택해주세요.,Please select vacation to use.
-calendar,addEvent.eventReason,일정 사유,Event Reason
-calendar,addEvent.startDate,시작일,Start Date
-calendar,addEvent.startDateRequired,시작일을 입력해주세요.,Please enter start date.
-calendar,addEvent.endDate,종료일,End Date
-calendar,addEvent.endDateRequired,종료일을 입력해주세요.,Please enter end date.
-calendar,addEvent.endDateError,종료일은 시작일보다 빠를 수 없습니다.,End date cannot be earlier than start date.
-calendar,addEvent.hour,시,Hour
-calendar,addEvent.hourUnit,시,hour
-calendar,addEvent.minute,분,Minute
-calendar,addEvent.minuteUnit,분,minute
-calendar,addEvent.register,등록,Register
-calendar,editEvent.title,일정 수정,Edit Event
-calendar,editEvent.description,일정 정보를 수정해주세요.,Please edit event information.
 user,edit.processing,처리 중...,Processing...
 culture,dues.typeSelect,분류,Category
 culture,dues.typeOperation,운영비,Operation
@@ -1035,18 +1012,7 @@ user,passwordMatched,비밀번호가 일치합니다.,Passwords match.
 user,passwordChangeSuccess,비밀번호가 성공적으로 변경되었습니다.,Password changed successfully.
 user,passwordChangeError,비밀번호 변경에 실패했습니다.,Failed to change password.
 common,login,로그인,Login
-calendar,header.addEvent,일정 추가,Add Event
-calendar,header.allFilters,전체 필터,All Filters
-calendar,header.selected,선택됨,selected
-calendar,header.users,사용자,Users
-calendar,header.types,유형,Types
-calendar,header.allUsers,전체 사용자,All Users
-calendar,header.allTypes,전체 유형,All Types
-calendar,eventDetails.user,사용자,User
-calendar,eventDetails.startDate,시작일,Start Date
-calendar,eventDetails.endDate,종료일,End Date
-calendar,eventDetails.content,내용,Content
-calendar,agenda.dateFormat,yyyy년 M월 dd일 EEEE,EEEE MMM dd yyyy
+calendar,header.addEvent,일정 추가,Add event
 dashboard,workHistory.achieved,다 채웠어요,Done
 dashboard,workHistory.inProgress,작성 중,In progress
 dashboard,workHistory.achievedMessage,오늘 채워야 할 시간을 다 채웠어요.,You've filled today's required hours.
@@ -1166,12 +1132,6 @@ common,clear,초기화,Clear
 common,previous,이전,Previous
 common,next,다음,Next
 common,dontShowToday,오늘은 그만 보기,Don't show again today
-calendar,header.eventCount,{{count}}개 일정,{{count}} events
-calendar,header.eventCount_one,{{count}}개 일정,{{count}} event
-calendar,dayView.happeningNow,진행 중,Happening now
-calendar,dayView.noAppointments,현재 진행 중인 일정이 없습니다,No appointments or consultations at the moment
-calendar,weekView.notAvailable,주간 뷰는 작은 화면에서 사용할 수 없습니다.,Weekly view is not available on smaller devices.
-calendar,weekView.switchView,일간 또는 월간 뷰로 전환해주세요.,Please switch to daily or monthly view.
 admin,user.passwordReset,비밀번호 초기화,Reset Password
 admin,user.passwordResetTitle,비밀번호 초기화,Reset Password
 admin,user.passwordResetConfirm,"""{{name}}"" 님의 비밀번호를 초기화할까요? 지금 비밀번호로는 더 로그인할 수 없고, 임시 비밀번호를 메일로 보내요.","Reset the password for ""{{name}}""? The current password will stop working and a temporary password is sent by email."
@@ -1628,6 +1588,83 @@ vacation,grantForm.submit,부여,Grant
 vacation,staff.noRequestsTitle,{{name}} 님의 신청이 없어요,{{name}} has no requests
 vacation,staff.noRequestsDescription,고른 해에 낸 휴가 신청이 없어요.,There are no leave requests for the selected year.
 calendar,addEvent.fixedUser,{{name}} 님({{detail}})의 휴가를 등록해요.,Register leave for {{name}} ({{detail}}).
+calendar,title,캘린더,Calendar
+calendar,view.label,보기,View
+calendar,view.week,주,Week
+calendar,view.month,월,Month
+calendar,view.year,년,Year
+calendar,view.agenda,목록,List
+calendar,header.today,오늘,Today
+calendar,header.prevMonth,이전 달,Previous month
+calendar,header.nextMonth,다음 달,Next month
+calendar,header.prevWeek,이전 주,Previous week
+calendar,header.nextWeek,다음 주,Next week
+calendar,header.prevYear,이전 해,Previous year
+calendar,header.nextYear,다음 해,Next year
+calendar,filter.label,필터,Filters
+calendar,filter.peopleTitle,사람,People
+calendar,filter.typeTitle,유형,Types
+calendar,filter.allPeople,모든 사람,Everyone
+calendar,filter.allTypes,모든 유형,All types
+calendar,filter.peopleSome,{{name}} 외 {{count}}명,{{name}} +{{count}} more
+calendar,filter.typesSome,{{name}} 외 {{count}}개,{{name}} +{{count}} more
+calendar,filter.all,모두,All
+calendar,filter.reset,초기화,Reset
+calendar,filter.apply,적용,Apply
+calendar,filter.clear,필터 지우기,Clear filters
+calendar,monthView.cellLabel,"{{date}}, 일정 {{count}}개","{{date}}, {{count}} events"
+calendar,monthView.cellLabel_one,"{{date}}, 일정 {{count}}개","{{date}}, {{count}} event"
+calendar,monthView.cellLabelEmpty,"{{date}}, 일정 없음","{{date}}, no events"
+calendar,monthView.moreCount,+{{count}}개,+{{count}} more
+calendar,panel.today,오늘,Today
+calendar,panel.add,추가,Add
+calendar,panel.count,일정 {{count}}개,{{count}} events
+calendar,panel.count_one,일정 {{count}}개,{{count}} event
+calendar,panel.backToList,{{date}} 목록으로,Back to {{date}}
+calendar,sheet.count,{{count}}개,{{count}} events
+calendar,sheet.count_one,{{count}}개,{{count}} event
+calendar,noEvents,이 날에 일정이 없어요,No events on this day
+calendar,allDay,종일,All day
+calendar,holiday,공휴일,Holiday
+calendar,dayOf,{{n}}/{{m}}일째,Day {{n}} of {{m}}
+calendar,eventDetail,일정 상세,Event details
+calendar,detail.user,사람,Person
+calendar,detail.kind,종류,Type
+calendar,detail.when,날짜,Date
+calendar,detail.content,내용,Notes
+calendar,detail.vacationValue,{{time}} · {{used}},{{time}} · {{used}}
+calendar,agenda.empty,이 달에 일정이 없어요,No events this month
+calendar,loadFailed.title,일정을 불러오지 못했어요,Couldn't load events
+calendar,loadFailed.description,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+calendar,eventDetails.deleted,일정을 삭제했어요.,Event deleted.
+calendar,form.titleAdd,일정 추가,Add event
+calendar,form.titleEdit,일정 수정,Edit event
+calendar,form.desc,내용,Notes
+calendar,form.descPlaceholder,예: 병원 진료,e.g. Doctor's appointment
+calendar,form.target,대상,Person
+calendar,form.targetPlaceholder,대상을 골라주세요,Pick a person
+calendar,form.type,종류,Type
+calendar,form.typePlaceholder,종류를 골라주세요,Pick a type
+calendar,form.typeRequired,종류를 골라주세요.,Pick a type.
+calendar,form.vacationGroup,휴가,Leave
+calendar,form.scheduleGroup,일정,Events
+calendar,form.useVacation,쓸 휴가,Leave to use
+calendar,form.useVacationPlaceholder,쓸 휴가를 골라주세요,Pick the leave to use
+calendar,form.useVacationRequired,쓸 휴가를 골라주세요.,Pick the leave to use.
+calendar,form.useVacationValue,{{name}} · {{remain}} 남음,{{name}} · {{remain}} left
+calendar,form.remain,{{remain}} 남음,{{remain}} left
+calendar,form.noVacation,쓸 수 있는 휴가가 없어요,No leave available to use
+calendar,form.vacationLoadFailed,쓸 휴가를 불러오지 못했어요,Couldn't load your leave
+calendar,form.startDate,시작 날짜,Start date
+calendar,form.endDate,끝 날짜,End date
+calendar,form.endBeforeStart,시작 날짜보다 뒤로 골라주세요.,Pick a date after the start date.
+calendar,form.datePlaceholder,날짜를 골라주세요,Pick a date
+calendar,form.startTime,시작 시각,Start time
+calendar,form.endTime,끝 시각,End time
+calendar,form.timePlaceholder,시각을 골라주세요,Pick a time
+calendar,form.startTimeRequired,시작 시각을 골라주세요.,Pick a start time.
+calendar,form.saved,일정을 저장했어요.,Event saved.
+calendar,form.created,일정을 추가했어요.,Event added.
 admin,company.editBtn,회사 정보 수정,Edit company info
 admin,company.createBtn,회사 만들기,Create company
 admin,company.emptyTitle,회사가 없어요,No company yet
