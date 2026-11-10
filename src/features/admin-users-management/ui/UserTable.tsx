@@ -56,7 +56,7 @@ const UsersEmpty = () => {
 /**
  * 사용자 목록 카드 "사용자 {n}명"(I-24 F 28 · 30 · 31) — 데스크톱: 머리 [초대] + ds Table 여섯 열 + ⋮ + Table Pagination(받은 목록을 화면에서 자른다).
  * 폰: 띠 하나 — 머리 + List 줄(Avatar 42 · 이름 · "{아이디} · {주 부서}" · 상태). 11-08 A1 — 줄에 ⋮ 를 두지 않고 줄을 누르면 그 사람의 동작 시트가 열린다.
- * 표 rich 줄은 칸 높이 72 + 위아래 안쪽 여백 0(TABLE_BODY_RICH)이라 칸마다 py-x3 를 다시 준다(가장 나쁜 값 행에서 글이 줄 선에 붙지 않게).
+ * 표 rich 줄은 ds 가 칸 높이 최소 72 + 위아래 12 를 지킨다(TABLE_BODY_RICH — 칸마다 여백을 따로 주지 않는다).
  */
 export function UserListCard({ users }: { users: GetUsersResp[] }) {
   const { t } = useTranslation('admin')
@@ -120,31 +120,31 @@ export function UserListCard({ users }: { users: GetUsersResp[] }) {
             const actions = userActionsOf(u, can)
             return (
               <TableRow key={u.user_id} data-user-id={u.user_id}>
-                <TableRowHeader className='min-w-[180px] py-x3'>
+                <TableRowHeader className='min-w-[180px]'>
                   <TableCellContent
                     media={<Avatar name={u.user_name} src={photoOf(u)} size={42} />}
                     title={<span className={WORD}>{u.user_name}</span>}
                     detail={<span className={`${LONG} whitespace-normal`}>{u.user_email || '-'}</span>}
                   />
                 </TableRowHeader>
-                <TableCell className={`max-w-[160px] whitespace-normal py-x3 ${LONG}`}>{u.user_id}</TableCell>
-                <TableCell className='whitespace-nowrap py-x3'>{formatWorkTime(u.user_work_time)}</TableCell>
-                <TableCell className='max-w-[200px] whitespace-normal py-x3'>
+                <TableCell className={`max-w-[160px] whitespace-normal ${LONG}`}>{u.user_id}</TableCell>
+                <TableCell className='whitespace-nowrap'>{formatWorkTime(u.user_work_time)}</TableCell>
+                <TableCell className='max-w-[200px] whitespace-normal'>
                   <TableCellContent
                     title={<span className={WORD}>{u.user_origin_company_name}</span>}
                     detail={<span className={WORD}>{u.main_department_name_kr || '-'}</span>}
                   />
                 </TableCell>
-                <TableCell className='whitespace-nowrap py-x3'>
+                <TableCell className='whitespace-nowrap'>
                   <UserStatusBadge status={u.invitation_status} />
                 </TableCell>
                 {anyMenu &&
                   (hasUserActions(actions) ? (
-                    <TableMoreCell label={u.user_name} className='py-x3'>
+                    <TableMoreCell label={u.user_name}>
                       <UserRowMenuContent user={u} actions={actions} />
                     </TableMoreCell>
                   ) : (
-                    <TableCell className='py-x3' />
+                    <TableCell />
                   ))}
               </TableRow>
             )

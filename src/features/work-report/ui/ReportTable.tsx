@@ -153,37 +153,36 @@ export function ReportTable({
             <TableRow key={row.id} data-work-id={row.id}>
               {canWrite && (
                 <TableSelectCell
-                  className='py-x3'
                   label={t('rep.rowLabel', { date: formatDayText(row.date), name: row.managerName })}
                   checked={selected.includes(row.id)}
                   onCheckedChange={(on) => setSelected(on ? [...selected, row.id] : selected.filter((id) => id !== row.id))}
                 />
               )}
-              <TableRowHeader className='whitespace-nowrap py-x3'>{formatMonthDayText(row.date)}</TableRowHeader>
-              <TableCell className={`min-w-[80px] max-w-[160px] whitespace-normal py-x3 ${WORD}`}>{row.managerName}</TableCell>
+              <TableRowHeader className='whitespace-nowrap'>{formatMonthDayText(row.date)}</TableRowHeader>
+              <TableCell className={`min-w-[80px] max-w-[160px] whitespace-normal ${WORD}`}>{row.managerName}</TableCell>
               {wide ? (
                 <>
-                  <TableCell className={`min-w-[100px] max-w-[200px] whitespace-normal py-x3 ${WORD}`}>{row.group?.work_code_name}</TableCell>
-                  <TableCell className={`min-w-[120px] max-w-[260px] whitespace-normal py-x3 ${WORD}`}>{row.part?.work_code_name}</TableCell>
-                  <TableCell className={`min-w-[100px] max-w-[200px] whitespace-normal py-x3 ${WORD}`}>{row.division?.work_code_name}</TableCell>
+                  <TableCell className={`min-w-[100px] max-w-[200px] whitespace-normal ${WORD}`}>{row.group?.work_code_name}</TableCell>
+                  <TableCell className={`min-w-[120px] max-w-[260px] whitespace-normal ${WORD}`}>{row.part?.work_code_name}</TableCell>
+                  <TableCell className={`min-w-[100px] max-w-[200px] whitespace-normal ${WORD}`}>{row.division?.work_code_name}</TableCell>
                 </>
               ) : (
-                <TableCell className={`min-w-[160px] max-w-[240px] whitespace-normal py-x3 ${WORD}`}>
+                <TableCell className={`min-w-[160px] max-w-[240px] whitespace-normal ${WORD}`}>
                   <span className='block'>{codePath(row)}</span>
                   <span className='block text-t3 text-fg-neutral-subtle'>{row.division?.work_code_name}</span>
                 </TableCell>
               )}
-              <TableCell align='end' className='whitespace-nowrap py-x3'>
+              <TableCell align='end' className='whitespace-nowrap'>
                 {hoursText(row.hours, t)}
               </TableCell>
-              <TableCell className='min-w-[160px] whitespace-normal py-x3 [overflow-wrap:anywhere] [word-break:keep-all]'>{row.content}</TableCell>
+              <TableCell className='min-w-[160px] whitespace-normal [overflow-wrap:anywhere] [word-break:keep-all]'>{row.content}</TableCell>
               {anyActions &&
                 (actions.edit || actions.remove ? (
-                  <TableMoreCell label={t('rep.rowLabel', { date: formatDayText(row.date), name: row.managerName })} className='py-x3'>
+                  <TableMoreCell label={t('rep.rowLabel', { date: formatDayText(row.date), name: row.managerName })}>
                     <ReportRowMenuContent row={row} actions={actions} handlers={handlers} />
                   </TableMoreCell>
                 ) : (
-                  <TableCell className='whitespace-nowrap py-x3'>
+                  <TableCell className='whitespace-nowrap'>
                     {actions.duplicate && (
                       <Button variant='ghost' size='small' aria-label={t('rep.duplicateFor', { date: formatDayText(row.date), name: row.managerName })} onClick={() => handlers.onDuplicate(row)} data-duplicate-row>
                         {t('rep.duplicate')}

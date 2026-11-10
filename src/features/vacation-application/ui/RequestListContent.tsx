@@ -134,22 +134,22 @@ export function RequestListContent({
               const open = () => setDetail(row)
               return (
                 <TableRow key={row.vacation_grant_id} data-grant-id={row.vacation_grant_id} onClick={open}>
-                  <TableRowHeader className='min-w-[160px] max-w-[280px] whitespace-normal py-x3' onClick={open}>
+                  <TableRowHeader className='min-w-[160px] max-w-[280px] whitespace-normal' onClick={open}>
                     <span className={`block ${NAME}`}>{requestTitle(row)}</span>
                     {!wide && <span className='block text-t3 font-normal text-fg-neutral-subtle'>{row.vacation_type_name}</span>}
                   </TableRowHeader>
-                  {wide && <TableCell className='whitespace-nowrap py-x3'>{row.vacation_type_name}</TableCell>}
-                  <TableCell className='min-w-[120px] whitespace-normal py-x3'>{requestTargetText(row)}</TableCell>
-                  <TableCell align='end' className='whitespace-nowrap py-x3'>
+                  {wide && <TableCell className='whitespace-nowrap'>{row.vacation_type_name}</TableCell>}
+                  <TableCell className='min-w-[120px] whitespace-normal'>{requestTargetText(row)}</TableCell>
+                  <TableCell align='end' className='whitespace-nowrap'>
                     {row.grant_time_str}
                   </TableCell>
-                  <TableCell className='min-w-[160px] whitespace-normal py-x3'>
+                  <TableCell className='min-w-[160px] whitespace-normal'>
                     <span className='flex flex-col items-start gap-x1'>
                       <VacationStatusBadge status={row.grant_status} />
                       <span className='text-t3 text-fg-neutral-subtle'>{progressText(row, t)}</span>
                     </span>
                   </TableCell>
-                  <TableCell className='whitespace-nowrap py-x3'>
+                  <TableCell className='whitespace-nowrap'>
                     {cancelUserId && canCancelRequest(row) && (
                       <Button
                         variant='ghost'
