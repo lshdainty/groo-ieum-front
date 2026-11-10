@@ -24,3 +24,4 @@
 10. `button/button-variants.ts` — 로딩 원의 `var(--color-gray-500)` 3곳을 `#8a91a0` + `dark:#656b78`(groo gray-500 라이트·다크 리터럴)로. 옛 화면이 쓰는 Tailwind gray-500 을 `index.css` 의 body 블록이 되돌리기 때문이다. 그 블록을 걷을 때 `var(--color-gray-500)` 로 되돌린다.
 11. `dialog/dialog.tsx` — `ResponsiveDialogContentProps` 에 `onCloseAutoFocus` 타입 한 줄(두 표면 컨텐츠가 이미 받는 prop 을 반응형 래퍼 타입이 가렸다 — 2026-11-09 I-23 회비). 다시 복사할 때 같은 한 줄을 더한다.
 12. `src/index.css` — 임시 블록(글꼴 · shadow-sm~xl · 팔레트)이 옛 화면의 값을 지킨다. 전역 `word-break: keep-all` · 글리프 보충 글꼴 `GrooNumSymbols` 는 옛 화면을 바꾸므로 이 묶음에서 켜지 않았다(화면 이관 때).
+- 25-2 앞 ds 복사 · 시트 키보드 hook(2026-11-10): `bottom-sheet/use-clear-keyboard-sizing.ts` 를 groo-damda-front 71f5d7a0(담다 웹 #577) 에서 그대로 들이고 `bottom-sheet.tsx` 의 `BottomSheetSurface` 에 `useClearKeyboardSizing(own)` 한 줄(+ import)을 더했다 — 키보드가 내려갔는데 vaul(`repositionInputs` 기본)이 박은 `bottom`·`height` 가 남는 이관 회귀를 푼다. 이음에는 시험 러너가 없어 시험(`use-clear-keyboard-sizing.test.tsx`)은 들이지 않았다 — 같은 시험이 담다에 있다. 실기기 확인은 사용자 몫.
