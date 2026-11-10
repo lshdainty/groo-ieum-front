@@ -202,7 +202,7 @@ export function ApprovalInbox({
                 prefix={<Avatar name={row.applicant_name} size={42} />}
                 title={approvalRowName(row)}
                 detail={t('inbox.rowDetail', {
-                  date: formatRequestRange(row.request_start_time, row.request_end_time).replace(' ~ ', ' ~ '),
+                  date: formatRequestRange(row.request_start_time, row.request_end_time),
                   time: row.grant_time_str,
                   requested: formatRequestedAt(row.create_date),
                 })}

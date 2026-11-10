@@ -11,8 +11,17 @@ type DateInput = string | Date | dayjs.Dayjs
 
 const english = () => dsLanguage().startsWith('en')
 
-/** 범위 사이 글 — "~" 앞에서 줄이 끊기지 않게 앞에 붙는 공백(NBSP)이고, 뒤는 보통 공백이다 */
-export const RANGE_SEP = ' ~ '
+/** 한국어 범위 사이 글 — "~" 앞에서 줄이 끊기지 않게 앞에 붙는 공백(NBSP)이고, 뒤는 보통 공백이다 */
+const KO_RANGE_SEP = '\u00A0~ '
+
+/**
+ * 범위 사이 글 — 한국어 물결표 "~", 영어 en dash "–"(DESIGN.hr International Design 구간 · 영어는 앞뒤를 붙여 쓴다 "9:00 AM–1:00 PM").
+ * en dash 는 뒤에서 줄이 바뀌므로 줄 첫머리에 오지 않는다.
+ */
+export const rangeSep = (): string => (english() ? '–' : KO_RANGE_SEP)
+
+/** 요일 · 시각 사이 — 한국어 공백, 영어 " at "("Tue, Oct 20 at 9:00 AM") */
+const dayClockGap = (): string => (english() ? ' at ' : ' ')
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -32,20 +41,21 @@ export const formatClock = (value: DateInput): string => {
 }
 
 /** 시각 범위 — "오전 9:00 ~ 오후 1:00" · 같은 오전 · 오후면 끝의 말머리를 뗀다("오후 7:00 ~ 11:00", 한국어만) */
-export const formatClockRange = (start: DateInput, end: DateInput): string => {
-  const first = formatClock(start)
-  let last = formatClock(end)
+export const formatClockRange = (start: DateInput, end: DateInput): string => joinClocks(formatClock(start), formatClock(end))
+
+/** 두 시각 글을 범위로 — 한국어는 같은 오전 · 오후면 끝의 말머리를 뗀다. 시각 범위는 모두 이 함수를 지난다 */
+const joinClocks = (first: string, last: string): string => {
   if (!english()) {
     const head = /^(오전|오후) /.exec(first)?.[1]
     if (head && last.startsWith(`${head} `)) last = last.slice(head.length + 1)
   }
-  return `${first}${RANGE_SEP}${last}`
+  return `${first}${rangeSep()}${last}`
 }
 
 /** 유연근무 "9 ~ 18" 같은 시 범위 — "오전 9:00 ~ 오후 6:00". 끝이 시작보다 작거나 같고 12 보다 작으면 저녁 시각으로 본다("9 ~ 6") */
 export const formatHourRange = (startHour: number, endHour: number): string => {
   const end = endHour <= startHour && endHour < 12 ? endHour + 12 : endHour
-  return `${formatHourMinute(startHour)}${RANGE_SEP}${formatHourMinute(end)}`
+  return joinClocks(formatHourMinute(startHour), formatHourMinute(end))
 }
 
 /** "10월 26일 (월)" — 올해가 아니면 연도를 앞에 붙인다("2027년 1월 4일 (월)"). `now` 는 시험 · 하네스가 시계를 고정하는 자리 */
@@ -83,7 +93,7 @@ export const isAllDay = (start: DateInput, end: DateInput | null | undefined): b
  * 기간 글(휴가 사용 · 신청 대상 날짜) —
  * 종일 하루 "10월 30일 (금)" · 종일 여러 날 "10월 8일 (목) ~ 9일 (금)"(해가 다르면 해를 붙인다) ·
  * 같은 날 시각 "10월 20일 (화) 오전 9:00 ~ 오후 1:00" · 시각이 있는 여러 날 "10월 8일 (목) 오전 9:00 ~ 9일 (금) 오후 6:00".
- * 범위의 "~" 는 앞 낱말에 붙어(RANGE_SEP) 줄이 "~" 앞에서 끊기지 않는다.
+ * 한국어 범위의 "~" 는 앞 낱말에 붙어(rangeSep) 줄이 "~" 앞에서 끊기지 않고, 영어는 en dash 와 " at "(요일 · 시각 형식).
  */
 export const formatPeriodText = (start: string, end: string | null | undefined, now: dayjs.Dayjs = dayjs()): string => {
   const s = dayjs(start)
@@ -92,8 +102,8 @@ export const formatPeriodText = (start: string, end: string | null | undefined, 
   const e = end ? dayjs(end) : null
   if (!e || !e.isValid()) return first
   const allDay = isAllDay(s, e)
-  if (s.isSame(e, 'day')) return allDay ? first : `${first} ${formatClockRange(s, e)}`
+  if (s.isSame(e, 'day')) return allDay ? first : `${first}${dayClockGap()}${formatClockRange(s, e)}`
   return allDay
-    ? `${first}${RANGE_SEP}${formatEndDayText(e, s)}`
-    : `${first} ${formatClock(s)}${RANGE_SEP}${formatEndDayText(e, s)} ${formatClock(e)}`
+    ? `${first}${rangeSep()}${formatEndDayText(e, s)}`
+    : `${first}${dayClockGap()}${formatClock(s)}${rangeSep()}${formatEndDayText(e, s)}${dayClockGap()}${formatClock(e)}`
 }

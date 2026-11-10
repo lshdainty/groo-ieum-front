@@ -1973,3 +1973,4 @@ vacation,history.delete,삭제,Delete
 vacation,history.usageListEnd,휴가 기록을 모두 봤어요.,You've seen all leave records.
 vacation,history.grantListEnd,부여 내역을 모두 봤어요.,You've seen all leave grants.
 vacation,history.grantRemainOf,{{total}} 중 남음,of {{total}} left
+vacation,history.alreadyStarted,이미 시작된 휴가라 고칠 수 없어요.,This leave has already started and can't be changed.

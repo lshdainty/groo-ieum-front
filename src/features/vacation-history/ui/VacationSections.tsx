@@ -145,6 +145,7 @@ export function VacationSections({
 
   const records = (
     <VacationHistoryTable
+      key={`${userId}:${year}`}
       value={history.data}
       year={yearNum}
       owner={owner}

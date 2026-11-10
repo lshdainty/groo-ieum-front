@@ -7,6 +7,7 @@ import { IEvent } from '@/features/calendar/model/interfaces'
 import { calendarTypes } from '@/features/calendar/model/types'
 import { EditEventDialog } from '@/features/calendar/ui/dialogs/edit-event-dialog'
 import { isUpcoming } from '@/features/vacation-history/lib/record-format'
+import { useSnackbar } from '@/shared/ds/snackbar'
 import { formatDayText } from '@/shared/lib/date-text'
 import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
@@ -35,7 +36,9 @@ export function VacationHistoryTable({
   owner?: RecordOwner
   status?: RecordsStatus
 }) {
+  const { t } = useTranslation('vacation')
   const { t: tc } = useTranslation('common')
+  const snackbar = useSnackbar()
   const { loginUser } = useUser()
   const { hasAnyPermission } = usePermission()
   const desktop = useDesktop()
@@ -49,7 +52,15 @@ export function VacationHistoryTable({
   const mayAct = mine ? hasAnyPermission(['VACATION:USE', 'VACATION:MANAGE']) : hasAnyPermission(['VACATION:MANAGE'])
   const canAct = (u: VacationUsageInfo) => mayAct && isUpcoming(u.start_date)
 
+  /** 단추를 누르는 때 "시작 전" 을 다시 본다 — 화면을 열어 둔 채 시작 시각이 지났으면 폼 · 확인창을 열지 않고 알린다(서버도 시작 뒤는 거절) */
+  const stillUpcoming = (u: VacationUsageInfo): boolean => {
+    if (isUpcoming(u.start_date)) return true
+    snackbar.show({ message: t('history.alreadyStarted') })
+    return false
+  }
+
   const handleEdit = (u: VacationUsageInfo) => {
+    if (!stillUpcoming(u)) return
     setEditing({
       id: u.vacation_usage_id,
       type: calendarTypes.find((c) => c.id === u.vacation_time_type) ?? calendarTypes.find((c) => c.type === 'vacation') ?? calendarTypes[0],
@@ -72,7 +83,7 @@ export function VacationHistoryTable({
         status={status}
         canAct={canAct}
         onEdit={mayAct ? handleEdit : undefined}
-        onDelete={mayAct ? (u) => deleteConfirm.ask(u) : undefined}
+        onDelete={mayAct ? (u) => stillUpcoming(u) && deleteConfirm.ask(u) : undefined}
       />
       <ConfirmDialog
         open={deleteConfirm.open}
@@ -90,10 +101,11 @@ export function VacationHistoryTable({
             if (!open) setEditing(null)
           }}
           event={editing}
+          vacationOnly
           onDelete={desktop ? undefined : () => {
             const u = value?.usages.find((x) => x.vacation_usage_id === editing.id)
             setEditing(null)
-            if (u) deleteConfirm.ask(u)
+            if (u && stillUpcoming(u)) deleteConfirm.ask(u)
           }}
         >
           <></>
