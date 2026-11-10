@@ -23,7 +23,7 @@ import {
 import { TablePagination, type TablePaginationValue } from '@/shared/ds/table-pagination'
 import { VacationStatusBadge } from '@/shared/ui/groo/vacation-status'
 import type { GetUserRequestedVacationsResp } from '@/entities/vacation'
-import { VacationApprovalForm } from '@/features/vacation-application/ui/VacationApprovalForm'
+import { RequestDetail } from '@/features/vacation-application/ui/RequestDetail'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { approvalRowName, formatRequestRange, formatRequestedAt } from '../lib/approval-format'
 
@@ -228,7 +228,7 @@ export function ApprovalInbox({
   return (
     <div data-approval-inbox>
       {desktop ? <Card body='list'>{body}</Card> : body}
-      <VacationApprovalForm open={detail !== null} onClose={() => setDetail(null)} requestData={detail ?? undefined} />
+      <RequestDetail open={detail !== null} onClose={() => setDetail(null)} requestData={detail ?? undefined} />
     </div>
   )
 }

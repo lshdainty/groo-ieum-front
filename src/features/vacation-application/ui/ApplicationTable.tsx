@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/shadcn/card'
 import { Empty, EmptyDescription, EmptyIcon, EmptyTitle } from '@/shared/ui/shadcn/empty'
 import { ApplicationTableContent } from '@/features/vacation-application/ui/ApplicationTableContent'
-import { VacationApprovalForm } from '@/features/vacation-application/ui/VacationApprovalForm'
+import { RequestDetail } from '@/features/vacation-application/ui/RequestDetail'
 import { usePostCancelVacationRequestMutation } from '@/entities/vacation'
 import { TypeResp } from '@/entities/type'
 import { type GetUserRequestedVacationsResp } from '@/entities/vacation'
@@ -89,10 +89,12 @@ const ApplicationTable = ({
         </CardContent>
       </Card>
 
-      <VacationApprovalForm
+      <RequestDetail
         open={detailOpen}
         onClose={handleDetailClose}
         requestData={selectedRequest || undefined}
+        cancelUserId={showCancelButton ? userId : undefined}
+        latest={(id) => vacationRequests.find((r) => r.vacation_grant_id === id)}
       />
 
       {/* [취소] 와 [신청 취소] 가 헷갈려서 이 확인창만 닫는 단추를 "닫기" 로 한다 */}

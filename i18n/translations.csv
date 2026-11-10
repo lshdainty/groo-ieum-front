@@ -1974,3 +1974,140 @@ vacation,history.usageListEnd,휴가 기록을 모두 봤어요.,You've seen all
 vacation,history.grantListEnd,부여 내역을 모두 봤어요.,You've seen all leave grants.
 vacation,history.grantRemainOf,{{total}} 중 남음,of {{total}} left
 vacation,history.alreadyStarted,이미 시작된 휴가라 고칠 수 없어요.,This leave has already started and can't be changed.
+vacation,req.title,휴가 신청,Leave request
+vacation,req.create,휴가 신청,Request leave
+vacation,req.yearAria,연도,Year
+vacation,req.yearLabel,{{year}}년,{{year}}
+vacation,req.sumAria,신청 요약,Request summary
+vacation,req.sumTotalThisYear,올해 신청,Requests this year
+vacation,req.sumTotalYear,{{year}}년 신청,Requests in {{year}}
+vacation,req.sumCount,{{count}}건,{{count}} requests
+vacation,req.sumCount_one,{{count}}건,{{count}} request
+vacation,req.sumThisMonth,이번 달 {{count}}건,{{count}} this month
+vacation,req.sumAcquired,받은 휴가,Leave received
+vacation,req.sumAcquiredSub,승인된 신청,From approved requests
+vacation,req.sumRate,승인율,Approval rate
+vacation,req.sumRateSub,{{total}}건 중 {{approved}}건,{{approved}} of {{total}}
+vacation,req.sumAvg,결재까지 평균,Average time to decide
+vacation,req.sumAvgValue,{{days}}일,{{days}} days
+vacation,req.tagsAria,상태별 신청 수,Requests by status
+vacation,req.sumFailureTitle,신청 요약을 불러오지 못했어요,Couldn't load the request summary
+vacation,req.listTitle,신청 내역,Request history
+vacation,req.listCaption,휴가 신청 내역,Leave requests
+vacation,req.colTitle,제목,Title
+vacation,req.colType,휴가 종류,Leave type
+vacation,req.colDate,대상 날짜,Date
+vacation,req.colGrant,받을 휴가,Leave to receive
+vacation,req.colProgress,진행,Progress
+vacation,req.cancel,신청 취소,Cancel request
+vacation,req.cancelFor,{{name}} 신청 취소,Cancel request {{name}}
+vacation,req.rowDetail,{{type}} · {{date}} · {{grant}},{{type}} · {{date}} · {{grant}}
+vacation,req.listEnd,신청 내역을 모두 봤어요.,You've seen all requests.
+vacation,req.emptyTitle,{{year}}년에 낸 신청이 없어요,No requests in {{year}}
+vacation,req.emptyDescription,휴가 신청으로 보상 · 경조 휴가를 받을 수 있어요.,You can receive compensatory and special leave by requesting it.
+vacation,req.failureTitle,신청 내역을 불러오지 못했어요,Couldn't load your requests
+vacation,req.canceled,신청을 취소했어요.,Request canceled.
+vacation,req.cancelFailed,신청을 취소하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't cancel the request. Please try again in a moment.
+vacation,req.cancelNotPending,대기 중인 신청만 취소할 수 있어요.,Only pending requests can be canceled.
+vacation,req.progressWaiting,결재를 기다려요,Waiting for approval
+vacation,req.progressPending,지금 {{name}} 차례 · {{k}}/{{n}}단계,{{name}}'s turn · step {{k}} of {{n}}
+vacation,req.progressProgress,{{done}}단계 승인 · 지금 {{name}} 차례 · {{k}}/{{n}}단계,Step {{done}} approved · {{name}}'s turn · step {{k}} of {{n}}
+vacation,req.progressApproved,모두 승인 · {{date}},All approved · {{date}}
+vacation,req.progressApprovedNoDate,모두 승인,All approved
+vacation,req.progressAuto,자동 승인,Auto-approved
+vacation,req.progressRejected,{{k}}단계에서 반려 · {{name}},Rejected at step {{k}} · {{name}}
+vacation,req.progressRejectedNoName,{{k}}단계에서 반려,Rejected at step {{k}}
+vacation,req.progressCanceled,내가 취소함,Canceled by me
+vacation,req.progressRevoked,회수됨,Revoked
+vacation,req.detailBack,이전,Back
+vacation,req.detailRejectReason,반려 사유,Reason for rejection
+vacation,req.detailProgress,결재 진행,Approval progress
+vacation,req.detailContent,신청 내용,Request details
+vacation,req.detailApplicant,신청자,Applicant
+vacation,req.detailPolicy,휴가 정책,Leave policy
+vacation,req.detailDate,대상 날짜,Date
+vacation,req.detailGrant,받을 휴가,Leave to receive
+vacation,req.detailRequestedAt,신청한 때,Requested
+vacation,req.detailReason,사유,Reason
+vacation,req.detailNoApproval,결재 없이 바로 승인됐어요.,Approved right away without approvers.
+vacation,req.stepName,{{k}}단계 · {{name}},Step {{k}} · {{name}}
+vacation,req.stepApproved,승인 · {{at}},Approved · {{at}}
+vacation,req.stepApprovedNoDate,승인,Approved
+vacation,req.stepTurn,지금 결재할 차례예요,Their turn to decide
+vacation,req.stepWaiting,앞 단계를 기다려요,Waiting for the earlier step
+vacation,req.stepRejected,반려 · {{at}},Rejected · {{at}}
+vacation,req.stepRejectedNoDate,반려,Rejected
+vacation,req.stepSkipped,결재하지 않음,Not decided
+vacation,req.approve,승인,Approve
+vacation,req.reject,반려,Reject
+vacation,req.rejectTitle,반려 사유,Reason for rejection
+vacation,req.rejectConfirm,반려하기,Reject
+vacation,req.rejectRequired,반려 사유를 적어주세요.,Enter a reason for rejection.
+vacation,req.rejectPlaceholder,반려하는 까닭을 적어주세요,Tell them why you're rejecting
+vacation,req.approved,승인했어요.,Approved.
+vacation,req.rejected,반려했어요.,Rejected.
+vacation,req.actionFailed,처리하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't process this. Please try again in a moment.
+vacation,req.form.step1Title,어떤 휴가를 신청할까요?,Which leave do you want to request?
+vacation,req.form.step1Desc,고른 정책에 맞는 칸만 이어서 보여드려요.,We'll show only the fields that fit the policy you pick.
+vacation,req.form.policyDesc,{{desc}} · {{time}} · {{approval}},{{desc}} · {{time}} · {{approval}}
+vacation,req.form.timeFlexible,시간은 직접 정해요,You set the time
+vacation,req.form.approvalN,결재 {{n}}단계,{{n}} approval steps
+vacation,req.form.approvalNone,결재 없음,No approval
+vacation,req.form.policyRequired,신청할 휴가 정책을 골라주세요.,Pick a leave policy to request.
+vacation,req.form.policyGroup,휴가 정책,Leave policy
+vacation,req.form.noPolicy,지금 신청할 수 있는 휴가 정책이 없어요.,There's no leave policy you can request right now.
+vacation,req.form.policyFailureTitle,휴가 정책을 불러오지 못했어요,Couldn't load leave policies
+vacation,req.form.next,다음,Next
+vacation,req.form.prev,이전,Back
+vacation,req.form.backAria,정책 다시 고르기,Pick the policy again
+vacation,req.form.titleVacation,휴가 신청,Request leave
+vacation,req.form.titleComp,보상휴가 신청,Request compensatory leave
+vacation,req.form.step2Desc,{{policy}} · {{approval}},{{policy}} · {{approval}}
+vacation,req.form.resetTitle,입력한 내용이 지워져요,Your entries will be cleared
+vacation,req.form.resetDesc,정책을 바꾸면 이 정책에 맞춰 칸을 다시 채워야 해요.,"If you change the policy, you'll need to fill in the fields again."
+vacation,req.form.keep,계속 작성,Keep editing
+vacation,req.form.change,바꾸기,Change
+vacation,req.form.title,제목,Title
+vacation,req.form.titlePlaceholderVacation,예: 개인 사유,e.g. Personal reason
+vacation,req.form.titlePlaceholderComp,예: 프로젝트 마감 초과근무,e.g. Project deadline overtime
+vacation,req.form.overtimeDay,초과근무한 날,Overtime day
+vacation,req.form.day,날짜,Date
+vacation,req.form.datePlaceholder,날짜 고르기,Pick a date
+vacation,req.form.start,시작,Start
+vacation,req.form.end,끝,End
+vacation,req.form.timePlaceholder,시각 고르기,Pick a time
+vacation,req.form.hours,초과근무 시간,Overtime
+vacation,req.form.hoursValue,{{count}}시간,{{count}} hours
+vacation,req.form.hoursValue_one,{{count}}시간,{{count}} hour
+vacation,req.form.grant,받을 휴가,Leave to receive
+vacation,req.form.grantSum,모두 {{sum}}이에요. 1일은 8시간이에요.,That's {{sum}} in all. One day is 8 hours.
+vacation,req.form.sumDay,{{n}}일,{{n}}d
+vacation,req.form.sumHour,{{n}}시간,{{n}}h
+vacation,req.form.sumMinute,{{n}}분,{{n}}m
+vacation,req.form.sumZero,0시간,0h
+vacation,req.form.reason,사유,Reason
+vacation,req.form.reasonVacationPlaceholder,휴가를 쓰는 까닭을 적어주세요,Tell us why you need the leave
+vacation,req.form.reasonCompPlaceholder,초과근무를 하게 된 까닭을 적어주세요,Tell us why you worked overtime
+vacation,req.form.approvers,결재자 · {{n}}단계,Approvers · {{n}} steps
+vacation,req.form.approverStep,{{k}}단계,Step {{k}}
+vacation,req.form.approverPick,고르기,Pick
+vacation,req.form.approverPickTitle,{{k}}단계 결재자,Step {{k}} approver
+vacation,req.form.approverTaken,{{k}}단계에 골랐어요,Picked for step {{k}}
+vacation,req.form.approverSearch,이름 · 부서 검색,Search name or department
+vacation,req.form.approverEmpty,찾는 사람이 없어요,No one found
+vacation,req.form.autoApproval,결재 없이 바로 받아요.,Received right away without approval.
+vacation,req.form.autoApprovalCallout,결재 단계는 있지만 자동으로 승인돼요.,"This policy has approval steps, but they're approved automatically."
+vacation,req.form.reducedCallout,정책은 {{required}}단계지만 결재할 수 있는 사람이 {{available}}명이라 {{available}}단계로 받아요.,"The policy asks for {{required}} steps, but only {{available}} people can approve, so it needs {{available}}."
+vacation,req.form.approversFailureTitle,결재자를 불러오지 못했어요,Couldn't load approvers
+vacation,req.form.notice,모두 승인되면 받은 휴가에 바로 더해져요.,"Once everyone approves, it's added to your leave right away."
+vacation,req.form.submit,결재 요청,Send for approval
+vacation,req.form.titleRequired,제목을 입력해주세요.,Enter a title.
+vacation,req.form.dayRequired,날짜를 골라주세요.,Pick a date.
+vacation,req.form.startRequired,시작 시각을 골라주세요.,Pick a start time.
+vacation,req.form.endRequired,끝 시각을 골라주세요.,Pick an end time.
+vacation,req.form.endAfterStart,시작 시각보다 뒤로 골라주세요.,Pick a time after the start.
+vacation,req.form.grantRequired,받을 휴가를 정해주세요.,Set the leave to receive.
+vacation,req.form.reasonRequired,사유를 적어주세요.,Enter a reason.
+vacation,req.form.approverRequired,{{k}}단계 결재자를 골라주세요.,Pick a step {{k}} approver.
+vacation,req.form.saved,휴가를 신청했어요.,Leave requested.
+vacation,req.form.saveFailed,신청하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't send the request. Please try again in a moment.
