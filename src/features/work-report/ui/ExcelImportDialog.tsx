@@ -32,6 +32,7 @@ export function ExcelImportDialog({
   groups,
   divisions,
   users,
+  codes,
   me,
   canManage,
   onRegister,
@@ -42,6 +43,8 @@ export function ExcelImportDialog({
   groups: WorkGroupWithParts[]
   divisions: WorkCodeResp[]
   users: { data: GetUsersResp[]; failed: boolean; fetching: boolean; refetch: () => void }
+  /** 분류 · 구분 목록 — 못 받았거나 아직이면 확인 단계로 못 넘어간다(모든 줄이 "없는 분류" 로 잘못 안내되지 않게) */
+  codes: { ready: boolean; failed: boolean; fetching: boolean; refetch: () => void }
   me: { id: string; name: string }
   canManage: boolean
   onRegister: (rows: CreateWorkHistoryReq[]) => Promise<unknown>
@@ -59,10 +62,11 @@ export function ExcelImportDialog({
   const [failureKey, setFailureKey] = useState<string | null>(null)
 
   const usersBlocked = canManage && users.failed
+  const codesBlocked = !codes.ready
   const errorCount = rows.filter((r) => r.errors.length > 0).length
 
   const verify = () => {
-    const parsed = parseImportRows(text, delimiter, { groups, divisions, users: users.data, me, canManage })
+    const parsed = parseImportRows(text, delimiter, { groups, divisions, users: users.data, me, canManage, header: [t('rep.colDate'), t('rep.colManager'), t('rep.colGroup'), t('rep.colPart'), t('rep.colDivision'), t('rep.colHours'), t('rep.colContent')] })
     if (parsed.length === 0) {
       setEmpty(true)
       return
@@ -115,6 +119,14 @@ export function ExcelImportDialog({
                 </Button>
               </Callout>
             )}
+            {codes.failed && (
+              <Callout tone='critical' role='alert' data-codes-failed>
+                <span className='block'>{t('rep.xCodesFailed')}</span>
+                <Button variant='ghost' size='small' flush='left' loading={codes.fetching} onClick={codes.refetch} data-codes-retry>
+                  {tc('retry')}
+                </Button>
+              </Callout>
+            )}
             {step === 'input' ? (
               <>
                 <p className='m-0 text-t4 text-fg-neutral-muted'>{canManage ? t('rep.xInputHint') : t('rep.xInputHintMine')}</p>
@@ -129,7 +141,7 @@ export function ExcelImportDialog({
                     className='min-h-[220px] font-mono'
                     value={text}
                     aria-invalid={empty || undefined}
-                    placeholder={['2026-11-02', canManage ? '홍길동' : me.name, 'SF/내부과제', '[G1]신규 운영 시스템 조기 안정화', '프로그램 개발', '8', '로그인 구현'].join(delimiter)}
+                    placeholder={['2026-11-02', canManage ? t('rep.xSampleName') : me.name, 'SF/내부과제', '[G1]신규 운영 시스템 조기 안정화', '프로그램 개발', '8', t('rep.xSampleContent')].join(delimiter)}
                     onChange={(e) => {
                       setText(e.target.value)
                       setEmpty(false)
@@ -212,7 +224,7 @@ export function ExcelImportDialog({
         <ResponsiveDialogFooter>
           <ResponsiveDialogCancel>{tc('cancel')}</ResponsiveDialogCancel>
           {step === 'input' ? (
-            <Button variant='neutralSolid' disabled={usersBlocked} onClick={verify} data-import-verify>
+            <Button variant='neutralSolid' disabled={usersBlocked || codesBlocked} loading={!codes.ready && !codes.failed} onClick={verify} data-import-verify>
               {t('rep.xVerify')}
             </Button>
           ) : (

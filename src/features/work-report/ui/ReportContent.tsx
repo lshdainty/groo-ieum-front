@@ -476,6 +476,7 @@ export function ReportContent() {
           groups={groups}
           divisions={divisions}
           users={usersView}
+          codes={{ ready: codesReady, failed: codesFailed, fetching: groupsQ.isFetching || divisionQ.isFetching, refetch: retryCodes }}
           me={me}
           canManage={canManage}
           onRegister={registerRows}

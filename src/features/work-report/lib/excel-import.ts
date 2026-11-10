@@ -27,11 +27,18 @@ export interface ImportContext {
   me: { id: string; name: string }
   /** `WORK:MANAGE` — 있으면 누구 이름이든, 없으면 담당자는 나로 고정되고 남의 이름은 오류 */
   canManage: boolean
+  /** 머리 열 이름(화면 언어) — 첫 줄이 이것이면 머리 줄이라 건너뛴다(예시 파일을 머리째 붙여 넣은 경우) */
+  header?: string[]
 }
 
 /** 파일의 한 줄 — 일자 · 담당자 · 업무 분류 · 업무 파트 · 업무 구분 · 소요 시간 · 내용(이 차례) */
 export const parseImportRows = (text: string, delimiter: string, ctx: ImportContext): ImportRow[] => {
-  const lines = text.split('\n').map((l) => l.replace(/\r$/, '')).filter((l) => l.trim() !== '')
+  let lines = text.split('\n').map((l) => l.replace(/\r$/, '')).filter((l) => l.trim() !== '')
+  const head = ctx.header
+  if (head && lines.length > 0) {
+    const first = lines[0].split(delimiter).map((x) => x.trim().toLowerCase())
+    if (head.slice(0, 3).every((h, i) => first[i] === h.toLowerCase())) lines = lines.slice(1)
+  }
   return lines.map((line, index) => {
     const c = line.split(delimiter).map((x) => x.trim())
     const date = c[0] ?? ''

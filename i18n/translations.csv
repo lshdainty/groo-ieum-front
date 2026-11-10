@@ -2128,3 +2128,6 @@ work,rep.uDownloading,받는 중…,Downloading…
 work,rep.yearValue,{{year}}년,{{year}}
 work,rep.monthValue,{{month}}월,{{month}}
 work,rep.xColWho,일자 · 담당자,Date · assignee
+work,rep.xSampleName,홍길동,Gildong Hong
+work,rep.xSampleContent,로그인 구현,Implement login
+work,rep.xCodesFailed,업무 분류 · 구분 목록을 불러오지 못해 확인할 수 없어요.,"Could not load the work codes, so the rows can't be checked."

@@ -1,4 +1,3 @@
-import { CalendarX } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Card } from '@/shared/ds/card'
@@ -9,6 +8,7 @@ import { formatHourRange } from '@/shared/lib/date-text'
 import { useUsersQuery } from '@/entities/user'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { ScheduleEmpty } from './ScheduleEmpty'
 import { ScheduleByTime } from './ScheduleByTime'
 import { ScheduleSkeleton } from './ScheduleSkeleton'
 import { ScheduleTable } from './ScheduleTable'
@@ -33,7 +33,7 @@ export function ScheduleContent() {
       primaryAction={{ label: tc('retry'), onClick: () => void users.refetch(), loading: users.isFetching }}
     />
   )
-  const empty = <ResultSection size='medium' icon={<CalendarX />} title={t('sch.emptyTitle')} description={t('sch.emptyDescription')} />
+  const empty = <ScheduleEmpty />
 
   // 안내 줄은 기다리는 동안에도 처음부터 둔다(실패 · 비었음에서는 뺀다)
   const showNote = !users.isLoadingError && (users.isPending || list.length > 0)

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Skeleton } from '@/shared/ds/skeleton'
 import { useUsersQuery } from '@/entities/user'
+import { ScheduleEmpty } from '@/features/work-schedule/ui/ScheduleEmpty'
 import { ScheduleTable } from '@/features/work-schedule/ui/ScheduleTable'
 import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
 import { WidgetScrollBox } from '@/features/dashboard/ui/WidgetScrollBox'
@@ -15,9 +16,13 @@ export const ScheduleWidget = () => {
   return (
     <WidgetFrame id='schedule' body='list'>
       <WidgetBoundary id='schedule' queries={[query]} fallback={<Skeleton radius='12' className='mx-x6 block h-[200px]' />}>
-        <WidgetScrollBox label={t('widget.workSchedule')}>
-          <ScheduleTable users={query.data ?? []} />
-        </WidgetScrollBox>
+        {(query.data ?? []).length === 0 ? (
+          <ScheduleEmpty />
+        ) : (
+          <WidgetScrollBox label={t('widget.workSchedule')}>
+            <ScheduleTable users={query.data ?? []} />
+          </WidgetScrollBox>
+        )}
       </WidgetBoundary>
     </WidgetFrame>
   )
