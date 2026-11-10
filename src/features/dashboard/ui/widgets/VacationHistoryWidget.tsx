@@ -26,7 +26,7 @@ export const VacationHistoryWidget = () => {
     <WidgetFrame id='vacation-history' body='list'>
       <WidgetBoundary id='vacation-history' queries={[query]} fallback={<RowsSkeleton />}>
         <WidgetScrollBox label={t('widget.vacationHistory')}>
-          <VacationHistoryContent data={data!} showPagination={false} className='min-h-0' />
+          <VacationHistoryContent data={data} year={new Date().getFullYear()} pagination={false} />
         </WidgetScrollBox>
       </WidgetBoundary>
     </WidgetFrame>

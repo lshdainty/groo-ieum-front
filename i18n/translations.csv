@@ -1971,3 +1971,26 @@ admin,authority.permDesc.REGULATION_READ,규정 페이지를 볼 수 있어요.,
 admin,authority.permDesc.NOTICE_READ,공지사항을 볼 수 있어요.,View notices.
 admin,authority.permDesc.NOTICE_MANAGE,공지사항을 만들고 고치고 지워요.,"Create, edit and delete notices."
 admin,authority.permDesc.ROLE_MANAGE,"역할을 만들고 고치고 지우고, 역할에 권한을 연결해요.","Create, edit and delete roles, and link permissions to roles."
+vacation,history.yearAria,연도,Year
+vacation,history.yearLabel,{{year}}년,{{year}}
+vacation,history.metricsAria,휴가 현황 요약,Leave summary
+vacation,history.metricsFailureTitle,휴가 현황을 불러오지 못했어요,Couldn't load your leave summary
+vacation,history.typeFailureTitle,유형별 남은 휴가를 불러오지 못했어요,Couldn't load remaining leave by type
+vacation,history.monthFailureTitle,달마다 쓴 휴가를 불러오지 못했어요,Couldn't load leave used per month
+vacation,history.recordsFailureTitle,휴가 기록을 불러오지 못했어요,Couldn't load leave records
+vacation,history.typeCardTitle,유형별 남은 휴가,Remaining leave by type
+vacation,history.monthCardTitle,달마다 쓴 휴가,Leave used per month
+vacation,history.recordsTitle,휴가 기록,Leave records
+vacation,history.recordsTabsAria,휴가 기록 보기,Leave record views
+vacation,history.emptyType,남은 휴가가 없어요,No leave left
+vacation,history.emptyUsage,{{year}}년에 쓴 휴가가 없어요,No leave used in {{year}}
+vacation,history.emptyGrant,{{year}}년에 받은 휴가가 없어요,No leave received in {{year}}
+vacation,history.captionUsage,휴가 사용 내역,Leave usage
+vacation,history.captionGrant,휴가 부여 내역,Leave grants
+vacation,history.colType,휴가 종류,Leave type
+vacation,history.colValidity,유효 기간,Valid period
+vacation,history.edit,수정,Edit
+vacation,history.delete,삭제,Delete
+vacation,history.usageListEnd,휴가 기록을 모두 봤어요.,You've seen all leave records.
+vacation,history.grantListEnd,부여 내역을 모두 봤어요.,You've seen all leave grants.
+vacation,history.grantRemainOf,{{total}} 중 남음,of {{total}} left
