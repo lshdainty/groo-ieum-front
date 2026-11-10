@@ -9,7 +9,8 @@ import {
 } from '@/shared/ui/shadcn/dialog';
 import { Field, FieldError, FieldLabel } from '@/shared/ui/shadcn/field';
 import { Input } from '@/shared/ui/shadcn/input';
-import { toast } from '@/shared/ui/shadcn/sonner';
+import { Callout } from '@/shared/ds/callout';
+import { useSnackbar } from '@/shared/ds/snackbar';
 import { Spinner } from '@/shared/ui/shadcn/spinner';
 import { PasswordRequirements } from '@/shared/ui/password-requirements/PasswordRequirements';
 import { PasswordMatch } from '@/shared/ui/password-requirements/PasswordMatch';
@@ -17,11 +18,11 @@ import { useChangePasswordMutation } from '@/entities/user';
 import { createNewPasswordSchema } from '@/shared/lib';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { KeyRound, Lock, ShieldCheck } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { claimFailure } from '@/shared/api/failure'
+import { readWriteFailure } from '@/shared/ui/groo/write-error'
 
 const createFormSchema = (t: (key: string) => string) =>
   z.object({
@@ -49,6 +50,14 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
   const { t } = useTranslation('user');
   const { t: tc } = useTranslation('common');
   const changePasswordMutation = useChangePasswordMutation();
+  const snackbar = useSnackbar();
+  // 저장 실패는 대화상자가 열린 채 맨 위 Callout — 서버 글 · axios 영어 글은 쓰지 않는다(write-error)
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setSaveError(null);
+  }
 
   const form = useForm<PasswordChangeFormValues>({
     resolver: zodResolver(createFormSchema(t)),
@@ -73,6 +82,7 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
   }, [open, form]);
 
   const onSubmit = (values: PasswordChangeFormValues) => {
+    setSaveError(null);
     changePasswordMutation.mutate(
       {
         current_password: values.current_password,
@@ -81,13 +91,12 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
       },
       {
         onSuccess: () => {
-          toast.success(t('passwordChangeSuccess'));
           onOpenChange(false);
+          snackbar.show({ message: t('passwordChangeSuccess'), tone: 'positive' });
         },
         onError: (error) => {
-          // 서버 글 · axios 영어 글은 쓰지 않고 고정 글로
-          claimFailure(error);
-          toast.error(t('passwordChangeError'));
+          const { key } = readWriteFailure(error);
+          if (key) setSaveError(tc(key));
         },
       }
     );
@@ -101,6 +110,11 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
           <DialogDescription>{t('passwordChangeDescription')}</DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)}>
+          {saveError && (
+            <Callout tone='critical' role='alert' className='mt-4' data-save-failure>
+              {saveError}
+            </Callout>
+          )}
           <div className='grid gap-4 py-4'>
             <Controller
               control={form.control}
