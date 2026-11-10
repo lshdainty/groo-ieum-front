@@ -6,7 +6,8 @@ import { ResultSection } from '@/shared/ds/result-section'
 import { Table, TableBody, TableHead, TableHeader, TableRow, TableSkeletonRows } from '@/shared/ds/table'
 import { useUsersQuery } from '@/entities/user'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { UserCompanyCard } from './UserCompanyCard'
 import { UserDialogs } from './UserDialogs'
 import { UserListCard } from './UserTable'
@@ -87,7 +88,9 @@ const ManagementContent = () => {
 
   return (
     <ScreenBody density='high'>
-      <ScreenTitleRow title={t('user.title')} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle>{t('user.title')}</ScreenTitle>
+      </div>
       <LoadingRegion
         pending={query.isPending}
         failed={query.isLoadingError}

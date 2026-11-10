@@ -3,7 +3,7 @@
   "source": "specs/components/avatar.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "0b1461f3cad9"
+    "sha256": "3cc8ca281786"
   },
   "slots": {
     "root": "원 — 폭 = 높이. 사진 또는 이니셜을 원으로 자른다",

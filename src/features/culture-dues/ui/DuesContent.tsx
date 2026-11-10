@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Select, SelectItem } from '@/shared/ds/select'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { ScreenBands } from '@/widgets/layout/ui/ScreenBands'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { useDuesContext } from '@/features/culture-dues/model/DuesContext'
 import { DuesBirthMatrix } from './DuesBirthMatrix'
 import { DuesHistory } from './DuesHistory'
@@ -40,7 +41,9 @@ export const DuesContent = () => {
 
   return (
     <ScreenBody density='high'>
-      <ScreenTitleRow title={t('dues.title')} action={yearSelect} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle actions={yearSelect}>{t('dues.title')}</ScreenTitle>
+      </div>
       {desktop ? (
         <div className='flex flex-col gap-x2'>
           <DuesSummary year={year} month={month} />

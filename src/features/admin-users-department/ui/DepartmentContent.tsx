@@ -8,7 +8,8 @@ import { LoadingRegion, Skeleton } from '@/shared/ds/skeleton'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/shared/ds/resizable'
 import { ResultSection } from '@/shared/ds/result-section'
 import { useSnackbar } from '@/shared/ds/snackbar'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useScreenHeader } from '@/widgets/layout/lib/screen-header'
 import { useCompanyQuery, useCompanyWithDepartmentsQuery, type GetCompanyResp } from '@/entities/company'
@@ -156,7 +157,9 @@ const DepartmentInner = ({ company }: { company: GetCompanyResp }) => {
     </div>
   ) : (
     <ScreenBody density='high'>
-      <ScreenTitleRow title={tMenu('menu.adminUsersDepartment')} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle>{tMenu('menu.adminUsersDepartment')}</ScreenTitle>
+      </div>
       <div className='h-[calc(100svh-180px)] min-h-[480px]'>
         <ResizablePanelGroup
           storageKey='hr-admin-dept-members'
@@ -198,7 +201,9 @@ export const DepartmentContent = () => {
 
   const frame = (children: ReactNode) => (
     <ScreenBody density='high'>
-      <ScreenTitleRow title={tMenu('menu.adminUsersDepartment')} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle>{tMenu('menu.adminUsersDepartment')}</ScreenTitle>
+      </div>
       {children}
     </ScreenBody>
   )

@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -70,7 +70,7 @@ const UserRoleAssignment = ({ user, allRoles, onUpdateUserRole, onBack }: UserRo
         <div className="mb-x1 flex items-start gap-x2">
           {onBack && (
             <Button variant="ghost" layout="iconOnly" size="medium" aria-label={t('authority.backToUserList')} onClick={onBack} className="-ml-x2 shrink-0 md:hidden" data-user-back>
-              <ArrowLeft />
+              <ChevronLeft />
             </Button>
           )}
           <div className="min-w-0">

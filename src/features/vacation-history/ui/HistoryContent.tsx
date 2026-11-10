@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Select, SelectItem } from '@/shared/ds/select'
 import { useUser } from '@/entities/session'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { useHistoryContext } from '@/features/vacation-history/model/HistoryContext'
 import { VacationSections } from './VacationSections'
 
@@ -34,7 +35,9 @@ const HistoryContent = () => {
 
   return (
     <ScreenBody density='high'>
-      <ScreenTitleRow title={t('history.title')} action={desktop ? yearSelect : undefined} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle actions={desktop ? yearSelect : undefined}>{t('history.title')}</ScreenTitle>
+      </div>
       {userId && <VacationSections userId={userId} year={selectedYear} leading={desktop ? undefined : yearSelect} />}
     </ScreenBody>
   )

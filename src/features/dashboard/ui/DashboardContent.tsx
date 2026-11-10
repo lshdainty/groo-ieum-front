@@ -10,7 +10,8 @@ import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useWide } from '@/widgets/layout/lib/use-wide'
 import { useScreenAction } from '@/widgets/layout/lib/screen-action'
 import { Band, ScreenBands } from '@/widgets/layout/ui/ScreenBands'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { parseHomeWidgetIds, readHomeWidgets } from '@/features/dashboard/lib/read-home-widgets'
 import { canSeeWidget, widgetOf, WIDGETS } from '@/features/dashboard/lib/widgets'
 import { HomeEditPanel } from '@/features/dashboard/ui/HomeEditPanel'
@@ -108,16 +109,17 @@ export const DashboardContent = ({ userId, dashboard, pending, failed, retrying,
 
   return (
     <ScreenBody density='medium'>
-      <ScreenTitleRow
-        title={ts('menu.dashboard')}
-        action={
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle actions={
           canEdit ? (
             <Button variant='neutralOutline' size='small' onClick={openEdit} data-home-edit-entry>
               {t('edit')}
             </Button>
           ) : undefined
-        }
-      />
+        }>
+          {ts('menu.dashboard')}
+        </ScreenTitle>
+      </div>
       {content}
       {canEdit && (
         <HomeEditPanel

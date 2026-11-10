@@ -17,7 +17,8 @@ import { useDeleteHolidayMutation, useHolidaysByPeriodQuery, type GetHolidaysRes
 import { useCountryCodeTypesQuery } from '@/entities/type'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useScreenAction } from '@/widgets/layout/lib/screen-action'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { HOLIDAY_TYPE_KEY, formatHolidayDate, holidayRowName, repeatKey } from '../lib/holiday-format'
 import { CountryLoadNotice } from './CountryLoadNotice'
 import { HolidayBulkDialog } from './HolidayBulkDialog'
@@ -182,7 +183,9 @@ export const HolidayContent = () => {
 
   return (
     <ScreenBody density='medium'>
-      <ScreenTitleRow title={t('holiday.title')} action={titleActions} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle actions={titleActions}>{t('holiday.title')}</ScreenTitle>
+      </div>
       <div className='bg-bg-layer-default md:bg-transparent'>
         <div className='mb-x4 hidden md:block'>{controls}</div>
         <ScreenCard

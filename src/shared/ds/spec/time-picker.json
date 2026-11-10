@@ -3,7 +3,7 @@
   "source": "specs/components/time-picker.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "0b1461f3cad9"
+    "sha256": "3cc8ca281786"
   },
   "slots": {
     "root": "휠 — Wheel Picker medium, 칼럼 셋",
@@ -22,7 +22,7 @@
     ]
   },
   "defaults": {
-    "minuteStep": "5"
+    "minuteStep": "1"
   },
   "states": [
     "enabled",

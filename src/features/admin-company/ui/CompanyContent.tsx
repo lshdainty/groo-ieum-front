@@ -8,7 +8,8 @@ import { ResultSection } from '@/shared/ds/result-section'
 import { LoadingRegion, Skeleton } from '@/shared/ds/skeleton'
 import { useSnackbar } from '@/shared/ds/snackbar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ds/tabs'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
 import { useCompanyQuery, useCompanyWithDepartmentsQuery, type GetCompanyResp } from '@/entities/company'
@@ -166,7 +167,11 @@ const CompanyInner = ({ company }: { company: GetCompanyResp }) => {
       </div>
   ) : (
     <ScreenBody density='high'>
-      <ScreenTitleRow title={tMenu('menu.adminCompany')} description={company.company_name} action={<EditCompanyButton onClick={editCompany} />} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle description={company.company_name} actions={<EditCompanyButton onClick={editCompany} />}>
+          {tMenu('menu.adminCompany')}
+        </ScreenTitle>
+      </div>
       <div className='h-[calc(100svh-180px)] min-h-[480px]'>
         <ResizablePanelGroup
           storageKey='hr-admin-company'
@@ -205,7 +210,9 @@ export const CompanyContent = () => {
 
   const frame = (children: ReactNode) => (
     <ScreenBody density='high'>
-      <ScreenTitleRow title={tMenu('menu.adminCompany')} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle>{tMenu('menu.adminCompany')}</ScreenTitle>
+      </div>
       {children}
     </ScreenBody>
   )

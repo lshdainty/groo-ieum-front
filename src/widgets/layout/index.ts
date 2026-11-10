@@ -1,6 +1,6 @@
 export { Layout } from '@/widgets/layout/ui/Layout'
 export { NotFoundScreen } from '@/widgets/layout/ui/NotFoundScreen'
-export { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+export { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
 export { ParentLink } from '@/widgets/layout/ui/ParentLink'
 export { useDesktop } from '@/widgets/layout/lib/use-desktop'
 export { Band, ScreenBands } from '@/widgets/layout/ui/ScreenBands'

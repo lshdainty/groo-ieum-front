@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { List } from '@/shared/ds/list'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { Band, ScreenBands } from '@/widgets/layout/ui/ScreenBands'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { buildRuleSections } from '../model/rule-sections'
 import { RuleCard } from './RuleCard'
 import { RuleRow } from './RuleRow'
@@ -22,7 +23,9 @@ export const RuleContent = () => {
 
   return (
     <ScreenBody density='medium'>
-      <ScreenTitleRow title={tMenu('menu.cultureRegulation')} description={description} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle description={description}>{tMenu('menu.cultureRegulation')}</ScreenTitle>
+      </div>
       {desktop ? (
         <div>
           {sections.map((s) => (

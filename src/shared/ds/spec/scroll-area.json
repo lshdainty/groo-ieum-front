@@ -3,7 +3,7 @@
   "source": "specs/components/scroll-area.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "0b1461f3cad9"
+    "sha256": "3cc8ca281786"
   },
   "slots": {
     "box": "스크롤 상자 — overflow 를 둔 요소(문서 전체 포함). 이름 · 초점 · 넘침 막기",

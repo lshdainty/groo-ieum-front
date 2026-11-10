@@ -133,18 +133,18 @@ const HomeEditSurface = ({ wide, open, onOpenChange, userId, visible, stored, av
     </Button>
   )
 
-  // 닫기는 표면이 묻는다 — dirty · busy 를 표면에 넘기면 Esc · 딤 · 뒤로 가기 · [취소] 가 모두 한 자리에서 "작성한 내용이 사라져요" 를 묻는다.
+  // 닫기는 표면이 묻는다 — dirty · busy 를 표면에 넘기면(저장 중에는 [취소] 도 Esc · 뒤로 가기와 같이 표면이 받지 않는다) Esc · 딤 · 뒤로 가기 · [취소] 가 모두 한 자리에서 "작성한 내용이 사라져요" 를 묻는다.
   // 뒤로 가기 → [계속 작성] → 뒤로 가기 도 다시 묻는다(표면이 칸을 다시 쌓는다). onOpenChange(false) 는 확인 뒤에만 온다
   if (wide) {
     return (
-      <SidePanel open={open} onOpenChange={onOpenChange} form dirty={dirty}>
+      <SidePanel open={open} onOpenChange={onOpenChange} form dirty={dirty} busy={saving}>
         <SidePanelContent size='small' title={t('edit')} description={t('editPanel.description')} data-home-edit>
           <SidePanelBody scrollFog>{content}</SidePanelBody>
           <SidePanelFooter className='justify-between'>
             {resetButton}
             <span className='flex items-center gap-x2'>
               <DialogPrimitive.Close asChild>
-                <Button variant='neutralWeak' disabled={saving}>
+                <Button variant='neutralWeak'>
                   {tc('cancel')}
                 </Button>
               </DialogPrimitive.Close>

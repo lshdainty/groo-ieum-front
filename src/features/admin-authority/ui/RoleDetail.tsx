@@ -1,4 +1,4 @@
-import { ArrowLeft, EllipsisVertical, Trash2 } from 'lucide-react'
+import { ChevronLeft, EllipsisVertical, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/shared/ds/button'
@@ -65,7 +65,7 @@ const RoleDetail = ({ draft, isNew, permissions, canManage, desktop, busy, dirty
         <div className='flex min-w-0 items-center gap-x2'>
           {!desktop && onBack && (
             <Button variant='ghost' layout='iconOnly' size='medium' aria-label={t('authority.backToList')} data-role-back onClick={onBack} className='-ml-x2'>
-              <ArrowLeft />
+              <ChevronLeft />
             </Button>
           )}
           <h2 className='m-0 min-w-0 text-t5 font-bold text-fg-neutral [overflow-wrap:anywhere]'>{title}</h2>

@@ -3,7 +3,7 @@
   "source": "specs/components/input-otp.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "0b1461f3cad9"
+    "sha256": "3cc8ca281786"
   },
   "slots": {
     "field": "코드 칸 — Input 상자형 한 칸. 이름은 Field 라벨(\"인증 코드\")",

@@ -10,7 +10,8 @@ import { AdminListCard } from '@/shared/ui/groo/admin-list-card'
 import { useConfirmTarget } from '@/shared/ui/confirm'
 import { useEffectiveTypesQuery, useExpirationTypesQuery, useVacationTypesQuery } from '@/entities/type'
 import { useVacationPoliciesQuery, type GetVacationPoliciesResp } from '@/entities/vacation-policy'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { usePolicyContext } from '../model/PolicyContext'
 import { policyRuleLine, policyValidityLine } from '../lib/policy-format'
@@ -67,7 +68,9 @@ export const PolicyContent = () => {
 
   return (
     <ScreenBody density='medium'>
-      <ScreenTitleRow title={t('adminPolicy.title')} action={addButton} />
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle actions={addButton}>{t('adminPolicy.title')}</ScreenTitle>
+      </div>
       {!desktop && <div className='flex justify-end bg-bg-layer-default px-x6 pt-x3'>{addButton}</div>}
       <AdminListCard
         heading={t('adminPolicy.count', { count: filtered.length })}

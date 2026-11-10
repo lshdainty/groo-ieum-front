@@ -27,7 +27,8 @@ import {
 } from '@/entities/notice'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useScreenAction } from '@/widgets/layout/lib/screen-action'
-import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
+import { SCREEN_TITLE_BOX, ScreenBody } from '@/widgets/layout/ui/ScreenBody'
+import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { isNoticeActive } from '../lib/notice-form'
 import { NoticeFormDialog, type NoticeFormTarget } from './NoticeFormDialog'
 
@@ -239,7 +240,7 @@ export const NoticeContent = () => {
           <TableBody>
             {rows.map((n) => (
               <TableRow key={n.notice_id} data-notice-id={n.notice_id}>
-                <TableRowHeader className='min-w-[220px] max-w-[420px] whitespace-normal py-x3'>
+                <TableRowHeader className='min-w-[220px] max-w-[420px] whitespace-normal'>
                   <span className='flex flex-col items-start gap-x1'>
                     <span className='flex flex-wrap items-center gap-x1_5'>
                       {n.is_pinned === 'Y' && (
@@ -253,12 +254,12 @@ export const NoticeContent = () => {
                     <span className={TEXT_WRAP}>{n.title}</span>
                   </span>
                 </TableRowHeader>
-                <TableCell className='whitespace-nowrap py-x3'>{n.writer_name}</TableCell>
-                <TableCell className='whitespace-nowrap py-x3'>{dateText(n.create_date)}</TableCell>
-                <TableCell align='end' className='whitespace-nowrap py-x3 tabular-nums'>
+                <TableCell className='whitespace-nowrap'>{n.writer_name}</TableCell>
+                <TableCell className='whitespace-nowrap'>{dateText(n.create_date)}</TableCell>
+                <TableCell align='end' className='whitespace-nowrap tabular-nums'>
                   {n.view_count.toLocaleString(i18n.language)}
                 </TableCell>
-                <TableCell className='whitespace-nowrap py-x3'>
+                <TableCell className='whitespace-nowrap'>
                   <span className='flex flex-col items-start gap-x1'>
                     <span>{periodText(n)}</span>
                     {statusBadge(n)}
@@ -325,15 +326,16 @@ export const NoticeContent = () => {
 
   return (
     <ScreenBody density='medium'>
-      <ScreenTitleRow
-        title={t('notice.title')}
-        action={
+      <div className={SCREEN_TITLE_BOX}>
+        <ScreenTitle actions={
           <Button variant='neutralOutline' size='small' onClick={openAdd} data-notice-add>
             <Plus />
             {tc('add')}
           </Button>
-        }
-      />
+        }>
+          {t('notice.title')}
+        </ScreenTitle>
+      </div>
       {desktop ? (
         <Card body='list'>
           <CardHeader>
