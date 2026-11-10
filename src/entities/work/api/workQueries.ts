@@ -65,10 +65,11 @@ export const useUnregisteredWorkDatesQuery = (year: number, month: number, optio
 }
 
 // 업무 그룹 조회 훅
-export const useWorkGroupsQuery = () => {
+export const useWorkGroupsQuery = (options?: QuietOptions) => {
   return useQuery<WorkCodeResp[]>({
     queryKey: workKeys.list({ type: 'groups' }),
-    queryFn: () => workApi.getWorkGroups()
+    queryFn: () => workApi.getWorkGroups(),
+    meta: quietMeta(options)
   })
 }
 
@@ -116,20 +117,22 @@ export const useWorkGroupsWithPartsQuery = (options?: QuietOptions) => {
 }
 
 // 업무 파트 라벨 조회 훅
-export const useWorkPartLabelQuery = (parentWorkCodeId: number) => {
+export const useWorkPartLabelQuery = (parentWorkCodeId: number, options?: QuietOptions) => {
   return useQuery<WorkCodeResp[]>({
     queryKey: workKeys.list({ type: 'partLabel', parentWorkCodeId }),
     queryFn: () => workApi.getWorkPartLabel(parentWorkCodeId),
-    enabled: !!parentWorkCodeId
+    enabled: !!parentWorkCodeId,
+    meta: quietMeta(options)
   })
 }
 
 // 업무 파트 조회 훅
-export const useWorkPartsQuery = (parentWorkCodeId: number) => {
+export const useWorkPartsQuery = (parentWorkCodeId: number, options?: QuietOptions) => {
   return useQuery<WorkCodeResp[]>({
     queryKey: workKeys.list({ type: 'parts', parentWorkCodeId }),
     queryFn: () => workApi.getWorkParts(parentWorkCodeId),
-    enabled: !!parentWorkCodeId
+    enabled: !!parentWorkCodeId,
+    meta: quietMeta(options)
   })
 }
 
@@ -156,10 +159,11 @@ export const useWorkDivisionLabelsQuery = (options?: QuietOptions) => {
 }
 
 // 업무 히스토리 조회 훅
-export const useWorkHistoriesQuery = (condition?: WorkHistorySearchCondition) => {
+export const useWorkHistoriesQuery = (condition?: WorkHistorySearchCondition, options?: QuietOptions) => {
   return useQuery<WorkHistoryResp[]>({
     queryKey: workKeys.list({ type: 'histories', ...condition }),
-    queryFn: () => workApi.getWorkHistories(condition)
+    queryFn: () => workApi.getWorkHistories(condition),
+    meta: quietMeta(options)
   })
 }
 

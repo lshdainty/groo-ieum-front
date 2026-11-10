@@ -12,7 +12,9 @@ import { ResultSection } from '@/shared/ds/result-section'
 import { Skeleton } from '@/shared/ds/skeleton'
 import { useSnackbar } from '@/shared/ds/snackbar'
 import { formatClock } from '@/shared/lib/date-text'
+import { DayRow } from '@/shared/ui/groo/day-row'
 import { PickerRow } from '@/shared/ui/groo/picker-row'
+import { TimeRow } from '@/shared/ui/groo/time-row'
 import { readWriteFailure } from '@/shared/ui/groo/write-error'
 import { usePermission, useUser } from '@/entities/session'
 import { useVacationTypesQuery } from '@/entities/type'
@@ -26,7 +28,6 @@ import { useUpdateEvent } from '@/features/calendar/lib/hooks/use-update-event'
 import { calendarTypes } from '@/features/calendar/model/types'
 import type { CreatingEvent } from '@/features/calendar/model/use-calendar-screen'
 import type { IEvent } from '@/features/calendar/model/interfaces'
-import { DayRow, TimeRow } from '@/features/calendar/ui/event-form-rows'
 
 interface IProps {
   open: boolean
@@ -309,11 +310,11 @@ export function EventFormDialog({ open, onClose, event, start, fixedUser, onDele
               {targetRow}
               {typeRow}
               {vacationRow}
-              <DayRow title={t('form.startDate')} value={values.startDate} onChange={setStartDate} />
-              <DayRow title={t('form.endDate')} value={values.endDate} onChange={(d) => set('endDate', d)} error={showErrors && errors.endDate ? t('form.endBeforeStart') : undefined} />
+              <DayRow title={t('form.startDate')} value={values.startDate} onChange={setStartDate} placeholder={t('form.datePlaceholder')} />
+              <DayRow title={t('form.endDate')} value={values.endDate} onChange={(d) => set('endDate', d)} placeholder={t('form.datePlaceholder')} error={showErrors && errors.endDate ? t('form.endBeforeStart') : undefined} />
               {timed && (
                 <>
-                  <TimeRow title={t('form.startTime')} value={values.startTime} onChange={(v) => set('startTime', v)} error={timeError} />
+                  <TimeRow title={t('form.startTime')} value={values.startTime} onChange={(v) => set('startTime', v)} placeholder={t('form.timePlaceholder')} minuteStep={30} error={timeError} />
                   <PickerRow title={t('form.endTime')} surfaceTitle={t('form.endTime')} value={endClock} readOnly />
                 </>
               )}

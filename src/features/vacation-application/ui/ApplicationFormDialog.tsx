@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 import { Avatar } from '@/shared/ds/avatar'
 import { Button } from '@/shared/ds/button'
 import { Callout } from '@/shared/ds/callout'
-import { DatePicker, dayKey, formatDateValue, parseDayKey } from '@/shared/ds/date-picker'
 import { ResponsiveDialog, ResponsiveDialogBody, ResponsiveDialogCancel, ResponsiveDialogContent, ResponsiveDialogFooter } from '@/shared/ds/dialog'
 import { Field } from '@/shared/ds/field'
 import { Input } from '@/shared/ds/input'
@@ -15,11 +14,12 @@ import { RadioSelectBox, RadioSelectBoxGroup } from '@/shared/ds/select-box'
 import { Skeleton } from '@/shared/ds/skeleton'
 import { useSnackbar } from '@/shared/ds/snackbar'
 import { Textarea } from '@/shared/ds/textarea'
-import { TimePicker, formatTimeValue, type TimeValue } from '@/shared/ds/time-picker'
 import { ConfirmDialog } from '@/shared/ui/confirm'
 import { splitGrantTime } from '@/shared/lib/groo/grant-time'
 import { GrantTimeField } from '@/shared/ui/groo/grant-time-field'
+import { DayRow } from '@/shared/ui/groo/day-row'
 import { PickerRow } from '@/shared/ui/groo/picker-row'
+import { TimeRow } from '@/shared/ui/groo/time-row'
 import { readWriteFailure } from '@/shared/ui/groo/write-error'
 import { useUser } from '@/entities/session'
 import { useUserApproversQuery } from '@/entities/user'
@@ -63,68 +63,6 @@ const durationText = (total: number, t: (k: string, o?: Record<string, unknown>)
   if (h > 0) return t('req.form.hoursValue', { count: h })
   if (m > 0) return t('req.form.minutesValue', { count: m })
   return t('req.form.hoursValue', { count: 0 })
-}
-
-/** 날짜 줄 칸 — 값은 "YYYY-MM-DD", 누르면 1280 미만 시트 · 이상 Popover 의 Date Picker + [완료] */
-const DayRow = ({ title, value, onChange, error, rowRef }: { title: string; value: string; onChange: (v: string) => void; error?: string; rowRef?: React.Ref<HTMLButtonElement> }) => {
-  const { t } = useTranslation('vacation')
-  const { t: tc } = useTranslation('common')
-  const [draft, setDraft] = useState<Date | undefined>(value ? parseDayKey(value) : undefined)
-  return (
-    <PickerRow
-      ref={rowRef}
-      title={title}
-      surfaceTitle={title}
-      value={value ? formatDateValue(parseDayKey(value), new Date()) : ''}
-      placeholder={t('req.form.datePlaceholder')}
-      errorMessage={error}
-      onOpen={() => setDraft(value ? parseDayKey(value) : undefined)}
-      pickerActions={({ close }) => (
-        <Button
-          disabled={!draft}
-          onClick={() => {
-            if (draft) onChange(dayKey(draft))
-            close()
-          }}
-        >
-          {tc('done')}
-        </Button>
-      )}
-    >
-      <DatePicker selection='single' visibleRange='month' aria-label={title} value={draft} onValueChange={setDraft} autoFocus />
-    </PickerRow>
-  )
-}
-
-/** 시각 줄 칸 — Time Picker 휠(분 간격 1 — 명시). 휠 시트는 끌어서 닫히지 않는다(닫기 · [완료] · Esc 로만) */
-const TimeRow = ({ title, value, onChange, error }: { title: string; value: TimeValue | null; onChange: (v: TimeValue) => void; error?: string }) => {
-  const { t } = useTranslation('vacation')
-  const { t: tc } = useTranslation('common')
-  const [draft, setDraft] = useState<TimeValue | undefined>(value ?? undefined)
-  return (
-    <PickerRow
-      title={title}
-      surfaceTitle={title}
-      value={value ? formatTimeValue(value) : ''}
-      placeholder={t('req.form.timePlaceholder')}
-      errorMessage={error}
-      dismissible={false}
-      onOpen={() => setDraft(value ?? undefined)}
-      pickerActions={({ close }) => (
-        <Button
-          onClick={() => {
-            const now = new Date()
-            onChange(draft ?? { hour: now.getHours(), minute: now.getMinutes() })
-            close()
-          }}
-        >
-          {tc('done')}
-        </Button>
-      )}
-    >
-      <TimePicker aria-label={title} value={draft} onValueChange={setDraft} minuteStep={1} autoFocus />
-    </PickerRow>
-  )
 }
 
 /**
@@ -310,14 +248,16 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
         />
       </Field>
       <div className='-mx-x6 flex flex-col' data-request-rows>
-        <DayRow title={overtime ? t('req.form.overtimeDay') : t('req.form.day')} value={values.day} onChange={(v) => set('day', v)} error={showErrors && errors.day ? t('req.form.dayRequired') : undefined} />
+        <DayRow title={overtime ? t('req.form.overtimeDay') : t('req.form.day')} value={values.day} onChange={(v) => set('day', v)} placeholder={t('req.form.datePlaceholder')} error={showErrors && errors.day ? t('req.form.dayRequired') : undefined} />
         {overtime && (
           <>
-            <TimeRow title={t('req.form.start')} value={values.start} onChange={(v) => set('start', v)} error={showErrors && errors.start ? t('req.form.startRequired') : undefined} />
+            <TimeRow title={t('req.form.start')} value={values.start} onChange={(v) => set('start', v)} placeholder={t('req.form.timePlaceholder')} minuteStep={1} error={showErrors && errors.start ? t('req.form.startRequired') : undefined} />
             <TimeRow
               title={t('req.form.end')}
               value={values.end}
               onChange={(v) => set('end', v)}
+              placeholder={t('req.form.timePlaceholder')}
+              minuteStep={1}
               error={showErrors && errors.end ? (errors.end === 'order' ? t('req.form.endAfterStart') : t('req.form.endRequired')) : undefined}
             />
             <List>

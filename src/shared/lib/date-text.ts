@@ -67,6 +67,17 @@ export const formatDayText = (value: DateInput, now: dayjs.Dayjs = dayjs()): str
   return `${sameYear ? '' : `${d.year()}년 `}${d.month() + 1}월 ${d.date()}일 (${WEEKDAYS[d.day()]})`
 }
 
+/** "10월 22일" — 요일 없이 달 · 일만(표 칸처럼 좁은 자리). 올해가 아니면 연도를 앞에 붙인다("2025년 12월 30일"). 영어 "Oct 22" */
+export const formatMonthDayText = (value: DateInput, now: dayjs.Dayjs = dayjs()): string => {
+  const d = dayjs(value)
+  if (!d.isValid()) return String(value)
+  const sameYear = d.year() === now.year()
+  if (english()) {
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', ...(sameYear ? {} : { year: 'numeric' }) }).format(d.toDate())
+  }
+  return `${sameYear ? '' : `${d.year()}년 `}${d.month() + 1}월 ${d.date()}일`
+}
+
 /** 범위의 끝 날짜 — 시작과 같은 해 · 달이면 그것을 뗀다("10월 8일 (목) ~ 9일 (금)"), 해가 다르면 해를 붙인다 */
 const formatEndDayText = (end: dayjs.Dayjs, start: dayjs.Dayjs): string => {
   if (english()) {
