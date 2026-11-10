@@ -1,4 +1,5 @@
 import type { WorkCodeResp, WorkGroupWithParts, WorkHistoryResp } from '@/entities/work'
+import { durationText } from '@/features/work-schedule/lib/schedule-format'
 import type { WorkRow } from '../model/types'
 
 export const rowOf = (r: WorkHistoryResp): WorkRow => ({
@@ -59,3 +60,7 @@ export const groupByDate = (rows: WorkRow[]): DateGroup[] => {
   }
   return groups
 }
+
+/** 소요 시간 글 — 정수 "6시간", 소수는 시 + 분 꼴("4.5" → "4시간 30분" · 영어 "4 hours 30 minutes"; 다른 화면의 시간 글과 같은 꼴). 시 · 분을 각각 복수 처리 */
+export const hoursText = (hours: number | string, t: (key: string, options?: Record<string, unknown>) => string): string =>
+  durationText(Math.round((Number(hours) || 0) * 60), t)

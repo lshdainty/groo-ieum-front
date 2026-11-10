@@ -5,7 +5,7 @@ import { Button } from '@/shared/ds/button'
 import { InfiniteListEnd } from '@/shared/ds/infinite-list'
 import { List, ListButtonItem, ListCheckGroup, ListCheckItem, ListHeader, ListItem } from '@/shared/ds/list'
 import { formatDayText } from '@/shared/lib/date-text'
-import { codePath, groupByDate, rowTitle } from '../lib/report-format'
+import { codePath, groupByDate, hoursText, rowTitle } from '../lib/report-format'
 import { useReportContext } from '../model/ReportContext'
 import type { WorkRow } from '../model/types'
 import type { RowHandlers } from './ReportTable'
@@ -30,7 +30,7 @@ export function ReportPhoneList({ rows, handlers }: { rows: WorkRow[]; handlers:
   const groups = groupByDate(visible)
 
   const detailOf = (row: WorkRow) => [row.managerName, [codePath(row), row.division?.work_code_name].filter(Boolean).join(' › ')].filter(Boolean).join(' · ')
-  const hours = (row: WorkRow) => <span className='text-t5 font-bold tabular-nums text-fg-neutral'>{t('rep.hoursValue', { count: row.hours })}</span>
+  const hours = (row: WorkRow) => <span className='text-t5 font-bold tabular-nums text-fg-neutral'>{hoursText(row.hours, t)}</span>
   const toggle = (id: number, on: boolean) => setSelected(on ? [...selected, id] : selected.filter((x) => x !== id))
 
   return (

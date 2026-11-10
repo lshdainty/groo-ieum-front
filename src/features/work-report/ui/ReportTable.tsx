@@ -21,7 +21,7 @@ import {
 import { TablePagination, type TablePaginationValue } from '@/shared/ds/table-pagination'
 import { formatDayText, formatMonthDayText } from '@/shared/lib/date-text'
 import type { WorkCodeResp, WorkGroupWithParts } from '@/entities/work'
-import { codePath, hasRowActions, type RowActions } from '../lib/report-format'
+import { codePath, hasRowActions, hoursText, type RowActions } from '../lib/report-format'
 import type { DraftErrors } from '../lib/report-form'
 import { useReportContext } from '../model/ReportContext'
 import type { WorkRow } from '../model/types'
@@ -174,7 +174,7 @@ export function ReportTable({
                 </TableCell>
               )}
               <TableCell align='end' className='whitespace-nowrap py-x3'>
-                {t('rep.hoursValue', { count: row.hours })}
+                {hoursText(row.hours, t)}
               </TableCell>
               <TableCell className='min-w-[160px] whitespace-normal py-x3 [overflow-wrap:anywhere] [word-break:keep-all]'>{row.content}</TableCell>
               {anyActions &&
