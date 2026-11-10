@@ -87,6 +87,9 @@ export interface VacationUsageInfo {
   vacation_usage_desc: string
   vacation_time_type: string
   vacation_time_type_name: string
+  /** 쓴 휴가 종류(연차 · 보상휴가 …) — 서버 25-0 이 싣는다. 아직 없으면 undefined(옛 서버) */
+  vacation_type?: string | null
+  vacation_type_name?: string | null
   used_time: number
   used_time_str: string
   start_date: string

@@ -77,3 +77,7 @@ export {
   usePostRejectVacationMutation,
   usePostCancelVacationRequestMutation,
 } from '@/entities/vacation/api/vacationQueries'
+
+// UI
+export { VacationMetrics } from './ui/VacationMetrics'
+export { deltaOf, metricsOf, type Metric } from './model/metrics'

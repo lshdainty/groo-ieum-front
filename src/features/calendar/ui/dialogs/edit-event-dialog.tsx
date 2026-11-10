@@ -69,6 +69,10 @@ interface EditEventDialogProps {
   event: IEvent;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** 바닥 왼쪽 [삭제] — 폰 휴가 기록 줄이 수정 폼으로 들어올 때(25-3 이 폼을 다시 짜면 그쪽 규칙을 따른다) */
+  onDelete?: () => void;
+  /** 휴가 종류만 고르게 한다 — 휴가 기록에서 연 폼(일정 종류로 바꾸면 휴가 기록 id 로 일정 수정이 나간다) */
+  vacationOnly?: boolean;
 }
 
 export const EditEventDialog: React.FC<EditEventDialogProps> = ({
@@ -76,6 +80,8 @@ export const EditEventDialog: React.FC<EditEventDialogProps> = ({
   event,
   open: propOpen,
   onOpenChange,
+  onDelete,
+  vacationOnly = false,
 }) => {
   const { t } = useTranslation('calendar');
   const { t: tc } = useTranslation('common');
@@ -238,7 +244,7 @@ export const EditEventDialog: React.FC<EditEventDialogProps> = ({
                             })}
                           </SelectGroup>
                         </Activity>
-                        <Activity mode={canUseSchedule || currentEventType === 'schedule' ? 'visible' : 'hidden'}>
+                        <Activity mode={!vacationOnly && (canUseSchedule || currentEventType === 'schedule') ? 'visible' : 'hidden'}>
                           <SelectGroup>
                             <SelectLabel>{t('addEvent.schedule')}</SelectLabel>
                             {calendarTypes.filter(c => c.type === 'schedule').map(ct => {
@@ -409,6 +415,11 @@ export const EditEventDialog: React.FC<EditEventDialogProps> = ({
             )}
           </div>
           <DialogFooter>
+            {onDelete && (
+              <Button variant='ghost' type='button' className='text-destructive hover:text-destructive min-[40rem]:mr-auto' onClick={onDelete} data-edit-delete>
+                {tc('delete')}
+              </Button>
+            )}
             <DialogClose asChild>
               <Button variant='outline' type="button">{tc('cancel')}</Button>
             </DialogClose>

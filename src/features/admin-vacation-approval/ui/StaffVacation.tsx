@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import dayjs from 'dayjs'
 
 import { Button } from '@/shared/ds/button'
 import { ResultSection } from '@/shared/ds/result-section'
@@ -9,21 +8,12 @@ import { PersonPicker, type PersonOption } from '@/shared/ui/groo/person-picker'
 import { useGrantStatusTypesQuery } from '@/entities/type'
 import { usePermission } from '@/entities/session'
 import { useUsersQuery } from '@/entities/user'
-import {
-  useAvailableVacationsQuery,
-  useUserMonthlyVacationStatsQuery,
-  useUserRequestedVacationsQuery,
-  useUserVacationHistoryQuery,
-  useUserVacationStatsQuery,
-} from '@/entities/vacation'
+import { useUserRequestedVacationsQuery } from '@/entities/vacation'
 import { UserInfoCard } from '@/features/user-profile/ui/UserInfoCard'
 import { AddEventDialog } from '@/features/calendar/ui/dialogs/add-event-dialog'
 import { ApplicationTable } from '@/features/vacation-application/ui/ApplicationTable'
 import { VacationGrantDialog } from '@/features/vacation-application/ui/VacationGrantDialog'
-import { MonthVacationStatsCard } from '@/features/vacation-history/ui/MonthVacationStatsCard'
-import { VacationHistoryTable } from '@/features/vacation-history/ui/VacationHistoryTable'
-import { VacationStatsCard } from '@/features/vacation-history/ui/VacationStatsCard'
-import { VacationTypeStatsCard } from '@/features/vacation-history/ui/VacationTypeStatsCard'
+import { VacationSections } from '@/features/vacation-history/ui/VacationSections'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useVacationContext } from '../model/VacationContext'
 
@@ -100,8 +90,12 @@ export function StaffVacation() {
         <div className={desktop ? 'flex items-center gap-x2' : 'grid grid-cols-2 gap-x2 [&>*]:w-full'}>{actions}</div>
       </div>
       {selected && (
-        <div className={desktop ? 'flex min-w-0 flex-col gap-x6' : 'flex min-w-0 flex-col gap-x6 overflow-x-auto px-x4'} data-staff-cards>
-          {selectedUser && <UserInfoCard value={[selectedUser]} />}
+        <div className='flex min-w-0 flex-col gap-x6' data-staff-cards>
+          {selectedUser && (
+            <div className={desktop ? undefined : 'px-x4'}>
+              <UserInfoCard value={[selectedUser]} />
+            </div>
+          )}
           <StaffCards userId={selected.id} year={selectedYear} name={selected.name} />
         </div>
       )}
@@ -116,36 +110,25 @@ export function StaffVacation() {
   )
 }
 
-/** 고른 직원의 카드들 — 지금 부품 그대로(H-C 가 모양을 정하면 바꾼다) */
+/** 고른 직원의 카드들 — 휴가 현황 구역(휴가 현황 화면과 같은 부품)과 신청 내역(옛 부품 — 25-2 가 바꾼다) */
 function StaffCards({ userId, year, name }: { userId: string; year: string; name: string }) {
   const { t } = useTranslation('vacation')
-  const baseDate = dayjs().year(parseInt(year)).format('YYYY-MM-DDT23:59:59')
-  const { data: vacationTypes } = useAvailableVacationsQuery(userId, baseDate)
-  const { data: monthStats } = useUserMonthlyVacationStatsQuery(userId, year)
-  const { data: histories } = useUserVacationHistoryQuery(userId, parseInt(year))
-  const { data: vacationStats } = useUserVacationStatsQuery(userId, baseDate)
   const { data: requests = [] } = useUserRequestedVacationsQuery(userId, parseInt(year))
   const { data: grantStatusTypes = [] } = useGrantStatusTypesQuery()
+  const desktop = useDesktop()
   return (
     <>
-      <VacationStatsCard value={vacationStats} />
-      <MonthVacationStatsCard value={monthStats || []} className='h-full' />
-      <div className='grid grid-cols-1 gap-6 min-[80rem]:grid-cols-3'>
-        <div className='flex flex-col min-[80rem]:col-span-1'>
-          <VacationTypeStatsCard value={vacationTypes} className='h-full' />
-        </div>
-        <div className='flex flex-col min-[80rem]:col-span-2'>
-          <VacationHistoryTable value={histories || { grants: [], usages: [] }} canAdd={false} />
-        </div>
+      <VacationSections userId={userId} year={year} owner={{ id: userId, name }} />
+      <div className={desktop ? undefined : 'px-x4'}>
+        <ApplicationTable
+          title={t('staff.requestsTitle')}
+          vacationRequests={requests}
+          grantStatusTypes={grantStatusTypes}
+          showCancelButton={false}
+          emptyTitle={t('staff.noRequestsTitle', { name })}
+          emptyDescription={t('staff.noRequestsDescription')}
+        />
       </div>
-      <ApplicationTable
-        title={t('staff.requestsTitle')}
-        vacationRequests={requests}
-        grantStatusTypes={grantStatusTypes}
-        showCancelButton={false}
-        emptyTitle={t('staff.noRequestsTitle', { name })}
-        emptyDescription={t('staff.noRequestsDescription')}
-      />
     </>
   )
 }

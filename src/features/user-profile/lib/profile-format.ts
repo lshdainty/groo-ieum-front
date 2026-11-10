@@ -1,14 +1,7 @@
-/** 유연근무시간 "9 ~ 6" → "09:00 ~ 18:00"(저녁 시각은 12 를 더한다) — 형식이 다르면 받은 글 그대로 */
-export const formatWorkTime = (time: string | undefined): string => {
-  if (!time) return ''
-  const parts = time.split(' ~ ')
-  if (parts.length !== 2) return time
-  const [start, end] = parts.map((p) => p.trim())
-  const formattedStart = `${start.padStart(2, '0')}:00`
-  const endHour = parseInt(end, 10)
-  const formattedEndHour = endHour < 12 ? endHour + 12 : endHour
-  return `${formattedStart} ~ ${formattedEndHour}:00`
-}
+import { formatWorkTime as formatWorkTimeText } from '@/shared/lib/work-time'
+
+/** 유연근무시간 "9 ~ 18" → "오전 9:00 ~ 오후 6:00"(12시간) — 비었으면 빈 글, 형식이 다르면 받은 글 그대로 */
+export const formatWorkTime = (time: string | undefined): string => (time ? formatWorkTimeText(time) : '')
 
 /** 생년월일 "1990-04-12" → [1990, 4, 12] — 달 · 일 앞 0 을 떼어 날짜 글 규칙을 따른다. 형식이 다르면 null */
 export const parseBirth = (birth: string | undefined): { year: number; month: number; day: number } | null => {
