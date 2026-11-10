@@ -10,6 +10,9 @@ export type TCalendarType = {
   color: TEventColor
 }
 
+/** 일정이 휴가 사용 기록인지 일정(스케줄)인지 — 서버 응답 `domain_type` 이 정한다. 둘의 id 는 서로 다른 표의 행 번호라 겹칠 수 있다 */
+export type TEventKind = 'vacation' | 'schedule'
+
 export type TBadgeVariant = 'dot' | 'colored' | 'mixed';
 export type TWorkingHours = { [key: number]: { from: number; to: number } };
 export type TVisibleHours = { from: number; to: number };
@@ -152,3 +155,31 @@ export const calendarTypes: TCalendarType[] = [
     color: 'teal'
   }
 ]
+
+/** 종류 색 이름 → 차트 색 이름(v110 · 바탕 `chart-{색}-weak` · 글 `chart-{색}-contrast`). 차트 팔레트에 없는 purple · teal 은 가까운 색으로 읽는다 */
+export const CHART_HUE: Record<TEventColor, string> = {
+  blue: 'blue',
+  green: 'green',
+  red: 'red',
+  yellow: 'yellow',
+  purple: 'violet',
+  orange: 'orange',
+  pink: 'pink',
+  gray: 'gray',
+  teal: 'indigo',
+}
+
+/** 시각 종류가 쓰는 시간(분) — 끝 시각은 시작에서 셈한다(서버는 끝 시각을 그대로 받는다). 종일 종류 · 알 수 없는 종류는 없음 */
+export const TIMED_MINUTES: Record<string, number> = {
+  MORNINGOFF: 240,
+  AFTERNOONOFF: 240,
+  HEALTHCHECKHALF: 240,
+  DEFENSEHALF: 240,
+  HALFTIMEOFF: 30,
+  ONETIMEOFF: 60,
+  TWOTIMEOFF: 120,
+  THREETIMEOFF: 180,
+  FIVETIMEOFF: 300,
+  SIXTIMEOFF: 360,
+  SEVENTIMEOFF: 420,
+}

@@ -164,7 +164,7 @@ export const EditEventDialog: React.FC<EditEventDialogProps> = ({
     };
   }, [event.vacationType, vacations?.vacations, vacationTypes]);
 
-  const { updateEvent, isPending } = useUpdateEvent();
+  const { updateFromForm, isPending } = useUpdateEvent();
 
   const onSubmit = (values: EditEventFormValues) => {
     // 이벤트 소유자의 근무타입 조회
@@ -172,8 +172,9 @@ export const EditEventDialog: React.FC<EditEventDialogProps> = ({
     const userWorkTime = targetUser?.user_work_time;
 
     // 이벤트 소유자의 ID 사용 (VACATION:MANAGE 권한이 있으면 다른 유저 이벤트 수정 가능)
-    updateEvent({
+    updateFromForm({
       eventId: event.id,
+      kind: event.kind,
       userId: event.user.id,
       calendarType: values.calendarType,
       vacationType: values.vacationType,
@@ -183,9 +184,7 @@ export const EditEventDialog: React.FC<EditEventDialogProps> = ({
       startHour: values.startHour,
       startMinute: values.startMinute,
       userWorkTime,
-    }, {
-      onSuccess: () => setOpen(false)
-    });
+    }).then(() => setOpen(false)).catch(() => undefined);
   }
 
   useEffect(() => {
@@ -227,7 +226,7 @@ export const EditEventDialog: React.FC<EditEventDialogProps> = ({
                         <SelectValue placeholder={t('addEvent.calendarType')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <Activity mode={canUseVacation || currentEventType === 'vacation' ? 'visible' : 'hidden'}>
+                        <Activity mode={currentEventType === 'vacation' ? 'visible' : 'hidden'}>
                           <SelectGroup>
                             <SelectLabel>{t('addEvent.vacation')}</SelectLabel>
                             {calendarTypes.filter(c => c.type === 'vacation').map(ct => {
@@ -244,7 +243,7 @@ export const EditEventDialog: React.FC<EditEventDialogProps> = ({
                             })}
                           </SelectGroup>
                         </Activity>
-                        <Activity mode={!vacationOnly && (canUseSchedule || currentEventType === 'schedule') ? 'visible' : 'hidden'}>
+                        <Activity mode={!vacationOnly && currentEventType === 'schedule' ? 'visible' : 'hidden'}>
                           <SelectGroup>
                             <SelectLabel>{t('addEvent.schedule')}</SelectLabel>
                             {calendarTypes.filter(c => c.type === 'schedule').map(ct => {

@@ -8,9 +8,9 @@ export const useDeleteEvent = () => {
 
   const isPending = isVacationPending || isSchedulePending;
 
-  // 실패하면 던진다 — 확인창(ConfirmDialog)이 닫히고 실패 알림이 뜬다
+  // 실패하면 던진다 — 확인창(ConfirmDialog)이 닫히고 실패 알림이 뜬다. 어느 표의 번호인지는 기록의 kind 가 정한다
   const deleteEvent = (event: IEvent): Promise<unknown> =>
-    event.type.type === 'vacation' ? deleteVacation(event.id) : deleteSchedule(event.id);
+    event.kind === 'vacation' ? deleteVacation(event.id) : deleteSchedule(event.id);
 
   return { deleteEvent, isPending };
 };

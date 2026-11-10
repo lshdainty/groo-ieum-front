@@ -1,148 +1,33 @@
 import { usePostScheduleMutation } from '@/entities/schedule'
 import { usePostUseVacationMutation } from '@/entities/vacation'
-import { calendarTypes } from '@/features/calendar/model/types'
-import dayjs from 'dayjs'
+import { eventRange, kindOfType, type EventFormPayloadInput } from '@/features/calendar/lib/event-payload'
 
-export interface AddEventParams {
-  userId: string
-  calendarType: string
-  vacationType?: string
-  desc?: string
-  startDate: string
-  endDate: string
-  startHour?: string
-  startMinute?: string
-  userWorkTime?: string
-}
-
-// 오후반 여부 확인 (13시 출근자)
-const isAfternoonShift = (workTime?: string): boolean => {
-  return workTime === '13 ~ 21'
-}
-
-// 휴식시간 포함하여 종료시간 계산
-const calculateEndHourWithBreak = (
-  startHour: number,
-  plusHour: number,
-  workTime?: string
-): number => {
-  const endHour = startHour + plusHour
-
-  if (isAfternoonShift(workTime)) {
-    // 오후반: 저녁시간(18~19) 고려
-    // 시작시간이 18시 이전이고 종료시간이 18시를 넘는 경우만 +1
-    if (startHour < 18 && endHour > 18) {
-      return endHour + 1
-    }
-  } else {
-    // 오전반: 점심시간(12~13) 고려
-    // 시작시간이 12시 이전이고 종료시간이 12시를 넘는 경우만 +1
-    if (startHour < 12 && endHour > 12) {
-      return endHour + 1
-    }
-  }
-
-  return endHour
-}
-
-interface UseAddEventOptions {
-  onSuccess?: () => void
-}
+export type AddEventParams = EventFormPayloadInput
 
 export const useAddEvent = () => {
-  const { mutate: postUseVacation, isPending: isVacationPending } = usePostUseVacationMutation()
-  const { mutate: postSchedule, isPending: isSchedulePending } = usePostScheduleMutation()
+  const { mutateAsync: postUseVacation, isPending: isVacationPending } = usePostUseVacationMutation()
+  const { mutateAsync: postSchedule, isPending: isSchedulePending } = usePostScheduleMutation()
 
   const isPending = isVacationPending || isSchedulePending
 
-  const addEvent = (params: AddEventParams, options?: UseAddEventOptions) => {
-    const {
-      userId,
-      calendarType,
-      vacationType,
-      desc,
-      startDate,
-      endDate,
-      startHour,
-      startMinute,
-      userWorkTime
-    } = params
-
-    const selectedCalendar = calendarTypes.find(c => c.id === calendarType)
-    const isVacation = selectedCalendar?.type === 'vacation'
-    const isDate = selectedCalendar?.isDate
-
-    const format = 'YYYY-MM-DDTHH:mm:ss'
-    const payload: any = {
-      user_id: userId,
-    }
-
-    // 날짜 계산 로직
-    if (isDate) {
-      // 종일 이벤트
-      payload.start_date = dayjs(startDate).startOf('day').format(format)
-      payload.end_date = dayjs(endDate).endOf('day').format(format)
-    } else {
-      // 시간 이벤트 - calendarType에 따라 종료 시간 계산
-      let plusHour = 0
-      switch(calendarType) {
-        case 'MORNINGOFF':
-        case 'AFTERNOONOFF':
-        case 'HEALTHCHECKHALF':
-        case 'DEFENSEHALF':
-          plusHour = 4
-          break
-        case 'ONETIMEOFF':
-          plusHour = 1
-          break
-        case 'TWOTIMEOFF':
-          plusHour = 2
-          break
-        case 'THREETIMEOFF':
-          plusHour = 3
-          break
-        case 'FIVETIMEOFF':
-          plusHour = 5
-          break
-        case 'SIXTIMEOFF':
-          plusHour = 6
-          break
-        case 'SEVENTIMEOFF':
-          plusHour = 7
-          break
-        default:
-          break
-      }
-
-      const endHour = calculateEndHourWithBreak(Number(startHour), plusHour, userWorkTime)
-
-      payload.start_date = dayjs(startDate)
-        .hour(Number(startHour))
-        .minute(Number(startMinute))
-        .second(0)
-        .format(format)
-      payload.end_date = dayjs(endDate)
-        .hour(endHour)
-        .minute(Number(startMinute))
-        .second(0)
-        .format(format)
-    }
-
-    // API 호출 - 휴가 vs 스케줄
-    if (isVacation) {
-      payload.vacation_type = vacationType
-      payload.vacation_time_type = calendarType
-      payload.vacation_desc = desc
-      postUseVacation(payload, {
-        onSuccess: options?.onSuccess
-      })
-    } else {
-      payload.schedule_type = calendarType
-      payload.schedule_desc = desc
-      postSchedule(payload, {
-        onSuccess: options?.onSuccess
+  /** 새 기록 — 종류가 휴가면 휴가 사용, 일정이면 일정. 실패하면 던진다(폼이 자기 자리에서 알린다) */
+  const addEvent = (params: AddEventParams): Promise<unknown> => {
+    const range = eventRange(params)
+    if (kindOfType(params.calendarType) === 'vacation') {
+      return postUseVacation({
+        user_id: params.userId,
+        ...range,
+        vacation_type: params.vacationType ?? '',
+        vacation_time_type: params.calendarType,
+        vacation_desc: params.desc ?? '',
       })
     }
+    return postSchedule({
+      user_id: params.userId,
+      ...range,
+      schedule_type: params.calendarType,
+      schedule_desc: params.desc ?? '',
+    })
   }
 
   return { addEvent, isPending }

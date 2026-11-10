@@ -194,9 +194,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
       startHour: values.startHour,
       startMinute: values.startMinute,
       userWorkTime,
-    }, {
-      onSuccess: () => setOpen(false)
-    });
+    }).then(() => setOpen(false)).catch(() => undefined);
   }
 
   useEffect(() => {

@@ -63,6 +63,7 @@ export function VacationHistoryTable({
     if (!stillUpcoming(u)) return
     setEditing({
       id: u.vacation_usage_id,
+      kind: 'vacation',
       type: calendarTypes.find((c) => c.id === u.vacation_time_type) ?? calendarTypes.find((c) => c.type === 'vacation') ?? calendarTypes[0],
       title: u.vacation_usage_desc,
       description: u.vacation_usage_desc,
