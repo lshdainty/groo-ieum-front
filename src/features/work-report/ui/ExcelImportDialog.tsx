@@ -1,499 +1,232 @@
-import { Button } from '@/shared/ui/shadcn/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/shadcn/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/shadcn/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/ui/shadcn/table';
-import { Textarea } from '@/shared/ui/shadcn/textarea';
-import { GetUsersResp } from '@/entities/user';
-import { WorkCodeResp, WorkGroupWithParts } from '@/entities/work';
-import { cn } from '@/shared/lib'
-import { Spinner } from '@/shared/ui/shadcn/spinner';
-import { AlertCircle, Check, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { toast } from '@/shared/ui/shadcn/sonner';
-import { useTranslation } from 'react-i18next';
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-interface ExcelImportDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  workGroups: WorkGroupWithParts[];
-  workDivision: WorkCodeResp[];
-  users: GetUsersResp[];
-  onRegister: (data: any[]) => Promise<void>;
-  isRegistering: boolean;
-}
+import { Badge } from '@/shared/ds/badge'
+import { Button } from '@/shared/ds/button'
+import { Callout } from '@/shared/ds/callout'
+import { ResponsiveDialog, ResponsiveDialogBody, ResponsiveDialogCancel, ResponsiveDialogContent, ResponsiveDialogFooter } from '@/shared/ds/dialog'
+import { Field } from '@/shared/ds/field'
+import { List, ListItem } from '@/shared/ds/list'
+import { Select, SelectItem } from '@/shared/ds/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ds/table'
+import { Textarea } from '@/shared/ds/textarea'
+import { useSnackbar } from '@/shared/ds/snackbar'
+import { readWriteFailure } from '@/shared/ui/groo/write-error'
+import type { GetUsersResp } from '@/entities/user'
+import type { CreateWorkHistoryReq, WorkCodeResp, WorkGroupWithParts } from '@/entities/work'
+import { useDesktop } from '@/widgets/layout/lib/use-desktop'
+import { importPayload, parseImportRows, type ImportRow } from '../lib/excel-import'
 
-interface ParsedRow {
-  id: number;
-  date: string;
-  manager_id: string;
-  work_group_name: string;
-  work_part_name: string;
-  work_division_name: string;
-  hours: string;
-  content: string;
-  isValid: boolean;
-  errors: { [key: string]: string };
-  // Mapped codes
-  work_group_code?: string;
-  work_part_code?: string;
-  work_division_code?: string;
-}
+const WORD = '[overflow-wrap:break-word] [word-break:keep-all]'
 
-const ExcelImportDialog = ({
+/**
+ * 엑셀로 가져오기(I-25 H 45 · Q1 사용자 결정 11-10) — 1280 이상 대화상자 800 · 미만 시트. 3단계: ① 붙여 넣기 → ② 확인하기 → ③ 등록.
+ * 확인 단계는 줄마다 상태(오류 · 확인)와 고칠 것을 보인다 — 오류가 남으면 [N줄 등록] 은 막힌다(줄을 고치려면 이전 단계에서 글을 고쳐 다시 확인).
+ * 담당자: `WORK:MANAGE` 는 파일의 이름으로 사람을 찾고, 없으면 담당자는 나로 고정이라 **파일에 남의 이름이 있으면 그 줄을 오류로 보인다**
+ * (서버가 남의 이름으로 만들기를 거절하고, 일괄은 한 줄이라도 걸리면 전체를 거절하므로 화면이 올리기 전에 막는다).
+ * 등록 실패는 대화상자 맨 위 Callout(폼이 열린 흐름) — 고쳐서 다시 등록한다.
+ */
+export function ExcelImportDialog({
   open,
-  onOpenChange,
-  workGroups,
-  workDivision,
+  onClose,
+  groups,
+  divisions,
   users,
+  me,
+  canManage,
   onRegister,
-  isRegistering,
-}: ExcelImportDialogProps) => {
-  const { t } = useTranslation('work');
-  const { t: tc } = useTranslation('common');
-  const [step, setStep] = useState<'input' | 'preview'>('input');
-  const [inputText, setInputText] = useState('');
-  const [parsedData, setParsedData] = useState<ParsedRow[]>([]);
-  const [validationErrorCount, setValidationErrorCount] = useState(0);
-  const [delimiter, setDelimiter] = useState<string>('\t');
+  registering,
+}: {
+  open: boolean
+  onClose: () => void
+  groups: WorkGroupWithParts[]
+  divisions: WorkCodeResp[]
+  users: { data: GetUsersResp[]; failed: boolean; fetching: boolean; refetch: () => void }
+  me: { id: string; name: string }
+  canManage: boolean
+  onRegister: (rows: CreateWorkHistoryReq[]) => Promise<unknown>
+  registering: boolean
+}) {
+  const { t } = useTranslation('work')
+  const { t: tc } = useTranslation('common')
+  const snackbar = useSnackbar()
+  const desktop = useDesktop()
+  const [step, setStep] = useState<'input' | 'preview'>('input')
+  const [text, setText] = useState('')
+  const [delimiter, setDelimiter] = useState<string>('\t')
+  const [rows, setRows] = useState<ImportRow[]>([])
+  const [empty, setEmpty] = useState(false)
+  const [failureKey, setFailureKey] = useState<string | null>(null)
 
-  // Reset state when dialog opens/closes
-  useEffect(() => {
-    if (open) {
-      setStep('input');
-      setInputText('');
-      setParsedData([]);
-      setValidationErrorCount(0);
-      setDelimiter('\t');
+  const usersBlocked = canManage && users.failed
+  const errorCount = rows.filter((r) => r.errors.length > 0).length
+
+  const verify = () => {
+    const parsed = parseImportRows(text, delimiter, { groups, divisions, users: users.data, me, canManage })
+    if (parsed.length === 0) {
+      setEmpty(true)
+      return
     }
-  }, [open]);
+    setEmpty(false)
+    setRows(parsed)
+    setStep('preview')
+  }
 
-  const validateRow = (row: ParsedRow): ParsedRow => {
-    const errors: { [key: string]: string } = {};
-    let isValid = true;
-
-    // Validate Date (Simple regex YYYY-MM-DD)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(row.date)) {
-      errors.date = t('excel.invalidDate');
-      isValid = false;
+  const register = async () => {
+    if (errorCount > 0 || registering) return
+    setFailureKey(null)
+    try {
+      await onRegister(importPayload(rows))
+      snackbar.show({ message: t('rep.xRegistered', { count: rows.length }), tone: 'positive' })
+      onClose()
+    } catch (error) {
+      setFailureKey(readWriteFailure(error).key ?? 'failure.write')
     }
+  }
 
-    // Validate User (Name -> ID mapping happens before validation, so we check manager_id)
-    if (!row.manager_id) {
-      errors.manager_id = t('excel.userNotFound');
-      isValid = false;
-    }
-
-    // Validate Codes
-    // Find Group Code
-    // Note: We use the names for initial validation from text, but codes for re-validation
-    let groupCode = workGroups.find(g => g.work_code === row.work_group_code);
-    if (!groupCode) {
-        // Fallback to name search if code is missing (initial parse)
-        groupCode = workGroups.find(g => g.work_code_name === row.work_group_name);
-    }
-
-    if (!groupCode) {
-      errors.work_group_name = t('excel.invalidWorkGroup');
-      isValid = false;
-    }
-
-    // Find Part Code
-    let partCode: WorkCodeResp | undefined;
-    if (groupCode) {
-       // Check if the part exists in the group's labels -> parts list
-       const allParts = groupCode.labels.flatMap(l => l.parts);
-       partCode = allParts.find(p => p.work_code === row.work_part_code);
-       if (!partCode) {
-           partCode = allParts.find(p => p.work_code_name === row.work_part_name);
-       }
-    }
-
-    if (!partCode) {
-       errors.work_part_name = t('excel.invalidWorkPart');
-       isValid = false;
-    }
-
-    // Find Division Code
-    let divisionCode = workDivision.find(d => d.work_code === row.work_division_code);
-    if (!divisionCode) {
-        divisionCode = workDivision.find(d => d.work_code_name === row.work_division_name);
-    }
-
-    if (!divisionCode) {
-      errors.work_division_name = t('excel.invalidWorkDivision');
-      isValid = false;
-    }
-
-    return {
-        ...row,
-        isValid,
-        errors,
-        work_group_code: groupCode?.work_code,
-        work_group_name: groupCode?.work_code_name || row.work_group_name,
-        work_part_code: partCode?.work_code,
-        work_part_name: partCode?.work_code_name || row.work_part_name,
-        work_division_code: divisionCode?.work_code,
-        work_division_name: divisionCode?.work_code_name || row.work_division_name,
-    };
-  };
-
-  const parseAndValidate = () => {
-    if (!inputText.trim()) {
-      toast.error(t('excel.enterData'));
-      return;
-    }
-
-    const rows = inputText.trim().split('\n');
-    const parsed: ParsedRow[] = [];
-    let errorCount = 0;
-
-    rows.forEach((row, index) => {
-      // Use selected delimiter
-      const columns = row.split(delimiter);
-      
-      const date = columns[0]?.trim() || '';
-      const userName = columns[1]?.trim() || ''; // 2nd column is User Name now
-      const groupName = columns[2]?.trim() || '';
-      const partName = columns[3]?.trim() || '';
-      const divisionName = columns[4]?.trim() || '';
-      const hours = columns[5]?.trim() || '';
-      const content = columns[6]?.trim() || '';
-
-      // Find User ID by Name
-      const user = users.find(u => u.user_name === userName);
-      const managerId = user ? user.user_id : '';
-
-      let parsedRow: ParsedRow = {
-        id: index,
-        date,
-        manager_id: managerId, // Set ID if found
-        work_group_name: groupName,
-        work_part_name: partName,
-        work_division_name: divisionName,
-        hours,
-        content,
-        isValid: true,
-        errors: {},
-      };
-
-      parsedRow = validateRow(parsedRow);
-
-      if (!parsedRow.isValid) errorCount++;
-      parsed.push(parsedRow);
-    });
-
-    setParsedData(parsed);
-    setValidationErrorCount(errorCount);
-    setStep('preview');
-  };
-
-  const handleRevalidate = () => {
-      let errorCount = 0;
-      const revalidatedData = parsedData.map(row => {
-          const validated = validateRow(row);
-          if (!validated.isValid) errorCount++;
-          return validated;
-      });
-      setParsedData(revalidatedData);
-      setValidationErrorCount(errorCount);
-      toast.success(t('excel.validationComplete'));
-  };
-
-  const handleCellChange = (id: number, field: keyof ParsedRow, value: string) => {
-    setParsedData(prev => prev.map(row => {
-      if (row.id !== id) return row;
-      
-      // Update field
-      const updatedRow = { ...row, [field]: value };
-      
-      // Re-validate this row
-      return validateRow(updatedRow);
-    }));
-  };
-
-  // Handle Select Change for Codes
-  const handleCodeChange = (id: number, type: 'group' | 'part' | 'division', code: string) => {
-    setParsedData(prev => prev.map(row => {
-      if (row.id !== id) return row;
-
-      let updatedRow = { ...row };
-
-      if (type === 'group') {
-        const group = workGroups.find(g => g.work_code === code);
-        updatedRow.work_group_code = code;
-        updatedRow.work_group_name = group?.work_code_name || '';
-        // Reset part when group changes
-        updatedRow.work_part_code = undefined;
-        updatedRow.work_part_name = '';
-      } else if (type === 'part') {
-        // Find part in the current group's labels -> parts
-        const currentGroup = workGroups.find(g => g.work_code === updatedRow.work_group_code);
-        const allParts = currentGroup?.labels.flatMap(l => l.parts) || [];
-        const part = allParts.find((p: WorkCodeResp) => p.work_code === code);
-        updatedRow.work_part_code = code;
-        updatedRow.work_part_name = part?.work_code_name || '';
-      } else if (type === 'division') {
-        const division = workDivision.find(d => d.work_code === code);
-        updatedRow.work_division_code = code;
-        updatedRow.work_division_name = division?.work_code_name || '';
-      }
-
-      // Re-validate
-      return validateRow(updatedRow);
-    }));
-  };
-
-  const handleDeleteRow = (id: number) => {
-    setParsedData(prev => prev.filter(row => row.id !== id));
-  };
-
-  // Update error count when parsedData changes
-  useEffect(() => {
-    const count = parsedData.filter(row => !row.isValid).length;
-    setValidationErrorCount(count);
-  }, [parsedData]);
-
-  const handleRegister = async () => {
-    if (validationErrorCount > 0) {
-      toast.error(t('excel.fixErrors'));
-      return;
-    }
-
-    const payload = parsedData.map(row => ({
-      work_date: row.date,
-      work_user_id: row.manager_id,
-      work_group_code: row.work_group_code!,
-      work_part_code: row.work_part_code!,
-      work_class_code: row.work_division_code!,
-      work_hour: Number(row.hours) || 0,
-      work_content: row.content,
-    }));
-
-    await onRegister(payload);
-    onOpenChange(false);
-  };
+  const errorText = (r: ImportRow) => r.errors.map((k) => t(`rep.${k}`)).join(' · ')
+  const statusBadge = (r: ImportRow) => (
+    <Badge tone={r.errors.length > 0 ? 'critical' : 'positive'} className='whitespace-nowrap'>
+      {r.errors.length > 0 ? t('rep.xBadgeError') : t('rep.xBadgeOk')}
+    </Badge>
+  )
+  const drop = (id: number) => setRows((prev) => prev.filter((r) => r.id !== id))
+  const dropButton = (r: ImportRow) => (
+    <Button variant='ghost' size='small' aria-label={t('rep.xDropRow', { date: r.date, name: r.userName })} onClick={() => drop(r.id)} data-import-drop>
+      {t('rep.xDrop')}
+    </Button>
+  )
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='max-w-7xl max-h-[90vh] flex flex-col'>
-        <DialogHeader>
-          <DialogTitle>{t('excel.title')}</DialogTitle>
-          <DialogDescription>
-            {step === 'input'
-              ? t('excel.inputDesc', { comma: ',' })
-              : t('excel.previewDesc')}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className='flex-1 overflow-hidden p-1'>
-          {step === 'input' ? (
-            <div className='flex flex-col h-[60vh] gap-2'>
-              <div className='flex items-center gap-2'>
-                <span className='text-sm font-medium'>{t('excel.delimiterLabel')}</span>
-                <Select value={delimiter} onValueChange={setDelimiter}>
-                  <SelectTrigger className='w-[120px]'>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={'\t'}>{t('excel.tabExcel')}</SelectItem>
-                    <SelectItem value={','}>Comma (,)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Textarea
-                placeholder={`2024-01-01${delimiter}user123${delimiter}개발${delimiter}프론트엔드${delimiter}프로젝트${delimiter}8${delimiter}로그인 구현\n2024-01-01${delimiter}user123${delimiter}개발${delimiter}백엔드${delimiter}유지보수${delimiter}4${delimiter}버그 수정`}
-                className='flex-1 font-mono text-sm resize-none'
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-              />
-            </div>
-          ) : (
-            <div className='border rounded-md [&>div]:h-[60vh]'>
-              <Table>
-                <TableHeader className='sticky top-0 bg-white z-10'>
-                  <TableRow>
-                    <TableHead className='w-[50px]'>{t('excel.status')}</TableHead>
-                    <TableHead className='w-[100px]'>{t('excel.date')}</TableHead>
-                    <TableHead className='w-[120px]'>{t('excel.user')}</TableHead>
-                    <TableHead className='w-[140px]'>{t('excel.workGroup')}</TableHead>
-                    <TableHead className='w-[140px]'>{t('excel.workPart')}</TableHead>
-                    <TableHead className='w-[140px]'>{t('excel.workDivision')}</TableHead>
-                    <TableHead className='w-[60px]'>{t('excel.time')}</TableHead>
-                    <TableHead>{t('report.content')}</TableHead>
-                    <TableHead className='w-[50px]'></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {parsedData.map((row) => {
-                    // Filter parts based on selected group
-                    const currentGroup = workGroups.find(g => g.work_code === row.work_group_code);
-                    const filteredParts = currentGroup ? currentGroup.labels.flatMap(l => l.parts) : [];
-
-                    return (
-                      <TableRow key={row.id} className={cn(!row.isValid && 'bg-red-50')}>
-                        <TableCell>
-                          {row.isValid ? (
-                            <Check className='w-4 h-4 text-green-500' />
-                          ) : (
-                            <AlertCircle className='w-4 h-4 text-red-500' />
-                          )}
-                        </TableCell>
-                        <TableCell className='p-1'>
-                          <input 
-                            className={cn('w-full bg-transparent border-none focus:ring-1 px-1', row.errors.date && 'text-red-600 font-bold')}
-                            value={row.date}
-                            onChange={e => handleCellChange(row.id, 'date', e.target.value)}
-                            title={row.errors.date}
-                          />
-                        </TableCell>
-                        <TableCell className='p-1'>
-                          <Select
-                            value={row.manager_id}
-                            onValueChange={(value) => handleCellChange(row.id, 'manager_id', value)}
-                          >
-                            <SelectTrigger className={cn('h-8 w-full', row.errors.manager_id && 'border-red-500')}>
-                              <SelectValue placeholder={tc('select')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {users.map((user) => (
-                                <SelectItem key={user.user_id} value={user.user_id}>
-                                  {user.user_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell className='p-1'>
-                          <Select
-                            value={row.work_group_code}
-                            onValueChange={(value) => handleCodeChange(row.id, 'group', value)}
-                          >
-                            <SelectTrigger className={cn('h-8 w-full', row.errors.work_group_name && 'border-red-500')}>
-                              <SelectValue placeholder={tc('select')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {workGroups.map((group) => (
-                                <SelectItem key={group.work_code} value={group.work_code}>
-                                  {group.work_code_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell className='p-1'>
-                          <Select
-                            value={row.work_part_code}
-                            onValueChange={(value) => handleCodeChange(row.id, 'part', value)}
-                            disabled={!row.work_group_code}
-                          >
-                            <SelectTrigger className={cn('h-8 w-full', row.errors.work_part_name && 'border-red-500')}>
-                              <SelectValue placeholder={tc('select')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {filteredParts.map((part: WorkCodeResp) => (
-                                <SelectItem key={part.work_code} value={part.work_code}>
-                                  {part.work_code_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell className='p-1'>
-                           <Select
-                            value={row.work_division_code}
-                            onValueChange={(value) => handleCodeChange(row.id, 'division', value)}
-                          >
-                            <SelectTrigger className={cn('h-8 w-full', row.errors.work_division_name && 'border-red-500')}>
-                              <SelectValue placeholder={tc('select')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {workDivision.map((division) => (
-                                <SelectItem key={division.work_code} value={division.work_code}>
-                                  {division.work_code_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell className='p-1'>
-                          <input 
-                            className='w-full bg-transparent border-none focus:ring-1 px-1'
-                            value={row.hours}
-                            onChange={e => handleCellChange(row.id, 'hours', e.target.value)}
-                          />
-                        </TableCell>
-                        <TableCell className='p-1'>
-                          <input 
-                            className='w-full bg-transparent border-none focus:ring-1 px-1'
-                            value={row.content}
-                            onChange={e => handleCellChange(row.id, 'content', e.target.value)}
-                          />
-                        </TableCell>
-                        <TableCell className='p-1'>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50'
-                            onClick={() => handleDeleteRow(row.id)}
-                          >
-                            <Trash2 className='w-4 h-4' />
-                          </Button>
-                        </TableCell>
+    <ResponsiveDialog open={open} form dirty={text.trim() !== ''} busy={registering} onOpenChange={(o) => !o && onClose()}>
+      <ResponsiveDialogContent title={t('rep.xTitle')} description={step === 'input' ? t('rep.xStep1') : t('rep.xStep2')} size='large'>
+        <ResponsiveDialogBody>
+          <div className='flex flex-col gap-x4 pb-x2' data-import-step={step}>
+            {failureKey && (
+              <Callout tone='critical' role='alert' data-save-failure>
+                {tc(failureKey)}
+              </Callout>
+            )}
+            {usersBlocked && (
+              <Callout tone='critical' role='alert' data-users-failed>
+                <span className='block'>{t('rep.xUsersFailed')}</span>
+                <Button variant='ghost' size='small' flush='left' loading={users.fetching} onClick={users.refetch} data-users-retry>
+                  {tc('retry')}
+                </Button>
+              </Callout>
+            )}
+            {step === 'input' ? (
+              <>
+                <p className='m-0 text-t4 text-fg-neutral-muted'>{canManage ? t('rep.xInputHint') : t('rep.xInputHintMine')}</p>
+                <Field label={t('rep.xDelimiter')}>
+                  <Select size='responsive' aria-label={t('rep.xDelimiter')} value={delimiter} onValueChange={setDelimiter} className='w-[10rem]'>
+                    <SelectItem value={'\t'} label={t('rep.xTab')} />
+                    <SelectItem value=',' label={t('rep.xComma')} />
+                  </Select>
+                </Field>
+                <Field label={t('rep.xPasteLabel')} invalid={empty} errorMessage={t('rep.xEmpty')}>
+                  <Textarea
+                    className='min-h-[220px] font-mono'
+                    value={text}
+                    aria-invalid={empty || undefined}
+                    placeholder={['2026-11-02', canManage ? '홍길동' : me.name, 'SF/내부과제', '[G1]신규 운영 시스템 조기 안정화', '프로그램 개발', '8', '로그인 구현'].join(delimiter)}
+                    onChange={(e) => {
+                      setText(e.target.value)
+                      setEmpty(false)
+                    }}
+                    data-import-text
+                  />
+                </Field>
+              </>
+            ) : (
+              <>
+                {errorCount > 0 && (
+                  <Callout tone='critical' role='alert' data-import-errors>
+                    {t('rep.xErrorsCallout', { count: errorCount })}
+                  </Callout>
+                )}
+                {desktop ? (
+                  <Table caption={t('rep.xPreviewCaption')}>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t('rep.xColStatus')}</TableHead>
+                        <TableHead>{t('rep.colDate')}</TableHead>
+                        <TableHead>{t('rep.colManager')}</TableHead>
+                        <TableHead>{t('rep.colGroup')}</TableHead>
+                        <TableHead>{t('rep.colPart')}</TableHead>
+                        <TableHead>{t('rep.colDivision')}</TableHead>
+                        <TableHead align='end'>{t('rep.colHours')}</TableHead>
+                        <TableHead>{t('rep.xColFix')}</TableHead>
+                        <TableHead>
+                          <span className='sr-only'>{t('rep.xDrop')}</span>
+                        </TableHead>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </div>
-
-        <DialogFooter className='gap-2'>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
-            {tc('cancel')}
-          </Button>
+                    </TableHeader>
+                    <TableBody>
+                      {rows.map((r) => (
+                        <TableRow key={r.id} data-import-row={r.id} data-import-ok={r.errors.length === 0}>
+                          <TableCell className='whitespace-nowrap py-x2_5'>{statusBadge(r)}</TableCell>
+                          <TableCell className='whitespace-nowrap py-x2_5'>{r.date}</TableCell>
+                          <TableCell className={`min-w-[88px] whitespace-normal py-x2_5 ${WORD}`}>{r.userName}</TableCell>
+                          <TableCell className={`min-w-[96px] whitespace-normal py-x2_5 ${WORD}`}>{r.groupName}</TableCell>
+                          <TableCell className={`min-w-[120px] whitespace-normal py-x2_5 ${WORD}`}>{r.partName}</TableCell>
+                          <TableCell className={`min-w-[96px] whitespace-normal py-x2_5 ${WORD}`}>{r.divisionName}</TableCell>
+                          <TableCell align='end' className='whitespace-nowrap py-x2_5'>
+                            {r.hours}
+                          </TableCell>
+                          <TableCell className={`min-w-[160px] whitespace-normal py-x2_5 text-fg-critical ${WORD}`}>{errorText(r)}</TableCell>
+                          <TableCell className='whitespace-nowrap py-x2_5'>{dropButton(r)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <List className='-mx-x6'>
+                    {rows.map((r) => (
+                      <ListItem
+                        key={r.id}
+                        data-import-row={r.id}
+                        data-import-ok={r.errors.length === 0}
+                        title={<span className={WORD}>{t('rep.xRowTitle', { date: r.date, name: r.userName })}</span>}
+                        detail={
+                          <>
+                            <span className={`block ${WORD}`}>{t('rep.xRowDetail', { path: [r.groupName, r.partName, r.divisionName].join(' › '), hours: r.hours || 0 })}</span>
+                            {r.errors.length > 0 && <span className={`block text-fg-critical ${WORD}`}>{errorText(r)}</span>}
+                          </>
+                        }
+                        suffix={
+                          <span className='flex flex-col items-end gap-x1'>
+                            {statusBadge(r)}
+                            {dropButton(r)}
+                          </span>
+                        }
+                        align='top'
+                      />
+                    ))}
+                  </List>
+                )}
+              </>
+            )}
+          </div>
+        </ResponsiveDialogBody>
+        <ResponsiveDialogFooter>
+          <ResponsiveDialogCancel>{tc('cancel')}</ResponsiveDialogCancel>
           {step === 'input' ? (
-            <Button onClick={parseAndValidate}>
-              {t('excel.verify')}
+            <Button variant='neutralSolid' disabled={usersBlocked} onClick={verify} data-import-verify>
+              {t('rep.xVerify')}
             </Button>
           ) : (
             <>
-              <Button variant='secondary' onClick={() => setStep('input')}>
-                {t('excel.reenter')}
+              <Button variant='neutralWeak' disabled={registering} onClick={() => setStep('input')} data-import-prev>
+                {t('rep.xPrev')}
               </Button>
-              <Button variant='outline' onClick={handleRevalidate}>
-                {t('excel.validate')}
-              </Button>
-              <Button onClick={handleRegister} disabled={validationErrorCount > 0 || isRegistering}>
-                {isRegistering && <Spinner className='w-4 h-4 mr-2' />}
-                {validationErrorCount > 0 ? t('excel.errorsNeedFix', { count: validationErrorCount }) : t('excel.batchRegister')}
+              <Button variant='neutralSolid' loading={registering} disabled={errorCount > 0 || rows.length === 0} onClick={() => void register()} data-import-register>
+                {t('rep.xRegister', { count: rows.length })}
               </Button>
             </>
           )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   )
 }
-
-export { ExcelImportDialog }

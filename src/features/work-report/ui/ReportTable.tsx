@@ -1,406 +1,213 @@
-import { Badge } from '@/shared/ui/shadcn/badge';
-import { Button } from '@/shared/ui/shadcn/button';
-import { Spinner } from '@/shared/ui/shadcn/spinner';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/shadcn/card';
-import { Checkbox } from '@/shared/ui/shadcn/checkbox';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/shared/ui/shadcn/dropdownMenu';
-import { Input } from '@/shared/ui/shadcn/input';
-import { InputDatePicker } from '@/shared/ui/shadcn/inputDatePicker';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/shadcn/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/shadcn/table';
-import { Textarea } from '@/shared/ui/shadcn/textarea';
-import { EmptyReport } from '@/features/work-report/ui/EmptyReport';
-import { WorkCodeResp, WorkGroupWithParts } from '@/entities/work';
-import { cn } from '@/shared/lib'
-import dayjs from 'dayjs';
-import {
-  Copy,
-  EllipsisVertical,
-  Pencil,
-  Plus,
-  Trash2
-} from 'lucide-react';
+import { Copy, Pencil, Trash2 } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
-import { usePermission } from '@/entities/session';
-import { useReportContext } from '@/features/work-report/model/ReportContext';
-import { WorkHistory } from '@/features/work-report/model/types';
-import { Activity } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Button } from '@/shared/ds/button'
+import { ResponsiveMenuContent, ResponsiveMenuGroup, ResponsiveMenuItem } from '@/shared/ds/menu'
+import {
+  Table,
+  TableBody,
+  TableBulkBar,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableMoreCell,
+  TableMoreHead,
+  TableRow,
+  TableRowHeader,
+  TableSelectCell,
+  TableSelectHead,
+} from '@/shared/ds/table'
+import { TablePagination, type TablePaginationValue } from '@/shared/ds/table-pagination'
+import { formatDayText, formatMonthDayText } from '@/shared/lib/date-text'
+import type { WorkCodeResp, WorkGroupWithParts } from '@/entities/work'
+import { codePath, hasRowActions, type RowActions } from '../lib/report-format'
+import type { DraftErrors } from '../lib/report-form'
+import { useReportContext } from '../model/ReportContext'
+import type { WorkRow } from '../model/types'
+import { ReportEditRow } from './ReportEditRow'
 
-interface ReportTableProps {
-  workHistories: WorkHistory[];
-  isWorkHistoriesLoading: boolean;
-  handleAddRow: () => void;
-  handleDuplicateSelected: () => void;
-  handleSave: () => void;
-  handleCancel: () => void;
-  handleEdit: (row: WorkHistory) => void;
-  handleDelete: (row: WorkHistory) => void;
-  handleDuplicate: (row: WorkHistory) => void;
-  workGroups: WorkGroupWithParts[];
-  isWorkGroupsLoading: boolean;
-  workDivision: WorkCodeResp[] | undefined;
-  isWorkDivisionLoading: boolean;
-  isSaving?: boolean;
+/** 쪽 크기 선택지 — 처음 25(I-25 H 48) */
+export const PAGE_SIZES = [10, 25, 50] as const
+const DEFAULT_PAGE_SIZE = 25
+const WORD = '[overflow-wrap:break-word] [word-break:keep-all]'
+
+export interface RowHandlers {
+  actionsOf: (row: WorkRow) => RowActions
+  onEdit: (row: WorkRow) => void
+  onDuplicate: (row: WorkRow) => void
+  onDelete: (row: WorkRow) => void
 }
 
-const ReportTable = ({
-  workHistories,
-  isWorkHistoriesLoading,
-  handleAddRow,
-  handleDuplicateSelected,
-  handleSave,
-  handleCancel,
-  handleEdit,
-  handleDelete,
-  handleDuplicate,
-  workGroups,
-  isWorkGroupsLoading,
-  workDivision,
-  isWorkDivisionLoading,
-  isSaving = false,
-}: ReportTableProps) => {
-  const { t } = useTranslation('work');
-  const { t: tc } = useTranslation('common');
-  const {
-    selectedRows,
-    setSelectedRows,
-    editingRow,
-    editData,
-    setEditData,
-    updateEditData,
-  } = useReportContext();
+/** 줄 ⋮ 의 내용 — 복제 · 수정 · (가름) 삭제. 남의 줄은 ⋮ 가 아니라 줄 끝 [복제] 단추라 여기 오지 않는다 */
+export function ReportRowMenuContent({ row, actions, handlers }: { row: WorkRow; actions: RowActions; handlers: RowHandlers }) {
+  const { t } = useTranslation('work')
+  const { t: tc } = useTranslation('common')
+  return (
+    <ResponsiveMenuContent title={t('rep.rowMenuTitle', { date: formatDayText(row.date) })} description={codePath(row) || undefined}>
+      <ResponsiveMenuGroup>
+        {actions.duplicate && <ResponsiveMenuItem label={t('rep.duplicate')} icon={<Copy />} onSelect={() => handlers.onDuplicate(row)} />}
+        {actions.edit && <ResponsiveMenuItem label={tc('edit')} icon={<Pencil />} onSelect={() => handlers.onEdit(row)} />}
+      </ResponsiveMenuGroup>
+      {actions.remove && (
+        <ResponsiveMenuGroup>
+          <ResponsiveMenuItem label={tc('delete')} icon={<Trash2 />} tone='critical' onSelect={() => handlers.onDelete(row)} />
+        </ResponsiveMenuGroup>
+      )}
+    </ResponsiveMenuContent>
+  )
+}
 
-  const { hasAnyPermission } = usePermission();
+/**
+ * 업무 기록 표(768 이상 — I-25 H 48 · 50 · 51 · 52) — ds Table `rich`(두 줄 72) + Table Pagination(받은 목록을 화면에서 자른다 · 처음 25 · 조건을 바꾸면 첫 쪽).
+ * 열(1280): 체크 · 일자 · 담당자 · 업무 분류 · 업무 파트 · 업무 구분 · 소요 시간 · 내용 · ⋮ / 1024: 업무(분류 › 파트 + 아래 구분) 한 열. "No" 열 없음 · 분류 · 파트 · 구분은 Badge 가 아니라 글.
+ * ⋮ — 내 줄(또는 `WORK:MANAGE`)은 복제 · 수정 · 삭제 Menu, 남의 줄은 동작이 하나라 줄 끝 [복제] 글 단추, 쓰기 권한이 없으면 열 자체가 없다.
+ * 체크 열은 쓰기 권한이 있을 때만(복제용). 고르면 표 위 일괄 작업 바(ds). 편집 줄은 한 줄 전체 폭.
+ */
+export function ReportTable({
+  rows,
+  wide,
+  groups,
+  divisions,
+  canWrite,
+  handlers,
+  edit,
+}: {
+  rows: WorkRow[]
+  wide: boolean
+  groups: WorkGroupWithParts[]
+  divisions: WorkCodeResp[]
+  canWrite: boolean
+  handlers: RowHandlers
+  edit: {
+    errors: DraftErrors
+    showErrors: boolean
+    failure: string | null
+    busy: boolean
+    onChange: (patch: Partial<import('../model/types').WorkDraft>) => void
+    onSave: () => void
+    onCancel: () => void
+  }
+}) {
+  const { t } = useTranslation('work')
+  const { selected, setSelected, draft } = useReportContext()
+  const [pageValue, setPageValue] = useState<TablePaginationValue>({ page: 1, pageSize: DEFAULT_PAGE_SIZE })
+  const tableRef = useRef<HTMLDivElement>(null)
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedRows(workHistories.map((row) => row.no));
-    } else {
-      setSelectedRows([]);
-    }
-  };
-
-  const handleSelectRow = (no: number, checked: boolean) => {
-    if (checked) {
-      setSelectedRows([...selectedRows, no]);
-    } else {
-      setSelectedRows(selectedRows.filter((rowNo) => rowNo !== no));
-    }
-  };
-  const isAllSelected =
-    workHistories.length > 0 && selectedRows.length === workHistories.length;
-  const isSomeSelected = selectedRows.length > 0 && selectedRows.length < workHistories.length;
+  const showPagination = rows.length > PAGE_SIZES[0]
+  const lastPage = Math.max(1, Math.ceil(rows.length / pageValue.pageSize))
+  const page = showPagination ? Math.min(pageValue.page, lastPage) : 1
+  const pageRows = showPagination ? rows.slice((page - 1) * pageValue.pageSize, page * pageValue.pageSize) : rows
+  const anyActions = canWrite && rows.some((r) => hasRowActions(handlers.actionsOf(r)))
+  const pageIds = pageRows.map((r) => r.id)
+  const pickedOnPage = pageIds.filter((id) => selected.includes(id)).length
+  const allChecked: boolean | 'indeterminate' = pageIds.length > 0 && pickedOnPage === pageIds.length ? true : pickedOnPage > 0 ? 'indeterminate' : false
+  const colSpan = (canWrite ? 1 : 0) + (wide ? 8 : 6) + (anyActions ? 1 : 0)
+  const isNew = draft && draft.id === undefined
 
   return (
-    <Card>
-      <CardHeader>
-        <div className='flex items-center justify-between'>
-          <CardTitle>{t('report.tableTitle')}</CardTitle>
-          <Activity mode={hasAnyPermission(['WORK:WRITE', 'WORK:MANAGE']) ? 'visible' : 'hidden'}>
-            <div className='flex gap-2'>
-              <Button
-                size='sm'
-                variant='outline'
-                onClick={handleDuplicateSelected}
-                disabled={selectedRows.length === 0}
-              >
-                <Copy className='w-4 h-4 mr-2' />
-                {t('report.duplicate')} ({selectedRows.length})
-              </Button>
-              <Button size='sm' onClick={handleAddRow}>
-                <Plus className='w-4 h-4 mr-2' />
-                {t('report.add')}
-              </Button>
-            </div>
-          </Activity>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {isWorkHistoriesLoading ? (
-          <div className='flex items-center justify-center py-8'>
-            <p className='text-muted-foreground'>{t('report.loading')}</p>
-          </div>
-        ) : workHistories && workHistories.length > 0 ? (
-          <div className='overflow-x-auto'>
-            <Table className='min-w-[1500px]'>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className='w-[50px]'>
-                    <Checkbox
-                      checked={isAllSelected}
-                      onCheckedChange={handleSelectAll}
-                      aria-label='Select all'
-                      className={cn(isSomeSelected && 'data-[state=checked]:bg-muted')}
-                    />
-                  </TableHead>
-                  <TableHead className='w-[60px]'>No</TableHead>
-                  <TableHead className='min-w-[140px]'>{t('report.fieldDate')}</TableHead>
-                  <TableHead className='min-w-[120px]'>{t('report.manager')}</TableHead>
-                  <TableHead className='min-w-[120px]'>{t('report.fieldWorkGroup')}</TableHead>
-                  <TableHead className='min-w-[120px]'>{t('report.fieldWorkPart')}</TableHead>
-                  <TableHead className='min-w-[120px]'>{t('report.fieldWorkDivision')}</TableHead>
-                  <TableHead className='min-w-[100px]'>{t('report.hours')}</TableHead>
-                  <TableHead className='min-w-[300px]'>{t('report.content')}</TableHead>
-                  <TableHead className='w-[80px]'></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {workHistories.map((row: WorkHistory) => (
-                  <TableRow key={row.no} className='hover:bg-muted/50'>
-                    {/* 체크박스 */}
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedRows.includes(row.no)}
-                        onCheckedChange={(checked) =>
-                          handleSelectRow(row.no, checked as boolean)
-                        }
-                        aria-label={`Select row ${row.no}`}
-                      />
-                    </TableCell>
-
-                    {/* No */}
-                    <TableCell className='font-medium'>{row.no}</TableCell>
-
-                    {/* 일자 */}
-                    <TableCell>
-                      {editingRow === row.no ? (
-                        <InputDatePicker
-                          value={editData?.date || ''}
-                          onValueChange={(value) => updateEditData('date', value)}
-                          placeholder={t('report.selectDate')}
-                        />
-                      ) : (
-                        <span className='text-sm'>{dayjs(row.date).format('YYYY-MM-DD')}</span>
-                      )}
-                    </TableCell>
-
-                    {/* 담당자 */}
-                    <TableCell>
-                      {editingRow === row.no ? (
-                        <Input
-                          value={editData?.manager_name || ''}
-                          disabled
-                          className='bg-muted cursor-not-allowed'
-                          placeholder={t('report.manager')}
-                        />
-                      ) : (
-                        <span className='text-sm'>{row.manager_name}</span>
-                      )}
-                    </TableCell>
-
-                    {/* 업무 분류 */}
-                    <TableCell>
-                      {editingRow === row.no ? (
-                        <Select
-                          value={editData?.work_group?.work_code || ''}
-                          onValueChange={(value) => {
-                            const selectedGroup = workGroups?.find((g) => g.work_code === value);
-                            if (selectedGroup) {
-                              setEditData((prev) => prev ? {
-                                ...prev,
-                                work_group: selectedGroup,
-                                work_part: undefined // 업무 분류 변경 시 업무 파트 초기화
-                              } : null);
-                            }
-                          }}
-                          disabled={isWorkGroupsLoading}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={isWorkGroupsLoading ? t('report.loading') : t('report.fieldWorkGroup')} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {workGroups?.map((group) => (
-                              <SelectItem key={group.work_code} value={group.work_code}>
-                                {group.work_code_name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Badge variant='outline'>{row.work_group?.work_code_name}</Badge>
-                      )}
-                    </TableCell>
-
-                    {/* 업무 파트 */}
-                    <TableCell>
-                      {editingRow === row.no ? (
-                        <Select
-                          value={editData?.work_part?.work_code || ''}
-                          onValueChange={(value) => {
-                            const currentGroup = workGroups?.find(g => g.work_code === editData?.work_group?.work_code);
-                            const selectedPart = currentGroup?.labels?.[0]?.parts?.find((p) => p.work_code === value);
-                            if (selectedPart) {
-                              updateEditData('work_part', selectedPart);
-                            }
-                          }}
-                          disabled={!editData?.work_group}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={
-                              !editData?.work_group
-                                ? t('report.selectGroupFirst')
-                                : t('report.fieldWorkPart')
-                            } />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {workGroups?.find(g => g.work_code === editData?.work_group?.work_code)?.labels?.[0]?.parts?.map((part) => (
-                              <SelectItem key={part.work_code} value={part.work_code}>
-                                {part.work_code_name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Badge variant='outline'>{row.work_part?.work_code_name}</Badge>
-                      )}
-                    </TableCell>
-
-                    {/* 업무 구분 */}
-                    <TableCell>
-                      {editingRow === row.no ? (
-                        <Select
-                          value={editData?.work_division?.work_code || ''}
-                          onValueChange={(value) => {
-                            const selectedDivision = workDivision?.find((d) => d.work_code === value);
-                            if (selectedDivision) {
-                              updateEditData('work_division', selectedDivision);
-                            }
-                          }}
-                          disabled={isWorkDivisionLoading}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={isWorkDivisionLoading ? t('report.loading') : t('report.fieldWorkDivision')} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {workDivision?.map((division) => (
-                              <SelectItem key={division.work_code} value={division.work_code}>
-                                {division.work_code_name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Badge variant='secondary'>{row.work_division?.work_code_name}</Badge>
-                      )}
-                    </TableCell>
-
-                    {/* 소요시간 */}
-                    <TableCell>
-                      {editingRow === row.no ? (
-                        <Input
-                          type='number'
-                          min='0'
-                          max='24'
-                          value={editData?.hours}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            updateEditData('hours', value === '' ? '' : parseInt(value) || 0);
-                          }}
-                          className='w-full'
-                        />
-                      ) : (
-                        <span className='font-medium'>{row.hours}h</span>
-                      )}
-                    </TableCell>
-
-                    {/* 내용 */}
-                    <TableCell>
-                      {editingRow === row.no ? (
-                        <Textarea
-                          value={editData?.content}
-                          onChange={(e) => updateEditData('content', e.target.value)}
-                          className='min-h-[80px] w-full resize-y'
-                          placeholder={t('report.contentPlaceholder')}
-                        />
-                      ) : (
-                        <p className='text-sm line-clamp-2 text-muted-foreground'>
-                          {row.content}
-                        </p>
-                      )}
-                    </TableCell>
-
-                    {/* 액션 */}
-                    <TableCell>
-                      {editingRow === row.no ? (
-                        <div className='flex gap-2'>
-                          <Button size='sm' onClick={handleSave} disabled={isSaving}>
-                            {isSaving && <Spinner />}
-                            {tc('save')}
-                          </Button>
-                          <Button
-                            size='sm'
-                            variant='outline'
-                            onClick={handleCancel}
-                            disabled={isSaving}
-                          >
-                            {tc('cancel')}
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className='flex justify-end'>
-                          <DropdownMenu modal={false}>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant='ghost'
-                                size='sm'
-                                className='h-8 w-8 p-0 data-[state=open]:bg-muted'
-                              >
-                                <EllipsisVertical className='w-4 h-4' />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align='end' className='w-32'>
-                              <DropdownMenuItem
-                                onClick={() => handleDuplicate(row)}
-                                disabled={!hasAnyPermission(['WORK:WRITE', 'WORK:MANAGE'])}
-                              >
-                                <Copy className='h-4 w-4 mr-2' />
-                                <span>{t('report.duplicate')}</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleEdit(row)}
-                                disabled={!hasAnyPermission(['WORK:WRITE', 'WORK:MANAGE'])}
-                              >
-                                <Pencil className='h-4 w-4 mr-2' />
-                                <span>{tc('edit')}</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => handleDelete(row)}
-                                className='text-destructive focus:text-destructive'
-                                disabled={!hasAnyPermission(['WORK:WRITE', 'WORK:MANAGE'])}
-                              >
-                                <Trash2 className='h-4 w-4 mr-2' />
-                                <span>{tc('delete')}</span>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <EmptyReport onAddClick={handleAddRow} />
+    <Table
+      ref={tableRef}
+      caption={t('rep.tableCaption')}
+      rowHeight='rich'
+      pagination={
+        showPagination ? (
+          <TablePagination value={{ ...pageValue, page }} onValueChange={setPageValue} totalItems={rows.length} pageSizeOptions={PAGE_SIZES} scrollTarget={tableRef} />
+        ) : undefined
+      }
+    >
+      <TableHeader>
+        <TableRow>
+          {canWrite && (
+            <TableSelectHead
+              checked={allChecked}
+              onCheckedChange={(on) => setSelected(on ? Array.from(new Set([...selected, ...pageIds])) : selected.filter((id) => !pageIds.includes(id)))}
+            />
+          )}
+          <TableHead>{t('rep.colDate')}</TableHead>
+          <TableHead>{t('rep.colManager')}</TableHead>
+          {wide ? (
+            <>
+              <TableHead>{t('rep.colGroup')}</TableHead>
+              <TableHead>{t('rep.colPart')}</TableHead>
+              <TableHead>{t('rep.colDivision')}</TableHead>
+            </>
+          ) : (
+            <TableHead>{t('rep.colWork')}</TableHead>
+          )}
+          <TableHead align='end'>{t('rep.colHours')}</TableHead>
+          <TableHead>{t('rep.colContent')}</TableHead>
+          {anyActions && <TableMoreHead />}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {isNew && (
+          <ReportEditRow colSpan={colSpan} draft={draft} groups={groups} divisions={divisions} {...edit} />
         )}
-      </CardContent>
-    </Card>
-  );
+        {pageRows.map((row) => {
+          if (draft && draft.id === row.id) {
+            return <ReportEditRow key={row.id} colSpan={colSpan} draft={draft} groups={groups} divisions={divisions} {...edit} />
+          }
+          const actions = handlers.actionsOf(row)
+          return (
+            <TableRow key={row.id} data-work-id={row.id}>
+              {canWrite && (
+                <TableSelectCell
+                  className='py-x3'
+                  label={t('rep.rowLabel', { date: formatDayText(row.date), name: row.managerName })}
+                  checked={selected.includes(row.id)}
+                  onCheckedChange={(on) => setSelected(on ? [...selected, row.id] : selected.filter((id) => id !== row.id))}
+                />
+              )}
+              <TableRowHeader className='whitespace-nowrap py-x3'>{formatMonthDayText(row.date)}</TableRowHeader>
+              <TableCell className={`min-w-[80px] max-w-[160px] whitespace-normal py-x3 ${WORD}`}>{row.managerName}</TableCell>
+              {wide ? (
+                <>
+                  <TableCell className={`min-w-[100px] max-w-[200px] whitespace-normal py-x3 ${WORD}`}>{row.group?.work_code_name}</TableCell>
+                  <TableCell className={`min-w-[120px] max-w-[260px] whitespace-normal py-x3 ${WORD}`}>{row.part?.work_code_name}</TableCell>
+                  <TableCell className={`min-w-[100px] max-w-[200px] whitespace-normal py-x3 ${WORD}`}>{row.division?.work_code_name}</TableCell>
+                </>
+              ) : (
+                <TableCell className={`min-w-[160px] max-w-[240px] whitespace-normal py-x3 ${WORD}`}>
+                  <span className='block'>{codePath(row)}</span>
+                  <span className='block text-t3 text-fg-neutral-subtle'>{row.division?.work_code_name}</span>
+                </TableCell>
+              )}
+              <TableCell align='end' className='whitespace-nowrap py-x3'>
+                {t('rep.hoursValue', { count: row.hours })}
+              </TableCell>
+              <TableCell className='min-w-[160px] whitespace-normal py-x3 [overflow-wrap:anywhere] [word-break:keep-all]'>{row.content}</TableCell>
+              {anyActions &&
+                (actions.edit || actions.remove ? (
+                  <TableMoreCell label={t('rep.rowLabel', { date: formatDayText(row.date), name: row.managerName })} className='py-x3'>
+                    <ReportRowMenuContent row={row} actions={actions} handlers={handlers} />
+                  </TableMoreCell>
+                ) : (
+                  <TableCell className='whitespace-nowrap py-x3'>
+                    {actions.duplicate && (
+                      <Button variant='ghost' size='small' aria-label={t('rep.duplicateFor', { date: formatDayText(row.date), name: row.managerName })} onClick={() => handlers.onDuplicate(row)} data-duplicate-row>
+                        {t('rep.duplicate')}
+                      </Button>
+                    )}
+                  </TableCell>
+                ))}
+            </TableRow>
+          )
+        })}
+      </TableBody>
+    </Table>
+  )
 }
 
-export { ReportTable }
+/** 표 위 일괄 작업 바 — 고르면 "{n}개 선택됨" + [복제] + ✕ */
+export function ReportBulkBar({ count, onClear, onDuplicate, busy }: { count: number; onClear: () => void; onDuplicate: () => void; busy: boolean }) {
+  const { t } = useTranslation('work')
+  return (
+    <TableBulkBar count={count} onClear={onClear} data-report-bulk>
+      <Button variant='ghost' size='small' loading={busy} onClick={onDuplicate} data-bulk-duplicate>
+        <Copy />
+        {t('rep.duplicate')}
+      </Button>
+    </TableBulkBar>
+  )
+}

@@ -2004,3 +2004,126 @@ work,sch.emptyTitle,근무 일정이 없어요,No work schedules
 work,sch.emptyDescription,등록된 사람이 생기면 근무 시간이 여기에 보여요.,Working hours show up here once people are added.
 work,sch.failureTitle,근무 일정을 불러오지 못했어요,Could not load the work schedule
 work,sch.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+work,rep.title,업무 보고,Work report
+work,rep.add,업무 추가,Add work
+work,rep.tools,업무 보고 더보기,More for work report
+work,rep.toolImport,엑셀로 가져오기,Import from Excel
+work,rep.toolExport,엑셀로 내려받기,Export to Excel
+work,rep.toolExportHint,지금 거른 목록,Current filtered list
+work,rep.toolTemplate,예시 파일 받기,Get a sample file
+work,rep.toolUnregistered,업무 미등록 목록 받기,Get the unregistered list
+work,rep.templateFile,업무_가져오기_예시,work_import_sample
+work,rep.tableTitle,업무 기록,Work records
+work,rep.tableCaption,업무 기록 목록,Work record list
+work,rep.colDate,일자,Date
+work,rep.colManager,담당자,Assignee
+work,rep.colGroup,업무 분류,Work group
+work,rep.colPart,업무 파트,Work part
+work,rep.colDivision,업무 구분,Work type
+work,rep.colWork,업무,Work
+work,rep.colHours,소요 시간,Hours
+work,rep.colContent,내용,Details
+work,rep.hoursValue,{{count}}시간,{{count}} hours
+work,rep.hoursValue_one,{{count}}시간,{{count}} hour
+work,rep.hoursDecrease,소요 시간 줄이기,Decrease hours
+work,rep.hoursIncrease,소요 시간 늘리기,Increase hours
+work,rep.rowLabel,{{date}} {{name}},{{date}} {{name}}
+work,rep.rowMenuTitle,{{date}} 업무,Work on {{date}}
+work,rep.emptyTitle,업무 기록이 없어요,No work records
+work,rep.emptyDescription,업무를 추가하면 여기에 모여요.,Added work shows up here.
+work,rep.emptyFilteredDescription,조건에 맞는 기록이 없어요. 조건을 바꿔보세요.,No records match. Try changing the filters.
+work,rep.failureTitle,업무 기록을 불러오지 못했어요,Could not load work records
+work,rep.failureDescription,잠시 뒤 다시 시도해주세요.,Please try again in a moment.
+work,rep.codesFailed,업무 분류를 불러오지 못해 업무를 추가하거나 고칠 수 없어요.,"Could not load the work codes, so work can't be added or edited."
+work,rep.listEnd,업무 기록을 모두 봤어요.,You've seen all work records.
+work,rep.select,고르기,Select
+work,rep.selectDone,완료,Done
+work,rep.duplicate,복제,Duplicate
+work,rep.duplicateFor,{{date}} {{name}} 업무 복제,Duplicate work on {{date}} by {{name}}
+work,rep.duplicated,업무 기록을 복제했어요.,Work record duplicated.
+work,rep.duplicatedCount,{{count}}개를 복제했어요.,Duplicated {{count}} records.
+work,rep.duplicatedCount_one,{{count}}개를 복제했어요.,Duplicated {{count}} record.
+work,rep.duplicateBlocked,업무 분류가 없는 줄은 복제할 수 없어요.,Records without a work group can't be duplicated.
+work,rep.saved,업무 기록을 저장했어요.,Work record saved.
+work,rep.deleted,업무 기록을 삭제했어요.,Work record deleted.
+work,rep.deleteTitle,업무 기록 삭제,Delete work record
+work,rep.deleteConfirm,{{date}} 업무 기록을 삭제할까요? 삭제한 업무 기록은 되돌릴 수 없어요.,Delete the work record for {{date}}? A deleted work record can't be restored.
+work,rep.formAdd,업무 추가,Add work
+work,rep.formEdit,업무 수정,Edit work
+work,rep.fDate,일자,Date
+work,rep.fManager,담당자,Assignee
+work,rep.fGroup,업무 분류,Work group
+work,rep.fPart,업무 파트,Work part
+work,rep.fDivision,업무 구분,Work type
+work,rep.fHours,소요 시간,Hours
+work,rep.fContent,내용,Details
+work,rep.datePlaceholder,날짜 고르기,Pick a date
+work,rep.groupPlaceholder,업무 분류 고르기,Pick a work group
+work,rep.partPlaceholder,업무 파트 고르기,Pick a work part
+work,rep.divisionPlaceholder,업무 구분 고르기,Pick a work type
+work,rep.partNeedGroup,업무 분류를 먼저 골라주세요,Pick a work group first
+work,rep.contentPlaceholder,어떤 일을 했는지 적어주세요,Describe what you did
+work,rep.errDate,일자를 골라주세요.,Pick a date.
+work,rep.errGroup,업무 분류를 골라주세요.,Pick a work group.
+work,rep.errPart,업무 파트를 골라주세요.,Pick a work part.
+work,rep.errDivision,업무 구분을 골라주세요.,Pick a work type.
+work,rep.filterLabel,업무 기록 필터,Work record filters
+work,rep.fPeriod,기간,Period
+work,rep.periodDefault,최근 한 달,Last month
+work,rep.fUser,담당자,Assignee
+work,rep.allPeople,모든 사람,Everyone
+work,rep.all,전체,All
+work,rep.fSort,정렬,Sort
+work,rep.latest,최신순,Newest first
+work,rep.oldest,오래된순,Oldest first
+work,rep.filterReset,초기화,Reset
+work,rep.filterApply,적용,Apply
+work,rep.filterClear,필터 지우기,Clear filters
+work,rep.peopleSearch,이름 · 아이디 검색,Search name or ID
+work,rep.peopleEmpty,찾는 사람이 없어요,No one found
+work,rep.peopleFailed,사람 목록을 불러오지 못했어요,Could not load people
+work,rep.excelFailed,엑셀 파일을 받지 못했어요. 잠시 뒤 다시 시도해주세요.,Could not download the Excel file. Please try again in a moment.
+work,rep.excelPeriodInvalid,기간을 1년 안으로 골라주세요.,Pick a period within one year.
+work,rep.xTitle,엑셀로 가져오기,Import from Excel
+work,rep.xStep1,1 / 3 · 엑셀에서 복사한 줄을 붙여 넣어요,1 / 3 · Paste the rows copied from Excel
+work,rep.xStep2,2 / 3 · 붙여 넣은 줄을 확인해요,2 / 3 · Check the pasted rows
+work,rep.xInputHint,열 차례는 일자 · 담당자 이름 · 업무 분류 · 업무 파트 · 업무 구분 · 소요 시간 · 내용이에요.,"Columns are date, assignee name, work group, work part, work type, hours, and details."
+work,rep.xInputHintMine,열 차례는 일자 · 담당자 이름 · 업무 분류 · 업무 파트 · 업무 구분 · 소요 시간 · 내용이에요. 내 업무만 가져올 수 있어요.,"Columns are date, assignee name, work group, work part, work type, hours, and details. You can only import your own work."
+work,rep.xDelimiter,나눔 기호,Separator
+work,rep.xTab,탭(엑셀),Tab (Excel)
+work,rep.xComma,"쉼표(,)","Comma (,)"
+work,rep.xPasteLabel,붙여 넣을 내용,Rows to paste
+work,rep.xEmpty,붙여 넣은 줄이 없어요.,Nothing was pasted.
+work,rep.xVerify,확인하기,Check
+work,rep.xPrev,이전 단계,Back
+work,rep.xRegister,{{count}}줄 등록,Register {{count}} rows
+work,rep.xRegister_one,{{count}}줄 등록,Register {{count}} row
+work,rep.xRegistered,{{count}}줄을 등록했어요.,Registered {{count}} rows.
+work,rep.xRegistered_one,{{count}}줄을 등록했어요.,Registered {{count}} row.
+work,rep.xErrorsCallout,오류 {{count}}개를 고치면 등록할 수 있어요.,Fix {{count}} errors to register.
+work,rep.xErrorsCallout_one,오류 {{count}}개를 고치면 등록할 수 있어요.,Fix {{count}} error to register.
+work,rep.xPreviewCaption,가져올 업무 확인,Rows to import
+work,rep.xColStatus,상태,Status
+work,rep.xColFix,고칠 것,To fix
+work,rep.xBadgeError,오류,Error
+work,rep.xBadgeOk,확인,OK
+work,rep.xDrop,빼기,Remove
+work,rep.xDropRow,{{date}} {{name}} 줄 빼기,Remove the row for {{date}} {{name}}
+work,rep.xRowTitle,{{date}} · {{name}},{{date}} · {{name}}
+work,rep.xRowDetail,{{path}} · {{hours}}시간,{{path}} · {{hours}} h
+work,rep.xUsersFailed,사람 목록을 불러오지 못해 담당자를 찾을 수 없어요.,"Could not load people, so assignees can't be matched."
+work,rep.xDateInvalid,일자 형식이 달라요(YYYY-MM-DD).,The date format is wrong (YYYY-MM-DD).
+work,rep.xUserMissing,담당자를 찾을 수 없어요.,Assignee not found.
+work,rep.xOnlyMine,내 업무만 가져올 수 있어요.,You can only import your own work.
+work,rep.xGroupInvalid,없는 업무 분류예요.,That work group doesn't exist.
+work,rep.xPartInvalid,없는 업무 파트이거나 이 분류에 속하지 않아요.,That work part doesn't exist in this group.
+work,rep.xDivisionInvalid,없는 업무 구분이에요.,That work type doesn't exist.
+work,rep.xHoursInvalid,소요 시간은 0 ~ 24 숫자로 적어주세요.,Enter hours as a number from 0 to 24.
+work,rep.uTitle,업무 미등록 목록 받기,Get the unregistered list
+work,rep.uDesc,받을 연도와 월을 골라주세요.,Pick the year and month to download.
+work,rep.uYear,연도,Year
+work,rep.uMonth,월,Month
+work,rep.uSubmit,받기,Download
+work,rep.uDownloading,받는 중…,Downloading…
+work,rep.yearValue,{{year}}년,{{year}}
+work,rep.monthValue,{{month}}월,{{month}}
