@@ -45,11 +45,12 @@ export const useUsersQuery = (options?: { quiet?: boolean }) => {
 }
 
 // 사용자 결재자 조회 훅
-export const useUserApproversQuery = (userId: string) => {
+export const useUserApproversQuery = (userId: string, options?: { quiet?: boolean }) => {
   return useQuery<GetUserApproversResp>({
     queryKey: userKeys.list({ type: 'approvers', userId }),
     queryFn: () => userApi.getUserApprovers(userId),
-    enabled: !!userId // userId가 있을 때만 실행
+    enabled: !!userId, // userId가 있을 때만 실행
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 

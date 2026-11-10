@@ -63,6 +63,8 @@ export interface PickerRowProps {
   /** 끝 흐림 — 길이가 사용자 값에 달린 목록형 고르기에만(카테고리 · 계좌 …). 달력 · 고정 선택지는 걸지 않는다 */
   scrollFog?: boolean;
   onOpenAutoFocus?: (e: Event) => void;
+  /** false 면 시트를 끌기 · 바깥 누르기로 닫지 않는다 — 휠 시트(시각)용. 1280 미만 시트에만 걸린다 */
+  dismissible?: boolean;
 }
 
 export const PickerRow = React.forwardRef<HTMLButtonElement, PickerRowProps>(
@@ -89,6 +91,7 @@ export const PickerRow = React.forwardRef<HTMLButtonElement, PickerRowProps>(
       bodyless,
       scrollFog,
       onOpenAutoFocus,
+      dismissible,
     },
     ref,
   ) => {
@@ -211,7 +214,7 @@ export const PickerRow = React.forwardRef<HTMLButtonElement, PickerRowProps>(
           {surface === "sheet" ? (
             <>
               {row}
-              <BottomSheet open={open} onOpenChange={setOpen}>
+              <BottomSheet open={open} onOpenChange={setOpen} dismissible={dismissible}>
                 <BottomSheetContent
                   title={surfaceTitle}
                   className={sheetClassName}

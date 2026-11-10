@@ -7,9 +7,7 @@ import { ResultSection } from '@/shared/ds/result-section'
 import { Select, SelectItem } from '@/shared/ds/select'
 import { LoadingRegion } from '@/shared/ds/skeleton'
 import { useUser } from '@/entities/session'
-import { useUserApproversQuery } from '@/entities/user'
 import { useUserRequestedVacationsQuery, useUserRequestedVacationStatsQuery } from '@/entities/vacation'
-import { useUserVacationPoliciesQuery } from '@/entities/vacation-policy'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useWide } from '@/widgets/layout/lib/use-wide'
 import { ScreenBody, ScreenTitleRow } from '@/widgets/layout/ui/ScreenBody'
@@ -39,8 +37,6 @@ const ApplicationContent = () => {
   const userId = loginUser?.user_id || ''
   const year = parseInt(selectedYear)
 
-  const { data: vacationPolicies = [] } = useUserVacationPoliciesQuery(userId, 'ON_REQUEST')
-  const { data: approversData } = useUserApproversQuery(userId)
   const requests = useUserRequestedVacationsQuery(userId, year, { quiet: true })
   const stats = useUserRequestedVacationStatsQuery(userId, year, { quiet: true })
 
@@ -118,8 +114,6 @@ const ApplicationContent = () => {
         open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onSubmitSuccess={() => setIsDialogOpen(false)}
-        vacationPolicies={vacationPolicies}
-        approversData={approversData || { approvers: [], max_available_count: 0, is_auto_approval: false }}
       />
     </ScreenBody>
   )

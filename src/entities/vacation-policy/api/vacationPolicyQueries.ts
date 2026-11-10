@@ -43,11 +43,12 @@ export const useVacationPoliciesQuery = (options?: { quiet?: boolean }) => {
   })
 }
 
-export const useUserVacationPoliciesQuery = (userId: string, grantMethod?: string) => {
+export const useUserVacationPoliciesQuery = (userId: string, grantMethod?: string, options?: { quiet?: boolean }) => {
   return useQuery<GetUserVacationPoliciesResp[]>({
     queryKey: vacationPolicyKeys.list({ type: 'userPolicies', userId, grantMethod }),
     queryFn: () => vacationPolicyApi.getUserVacationPolicies(userId, grantMethod),
-    enabled: !!userId
+    enabled: !!userId,
+    meta: options?.quiet ? { quiet: true } : undefined
   })
 }
 
