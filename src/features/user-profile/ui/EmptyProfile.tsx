@@ -1,6 +1,7 @@
-import { Empty, EmptyDescription, EmptyHeader, EmptyIcon, EmptyTitle } from '@/shared/ui/shadcn/empty';
 import { UserX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+import { ResultSection } from '@/shared/ds/result-section';
 
 interface EmptyProfileProps {
   className?: string;
@@ -10,17 +11,14 @@ const EmptyProfile = ({ className }: EmptyProfileProps) => {
   const { t } = useTranslation('user');
 
   return (
-    <Empty className={className}>
-      <EmptyHeader>
-        <EmptyIcon>
-          <UserX />
-        </EmptyIcon>
-        <EmptyTitle>{t('empty.title')}</EmptyTitle>
-        <EmptyDescription>
-          {t('empty.description')}
-        </EmptyDescription>
-      </EmptyHeader>
-    </Empty>
+    <ResultSection
+      kind='empty'
+      size='medium'
+      className={className}
+      icon={<UserX />}
+      title={t('empty.title')}
+      description={t('empty.description')}
+    />
   );
 };
 

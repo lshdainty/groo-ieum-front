@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/shadcn/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ds/card';
 import { EmptyProfile } from '@/features/user-profile/ui/EmptyProfile';
 import { UserInfoContent } from '@/features/user-profile/ui/UserInfoContent';
 import { GetUsersResp } from '@/entities/user';
@@ -35,10 +35,10 @@ const UserInfoCard = ({
   return (
     <div className='flex flex-col gap-6 h-full'>
       <Card className='h-full min-w-[350px]'>
-        <CardHeader className='pb-4 flex flex-row items-center justify-between'>
+        <CardHeader>
           <CardTitle>{displayTitle}</CardTitle>
         </CardHeader>
-        <CardContent className='px-6 pb-6 pt-2'>
+        <CardContent>
           <UserInfoContent user={selectedUser} />
         </CardContent>
       </Card>

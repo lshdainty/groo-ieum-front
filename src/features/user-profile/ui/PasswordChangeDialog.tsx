@@ -1,27 +1,19 @@
-import { Button } from '@/shared/ui/shadcn/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/shadcn/dialog';
-import { Field, FieldError, FieldLabel } from '@/shared/ui/shadcn/field';
-import { Input } from '@/shared/ui/shadcn/input';
-import { Callout } from '@/shared/ds/callout';
-import { useSnackbar } from '@/shared/ds/snackbar';
-import { Spinner } from '@/shared/ui/shadcn/spinner';
-import { PasswordRequirements } from '@/shared/ui/password-requirements/PasswordRequirements';
-import { PasswordMatch } from '@/shared/ui/password-requirements/PasswordMatch';
-import { useChangePasswordMutation } from '@/entities/user';
-import { createNewPasswordSchema } from '@/shared/lib';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { KeyRound, Lock, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
+
+import { Button } from '@/shared/ds/button';
+import { Callout } from '@/shared/ds/callout';
+import { ResponsiveDialog, ResponsiveDialogBody, ResponsiveDialogCancel, ResponsiveDialogContent, ResponsiveDialogFooter } from '@/shared/ds/dialog';
+import { Field } from '@/shared/ds/field';
+import { Input } from '@/shared/ds/input';
+import { useSnackbar } from '@/shared/ds/snackbar';
+import { PasswordRequirements } from '@/shared/ui/password-requirements/PasswordRequirements';
+import { PasswordMatch } from '@/shared/ui/password-requirements/PasswordMatch';
+import { useChangePasswordMutation } from '@/entities/user';
+import { createNewPasswordSchema } from '@/shared/lib';
 import { readWriteFailure } from '@/shared/ui/groo/write-error'
 
 const createFormSchema = (t: (key: string) => string) =>
@@ -103,102 +95,57 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='min-[40rem]:max-w-[28rem]'>
-        <DialogHeader>
-          <DialogTitle>{t('passwordChange')}</DialogTitle>
-          <DialogDescription>{t('passwordChangeDescription')}</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          {saveError && (
-            <Callout tone='critical' role='alert' className='mt-4' data-save-failure>
-              {saveError}
-            </Callout>
-          )}
-          <div className='grid gap-4 py-4'>
-            <Controller
-              control={form.control}
-              name='current_password'
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    <Lock className='h-4 w-4 text-muted-foreground inline-block' />
-                    {t('currentPassword')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    type='password'
-                    placeholder={t('currentPasswordPlaceholder')}
-                  />
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                </Field>
-              )}
-            />
-            <Controller
-              control={form.control}
-              name='new_password'
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    <KeyRound className='h-4 w-4 text-muted-foreground inline-block' />
-                    {t('newPassword')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    type='password'
-                    placeholder={t('newPasswordPlaceholder')}
-                  />
-                  <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
-                  <PasswordRequirements password={field.value} />
-                </Field>
-              )}
-            />
-            <Controller
-              control={form.control}
-              name='confirm_password'
-              render={({ field, fieldState }) => (
-                <Field data-invalid={!!fieldState.error}>
-                  <FieldLabel>
-                    <ShieldCheck className='h-4 w-4 text-muted-foreground inline-block' />
-                    {t('confirmPassword')}
-                    <span className='text-destructive ml-0.5'>*</span>
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    type='password'
-                    placeholder={t('confirmPasswordPlaceholder')}
-                  />
-                  {/* 불일치는 아래 PasswordMatch 가 입력 중에 이미 보여주므로, 여기선 미입력 에러만 남긴다 */}
-                  <FieldError
-                    errors={fieldState.error && !field.value ? [fieldState.error] : undefined}
-                  />
-                  <PasswordMatch password={newPassword} confirmPassword={field.value} />
-                </Field>
-              )}
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => onOpenChange(false)}
-              disabled={changePasswordMutation.isPending}
-            >
-              {tc('cancel')}
-            </Button>
-            <Button
-              type='submit'
-              disabled={changePasswordMutation.isPending}
-            >
-              {changePasswordMutation.isPending && <Spinner />}
+    <ResponsiveDialog open={open} form dirty={form.formState.isDirty} busy={changePasswordMutation.isPending} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent title={t('passwordChange')} description={t('passwordChangeDescription')}>
+        <form onSubmit={form.handleSubmit(onSubmit)} noValidate className='flex min-h-0 flex-1 flex-col'>
+          <ResponsiveDialogBody>
+            {saveError && (
+              <Callout tone='critical' role='alert' className='mb-x4' data-save-failure>
+                {saveError}
+              </Callout>
+            )}
+            <div className='flex flex-col gap-x6 pb-x2'>
+              <Controller
+                control={form.control}
+                name='current_password'
+                render={({ field, fieldState }) => (
+                  <Field label={t('currentPassword')} showRequiredIndicator invalid={!!fieldState.error} errorMessage={fieldState.error?.message}>
+                    <Input {...field} type='password' placeholder={t('currentPasswordPlaceholder')} />
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name='new_password'
+                render={({ field, fieldState }) => (
+                  <Field label={t('newPassword')} showRequiredIndicator invalid={!!fieldState.error} errorMessage={fieldState.error?.message}>
+                    <Input {...field} type='password' placeholder={t('newPasswordPlaceholder')} />
+                    <PasswordRequirements password={field.value} />
+                  </Field>
+                )}
+              />
+              <Controller
+                control={form.control}
+                name='confirm_password'
+                render={({ field, fieldState }) => (
+                  // 불일치는 아래 PasswordMatch 가 입력 중에 이미 보여주므로, 여기선 미입력 에러만 남긴다
+                  <Field label={t('confirmPassword')} showRequiredIndicator invalid={!!fieldState.error && !field.value} errorMessage={fieldState.error?.message}>
+                    <Input {...field} type='password' placeholder={t('confirmPasswordPlaceholder')} />
+                    <PasswordMatch password={newPassword} confirmPassword={field.value} />
+                  </Field>
+                )}
+              />
+            </div>
+          </ResponsiveDialogBody>
+          <ResponsiveDialogFooter>
+            <ResponsiveDialogCancel>{tc('cancel')}</ResponsiveDialogCancel>
+            <Button type='submit' loading={changePasswordMutation.isPending}>
               {changePasswordMutation.isPending ? tc('processing') : tc('save')}
             </Button>
-          </DialogFooter>
+          </ResponsiveDialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 };
 

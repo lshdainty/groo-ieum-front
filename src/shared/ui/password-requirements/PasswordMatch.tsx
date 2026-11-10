@@ -28,7 +28,7 @@ const PasswordMatch = ({ password, confirmPassword, className }: PasswordMatchPr
     <p
       className={cn(
         'flex items-center gap-1.5 text-xs pt-0.5',
-        matched ? 'text-emerald-600 dark:text-emerald-500' : 'text-destructive',
+        matched ? 'text-fg-positive' : 'text-fg-critical',
         className
       )}
       aria-live='polite'
