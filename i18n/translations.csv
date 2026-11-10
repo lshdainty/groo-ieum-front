@@ -2042,3 +2042,7 @@ work,rep.xColWho,일자 · 담당자,Date · assignee
 work,rep.xSampleName,홍길동,Gildong Hong
 work,rep.xSampleContent,로그인 구현,Implement login
 work,rep.xCodesFailed,업무 분류 · 구분 목록을 불러오지 못해 확인할 수 없어요.,"Could not load the work codes, so the rows can't be checked."
+work,rep.xPickPerson,담당자 고르기,Pick assignee
+work,rep.xFixTitle,줄 고치기,Fix row
+work,rep.xFixDone,오류를 모두 고쳤어요.,All errors are fixed.
+work,rep.xTapHint,오류가 있는 줄을 눌러 고칠 수 있어요.,Tap a row with an error to fix it.
