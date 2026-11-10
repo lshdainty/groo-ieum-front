@@ -1,5 +1,4 @@
 import { EnvWatermark } from '@/shared/ui/env-watermark/EnvWatermark'
-import { Toaster } from '@/shared/ui/shadcn/sonner'
 import { ThemeProvider } from '@/shared/ui/theme/theme-provider'
 import { LoadingAnnouncer } from '@/shared/ds/skeleton'
 import { SnackbarProvider } from '@/shared/ds/snackbar'
@@ -37,7 +36,6 @@ export function App() {
   return (
     <ThemeProvider defaultTheme='system' storageKey='vite-ui-theme'>
       <EnvWatermark />
-      <Toaster position="top-center" />
       <QueryProvider>
         <SnackbarProvider>
           <TooltipProvider>

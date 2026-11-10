@@ -127,7 +127,6 @@ export {
   useSidebar,
 } from '@/shared/ui/shadcn/sidebar'
 export { Skeleton } from '@/shared/ui/shadcn/skeleton'
-export { toast, Toaster } from '@/shared/ui/shadcn/sonner'
 export { Spinner } from '@/shared/ui/shadcn/spinner'
 export { Switch } from '@/shared/ui/shadcn/switch'
 export {
