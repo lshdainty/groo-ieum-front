@@ -1,5 +1,4 @@
-import { Dialog, DialogContent } from "@/shared/ui/shadcn/dialog";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ui/shadcn/resizable";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ds/resizable";
 import { UserList } from "@/features/admin-authority/ui/UserList";
 import { UserListSkeleton } from "@/features/admin-authority/ui/UserListSkeleton";
 import { UserRoleAssignment } from "@/features/admin-authority/ui/UserRoleAssignment";
@@ -108,44 +107,37 @@ const UserManagementPanel = () => {
     )
   }
 
+  // 폰은 목록 → 사용자를 누르면 그 사용자 화면(뒤로 = 목록) — 역할 탭과 같은 길. 목록은 숨겨 두어 검색어가 남는다
   if (isMobile) {
     return (
-      <div className="min-h-[28rem] bg-background">
-        {isLoading ? (
-          <UserListSkeleton />
-        ) : (
-          <UserList
-            users={users}
-            selectedUserId={selectedUserId}
-            onSelectUser={setSelectedUserId}
+      <div className="flex min-h-[28rem] flex-col bg-bg-layer-default">
+        <div hidden={!!selectedUser} className="flex min-h-0 flex-1 flex-col">
+          {isLoading ? (
+            <UserListSkeleton />
+          ) : (
+            <UserList
+              users={users}
+              selectedUserId={selectedUserId}
+              onSelectUser={setSelectedUserId}
+            />
+          )}
+        </div>
+        {selectedUser && (
+          <UserRoleAssignment
+            key={selectedUser.id}
+            user={selectedUser}
+            allRoles={domainRoles}
+            onUpdateUserRole={handleUpdateUserRole}
+            onBack={() => setSelectedUserId(null)}
           />
         )}
-
-        <Dialog
-          open={!!selectedUserId}
-          onOpenChange={(open) => {
-            if (!open) setSelectedUserId(null);
-          }}
-        >
-          <DialogContent className="w-full h-full max-w-none m-0 p-0 rounded-none border-none bg-background [&>button]:hidden">
-            {selectedUser && (
-              <UserRoleAssignment
-                key={selectedUser.id}
-                user={selectedUser}
-                allRoles={domainRoles}
-                onUpdateUserRole={handleUpdateUserRole}
-                onBack={() => setSelectedUserId(null)}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
     );
   }
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-[calc(100dvh-16rem)] min-h-[28rem] rounded-r3 border bg-background">
-      <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+    <ResizablePanelGroup storageKey="hr-admin-authority-users" className="h-[calc(100dvh-16rem)] min-h-[28rem] rounded-r3 border border-solid border-stroke-neutral-subtle bg-bg-layer-default">
+      <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="flex flex-col">
         {isLoading ? (
           <UserListSkeleton />
         ) : (
@@ -156,8 +148,8 @@ const UserManagementPanel = () => {
           />
         )}
       </ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel defaultSize={75}>
+      <ResizableHandle label={t('department.resizeLabel')} />
+      <ResizablePanel className="flex flex-col">
         {isLoading ? (
           <UserRoleAssignmentSkeleton />
         ) : selectedUser ? (
@@ -168,7 +160,7 @@ const UserManagementPanel = () => {
             onUpdateUserRole={handleUpdateUserRole}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
+          <div className="flex h-full items-center justify-center text-t4 text-fg-neutral-muted">
             {t('authority.selectUserToManage')}
           </div>
         )}

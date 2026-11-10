@@ -1684,6 +1684,7 @@ admin,authority.selectAllShort,모두,All
 admin,authority.selectAllOf,{{name}} 권한 모두 선택,Select all {{name}} permissions
 admin,authority.moreFor,{{name}} 더보기,More for {{name}}
 admin,authority.backToList,역할 목록,Role list
+admin,authority.backToUserList,사용자 목록,User list
 admin,authority.tabsAria,역할 및 권한,Roles and permissions
 admin,authority.failureTitle,역할을 불러오지 못했어요,Could not load roles
 admin,authority.roleCodeRequired,역할 코드를 입력해주세요.,Enter a role code.

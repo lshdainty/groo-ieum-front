@@ -3,7 +3,7 @@ import { Shield } from 'lucide-react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/shared/ui/shadcn/resizable'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/shared/ds/resizable'
 import { ResultSection } from '@/shared/ds/result-section'
 import { LoadingRegion, Skeleton } from '@/shared/ds/skeleton'
 import { useSnackbar } from '@/shared/ds/snackbar'
@@ -176,12 +176,12 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
         primaryAction={canManage ? { label: t('authority.addRole'), onClick: add } : undefined}
       />
     ) : desktop ? (
-      <ResizablePanelGroup direction='horizontal' className='min-h-[32rem] rounded-r3 border border-stroke-neutral-subtle bg-bg-layer-default' data-role-split>
+      <ResizablePanelGroup storageKey='hr-admin-authority-roles' className='min-h-[32rem] rounded-r3 border border-stroke-neutral-subtle bg-bg-layer-default' data-role-split>
         <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
           {list}
         </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={75}>
+        <ResizableHandle label={t('department.resizeLabel')} />
+        <ResizablePanel>
           {detail ?? <div className='p-x6 text-t4 text-fg-neutral-muted'>{t('authority.selectRoleToView')}</div>}
         </ResizablePanel>
       </ResizablePanelGroup>
