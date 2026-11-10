@@ -45,9 +45,9 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
           <WeekViewMultiDayEventsRow selectedDate={selectedDate} multiDayEvents={multiDayEvents} onEventClick={onEventClick} />
 
           {/* Week header */}
-          <div className='relative z-20 flex border-b'>
+          <div className='relative z-20 flex border-b border-stroke-neutral-subtle'>
             <div className='w-18'></div>
-            <div className='grid flex-1 grid-cols-7 divide-x border-l'>
+            <div className='grid flex-1 grid-cols-7 divide-x divide-stroke-neutral-subtle border-l border-stroke-neutral-subtle'>
               {weekDays.map((day, index) => {
                 const dayOfWeek = day.getDay();
                 const isSunday = dayOfWeek === 0;
@@ -85,8 +85,8 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
             </div>
 
             {/* Week grid */}
-            <div className='relative flex-1 border-l'>
-              <div className='grid grid-cols-7 divide-x'>
+            <div className='relative flex-1 border-l border-stroke-neutral-subtle'>
+              <div className='grid grid-cols-7 divide-x divide-stroke-neutral-subtle'>
                 {weekDays.map((day, dayIndex) => {
                   const dayEvents = singleDayEvents.filter(event => isSameDay(parseISO(event.startDate), day) || isSameDay(parseISO(event.endDate), day));
                   const groupedEvents = groupEvents(dayEvents);
@@ -98,7 +98,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
 
                         return (
                           <div key={hour} className={cn('relative', isDisabled && 'bg-bg-neutral-weak')} style={{ height: '96px' }}>
-                            {index !== 0 && <div className='pointer-events-none absolute inset-x-0 top-0 border-b'></div>}
+                            {index !== 0 && <div className='pointer-events-none absolute inset-x-0 top-0 border-b border-stroke-neutral-subtle'></div>}
 
                             <DroppableTimeBlock date={day} hour={hour} minute={0}>
                               {canAddEvent && (
@@ -111,7 +111,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
                               )}
                             </DroppableTimeBlock>
 
-                            <div className='pointer-events-none absolute inset-x-0 top-1/2 border-b border-dashed'></div>
+                            <div className='pointer-events-none absolute inset-x-0 top-1/2 border-b border-dashed border-stroke-neutral-subtle'></div>
 
                             <DroppableTimeBlock date={day} hour={hour} minute={30}>
                               {canAddEvent && (
