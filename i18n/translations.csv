@@ -420,9 +420,6 @@ work,report.dateRequired,일자,Date
 work,schedule.am,오전,AM
 work,schedule.pm,오후,PM
 work,schedule.title,팀 근무 일정,Team Work Schedule
-vacation,history.compared,지난 달 대비,Compared to last month
-vacation,history.increase,증가,increase
-vacation,history.decrease,감소,decrease
 vacation,application.dayPlaceholder,일,Day
 vacation,application.hourPlaceholder,시간,Hour
 vacation,application.minutePlaceholder,분,Minute
@@ -788,7 +785,6 @@ vacation,stats.empty.description,휴가 현황 정보를 불러올 수 없습니
 vacation,history.remainVacation,남은 휴가,Remaining leave
 vacation,history.usedVacation,쓴 휴가,Leave used
 vacation,history.expectedVacation,쓸 예정,Planned leave
-vacation,history.comparedDesc,지난 달 대비 {{gap}} {{type}},Compared to last month {{gap}} {{type}}
 vacation,request.totalRequest,총 신청,Total Requests
 vacation,request.thisMonth,이번 달 {{count}}건,{{count}} this month
 vacation,request.sinceLastMonth,지난달보다,Since last month
@@ -1065,19 +1061,14 @@ vacation,application.noRequestsDescription,아직 신청한 휴가가 없어요.
 vacation,application.viewDetail,상세보기,View Detail
 vacation,application.cancelRequest,신청취소,Cancel Request
 common,loadFailed,데이터를 불러오는데 실패했습니다.,Failed to load data.
-vacation,history.pageTitle,휴가 내역 통계,Vacation History Stats
 vacation,history.usageTab,사용 내역,Usage History
 vacation,history.grantTab,부여 내역,Grant History
 vacation,history.usagePeriod,사용 기간,Usage Period
 vacation,history.vacationType,휴가 종류,Vacation Type
 vacation,history.usageTime,사용 시간,Used Time
 vacation,history.content,내용,Content
-vacation,history.noUsage,사용 내역이 없습니다.,No usage history.
 vacation,history.grantTime,부여 시간,Grant Time
 vacation,history.remainTime,남은 시간,Remaining Time
-vacation,history.grantDate,부여일,Grant Date
-vacation,history.expiryDate,만료일,Expiry Date
-vacation,history.noGrant,부여 내역이 없습니다.,No grant history.
 vacation,history.tableDate,날짜,Date
 vacation,history.tableReason,사유,Reason
 vacation,history.tableName,이름,Name
@@ -1086,11 +1077,7 @@ vacation,history.tableTotalAnnual,총 연차,Total Annual
 vacation,history.tableUsed,사용,Used
 vacation,history.tableScheduled,예정,Scheduled
 vacation,history.tableRemaining,잔여,Remaining
-vacation,history.noDataMessage,휴가 통계 데이터가 없습니다.,No vacation statistics data available.
-vacation,history.noDataMessageDesc,휴가 사용 내역이 없습니다.,No vacation usage history found.
-vacation,history.monthlyUsageTrend,월별 휴가 사용 추이,Monthly Vacation Usage Trend
 vacation,history.vacationType,휴가 유형,Vacation Type
-vacation,history.vacationTypeDesc,잔여 휴가별 휴가 유형,Vacation type by remaining leave
 culture,dues.transactionHistory,입출금 내역,Transaction History
 culture,dues.tableDate,날짜,Date
 culture,dues.tableName,이름,Name
@@ -1183,8 +1170,6 @@ vacation,approval.confirmReject,반려 확정,Confirm Rejection
 vacation,approval.approveBtn,승인,Approve
 vacation,approval.rejectBtn,반려,Reject
 vacation,approval.approvalNotice,승인 완료되면 변경 내역이 바로 반영됩니다.,Changes will be applied immediately after approval.
-vacation,history.vacationHistory,휴가 이력,Vacation History
-vacation,history.useVacation,휴가 사용,Use Vacation
 login,idLabel,ID,ID
 login,passwordLabel,Password,Password
 login,idPlaceholder,아이디를 입력하세요,Enter your ID
@@ -1353,12 +1338,6 @@ calendar,dayView.happeningNow,진행 중,Happening now
 calendar,dayView.noAppointments,현재 진행 중인 일정이 없습니다,No appointments or consultations at the moment
 calendar,weekView.notAvailable,주간 뷰는 작은 화면에서 사용할 수 없습니다.,Weekly view is not available on smaller devices.
 calendar,weekView.switchView,일간 또는 월간 뷰로 전환해주세요.,Please switch to daily or monthly view.
-vacation,history.noUsageTitle,사용 내역이 없습니다,No usage history
-vacation,history.noUsageDesc,아직 휴가를 사용한 기록이 없습니다.,You have no vacation usage records yet.
-vacation,history.noGrantTitle,부여 내역이 없습니다,No grant history
-vacation,history.noGrantDesc,아직 휴가를 부여받은 기록이 없습니다.,You have no vacation grant records yet.
-vacation,history.empty.typeStats.title,휴가 유형 통계가 없습니다,No Vacation Type Statistics
-vacation,history.empty.typeStats.description,사용 가능한 휴가 유형이 없습니다,No available vacation types
 admin,user.passwordReset,비밀번호 초기화,Reset Password
 admin,user.passwordResetTitle,비밀번호 초기화,Reset Password
 admin,user.passwordResetConfirm,"""{{name}}"" 님의 비밀번호를 초기화할까요? 지금 비밀번호로는 더 로그인할 수 없고, 임시 비밀번호를 메일로 보내요.","Reset the password for ""{{name}}""? The current password will stop working and a temporary password is sent by email."

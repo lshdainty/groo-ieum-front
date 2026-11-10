@@ -79,4 +79,5 @@ export {
 } from '@/entities/vacation/api/vacationQueries'
 
 // UI
-export { VacationMetrics, deltaOf, metricsOf } from './ui/VacationMetrics'
+export { VacationMetrics } from './ui/VacationMetrics'
+export { deltaOf, metricsOf, type Metric } from './model/metrics'
