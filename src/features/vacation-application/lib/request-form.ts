@@ -24,11 +24,11 @@ export const requestFormChanged = (v: RequestFormValues): boolean =>
 
 const minutes = (t: TimeValue): number => t.hour * 60 + t.minute
 
-/** 초과근무 시간 — 지금 셈 그대로: 분은 버리고 시간만(Math.floor), 끝이 시작보다 늦지 않으면 0 */
-export const overtimeHours = (start: TimeValue | null, end: TimeValue | null): number => {
+/** 초과근무 시간(분) — 끝이 시작보다 늦지 않으면 0. 보이는 글만이다(서버 부여 시간은 정책 값) */
+export const overtimeMinutes = (start: TimeValue | null, end: TimeValue | null): number => {
   if (!start || !end) return 0
-  const hours = Math.floor((minutes(end) - minutes(start)) / 60)
-  return hours > 0 ? hours : 0
+  const diff = minutes(end) - minutes(start)
+  return diff > 0 ? diff : 0
 }
 
 /** 결재 단계 수 — min(정책 요구 인원, 가용 결재자 수), 자동 승인이면 고를 것이 없다 */

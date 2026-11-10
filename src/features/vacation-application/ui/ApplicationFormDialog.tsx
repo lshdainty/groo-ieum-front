@@ -30,7 +30,7 @@ import {
   emptyRequestForm,
   hasRequestErrors,
   isOvertimePolicy,
-  overtimeHours,
+  overtimeMinutes,
   requestFormChanged,
   requestFormErrors,
   requestPayloadOf,
@@ -53,6 +53,16 @@ const sumText = (total: number, t: (k: string, o?: Record<string, unknown>) => s
   const { days, hours, minutes } = splitGrantTime(total)
   const parts = [days > 0 ? t('req.form.sumDay', { n: days }) : '', hours > 0 ? t('req.form.sumHour', { n: hours }) : '', minutes > 0 ? t('req.form.sumMinute', { n: minutes }) : ''].filter(Boolean)
   return parts.length > 0 ? parts.join(' ') : t('req.form.sumZero')
+}
+
+/** 초과근무 시간 글 — 분까지("2시간 40분"), 0분이면 "2시간", 0시간이면 "40분", 0 이면 "0시간". 보이는 글만이고 서버로 가지 않는다 */
+const durationText = (total: number, t: (k: string, o?: Record<string, unknown>) => string): string => {
+  const h = Math.floor(total / 60)
+  const m = total % 60
+  if (h > 0 && m > 0) return t('req.form.hoursMinutes', { h, m })
+  if (h > 0) return t('req.form.hoursValue', { count: h })
+  if (m > 0) return t('req.form.minutesValue', { count: m })
+  return t('req.form.hoursValue', { count: 0 })
 }
 
 /** 날짜 줄 칸 — 값은 "YYYY-MM-DD", 누르면 1280 미만 시트 · 이상 Popover 의 Date Picker + [완료] */
@@ -246,7 +256,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
     </Field>
   )
 
-  const hoursValue = overtimeHours(values.start, values.end)
+  const overtimeMin = overtimeMinutes(values.start, values.end)
   const approverRows = Array.from({ length: required }).map((_, i) => {
     const k = i + 1
     const chosen = values.approvers[i] ?? ''
@@ -299,7 +309,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
           onChange={(e) => set('title', e.target.value)}
         />
       </Field>
-      <div className='flex flex-col' data-request-rows>
+      <div className='-mx-x6 flex flex-col' data-request-rows>
         <DayRow title={overtime ? t('req.form.overtimeDay') : t('req.form.day')} value={values.day} onChange={(v) => set('day', v)} error={showErrors && errors.day ? t('req.form.dayRequired') : undefined} />
         {overtime && (
           <>
@@ -311,7 +321,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
               error={showErrors && errors.end ? (errors.end === 'order' ? t('req.form.endAfterStart') : t('req.form.endRequired')) : undefined}
             />
             <List>
-              <ListItem title={t('req.form.hours')} data-overtime-hours suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{t('req.form.hoursValue', { count: hoursValue })}</span>} />
+              <ListItem title={t('req.form.hours')} data-overtime-hours suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{durationText(overtimeMin, t)}</span>} />
             </List>
           </>
         )}
@@ -348,8 +358,10 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
         ) : (
           <>
             {required < policyRequired && <Callout tone='informative'>{t('req.form.reducedCallout', { required: policyRequired, available: required })}</Callout>}
-            <ListHeader as='h3'>{t('req.form.approvers', { n: required })}</ListHeader>
-            {approverRows}
+            <div className='-mx-x6 flex flex-col' data-approver-rows>
+              <ListHeader as='h3'>{t('req.form.approvers', { n: required })}</ListHeader>
+              {approverRows}
+            </div>
           </>
         )}
       </div>

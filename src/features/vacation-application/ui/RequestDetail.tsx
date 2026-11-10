@@ -207,19 +207,22 @@ export function RequestDetail({
                       <span className='block whitespace-pre-wrap [overflow-wrap:break-word]'>{rejection?.rejection_reason || '—'}</span>
                     </Callout>
                   )}
-                  <ListHeader as='h3'>{t('req.detailProgress')}</ListHeader>
-                  <ApprovalSteps request={r} />
-                  <ListHeader as='h3'>{t('req.detailContent')}</ListHeader>
-                  <List>
-                    {r.applicant_name && r.applicant_id !== loginUser?.user_id ? kv(t('req.detailApplicant'), r.applicant_name, 'applicant') : null}
-                    {kv(t('req.detailPolicy'), r.policy_name, 'policy')}
-                    {kv(t('req.detailDate'), requestTargetText(r), 'date')}
-                    {kv(t('req.detailGrant'), r.grant_time_str, 'grant')}
-                    {kv(t('req.detailRequestedAt'), requestedAt, 'requested')}
-                    {r.request_desc?.trim() ? (
-                      <ListItem data-kv='reason' title={t('req.detailReason')} detail={<span className='whitespace-pre-wrap [overflow-wrap:break-word]'>{r.request_desc}</span>} />
-                    ) : null}
-                  </List>
+                  {/* 줄 묶음은 제 좌우 여백(24)을 가지므로 본문 여백을 뺀다 — 줄 글이 머리 · Callout 과 같은 x 에서 시작한다(bottom-sheet.md · dialog.md 본문에 List) */}
+                  <div className='-mx-x6 flex flex-col gap-x2' data-detail-rows>
+                    <ListHeader as='h3'>{t('req.detailProgress')}</ListHeader>
+                    <ApprovalSteps request={r} />
+                    <ListHeader as='h3'>{t('req.detailContent')}</ListHeader>
+                    <List>
+                      {r.applicant_name && r.applicant_id !== loginUser?.user_id ? kv(t('req.detailApplicant'), r.applicant_name, 'applicant') : null}
+                      {kv(t('req.detailPolicy'), r.policy_name, 'policy')}
+                      {kv(t('req.detailDate'), requestTargetText(r), 'date')}
+                      {kv(t('req.detailGrant'), r.grant_time_str, 'grant')}
+                      {kv(t('req.detailRequestedAt'), requestedAt, 'requested')}
+                      {r.request_desc?.trim() ? (
+                        <ListItem data-kv='reason' title={t('req.detailReason')} detail={<span className='whitespace-pre-wrap [overflow-wrap:break-word]'>{r.request_desc}</span>} />
+                      ) : null}
+                    </List>
+                  </div>
                 </div>
               )
             )}
