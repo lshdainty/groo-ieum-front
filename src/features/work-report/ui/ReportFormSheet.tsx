@@ -13,10 +13,10 @@ import { PickerRow } from '@/shared/ui/groo/picker-row'
 import type { WorkCodeResp, WorkGroupWithParts } from '@/entities/work'
 import type { DraftErrors } from '../lib/report-form'
 import { draftChanged } from '../lib/report-form'
-import { partsOf } from '../lib/report-format'
+import { hoursText, partsOf } from '../lib/report-format'
 import { useReportContext } from '../model/ReportContext'
 import type { WorkDraft } from '../model/types'
-import { MAX_HOURS } from './ReportEditRow'
+import { HOURS_STEP, MAX_HOURS } from './ReportEditRow'
 
 /** 고르기 줄 한 칸 — 줄 시트 안에 선택지 라디오처럼 눌러 고른다 */
 function CodeRow({ title, placeholder, value, options, error, onPick, readOnly }: { title: string; placeholder: string; value: string; options: WorkCodeResp[]; error?: string; onPick: (code: string) => void; readOnly?: boolean }) {
@@ -116,7 +116,8 @@ export function ReportFormSheet({
                 value={draft.hours}
                 min={0}
                 max={MAX_HOURS}
-                getValueText={(n) => t('rep.hoursValue', { count: n })}
+                step={HOURS_STEP}
+                  getValueText={(n) => hoursText(n, t)}
                 decrementAriaLabel={t('rep.hoursDecrease')}
                 incrementAriaLabel={t('rep.hoursIncrease')}
                 onValueChange={(n) => onChange({ hours: n })}

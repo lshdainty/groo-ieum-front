@@ -11,11 +11,13 @@ import { TableCell, TableRow } from '@/shared/ds/table'
 import { DayField } from '@/shared/ui/groo/day-field'
 import type { WorkCodeResp, WorkGroupWithParts } from '@/entities/work'
 import type { DraftErrors } from '../lib/report-form'
-import { partsOf } from '../lib/report-format'
+import { hoursText, partsOf } from '../lib/report-format'
 import type { WorkDraft } from '../model/types'
 
 /** 소요 시간 상한 — 지금 그대로(0 ~ 24) */
 export const MAX_HOURS = 24
+/** 소요 시간 한 단계 — 30분(25-4b, 사용자 결정 11-10). 서버 값은 4.5 같은 숫자 그대로 */
+export const HOURS_STEP = 0.5
 
 /**
  * 표 안 편집 줄(데스크톱 — I-25 H 52) — 한 줄 전체 폭(colSpan) · 바탕 bg-layer-default-pressed. 첫 줄 칸: 일자 · 담당자(읽기 전용) · 업무 분류 · 업무 파트 · 업무 구분 · 소요 시간(Quantity Picker 0 ~ 24),
@@ -133,7 +135,8 @@ export function ReportEditRow({
                   value={draft.hours}
                   min={0}
                   max={MAX_HOURS}
-                  getValueText={(n) => t('rep.hoursValue', { count: n })}
+                  step={HOURS_STEP}
+                  getValueText={(n) => hoursText(n, t)}
                   decrementAriaLabel={t('rep.hoursDecrease')}
                   incrementAriaLabel={t('rep.hoursIncrease')}
                   onValueChange={(n) => onChange({ hours: n })}
