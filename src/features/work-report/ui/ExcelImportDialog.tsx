@@ -214,7 +214,9 @@ export function ExcelImportDialog({
                         <TableHead>{t('rep.xColStatus')}</TableHead>
                         <TableHead>{t('rep.xColWho')}</TableHead>
                         <TableHead>{t('rep.colWork')}</TableHead>
-                        <TableHead align='end'>{t('rep.colHours')}</TableHead>
+                        <TableHead align='end' className={`w-[96px] whitespace-normal ${WORD}`}>
+                          {t('rep.colHours')}
+                        </TableHead>
                         <TableHead>{t('rep.xColFix')}</TableHead>
                         <TableHead>
                           <span className='sr-only'>{t('rep.xDrop')}</span>
@@ -243,8 +245,8 @@ export function ExcelImportDialog({
                             )}
                           </TableCell>
                           {r.fixable.length > 0 && r.fixable.some((f) => f !== 'manager') ? (
-                            <TableCell className='min-w-[170px] whitespace-normal py-x2_5'>
-                              <div className='flex w-[170px] flex-col gap-x1_5'>
+                            <TableCell className='w-[202px] min-w-[120px] whitespace-normal py-x2_5'>
+                              <div className='flex w-full flex-col gap-x1_5 [contain:inline-size]'>
                                 {r.fixable.includes('group') ? (
                                   <div data-import-fix='group'>
                                     <Select size='medium' aria-label={fieldLabel(t('rep.fGroup'), r)} placeholder={t('rep.groupPlaceholder')} value={r.groupCode ?? ''} disabled={codesBlocked} aria-invalid={r.errors.includes('xGroupInvalid') || undefined} onValueChange={(v) => fix(r.id, { groupCode: v })}>

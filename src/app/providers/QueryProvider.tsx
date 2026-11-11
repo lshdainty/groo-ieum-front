@@ -35,6 +35,11 @@ export function QueryProvider({ children }: QueryProviderProps) {
           retry: retryOnlyServerErrors,
           retryDelay,
         },
+        // 쓰기는 오프라인이어도 바로 보낸다 — 기본값('online')은 오프라인 동안 쓰기를 멈춰 두어, 확인창 · 폼이 로딩인 채
+        // 끝나지 않고 확정 중이라 [취소] 로도 닫히지 않았다. 바로 실패시켜 "요청이 닿지 않음" 실패 글로 알린다(shared/api/failure.ts)
+        mutations: {
+          networkMode: 'always',
+        },
       },
     })
   }
