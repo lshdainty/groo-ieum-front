@@ -35,7 +35,8 @@ export const FAILURE_CODE_KEYS: Record<string, string> = {
   DEPARTMENT_004: 'failure.code.deptCompany',
   DEPARTMENT_005: 'failure.code.deptSelf',
   DEPARTMENT_006: 'failure.code.deptCircular',
-  SCHEDULE_002: 'failure.code.scheduleDate',
+  // 쓰기에서 SCHEDULE_002 는 끝난 일정을 지우려 할 때뿐이다(수정도 서버가 지운 뒤 다시 만들어 같은 거절) — 기본은 고치기 글, 삭제 확인창은 DELETE_CODE_KEYS
+  SCHEDULE_002: 'failure.code.scheduleEnded',
   SCHEDULE_003: 'failure.code.scheduleConflict',
   PERMISSION_003: 'failure.code.roleExists',
   PERMISSION_005: 'failure.code.permissionExists',
@@ -71,6 +72,11 @@ export const FAILURE_CODE_KEYS: Record<string, string> = {
   SSO_002: 'failure.code.notFound',
   COMMON_404: 'failure.code.notFound',
   FILE_001: 'failure.code.notFound',
+}
+
+/** 삭제 확인창에서만 글을 바꾸는 코드 — 같은 거절이라도 지우는 자리에서는 지우는 말로 한다(confirm-fail.ts) */
+export const DELETE_CODE_KEYS: Record<string, string> = {
+  SCHEDULE_002: 'failure.code.scheduleEndedDelete',
 }
 
 /*
