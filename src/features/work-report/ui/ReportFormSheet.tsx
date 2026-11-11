@@ -16,7 +16,7 @@ import { draftChanged } from '../lib/report-form'
 import { hoursText, partsOf } from '../lib/report-format'
 import { useReportContext } from '../model/ReportContext'
 import type { WorkDraft } from '../model/types'
-import { HOURS_STEP, MAX_HOURS } from './ReportEditRow'
+import { HOURS_STEP, MAX_HOURS, snapHours } from '../lib/report-form'
 
 /** 고르기 줄 한 칸 — 줄 시트 안에 선택지 라디오처럼 눌러 고른다 */
 function CodeRow({ title, placeholder, value, options, error, onPick, readOnly }: { title: string; placeholder: string; value: string; options: WorkCodeResp[]; error?: string; onPick: (code: string) => void; readOnly?: boolean }) {
@@ -120,7 +120,7 @@ export function ReportFormSheet({
                   getValueText={(n) => hoursText(n, t)}
                 decrementAriaLabel={t('rep.hoursDecrease')}
                 incrementAriaLabel={t('rep.hoursIncrease')}
-                onValueChange={(n) => onChange({ hours: n })}
+                onValueChange={(n) => onChange({ hours: snapHours(draft.hours, n) })}
               />
             </Field>
             <Field label={t('rep.fContent')}>
