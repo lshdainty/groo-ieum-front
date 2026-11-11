@@ -17,6 +17,7 @@ import {
 } from '@/shared/ds/table'
 import { TablePagination, type TablePaginationValue } from '@/shared/ds/table-pagination'
 import { VacationStatusBadge } from '@/shared/ui/groo/vacation-status'
+import { grantTimeText } from '@/shared/lib/groo/grant-time-text'
 import type { GetUserRequestedVacationsResp } from '@/entities/vacation'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { useWide } from '@/widgets/layout/lib/use-wide'
@@ -87,7 +88,7 @@ export function RequestListContent({
   cancelUserId?: string
   limit?: number
 }) {
-  const { t } = useTranslation('vacation')
+  const { t, i18n } = useTranslation('vacation')
   const desktop = useDesktop()
   const wide = useWide()
   const [pageValue, setPageValue] = useState<TablePaginationValue>({ page: 1, pageSize: PAGE_SIZES[0] })
@@ -141,7 +142,7 @@ export function RequestListContent({
                   {wide && <TableCell className='whitespace-nowrap'>{row.vacation_type_name}</TableCell>}
                   <TableCell className='min-w-[120px] whitespace-normal'>{requestTargetText(row)}</TableCell>
                   <TableCell align='end' className='whitespace-nowrap'>
-                    {row.grant_time_str}
+                    {grantTimeText(row.grant_time, row.grant_time_str, i18n.language, t)}
                   </TableCell>
                   <TableCell className='min-w-[160px] whitespace-normal'>
                     <span className='flex flex-col items-start gap-x1'>
@@ -181,7 +182,7 @@ export function RequestListContent({
                 title={<span className={NAME}>{requestTitle(row)}</span>}
                 detail={
                   <>
-                    <span className='block'>{t('req.rowDetail', { type: row.vacation_type_name, date: requestTargetText(row), grant: row.grant_time_str })}</span>
+                    <span className='block'>{t('req.rowDetail', { type: row.vacation_type_name, date: requestTargetText(row), grant: grantTimeText(row.grant_time, row.grant_time_str, i18n.language, t) })}</span>
                     <span className='block'>{progressText(row, t)}</span>
                   </>
                 }

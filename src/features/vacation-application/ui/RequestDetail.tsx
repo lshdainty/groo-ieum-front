@@ -12,6 +12,7 @@ import { Textarea } from '@/shared/ds/textarea'
 import { cn } from '@/shared/lib/cn'
 import { formatClock, formatDayText } from '@/shared/lib/date-text'
 import { VacationStatusBadge } from '@/shared/ui/groo/vacation-status'
+import { grantTimeText } from '@/shared/lib/groo/grant-time-text'
 import { readWriteFailure } from '@/shared/ui/groo/write-error'
 import { useUser } from '@/entities/session'
 import { usePostApproveVacationMutation, usePostRejectVacationMutation, type ApproverInfo, type GetUserRequestedVacationsResp } from '@/entities/vacation'
@@ -100,7 +101,7 @@ export function RequestDetail({
   cancelUserId?: string
   latest?: (id: number) => GetUserRequestedVacationsResp | undefined
 }) {
-  const { t } = useTranslation('vacation')
+  const { t, i18n } = useTranslation('vacation')
   const { t: tc } = useTranslation('common')
   const { loginUser } = useUser()
   const snackbar = useSnackbar()
@@ -216,7 +217,7 @@ export function RequestDetail({
                       {r.applicant_name && r.applicant_id !== loginUser?.user_id ? kv(t('req.detailApplicant'), r.applicant_name, 'applicant') : null}
                       {kv(t('req.detailPolicy'), r.policy_name, 'policy')}
                       {kv(t('req.detailDate'), requestTargetText(r), 'date')}
-                      {kv(t('req.detailGrant'), r.grant_time_str, 'grant')}
+                      {kv(t('req.detailGrant'), grantTimeText(r.grant_time, r.grant_time_str, i18n.language, t), 'grant')}
                       {kv(t('req.detailRequestedAt'), requestedAt, 'requested')}
                       {r.request_desc?.trim() ? (
                         <ListItem data-kv='reason' title={t('req.detailReason')} detail={<span className='whitespace-pre-wrap [overflow-wrap:break-word]'>{r.request_desc}</span>} />

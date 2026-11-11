@@ -1877,6 +1877,8 @@ vacation,req.form.sumDay,{{n}}일,{{n}}d
 vacation,req.form.sumHour,{{n}}시간,{{n}}h
 vacation,req.form.sumMinute,{{n}}분,{{n}}m
 vacation,req.form.sumZero,0시간,0h
+vacation,grantText.day,{{count}}일,{{count}} days
+vacation,grantText.day_one,{{count}}일,{{count}} day
 vacation,req.form.reason,사유,Reason
 vacation,req.form.reasonVacationPlaceholder,휴가를 쓰는 까닭을 적어주세요,Tell us why you need the leave
 vacation,req.form.reasonCompPlaceholder,초과근무를 하게 된 까닭을 적어주세요,Tell us why you worked overtime
