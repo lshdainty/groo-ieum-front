@@ -194,7 +194,7 @@ const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFo
                   }}
                   data-photo-delete
                 >
-                  {t('edit.deletePhoto')}
+                  {t('edit.removePhoto')}
                 </Button>
               )}
             </div>
