@@ -14,8 +14,15 @@ export const EMPTY_DRAFT: RoleDraft = { code: '', name: '', desc: '', perms: [] 
 
 const same = (a: string[], b: string[]): boolean => a.length === b.length && [...a].sort().join('|') === [...b].sort().join('|')
 
-/** 어느 요청이 필요한가 — 이름은 서버가 바꾸지 않는다(PUT 은 설명 · 권한만). 설명이 바뀌었으면 역할 수정, 권한이 바뀌었으면 권한 수정 */
-export const changesOf = (base: RoleDraft, now: RoleDraft): { desc: boolean; perms: boolean } => ({
+/** 역할 이름 상한 — 서버 roles.role_name 길이 20(넘으면 400) */
+export const ROLE_NAME_MAX = 20
+
+/**
+ * 어느 요청이 필요한가 — 이름 · 설명이 바뀌었으면 역할 수정(바뀐 칸만), 권한이 바뀌었으면 권한 수정.
+ * 이름은 서버가 앞뒤 공백을 걷으므로 걷은 값으로 견준다. 설명은 비워도 된다(빈 글을 보내면 서버가 설명을 지운다).
+ */
+export const changesOf = (base: RoleDraft, now: RoleDraft): { name: boolean; desc: boolean; perms: boolean } => ({
+  name: base.name !== now.name.trim(),
   desc: base.desc !== now.desc,
   perms: !same(base.perms, now.perms),
 })
