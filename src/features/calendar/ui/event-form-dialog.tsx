@@ -56,8 +56,9 @@ export function EventFormDialog({ open, onClose, event, start, fixedUser, onDele
   const { loginUser } = useUser()
   const { hasAnyPermission } = usePermission()
   const editing = !!event
-  const canUseVacation = hasAnyPermission(['VACATION:USE', 'VACATION:MANAGE'])
-  const canUseSchedule = hasAnyPermission(['SCHEDULE:WRITE', 'SCHEDULE:MANAGE'])
+  // 서버 등록 검사와 같다 — 휴가는 VACATION:USE, 일정은 SCHEDULE:WRITE 가 있어야 한다(MANAGE 는 남의 것까지 넓혀 줄 뿐)
+  const canUseVacation = hasAnyPermission(['VACATION:USE'])
+  const canUseSchedule = hasAnyPermission(['SCHEDULE:WRITE'])
   const canManageVacation = hasAnyPermission(['VACATION:MANAGE'])
   const loginId = loginUser?.user_id || ''
 

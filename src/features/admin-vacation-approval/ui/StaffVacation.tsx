@@ -25,7 +25,7 @@ export function StaffVacation() {
   const { t } = useTranslation('vacation')
   const { t: tc } = useTranslation('common')
   const desktop = useDesktop()
-  const { hasAnyPermission } = usePermission()
+  const { hasAnyPermission, hasAllPermissions } = usePermission()
   const { selectedUserId, setSelectedUserId, selectedYear } = useVacationContext()
   const usersQuery = useUsersQuery({ quiet: true })
   const [grantOpen, setGrantOpen] = useState(false)
@@ -38,8 +38,8 @@ export function StaffVacation() {
   const selected = people.find((p) => p.id === selectedUserId)
   const selectedUser = (usersQuery.data ?? []).find((u) => u.user_id === selectedUserId)
   const canGrant = hasAnyPermission(['VACATION:GRANT', 'VACATION:MANAGE'])
-  // 대리 사용은 VACATION:MANAGE 만(서버 규칙 — 대상이 로그인한 사람과 다르면 MANAGE). 결재자(APPROVER)에게는 이 단추가 없다
-  const canUse = hasAnyPermission(['VACATION:MANAGE'])
+  // 대리 사용은 VACATION:USE + VACATION:MANAGE(서버 규칙 — 등록은 USE, 대상이 로그인한 사람과 다르면 MANAGE 도). 결재자(APPROVER)에게는 이 단추가 없다
+  const canUse = hasAllPermissions(['VACATION:USE', 'VACATION:MANAGE'])
 
   const actions = (
     <>
