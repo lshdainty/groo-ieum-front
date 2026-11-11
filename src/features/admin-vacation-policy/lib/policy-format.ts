@@ -1,6 +1,7 @@
 import type { TFunction } from 'i18next'
 
 import type { GetVacationPoliciesResp } from '@/entities/vacation-policy'
+import { grantTimeText } from '@/shared/lib/groo/grant-time-text'
 
 type Named = { code: string; name: string }[] | undefined
 
@@ -31,14 +32,14 @@ export interface PolicyNames {
   expirationTypes: Named
 }
 
-/** 줄 ① "{부여 방법} · {휴가 종류} · {부여 시간} · {반복 규칙}" — 가변이면 "입력한 시간", 반복 규칙은 반복 부여만 */
-export const policyRuleLine = (t: TFunction, policy: GetVacationPoliciesResp, names: PolicyNames): string => {
+/** 줄 ① "{부여 방법} · {휴가 종류} · {부여 시간} · {반복 규칙}" — 가변이면 "입력한 시간", 부여 시간 0 이면 "제한 없음"(숫자로 가른다 — 서버 글은 언어마다 달라 "0일" · "0day(s)"), 반복 규칙은 반복 부여만 */
+export const policyRuleLine = (t: TFunction, policy: GetVacationPoliciesResp, names: PolicyNames, language: string): string => {
   const time =
     policy.is_flexible_grant === 'Y'
       ? t('adminPolicy.flexibleTime')
-      : policy.grant_time_str === '0' || policy.grant_time_str === '0일'
+      : policy.grant_time === 0
         ? t('policy.noLimit')
-        : policy.grant_time_str
+        : grantTimeText(policy.grant_time, policy.grant_time_str, language, t)
   const parts = [grantMethodLabel(t, policy.grant_method), nameOf(names.vacationTypes, policy.vacation_type), time]
   if (policy.grant_method === 'REPEAT_GRANT' && policy.repeat_grant_desc) parts.push(policy.repeat_grant_desc)
   return parts.filter(Boolean).join(' · ')

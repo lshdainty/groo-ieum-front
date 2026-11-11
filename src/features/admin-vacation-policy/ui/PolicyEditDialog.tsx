@@ -39,7 +39,7 @@ export function PolicyEditDialog({
   onOpenChange: (open: boolean) => void
   names: PolicyNames
 }) {
-  const { t } = useTranslation('vacation')
+  const { t, i18n } = useTranslation('vacation')
   const { t: tc } = useTranslation('common')
   const snackbar = useSnackbar()
   const put = usePutVacationPolicyMutation()
@@ -126,7 +126,7 @@ export function PolicyEditDialog({
               {policy && (
                 <Field label={t('adminPolicy.rules')} description={t('adminPolicy.rulesHelp')} readOnly>
                   <div className='rounded-r3 bg-bg-disabled px-x4 py-x3 text-t5 font-normal text-fg-neutral-muted' data-policy-rules>
-                    <p className='m-0 [overflow-wrap:break-word]'>{policyRuleLine(t, policy, names)}</p>
+                    <p className='m-0 [overflow-wrap:break-word]'>{policyRuleLine(t, policy, names, i18n.language)}</p>
                     <p className='m-0 [overflow-wrap:break-word]'>{policyValidityLine(t, policy, names)}</p>
                   </div>
                 </Field>

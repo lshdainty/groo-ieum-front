@@ -12,8 +12,8 @@ import { metricsOf } from '@/entities/vacation/model/metrics'
  * "쓸 예정" 아래 가장 가까운 쓸 날은 응답에 날짜 키가 없어 그리지 않는다.
  */
 export function VacationMetrics({ data, layout }: { data: GetUserVacationStatsResp; layout: 'cards' | 'band' | 'inline' }) {
-  const { t } = useTranslation('vacation')
-  const metrics = metricsOf(data, t)
+  const { t, i18n } = useTranslation('vacation')
+  const metrics = metricsOf(data, t, i18n.language)
 
   if (layout === 'cards') {
     return (

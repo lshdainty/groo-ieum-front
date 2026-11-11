@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useGrantTimeText } from '@/shared/lib/groo/use-grant-time-text'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
 import {
@@ -22,6 +23,7 @@ import { dayTicks, formatUsedTime, monthBars } from '@/features/vacation-history
  */
 export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthlyVacationStatsResp[]; year?: number }) => {
   const { t } = useTranslation('vacation')
+  const gt = useGrantTimeText()
   const legendId = useId()
   const bars = monthBars(data, year)
   const sum = bars.reduce((a, m) => a + m.used_time, 0)
@@ -30,7 +32,10 @@ export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthly
   const ticks = dayTicks(Math.max(0, ...bars.map((m) => m.used_time)))
   const axisWidth = useAxisWidth(ticks.map((n) => t('history.chart.dayAxis', { n })))
   const monthText = (month: unknown) => t('history.chart.monthAxis', { month: String(month) })
-  const strOf = (month: unknown) => bars.find((m) => m.month === Number(month))?.used_time_str ?? ''
+  const strOf = (month: unknown) => {
+    const bar = bars.find((m) => m.month === Number(month))
+    return bar ? gt(bar.used_time, bar.used_time_str) : ''
+  }
   const name = t(year != null ? 'history.chart.monthName' : 'history.chart.monthNameNoYear', { year, total })
 
   return (
@@ -59,7 +64,7 @@ export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthly
       <ChartDataTable
         caption={name}
         columns={[t('history.chart.tableMonth'), t('history.usedVacation')]}
-        rows={bars.map((m) => [monthText(m.month), m.used_time_str])}
+        rows={bars.map((m) => [monthText(m.month), gt(m.used_time, m.used_time_str)])}
       />
     </div>
   )

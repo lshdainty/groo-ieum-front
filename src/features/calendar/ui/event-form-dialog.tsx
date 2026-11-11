@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useGrantTimeText } from '@/shared/lib/groo/use-grant-time-text'
 
 import { Avatar } from '@/shared/ds/avatar'
 import { Button } from '@/shared/ds/button'
@@ -104,6 +105,7 @@ export function EventFormDialog({ open, onClose, event, start, fixedUser, onDele
   const available = useAvailableVacationsQuery(targetId, startIso, { quiet: true, enabled: open && isVacation })
   const vacationTypes = useVacationTypesQuery({ quiet: true })
 
+  const gt = useGrantTimeText()
   const addEvent = useAddEvent()
   const updateEvent = useUpdateEvent()
 
@@ -112,14 +114,14 @@ export function EventFormDialog({ open, onClose, event, start, fixedUser, onDele
     setValues((v) => ({ ...v, startDate: day, endDate: v.endDate && day > v.endDate ? day : v.endDate }))
 
   const vacationOptions = useMemo(() => {
-    const rows = (available.data?.vacations ?? []).map((v) => ({ code: v.vacation_type, name: v.vacation_type_name, remain: v.remain_time_str as string | null }))
+    const rows = (available.data?.vacations ?? []).map((v) => ({ code: v.vacation_type, name: v.vacation_type_name, remain: gt(v.remain_time, v.remain_time_str) as string | null }))
     // 고치는 기록의 쓸 휴가가 지금 쓸 수 있는 목록에 없으면(다 쓴 휴가) 이름만이라도 보인다
     if (editing && event!.vacationType && !rows.some((r) => r.code === event!.vacationType)) {
       const info = vacationTypes.data?.find((v) => v.code === event!.vacationType)
       if (info) rows.push({ code: info.code, name: info.name, remain: null })
     }
     return rows
-  }, [available.data, editing, event, vacationTypes.data])
+  }, [available.data, editing, event, vacationTypes.data, gt])
   const usedLabel = (code: string): string => {
     const row = vacationOptions.find((r) => r.code === code)
     if (!row) return ''

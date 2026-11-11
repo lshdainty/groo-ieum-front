@@ -16,13 +16,13 @@ import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
  * 증감은 ds Delta(▲ 빨강 · ▼ 파랑 + "지난달보다") 한 번 — 배지와 설명 두 번 쓰던 것을 하나로.
  */
 export const VacationStatsWidget = () => {
-  const { t } = useTranslation('vacation')
+  const { t, i18n } = useTranslation('vacation')
   const desktop = useDesktop()
   const { loginUser } = useUser()
   const userId = loginUser?.user_id || ''
   const today = useMemo(() => `${dayjs().format('YYYY-MM-DD')}T23:59:59`, [])
   const query = useUserVacationStatsQuery(userId, today, { quiet: true })
-  const metrics = query.data ? metricsOf(query.data, t) : []
+  const metrics = query.data ? metricsOf(query.data, t, i18n.language) : []
 
   return (
     <WidgetFrame id='vacation-stats' body={desktop ? 'content' : 'list'}>

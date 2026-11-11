@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { CalendarX2, Pencil, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useGrantTimeText } from '@/shared/lib/groo/use-grant-time-text'
 
 import { InfiniteListEnd } from '@/shared/ds/infinite-list'
 import { List, ListButtonItem, ListItem } from '@/shared/ds/list'
@@ -71,6 +72,7 @@ export function VacationHistoryContent({
   status?: RecordsStatus
 }) {
   const { t } = useTranslation('vacation')
+  const gt = useGrantTimeText()
   const { t: tc } = useTranslation('common')
   const desktop = useDesktop()
   const [tab, setTab] = useState<RecordTab>('usages')
@@ -124,7 +126,7 @@ export function VacationHistoryContent({
             <TableRowHeader className={`min-w-[200px] whitespace-normal ${WORD}`}>{formatPeriodText(u.start_date, u.end_date)}</TableRowHeader>
             <TableCell className={`min-w-[96px] whitespace-normal ${WORD}`}>{u.vacation_time_type_name}</TableCell>
             <TableCell align='end' className='whitespace-nowrap'>
-              {u.used_time_str}
+              {gt(u.used_time, u.used_time_str)}
             </TableCell>
             <TableCell className='min-w-[200px] whitespace-pre-wrap [overflow-wrap:anywhere]'>{u.vacation_usage_desc}</TableCell>
             {anyAction &&
@@ -165,10 +167,10 @@ export function VacationHistoryContent({
             <TableRowHeader className={`min-w-[96px] whitespace-normal ${WORD}`}>{g.vacation_type_name}</TableRowHeader>
             <TableCell className='min-w-[200px] whitespace-pre-wrap [overflow-wrap:anywhere]'>{g.vacation_grant_desc}</TableCell>
             <TableCell align='end' className='whitespace-nowrap'>
-              {g.grant_time_str}
+              {gt(g.grant_time, g.grant_time_str)}
             </TableCell>
             <TableCell align='end' className='whitespace-nowrap'>
-              {g.remain_time_str}
+              {gt(g.remain_time, g.remain_time_str)}
             </TableCell>
             <TableCell className='min-w-[160px]'>{formatValidity(g.grant_date, g.expiry_date)}</TableCell>
           </TableRow>
@@ -184,7 +186,7 @@ export function VacationHistoryContent({
           'data-usage-id': u.vacation_usage_id,
           title: <span className={WORD}>{u.vacation_time_type_name}</span>,
           detail: <span className='[overflow-wrap:anywhere]'>{joinDetail(formatPeriodText(u.start_date, u.end_date), u.vacation_usage_desc)}</span>,
-          suffix: <span className='text-t5 font-bold tabular-nums text-fg-neutral'>{u.used_time_str}</span>,
+          suffix: <span className='text-t5 font-bold tabular-nums text-fg-neutral'>{gt(u.used_time, u.used_time_str)}</span>,
           align: 'top' as const,
         }
         return usageActions(u) && onEdit ? (
@@ -207,8 +209,8 @@ export function VacationHistoryContent({
           align='top'
           suffix={
             <span className='flex flex-col items-end'>
-              <span className='text-t5 font-bold tabular-nums text-fg-neutral'>{g.remain_time_str}</span>
-              <span className='text-t3 font-normal text-fg-neutral-subtle'>{t('history.grantRemainOf', { total: g.grant_time_str })}</span>
+              <span className='text-t5 font-bold tabular-nums text-fg-neutral'>{gt(g.remain_time, g.remain_time_str)}</span>
+              <span className='text-t3 font-normal text-fg-neutral-subtle'>{t('history.grantRemainOf', { total: gt(g.grant_time, g.grant_time_str) })}</span>
             </span>
           }
         />
