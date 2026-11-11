@@ -23,7 +23,7 @@ import {
 } from '@/shared/ds/table'
 import { TablePagination, type TablePaginationValue } from '@/shared/ds/table-pagination'
 import { ConfirmDialog, useConfirmTarget } from '@/shared/ui/confirm'
-import { dsMoney } from '@/shared/ds/i18n'
+import { dsMoney, withCommaBreaks } from '@/shared/ds/i18n'
 import { useDeleteDuesMutation, useYearDuesQuery, type GetYearDuesResp } from '@/entities/dues'
 import { usePermission } from '@/entities/session'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
@@ -190,9 +190,9 @@ export const DuesHistory = ({ year }: { year: number }) => {
                       </TableCell>
                       <TableCell className='whitespace-normal [overflow-wrap:break-word] [word-break:keep-all]'>{row.dues_detail}</TableCell>
                       <TableCell align='end' className={cn('font-bold', row.dues_calc === 'PLUS' && 'text-fg-brand')} data-amount={row.dues_calc}>
-                        {signedMoney(row.dues_amount, row.dues_calc)}
+                        {withCommaBreaks(signedMoney(row.dues_amount, row.dues_calc))}
                       </TableCell>
-                      <TableCell align='end'>{balanceMoney(row.total_dues)}</TableCell>
+                      <TableCell align='end'>{withCommaBreaks(balanceMoney(row.total_dues))}</TableCell>
                       {manage && (
                         <TableMoreCell label={name}>
                           <ResponsiveMenuContent title={name}>
@@ -215,9 +215,9 @@ export const DuesHistory = ({ year }: { year: number }) => {
                   const suffix = (
                     <span className='flex flex-col items-end'>
                       <span className={cn('text-t5 font-bold tabular-nums', row.dues_calc === 'PLUS' ? 'text-fg-brand' : 'text-fg-neutral')} data-amount={row.dues_calc}>
-                        {signedMoney(row.dues_amount, row.dues_calc)}
+                        {withCommaBreaks(signedMoney(row.dues_amount, row.dues_calc))}
                       </span>
-                      <span className='text-t2 font-normal text-fg-neutral-subtle'>{t('dues.remaining', { amount: balanceMoney(row.total_dues) })}</span>
+                      <span className='text-t2 font-normal text-fg-neutral-subtle'>{withCommaBreaks(t('dues.remaining', { amount: balanceMoney(row.total_dues) }))}</span>
                     </span>
                   )
                   const title = row.dues_detail?.trim() || row.dues_user_name?.trim() || signedMoney(row.dues_amount, row.dues_calc)
@@ -256,11 +256,11 @@ export const DuesHistory = ({ year }: { year: number }) => {
         onOpenChange={deleteConfirm.onOpenChange}
         title={t('dues.deleteTitle')}
         // 내용이 비어 있으면 그 조각을 뺀다(빈칸이 겹치지 않게)
-        description={t(duesRow?.dues_detail?.trim() ? 'dues.deleteConfirm' : 'dues.deleteConfirmNoContent', {
+        description={withCommaBreaks(t(duesRow?.dues_detail?.trim() ? 'dues.deleteConfirm' : 'dues.deleteConfirmNoContent', {
           date: duesRow ? formatDuesDate(duesRow.dues_date) : '',
           content: duesRow?.dues_detail?.trim(),
           amount: dsMoney(Math.abs(duesRow?.dues_amount ?? 0)),
-        })}
+        }))}
         // 실패하면 던진다 — 확인창이 닫히고 실패 알림(Snackbar + 다시 시도)이 뜬다
         onConfirm={async () => {
           if (duesRow) await deleteDues.mutateAsync(duesRow.dues_id)

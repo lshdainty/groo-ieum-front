@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
 import { CardStat } from '@/shared/ds/card'
+import { withCommaBreaks } from '@/shared/ds/i18n'
 import { List, ListItem } from '@/shared/ds/list'
 import { LoadingRegion } from '@/shared/ds/skeleton'
 import { useMonthBirthDuesQuery, useYearOperationDuesQuery } from '@/entities/dues'
@@ -28,7 +29,7 @@ export const SummaryMetrics = ({ metrics, desktop }: { metrics: SummaryMetric[];
           data-metric={m.id}
           title={m.label}
           detail={m.description}
-          suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{m.value}</span>}
+          suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{withCommaBreaks(m.value)}</span>}
           suffixText
         />
       ))}

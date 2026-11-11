@@ -3,7 +3,7 @@ import { Gift } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/cn'
-import { dsMoney } from '@/shared/ds/i18n'
+import { dsMoney, withCommaBreaks } from '@/shared/ds/i18n'
 import { LoadingRegion } from '@/shared/ds/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ds/tooltip'
 import { useUsersMonthBirthDuesQuery } from '@/entities/dues'
@@ -148,7 +148,7 @@ export const Matrix = ({ rows, nameColumn: nameWanted }: { rows: Row[]; nameColu
                             <span className='sr-only'>{text}</span>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent>{text}</TooltipContent>
+                        <TooltipContent>{withCommaBreaks(text)}</TooltipContent>
                       </Tooltip>
                   </td>
                 )

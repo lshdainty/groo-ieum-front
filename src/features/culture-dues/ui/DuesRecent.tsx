@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/cn'
+import { withCommaBreaks } from '@/shared/ds/i18n'
 import { Badge } from '@/shared/ds/badge'
 import { List, ListItem } from '@/shared/ds/list'
 import { Skeleton } from '@/shared/ds/skeleton'
@@ -36,9 +37,9 @@ export const DuesRecent = ({ rows, desktop }: { rows: GetYearDuesResp[]; desktop
               </TableCell>
               <TableCell className='whitespace-normal [overflow-wrap:break-word] [word-break:keep-all]'>{row.dues_detail}</TableCell>
               <TableCell align='end' className={cn('font-bold', row.dues_calc === 'PLUS' && 'text-fg-brand')} data-amount={row.dues_calc}>
-                {signedMoney(row.dues_amount, row.dues_calc)}
+                {withCommaBreaks(signedMoney(row.dues_amount, row.dues_calc))}
               </TableCell>
-              <TableCell align='end'>{balanceMoney(row.total_dues)}</TableCell>
+              <TableCell align='end'>{withCommaBreaks(balanceMoney(row.total_dues))}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -60,9 +61,9 @@ export const DuesRecent = ({ rows, desktop }: { rows: GetYearDuesResp[]; desktop
             suffix={
               <span className='flex flex-col items-end'>
                 <span className={cn('text-t5 font-bold tabular-nums', row.dues_calc === 'PLUS' ? 'text-fg-brand' : 'text-fg-neutral')} data-amount={row.dues_calc}>
-                  {signedMoney(row.dues_amount, row.dues_calc)}
+                  {withCommaBreaks(signedMoney(row.dues_amount, row.dues_calc))}
                 </span>
-                <span className='text-t2 font-normal text-fg-neutral-subtle'>{t('dues.remaining', { amount: balanceMoney(row.total_dues) })}</span>
+                <span className='text-t2 font-normal text-fg-neutral-subtle'>{withCommaBreaks(t('dues.remaining', { amount: balanceMoney(row.total_dues) }))}</span>
               </span>
             }
           />
