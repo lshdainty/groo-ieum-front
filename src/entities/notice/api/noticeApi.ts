@@ -31,6 +31,17 @@ export const noticeApi = {
     return resp.data
   },
 
+  /** 관리용 상세 — 본문까지 주고 조회수는 올리지 않는다(NOTICE:MANAGE). 공지 수정 폼이 본문을 채울 때 쓴다 */
+  getNoticeForManage: async (noticeId: number): Promise<NoticeResp> => {
+    const resp: ApiResponse<NoticeResp> = await apiClient.request({
+      method: 'get',
+      url: `/notice/${noticeId}/manage`
+    })
+
+    if (!resp.success) throw new Error(resp.message)
+    return resp.data
+  },
+
   getNotices: async (page: number = 0, size: number = 10): Promise<NoticePageResp> => {
     const resp: ApiResponse<NoticePageResp> = await apiClient.request({
       method: 'get',

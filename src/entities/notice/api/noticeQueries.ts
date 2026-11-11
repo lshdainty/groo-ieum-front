@@ -40,6 +40,19 @@ export const useNoticeQuery = (noticeId: number | null, options?: NoticeQueryOpt
   })
 }
 
+// 공지사항 관리용 상세 조회 훅 — 수정 폼이 본문을 채운다. 조회수를 올리지 않는 관리 전용 GET 이다.
+// 폼을 열 때마다 새로 받는다(staleTime 0 · 캐시 즉시 버림) — 남이 막 고친 본문 위에 옛 글로 덮어쓰지 않게
+export const useNoticeManageQuery = (noticeId: number | null, options?: NoticeQueryOptions) => {
+  return useQuery<NoticeResp>({
+    queryKey: [...noticeKeys.detail(noticeId ?? 0), 'manage'],
+    queryFn: () => noticeApi.getNoticeForManage(noticeId!),
+    enabled: noticeId !== null && noticeId > 0,
+    staleTime: 0,
+    gcTime: 0,
+    meta: options?.quiet ? { quiet: true } : undefined
+  })
+}
+
 // 공지사항 유형별 조회 훅
 export const useNoticesByTypeQuery = (type: NoticeType, page: number = 0, size: number = 10) => {
   return useQuery<NoticePageResp>({

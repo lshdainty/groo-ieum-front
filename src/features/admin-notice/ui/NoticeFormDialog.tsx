@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { claimFailure, writeFailureKey } from '@/shared/api/failure'
@@ -13,7 +13,7 @@ import { useInputButtonSurface } from '@/shared/ds/input-button'
 import { useSnackbar } from '@/shared/ds/snackbar'
 import { Textarea } from '@/shared/ds/textarea'
 import { PeriodField } from '@/shared/ui/groo/period-field'
-import { useCreateNoticeMutation, useUpdateNoticeMutation, type NoticeListResp, type NoticeType } from '@/entities/notice'
+import { useCreateNoticeMutation, useNoticeManageQuery, useUpdateNoticeMutation, type NoticeListResp, type NoticeType } from '@/entities/notice'
 import { useUser } from '@/entities/session'
 import { NOTICE_TYPES, NOTICE_TYPE_KEY, emptyNoticeForm, noticeCreateOf, noticeFormChanged, noticeFormErrors, noticeFormOf, noticeUpdateOf, type NoticeFormValues } from '../lib/notice-form'
 
@@ -24,7 +24,8 @@ const TITLE_MAX = 200
 /**
  * 공지 폼(I-24 J 49) — ds Responsive Dialog `form`(1280 이상 대화상자 · 미만 Bottom Sheet), 바닥 [취소] [저장].
  * 칸 차례: 제목 → 종류(Chip 넷) → "맨 위에 고정해요" → 게시 기간(기간 Date Picker) → 본문(Textarea, 평문). 본문이 길면 본문만 스크롤.
- * 수정은 지금처럼 본문 칸이 비어 열린다(목록 응답에 본문이 없고, 상세를 받으면 서버가 조회수를 올린다) — 칸 아래 안내가 다시 쓰라고 말한다.
+ * 수정은 목록 응답에 본문이 없어 관리용 상세(GET /notice/{id}/manage — 조회수를 올리지 않는다)로 본문을 채운다.
+ * 받는 동안 본문 칸 · [저장] 은 잠그고, 받지 못하면 본문을 비운 채 칸 아래 안내가 다시 쓰라고 말한다(옛 서버도 같다).
  * 저장 실패는 폼 맨 위 Callout(고정 글).
  * 폰(시트)에서 줄을 눌러 연 수정 폼은 바닥 왼쪽에 [삭제](10-25 줄 동작).
  */
@@ -49,10 +50,20 @@ export function NoticeFormDialog({
   const { loginUser } = useUser()
   const sheet = useInputButtonSurface() === 'sheet'
   const editing = target.kind === 'edit'
-  // 목록 응답에는 본문이 없다 — 상세를 받아 채우면 서버가 조회수를 올려(공지 상세 GET) 관리자 수정마다 조회가 쌓인다.
-  // 그래서 지금처럼 본문 칸을 비워 열고 다시 쓰게 한다(서버 후속 후보: 관리용 상세 · 목록 응답에 본문)
-  const initial: NoticeFormValues = target.kind === 'edit' ? noticeFormOf({ ...target.row, content: '' }) : emptyNoticeForm()
+  // 목록 응답에는 본문이 없다 — 관리용 상세로 받아 채운다(일반 상세 GET 은 조회수를 올려 관리자 수정마다 조회가 쌓인다)
+  const manage = useNoticeManageQuery(target.kind === 'edit' ? target.row.notice_id : null, { quiet: true })
+  const contentLoading = editing && manage.isPending
+  const contentFailed = editing && manage.isError
+  const [baseContent, setBaseContent] = useState('')
+  const initial: NoticeFormValues = target.kind === 'edit' ? noticeFormOf({ ...target.row, content: baseContent }) : emptyNoticeForm()
   const [values, setValues] = useState<NoticeFormValues>(initial)
+  const loadedContent = manage.data?.content
+  useEffect(() => {
+    if (loadedContent == null) return
+    // 받은 본문이 기준(dirty 비교)이자 칸의 값이다. 받는 동안 칸을 잠그므로 덮어쓸 입력은 없다
+    setBaseContent(loadedContent)
+    setValues((v) => ({ ...v, content: loadedContent }))
+  }, [loadedContent])
   const [showErrors, setShowErrors] = useState(false)
   const [busy, setBusy] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -129,11 +140,11 @@ export function NoticeFormDialog({
             <Field
               label={t('adminNotice.content')}
               showRequiredIndicator
-              description={editing ? t('adminNotice.contentEditHint') : undefined}
+              description={contentFailed ? t('adminNotice.contentEditHint') : undefined}
               invalid={showErrors && !!errors.content}
               errorMessage={t('adminNotice.contentRequired')}
             >
-              <Textarea value={values.content} placeholder={t('notice.contentPlaceholder')} onChange={(e) => set('content', e.target.value)} />
+              <Textarea value={values.content} placeholder={t('notice.contentPlaceholder')} disabled={contentLoading} aria-busy={contentLoading || undefined} data-notice-content onChange={(e) => set('content', e.target.value)} />
             </Field>
           </div>
         </ResponsiveDialogBody>
@@ -144,7 +155,7 @@ export function NoticeFormDialog({
             </Button>
           )}
           <ResponsiveDialogCancel>{tc('cancel')}</ResponsiveDialogCancel>
-          <Button loading={busy} onClick={() => void submit()}>
+          <Button loading={busy} disabled={contentLoading} onClick={() => void submit()}>
             {tc('save')}
           </Button>
         </ResponsiveDialogFooter>

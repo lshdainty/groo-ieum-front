@@ -20,6 +20,7 @@ export {
   useActiveNoticesQuery,
   useCreateNoticeMutation,
   useDeleteNoticeMutation,
+  useNoticeManageQuery,
   useNoticeQuery,
   useNoticesByTypeQuery,
   useNoticesQuery,
