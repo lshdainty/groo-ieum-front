@@ -20,9 +20,12 @@ export const claimFailure = (error: unknown): void => {
 export const isClaimed = (error: unknown): boolean =>
   typeof error === 'object' && error !== null && claimed.has(error)
 
+/** 브라우저가 오프라인이라고 안다 — 이때 응답 없는 쓰기는 서버에 닿지 않은 것이다 */
+const isOffline = (): boolean => typeof navigator !== 'undefined' && navigator.onLine === false
+
 /**
  * 쓰기 실패의 안내 글 키(common 이름공간) — 없으면 알리지 않는다(401 은 로그인으로 넘어가는 길이 따로 있다).
- *  - 403 → 권한 글 · 응답을 못 받음 → "저장됐는지 확인하지 못했어요"(서버에 닿았는지 모른다)
+ *  - 403 → 권한 글 · 응답을 못 받음 → "저장됐는지 확인하지 못했어요"(서버에 닿았는지 모른다) · 오프라인 → 일반 실패(닿지 않았다)
  *  - 응답 code 가 사유 표(failure-codes.ts)에 있으면 그 글(사유를 코드로 고른다 — 서버 글은 쓰지 않는다)
  *  - 4xx → "입력한 내용을 확인해주세요"(다시 해도 같은 결과라 다시 시도 문구를 쓰지 않는다) · 5xx 그 밖 → "잠시 뒤 다시 시도해주세요"
  */
@@ -32,7 +35,12 @@ export const writeFailureKey = (error: unknown): string | null => {
   if (status === 401) return null
   // 비밀번호 변경 필요 — 강제 변경 화면으로 보내는 길(base.ts)이 있어 권한 글을 띄우지 않는다
   if (isPasswordChangeRequiredResponse(status, error.response?.data)) return null
-  if (status === undefined) return 'failure.unconfirmed'
+  if (status === undefined) {
+    // 오프라인이면 요청이 서버에 닿지 않았다 — 됐는지 모르는 게 아니라 안 된 것이라 "잠시 뒤 다시 시도"(확인창은 [다시 시도]) 글이다
+    // (alert-dialog.md "요청이 실패하면" — 네트워크(요청이 닿지 않음)는 다시 시도, 응답을 받지 못함은 확인하지 못했어요)
+    if (isOffline()) return 'failure.write'
+    return 'failure.unconfirmed'
+  }
   if (status === 403) return 'failure.forbidden'
   const code = (error.response?.data as { code?: unknown } | undefined)?.code
   if (typeof code === 'string' && FAILURE_CODE_KEYS[code]) return FAILURE_CODE_KEYS[code]
