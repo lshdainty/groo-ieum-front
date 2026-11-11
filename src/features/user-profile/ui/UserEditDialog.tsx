@@ -79,7 +79,7 @@ const initialOf = (u: GetUsersResp, firstCompany: string): Values => ({
 
 /**
  * 사용자 수정 · 내 정보(I-24 F 29b) — Responsive Dialog `form`(1280 이상 대화상자 · 미만 시트), 한 열. 맨 위 Avatar 108 + 늘 보이는
- * "사진 바꾸기" 단추("사진 지우기" 는 서버가 지운 사진을 저장하지 않아 두지 않는다 — 서버 지원 뒤). 칸 차례: 이름 · 아이디(읽기 전용) · 메일 · 생일 · "음력 생일이에요"(서버에는 Y/N 그대로) · 회사 · 근무 시간 · 국가.
+ * "사진 바꾸기"(neutralWeak small) · "사진 지우기"(ghost small, 사진이 있을 때만 — 지우면 이니셜, 저장 때 profile_delete_yn Y) — avatar.md. 칸 차례: 이름 · 아이디(읽기 전용) · 메일 · 생일 · "음력 생일이에요"(서버에는 Y/N 그대로) · 회사 · 근무 시간 · 국가.
  * 역할 칸은 없다. 저장 실패는 맨 위 Callout, 메일 중복은 그 칸 아래. dirty = 칸 · 사진 중 하나라도 바뀜.
  */
 const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFocus }: UserEditDialogProps) => {
@@ -94,6 +94,8 @@ const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFo
   const [values, setValues] = useState<Values>(initial)
   const [photo, setPhoto] = useState(user.profile_url || '')
   const [photoUuid, setPhotoUuid] = useState('')
+  // 지금 사진을 지운다 — 저장 때 profile_delete_yn Y. 새 사진을 다시 고르면 풀린다
+  const [photoDeleted, setPhotoDeleted] = useState(false)
   const [photoError, setPhotoError] = useState<string | null>(null)
   const [showErrors, setShowErrors] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -122,6 +124,7 @@ const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFo
       const data = await uploadProfile(await compressImage(file))
       setPhoto(data.profile_url)
       setPhotoUuid(data.profile_uuid)
+      setPhotoDeleted(false)
     } catch (error) {
       readWriteFailure(error)
       setPhotoError(t('edit.photoFailed'))
@@ -149,6 +152,7 @@ const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFo
         lunar_yn: values.lunar ? 'Y' : 'N',
         profile_url: photo.replace(config.baseUrl, ''),
         profile_uuid: photoUuid,
+        ...(photoDeleted ? { profile_delete_yn: 'Y' as const } : {}),
         country_code: values.country,
       })
       onOpenChange(false)
@@ -173,9 +177,27 @@ const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFo
           )}
           <div className='mb-x6 flex flex-col items-center gap-x2' data-user-photo>
             <Avatar name={values.name || user.user_name} src={photo ? fullUrl(photo) : null} size={108} decorative={false} />
-            <Button variant='neutralWeak' size='small' loading={uploading} onClick={() => fileRef.current?.click()}>
-              {t('edit.changePhoto')}
-            </Button>
+            <div className='flex flex-wrap justify-center gap-x2'>
+              <Button variant='neutralWeak' size='small' loading={uploading} onClick={() => fileRef.current?.click()} data-photo-change>
+                {t('edit.changePhoto')}
+              </Button>
+              {photo && (
+                <Button
+                  variant='ghost'
+                  size='small'
+                  disabled={uploading}
+                  onClick={() => {
+                    setPhoto('')
+                    setPhotoUuid('')
+                    setPhotoError(null)
+                    setPhotoDeleted(true)
+                  }}
+                  data-photo-delete
+                >
+                  {t('edit.deletePhoto')}
+                </Button>
+              )}
+            </div>
             <input ref={fileRef} type='file' accept='image/*' className='hidden' aria-hidden tabIndex={-1} onChange={(e) => void pickFile(e.target.files?.[0])} />
             {photoError && (
               <p role='alert' className='m-0 text-center text-t3 font-normal text-fg-critical'>
