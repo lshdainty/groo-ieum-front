@@ -120,6 +120,8 @@ export interface PutUserReq {
   lunar_yn: string
   profile_url: string
   profile_uuid?: string
+  /** Y 면 지금 사진을 지운다 — 함께 온 새 사진은 무시(서버). 없으면 그대로 */
+  profile_delete_yn?: 'Y' | 'N'
   country_code: string
   dashboard?: string
 }

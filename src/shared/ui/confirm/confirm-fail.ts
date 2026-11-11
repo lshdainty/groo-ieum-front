@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import { claimFailure, writeFailureKey } from '@/shared/api/failure'
+import { DELETE_CODE_KEYS } from '@/shared/api/failure-codes'
 import { useSnackbar, type SnackbarApi } from '@/shared/ds/snackbar'
 
 /*
@@ -23,6 +24,9 @@ export type ConfirmKind = 'delete' | 'cancel' | 'reset' | 'send'
 export const confirmFailureKey = (error: unknown, kind: ConfirmKind): string | null => {
   const key = writeFailureKey(error)
   if (key === null) return null
+  // 삭제 확인창 — 같은 거절이라도 지우는 말로(끝난 일정 "고칠 수 없어요" → "지울 수 없어요")
+  const code = isAxiosError(error) ? (error.response?.data as { code?: unknown } | undefined)?.code : undefined
+  if (kind === 'delete' && typeof code === 'string' && DELETE_CODE_KEYS[code]) return DELETE_CODE_KEYS[code]
   // 일반 실패는 "저장" 이 아니라 이 확인창의 동사로 말한다 — 사유 글(권한 · 코드별)은 그대로
   // 5xx · 네트워크는 "잠시 뒤 다시 시도", 사유 코드가 없는 4xx 는 "내용을 확인해주세요"(22-1 규칙과 같다)
   if (key === 'failure.write') return `failure.${kind}`

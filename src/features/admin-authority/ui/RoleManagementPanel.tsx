@@ -67,9 +67,10 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
   const selected = roles.find((r) => r.role_code === selectedCode)
   const base: RoleDraft | null = creating ? EMPTY_DRAFT : selected ? draftOf(selected) : null
   const draft: RoleDraft | null = creating ? (edits ?? EMPTY_DRAFT) : selected ? (edits && edits.code === selected.role_code ? edits : base) : null
-  const changes = base && draft ? changesOf(base, draft) : { desc: false, perms: false }
-  const descEmpty = !creating && changes.desc && !draft?.desc.trim()
-  const dirty = creating ? !!edits && (!!edits.code || !!edits.name || !!edits.desc || edits.perms.length > 0) : changes.desc || changes.perms
+  const changes = base && draft ? changesOf(base, draft) : { name: false, desc: false, perms: false }
+  // 있는 역할의 이름을 비웠다 — 서버가 빈 이름을 400 으로 거절한다. 칸 아래에 바로 알리고 [저장] 을 막는다(설명은 비워도 된다)
+  const nameEmpty = !creating && changes.name && !draft?.name.trim()
+  const dirty = creating ? !!edits && (!!edits.code || !!edits.name || !!edits.desc || edits.perms.length > 0) : changes.name || changes.desc || changes.perms
 
   useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange])
   // 새로 고침 · 탭 닫기도 바뀐 값이 있거나 저장 중일 때 브라우저 확인을 건다(사이드바 이동은 라우터가 막지 못한다)
@@ -107,7 +108,7 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
     })
 
   const save = async () => {
-    if (!draft || busy || !canManage || descEmpty) return
+    if (!draft || busy || !canManage || nameEmpty) return
     if (creating && (!draft.code.trim() || !draft.name.trim())) {
       setShowErrors(true)
       return
@@ -126,7 +127,13 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
         setParams(next)
         snackbar.show({ message: t('authority.roleCreatedToast'), tone: 'positive' })
       } else if (selected) {
-        if (changes.desc) await putRole({ roleCode: selected.role_code, data: { desc: draft.desc } })
+        // 바뀐 칸만 보낸다 — 없는 칸은 서버가 그대로 둔다
+        if (changes.name || changes.desc) {
+          await putRole({
+            roleCode: selected.role_code,
+            data: { ...(changes.name ? { role_name: draft.name.trim() } : {}), ...(changes.desc ? { desc: draft.desc } : {}) },
+          })
+        }
         if (changes.perms) await putPerms({ roleCode: selected.role_code, data: { permission_codes: draft.perms } })
         await rolesQ.refetch()
         resetEdits()
@@ -153,7 +160,7 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
       desktop={desktop}
       busy={busy}
       dirty={dirty}
-      descEmpty={descEmpty}
+      nameEmpty={nameEmpty}
       saveError={saveError}
       codeError={codeError}
       showErrors={showErrors}

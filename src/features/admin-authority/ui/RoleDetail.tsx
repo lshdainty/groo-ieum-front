@@ -8,7 +8,7 @@ import { Input } from '@/shared/ds/input'
 import { ResponsiveMenu, ResponsiveMenuContent, ResponsiveMenuGroup, ResponsiveMenuItem, ResponsiveMenuTrigger } from '@/shared/ds/menu'
 import { Textarea } from '@/shared/ds/textarea'
 import type { PermissionResp } from '@/entities/permission'
-import type { RoleDraft } from '../lib/role-draft'
+import { ROLE_NAME_MAX, type RoleDraft } from '../lib/role-draft'
 import { PermissionList } from './PermissionList'
 
 interface RoleDetailProps {
@@ -19,8 +19,8 @@ interface RoleDetailProps {
   desktop: boolean
   busy: boolean
   dirty: boolean
-  /** 있는 역할의 설명을 비웠다 — 서버가 비운 설명을 받지 않는다(아무 일도 없이 성공한다) */
-  descEmpty: boolean
+  /** 있는 역할의 이름을 비웠다 — 서버가 빈 이름을 받지 않는다(400) */
+  nameEmpty: boolean
   saveError: string | null
   codeError: string | null
   showErrors: boolean
@@ -33,14 +33,15 @@ interface RoleDetailProps {
 /**
  * 역할 상세 한 면(I-24 G 33 · 34) — 머리(역할 이름 + [저장] 하나 + ⋮ "삭제") · 칸(역할 코드 · 이름 · 설명) · 권한 묶음 체크 줄.
  * 데스크톱: 머리 오른쪽 [저장](새 역할은 [만들기]). 폰: 머리에 ← + 이름 + ⋮, 바닥에 [저장] 폭 전체(권한 시트는 걷었다 — 저장 시점이 같다).
- * 이름은 서버가 바꾸지 않으므로(PUT 은 설명 · 권한만) 있는 역할에서는 읽기 전용이다.
+ * 이름 · 설명은 관리 권한이 있으면 고친다(PUT 은 바뀐 칸만). 이름은 20자까지 · 비울 수 없고, 설명은 비우면 지운다.
  */
-const RoleDetail = ({ draft, isNew, permissions, canManage, desktop, busy, dirty, descEmpty, saveError, codeError, showErrors, onChange, onSave, onDelete, onBack }: RoleDetailProps) => {
+const RoleDetail = ({ draft, isNew, permissions, canManage, desktop, busy, dirty, nameEmpty, saveError, codeError, showErrors, onChange, onSave, onDelete, onBack }: RoleDetailProps) => {
   const { t } = useTranslation('admin')
   const { t: tc } = useTranslation('common')
-  const title = isNew ? t('authority.newRole') : draft.name
+  // 이름 칸을 비우는 중에도 머리가 비지 않게 — 역할 코드로 둔다
+  const title = isNew ? t('authority.newRole') : draft.name.trim() || draft.code
   const saveLabel = isNew ? t('authority.createRole') : tc('save')
-  const nameMissing = isNew && showErrors && !draft.name.trim()
+  const nameMissing = (isNew && showErrors && !draft.name.trim()) || nameEmpty
   const codeMissing = isNew && showErrors && !draft.code.trim()
 
   const menu =
@@ -72,7 +73,7 @@ const RoleDetail = ({ draft, isNew, permissions, canManage, desktop, busy, dirty
         </div>
         <div className='flex shrink-0 items-center gap-x1'>
           {desktop && canManage && (
-            <Button variant='neutralSolid' size='small' loading={busy} disabled={!dirty || descEmpty} data-role-save onClick={onSave}>
+            <Button variant='neutralSolid' size='small' loading={busy} disabled={!dirty || nameEmpty} data-role-save onClick={onSave}>
               {saveLabel}
             </Button>
           )}
@@ -95,11 +96,25 @@ const RoleDetail = ({ draft, isNew, permissions, canManage, desktop, busy, dirty
         >
           <Input value={draft.code} readOnly={!isNew} autoCapitalize='characters' placeholder={isNew ? t('authority.roleCodePlaceholder') : undefined} onChange={(e) => onChange({ ...draft, code: e.target.value })} />
         </Field>
-        <Field label={t('authority.roleName')} showRequiredIndicator={isNew} readOnly={!isNew} invalid={nameMissing} errorMessage={t('authority.roleNameRequired')}>
-          <Input value={draft.name} readOnly={!isNew} placeholder={isNew ? t('authority.roleNamePlaceholder') : undefined} onChange={(e) => onChange({ ...draft, name: e.target.value })} />
+        <Field
+          label={t('authority.roleName')}
+          showRequiredIndicator={canManage}
+          readOnly={!canManage}
+          invalid={nameMissing}
+          errorMessage={t('authority.roleNameRequired')}
+          maxGraphemeCount={canManage ? ROLE_NAME_MAX : undefined}
+        >
+          <Input
+            value={draft.name}
+            readOnly={!canManage}
+            maxLength={ROLE_NAME_MAX}
+            placeholder={isNew ? t('authority.roleNamePlaceholder') : undefined}
+            onChange={(e) => onChange({ ...draft, name: e.target.value.slice(0, ROLE_NAME_MAX) })}
+            data-role-name
+          />
         </Field>
-        <Field label={t('authority.roleDesc')} readOnly={!canManage} invalid={descEmpty} errorMessage={t('authority.roleDescRequired')}>
-          <Textarea value={draft.desc} readOnly={!canManage} placeholder={t('authority.roleDescPlaceholder')} onChange={(e) => onChange({ ...draft, desc: e.target.value })} />
+        <Field label={t('authority.roleDesc')} readOnly={!canManage}>
+          <Textarea value={draft.desc} readOnly={!canManage} data-role-desc placeholder={t('authority.roleDescPlaceholder')} onChange={(e) => onChange({ ...draft, desc: e.target.value })} />
         </Field>
       </div>
       <PermissionList
@@ -111,7 +126,7 @@ const RoleDetail = ({ draft, isNew, permissions, canManage, desktop, busy, dirty
       />
       {!desktop && canManage && (
         <div className='sticky bottom-0 z-10 bg-bg-layer-default px-global-gutter pb-x4 pt-x3'>
-          <Button size='large' variant='neutralSolid' className='w-full' loading={busy} disabled={!dirty || descEmpty} data-role-save onClick={onSave}>
+          <Button size='large' variant='neutralSolid' className='w-full' loading={busy} disabled={!dirty || nameEmpty} data-role-save onClick={onSave}>
             {saveLabel}
           </Button>
         </div>

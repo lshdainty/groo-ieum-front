@@ -32,6 +32,7 @@ export function AccountDialogsProvider({ children }: { children: ReactNode }) {
       lunar_yn: user.lunar_yn,
       profile_url: user.profile_url,
       profile_uuid: user.profile_uuid,
+      profile_delete_yn: user.profile_delete_yn,
       country_code: user.country_code,
     })
 
