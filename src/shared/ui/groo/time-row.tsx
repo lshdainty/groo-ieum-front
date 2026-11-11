@@ -16,6 +16,7 @@ export const TimeRow = ({
   placeholder,
   minuteStep,
   error,
+  valueText,
 }: {
   title: string
   value: TimeValue | null
@@ -23,6 +24,8 @@ export const TimeRow = ({
   placeholder: string
   minuteStep: MinuteStep
   error?: string
+  /** 칸에 보이는 글을 바꾼다("다음 날 오전 1:00") — 값은 그대로 */
+  valueText?: (formatted: string) => string
 }) => {
   const { t: tc } = useTranslation('common')
   const [draft, setDraft] = useState<TimeValue | undefined>(value ?? undefined)
@@ -30,7 +33,7 @@ export const TimeRow = ({
     <PickerRow
       title={title}
       surfaceTitle={title}
-      value={value ? formatTimeValue(value) : ''}
+      value={value ? (valueText ?? ((v) => v))(formatTimeValue(value)) : ''}
       placeholder={placeholder}
       errorMessage={error}
       dismissible={false}
