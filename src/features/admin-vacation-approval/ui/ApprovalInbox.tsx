@@ -22,6 +22,7 @@ import {
 } from '@/shared/ds/table'
 import { TablePagination, type TablePaginationValue } from '@/shared/ds/table-pagination'
 import { VacationStatusBadge } from '@/shared/ui/groo/vacation-status'
+import { grantTimeText } from '@/shared/lib/groo/grant-time-text'
 import type { GetUserRequestedVacationsResp } from '@/entities/vacation'
 import { RequestDetail } from '@/features/vacation-application/ui/RequestDetail'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
@@ -114,7 +115,7 @@ export function ApprovalInbox({
   fetching: boolean
   onRetry: () => void
 }) {
-  const { t } = useTranslation('vacation')
+  const { t, i18n } = useTranslation('vacation')
   const desktop = useDesktop()
   const [pageValue, setPageValue] = useState<TablePaginationValue>({ page: 1, pageSize: PAGE_SIZES[0] })
   const [shown, setShown] = useState<number>(PHONE_STEP)
@@ -175,7 +176,7 @@ export function ApprovalInbox({
                   </TableCell>
                   <TableCell className='whitespace-nowrap'>{formatRequestRange(row.request_start_time, row.request_end_time)}</TableCell>
                   <TableCell align='end' className='whitespace-nowrap'>
-                    {row.grant_time_str}
+                    {grantTimeText(row.grant_time, row.grant_time_str, i18n.language, t)}
                   </TableCell>
                   <TableCell className='whitespace-nowrap'>{formatRequestedAt(row.create_date)}</TableCell>
                   <TableCell className='whitespace-nowrap'>
@@ -202,7 +203,7 @@ export function ApprovalInbox({
                 title={approvalRowName(row)}
                 detail={t('inbox.rowDetail', {
                   date: formatRequestRange(row.request_start_time, row.request_end_time),
-                  time: row.grant_time_str,
+                  time: grantTimeText(row.grant_time, row.grant_time_str, i18n.language, t),
                   requested: formatRequestedAt(row.create_date),
                 })}
                 suffix={<VacationStatusBadge status={row.grant_status} />}

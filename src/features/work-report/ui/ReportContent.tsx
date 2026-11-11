@@ -225,27 +225,25 @@ export function ReportContent() {
     setBulkBusy(true)
     try {
       const today = dayjs().format('YYYY-MM-DD')
-      await Promise.all(
-        selectedRows.map((r) =>
-          createM.mutateAsync({
-            work_date: today,
-            work_user_id: me.id,
-            work_group_code: r.group!.work_code,
-            work_part_code: r.part!.work_code,
-            work_class_code: r.division!.work_code,
-            work_hour: Number(r.hours) || 0,
-            work_content: r.content,
-          }),
-        ),
-      )
+      // 한 번에 보낸다 — 서버가 한 트랜잭션이라 전부 저장되거나 전부 안 된다(실패하면 고른 줄이 그대로여서 다시 눌러도 겹치지 않는다)
+      await bulkM.mutateAsync({
+        work_histories: selectedRows.map((r) => ({
+          work_date: today,
+          work_user_id: me.id,
+          work_group_code: r.group!.work_code,
+          work_part_code: r.part!.work_code,
+          work_class_code: r.division!.work_code,
+          work_hour: Number(r.hours) || 0,
+          work_content: r.content,
+        })),
+      })
       await historiesQ.refetch()
       setSelected([])
       setSelecting(false)
       snackbar.show({ message: t('rep.duplicatedCount', { count: selectedRows.length }), tone: 'positive' })
     } catch (error) {
-      // 일부만 만들어졌을 수 있다 — 다시 시도 단추를 두지 않고 목록을 다시 받아 서버 값으로 맞춘다
+      // 전부 안 만들어졌다 — 고른 줄(selected)은 그대로 두고 안내 하나만 띄운다
       const { key } = readWriteFailure(error)
-      void historiesQ.refetch()
       snackbar.show({ message: tc(key ?? 'failure.write'), tone: 'critical' })
     } finally {
       setBulkBusy(false)

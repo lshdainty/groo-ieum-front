@@ -30,6 +30,7 @@ import {
   emptyRequestForm,
   hasRequestErrors,
   isOvertimePolicy,
+  endIsNextDay,
   overtimeMinutes,
   requestFormChanged,
   requestFormErrors,
@@ -258,6 +259,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
               onChange={(v) => set('end', v)}
               placeholder={t('req.form.timePlaceholder')}
               minuteStep={1}
+              valueText={endIsNextDay(values.start, values.end) ? (text) => t('req.form.nextDay', { time: text }) : undefined}
               error={showErrors && errors.end ? (errors.end === 'order' ? t('req.form.endAfterStart') : t('req.form.endRequired')) : undefined}
             />
             <List>
