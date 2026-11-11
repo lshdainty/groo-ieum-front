@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Users } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useGrantTimeText } from '@/shared/lib/groo/use-grant-time-text'
 
 import { InfiniteListEnd } from '@/shared/ds/infinite-list'
 import { List, ListItem } from '@/shared/ds/list'
@@ -30,6 +31,7 @@ const PAGE_SIZES = [10, 25, 50] as const
  */
 export const UserVacationStatsWidget = () => {
   const { t } = useTranslation('vacation')
+  const gt = useGrantTimeText()
   const { t: td } = useTranslation('dashboard')
   const desktop = useDesktop()
   const query = useAllUsersVacationSummaryQuery(new Date().getFullYear(), { quiet: true })
@@ -69,11 +71,11 @@ export const UserVacationStatsWidget = () => {
                 <TableRow key={user.user_id}>
                   <TableRowHeader className='whitespace-normal [overflow-wrap:break-word] [word-break:keep-all]'>{user.user_name}</TableRowHeader>
                   <TableCell className='whitespace-normal [overflow-wrap:break-word] [word-break:keep-all]'>{user.department_name}</TableCell>
-                  <TableCell align='end'>{user.total_vacation_days_str}</TableCell>
-                  <TableCell align='end'>{user.used_vacation_days_str}</TableCell>
-                  <TableCell align='end'>{user.scheduled_vacation_days_str}</TableCell>
+                  <TableCell align='end'>{gt(user.total_vacation_days, user.total_vacation_days_str)}</TableCell>
+                  <TableCell align='end'>{gt(user.used_vacation_days, user.used_vacation_days_str)}</TableCell>
+                  <TableCell align='end'>{gt(user.scheduled_vacation_days, user.scheduled_vacation_days_str)}</TableCell>
                   <TableCell align='end' className='font-bold text-fg-neutral'>
-                    {user.remaining_vacation_days_str}
+                    {gt(user.remaining_vacation_days, user.remaining_vacation_days_str)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -86,8 +88,8 @@ export const UserVacationStatsWidget = () => {
                 <ListItem
                   key={user.user_id}
                   title={user.user_name}
-                  detail={td('widget.allUsers.detail', { department: user.department_name, total: user.total_vacation_days_str, used: user.used_vacation_days_str })}
-                  suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{user.remaining_vacation_days_str}</span>}
+                  detail={td('widget.allUsers.detail', { department: user.department_name, total: gt(user.total_vacation_days, user.total_vacation_days_str), used: gt(user.used_vacation_days, user.used_vacation_days_str) })}
+                  suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{gt(user.remaining_vacation_days, user.remaining_vacation_days_str)}</span>}
                   align='top'
                 />
               ))}

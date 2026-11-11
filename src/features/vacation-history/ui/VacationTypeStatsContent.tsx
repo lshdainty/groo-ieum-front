@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useGrantTimeText } from '@/shared/lib/groo/use-grant-time-text'
 import { Pie, PieChart } from 'recharts'
 
 import {
@@ -19,17 +20,18 @@ import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 /**
  * 휴가 유형별 남은 휴가(I-23 D 21 · HB3 A) — ds Chart 도넛 + 아래 범례. 지름 데스크톱 160(두께 22) · 폰 120(두께 18).
  * 가운데 = "남은 휴가" + 합계, 구멍에 들지 않으면 가운데를 비우고 범례 위 합계 줄(폰 120 은 보통 이쪽). 유형 색은 표로 고정(typeColors).
- * 남은 시간 0 인 유형은 조각 · 범례에서 뺀다 — 모두 0 이면 부르는 쪽이 비어 있음을 그린다. 범례의 값은 원이 아니라 `remain_time_str`.
+ * 남은 시간 0 인 유형은 조각 · 범례에서 뺀다 — 모두 0 이면 부르는 쪽이 비어 있음을 그린다. 범례의 값은 원이 아니라 `remain_time`(글은 `grantTimeText`).
  */
 export const VacationTypeStatsContent = ({ data }: { data: GetAvailableVacationsResp }) => {
   const { t } = useTranslation('vacation')
+  const gt = useGrantTimeText()
   const desktop = useDesktop()
   const size = desktop ? 160 : 120
   const legendId = useId()
   const [fits, setFits] = useState(true)
   const slices = typeSlices(data)
   const sum = slices.reduce((a, s) => a + s.remain_time, 0)
-  const total = data.total_remain_time_str
+  const total = gt(data.total_remain_time, data.total_remain_time_str)
   const name = t('history.chart.typeName', { total })
 
   return (
@@ -39,8 +41,8 @@ export const VacationTypeStatsContent = ({ data }: { data: GetAvailableVacations
           <Pie data={slices} dataKey='remain_time' nameKey='vacation_type_name' {...chartDonutRadii(size)} />
           <ChartTooltip
             content={(props) => {
-              const row = props.payload?.[0]?.payload as { remain_time_str?: string } | undefined
-              return <ChartTooltipContent {...props} valueFormatter={() => row?.remain_time_str ?? ''} />
+              const row = props.payload?.[0]?.payload as { remain_time?: number; remain_time_str?: string } | undefined
+              return <ChartTooltipContent {...props} valueFormatter={() => gt(row?.remain_time, row?.remain_time_str ?? '')} />
             }}
           />
         </PieChart>
@@ -60,13 +62,13 @@ export const VacationTypeStatsContent = ({ data }: { data: GetAvailableVacations
           label: s.vacation_type_name,
           color: s.color,
           percent: shareOf(s.remain_time, sum),
-          amount: s.remain_time_str,
+          amount: gt(s.remain_time, s.remain_time_str),
         }))}
       />
       <ChartDataTable
         caption={name}
         columns={[t('history.vacationType'), t('history.chart.tableShare'), t('history.remainTotal')]}
-        rows={slices.map((s) => [s.vacation_type_name, shareOf(s.remain_time, sum), s.remain_time_str])}
+        rows={slices.map((s) => [s.vacation_type_name, shareOf(s.remain_time, sum), gt(s.remain_time, s.remain_time_str)])}
       />
     </div>
   )

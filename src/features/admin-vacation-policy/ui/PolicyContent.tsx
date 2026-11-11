@@ -36,7 +36,7 @@ const PolicyListSkeleton = () => (
  * 폰은 상단 바가 제목이라 본문에는 [정책 추가] 만 둔다(상단 바 오른쪽 아이콘 자리는 24-2 가 만들어 머지되면 거기로 옮긴다).
  */
 export const PolicyContent = () => {
-  const { t } = useTranslation('vacation')
+  const { t, i18n } = useTranslation('vacation')
   const { t: tc } = useTranslation('common')
   const desktop = useDesktop()
   const { searchQuery, setSearchQuery } = usePolicyContext()
@@ -107,7 +107,7 @@ export const PolicyContent = () => {
                   title={<span className='[overflow-wrap:break-word] [word-break:keep-all]'>{policy.vacation_policy_name}</span>}
                   detail={
                     <>
-                      <span className='block [overflow-wrap:break-word]'>{policyRuleLine(t, policy, names)}</span>
+                      <span className='block [overflow-wrap:break-word]'>{policyRuleLine(t, policy, names, i18n.language)}</span>
                       <span className='block [overflow-wrap:break-word]'>{policyValidityLine(t, policy, names)}</span>
                     </>
                   }

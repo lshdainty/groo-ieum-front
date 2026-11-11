@@ -1,6 +1,7 @@
 import { CalendarX2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useGrantTimeText } from '@/shared/lib/groo/use-grant-time-text'
 
 import { Avatar } from '@/shared/ds/avatar'
 import { Button } from '@/shared/ds/button'
@@ -42,10 +43,10 @@ import {
 type Policy = GetUserVacationPoliciesResp
 
 /** 선택지 설명 — "{설명} · {정해진 시간 또는 '시간은 직접 정해요'} · 결재 {n}단계(0 이면 결재 없음)" */
-const policyDescription = (p: Policy, t: (k: string, o?: Record<string, unknown>) => string): string =>
+const policyDescription = (p: Policy, t: (k: string, o?: Record<string, unknown>) => string, gt: (value: number, serverText: string) => string): string =>
   t('req.form.policyDesc', {
     desc: p.vacation_policy_desc?.trim() || p.vacation_policy_name,
-    time: p.is_flexible_grant === 'Y' ? t('req.form.timeFlexible') : p.grant_time_str,
+    time: p.is_flexible_grant === 'Y' ? t('req.form.timeFlexible') : gt(p.grant_time, p.grant_time_str),
     approval: p.approval_required_count > 0 ? t('req.form.approvalN', { n: p.approval_required_count }) : t('req.form.approvalNone'),
   })
 
@@ -74,6 +75,7 @@ const durationText = (total: number, t: (k: string, o?: Record<string, unknown>)
  */
 const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boolean; onClose: () => void; onSubmitSuccess: () => void }) => {
   const { t } = useTranslation('vacation')
+  const gt = useGrantTimeText()
   const { t: tc } = useTranslation('common')
   const snackbar = useSnackbar()
   const wide = useWide()
@@ -189,7 +191,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
         data-policy-group
       >
         {policies.map((p) => (
-          <RadioSelectBox key={p.vacation_policy_id} value={String(p.vacation_policy_id)} label={p.vacation_policy_name} description={policyDescription(p, t)} data-policy={p.vacation_policy_id} />
+          <RadioSelectBox key={p.vacation_policy_id} value={String(p.vacation_policy_id)} label={p.vacation_policy_name} description={policyDescription(p, t, gt)} data-policy={p.vacation_policy_id} />
         ))}
       </RadioSelectBoxGroup>
     </Field>

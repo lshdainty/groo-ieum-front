@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useGrantTimeText } from '@/shared/lib/groo/use-grant-time-text'
 
 import { Card, CardStat, Delta } from '@/shared/ds/card'
 import { List, ListItem } from '@/shared/ds/list'
@@ -42,6 +43,7 @@ export function RequestSummary({
   leading?: ReactNode
 }) {
   const { t } = useTranslation('vacation')
+  const gt = useGrantTimeText()
   const total = stats.total_request_count
   const growth = stats.change_rate
   const thisYear = year === new Date().getFullYear()
@@ -73,7 +75,7 @@ export function RequestSummary({
 
   const four = [
     <Stat key='total' id='total' label={totalLabel} value={t('req.sumCount', { count: total })} sub={monthSub} delta={delta} />,
-    <Stat key='acquired' id='acquired' label={t('req.sumAcquired')} value={stats.acquired_vacation_time_str || '0'} sub={t('req.sumAcquiredSub')} />,
+    <Stat key='acquired' id='acquired' label={t('req.sumAcquired')} value={gt(stats.acquired_vacation_time, stats.acquired_vacation_time_str || '0')} sub={t('req.sumAcquiredSub')} />,
     <Stat key='rate' id='rate' label={t('req.sumRate')} value={rate} sub={t('req.sumRateSub', { total, approved: stats.approved_count })} />,
     <Stat key='avg' id='avg' label={t('req.sumAvg')} value={avg} />,
   ]
@@ -87,7 +89,7 @@ export function RequestSummary({
         </div>
         <div className='px-x6 pt-x3'>{tags}</div>
         <List className='mt-x1'>
-          <ListItem data-stat='acquired' title={t('req.sumAcquired')} suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{stats.acquired_vacation_time_str || '0'}</span>} />
+          <ListItem data-stat='acquired' title={t('req.sumAcquired')} suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{gt(stats.acquired_vacation_time, stats.acquired_vacation_time_str || '0')}</span>} />
           <ListItem data-stat='rate' title={t('req.sumRate')} detail={t('req.sumRateSub', { total, approved: stats.approved_count })} suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{rate}</span>} align='top' />
           <ListItem data-stat='avg' title={t('req.sumAvg')} suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{avg}</span>} />
         </List>
