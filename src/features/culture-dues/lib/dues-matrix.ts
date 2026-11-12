@@ -19,5 +19,12 @@ export const rowsOf = (users: GetUsersResp[] | undefined, birth: GetUsersMonthBi
     user,
     // 응답에 사용자 id 가 없어 이름으로 맞춘다(서버 응답이 바뀌어야 고칠 수 있다 — 지시서 R · 사용자 보고)
     amounts: birth?.find((d) => d.dues_user_name === user.user_name)?.month_birth_dues ?? Array<number>(12).fill(0),
-    birthMonth: user.user_birth ? parseInt(user.user_birth.split('-')[1] ?? '', 10) || null : null,
+    // 생일 달은 월-일 칸(MM-dd)에서 읽는다 — 직원 목록에는 생년이 오지 않는다(관리자 응답은 둘 다 온다)
+    birthMonth: birthMonthOf(user),
   }))
+
+const birthMonthOf = (user: GetUsersResp): number | null => {
+  const monthDay = user.user_birth_month_day
+  if (monthDay) return parseInt(monthDay.split('-')[0] ?? '', 10) || null
+  return user.user_birth ? parseInt(user.user_birth.split('-')[1] ?? '', 10) || null : null
+}
