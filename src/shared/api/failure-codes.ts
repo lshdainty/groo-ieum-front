@@ -41,6 +41,7 @@ export const FAILURE_CODE_KEYS: Record<string, string> = {
   SCHEDULE_003: 'failure.code.scheduleConflict',
   PERMISSION_003: 'failure.code.roleExists',
   PERMISSION_005: 'failure.code.permissionExists',
+  PERMISSION_006: 'failure.code.systemRoleProtected',
   DUES_002: 'failure.code.duesPaid',
   DUES_003: 'failure.code.duesAmount',
   HOLIDAY_002: 'failure.code.holidayExists',
