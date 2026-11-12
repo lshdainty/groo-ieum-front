@@ -114,10 +114,12 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
   const overtime = isOvertimePolicy(policy)
   const flexible = policy?.is_flexible_grant === 'Y'
   const withMinutes = policy?.minute_grant_yn === 'Y'
-  const empty = { approvers: [], max_available_count: 0, is_auto_approval: false }
+  const empty = { approvers: [], max_available_count: 0, is_auto_approval: false, no_approval_line: false }
   const approvers = (approversData ?? empty).approvers
   const required = requiredApprovers(policy, approversData ?? empty)
   const policyRequired = policy?.approval_required_count || 0
+  // 결재가 필요한데 결재선이 없으면 서버가 거절한다 — 신청 버튼을 막고 사유를 알린다
+  const noApprovalLine = !!approversData?.no_approval_line && policyRequired > 0
   const errors = requestFormErrors(values, policy, required)
   const dirty = step === 2 && requestFormChanged(values)
   const set = <K extends keyof RequestFormValues>(key: K, value: RequestFormValues[K]) => setValues((v) => ({ ...v, [key]: value }))
@@ -295,6 +297,8 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
           retryRow(t('req.form.approversFailureTitle'), approversQuery)
         ) : approversQuery.isPending ? (
           <Skeleton radius='12' className='block h-[56px] w-full' />
+        ) : noApprovalLine ? (
+          <Callout tone='critical' data-no-approval-line>{t('req.form.noApprovalLineCallout')}</Callout>
         ) : approversData?.is_auto_approval && policyRequired > 0 ? (
           <Callout tone='informative'>{t('req.form.autoApprovalCallout')}</Callout>
         ) : required === 0 ? (
@@ -343,7 +347,7 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
                 {t('req.form.next')}
               </Button>
             ) : (
-              <Button variant='brandSolid' loading={busy} disabled={approversQuery.isPending || approversQuery.isLoadingError} onClick={() => void submit()} data-request-submit>
+              <Button variant='brandSolid' loading={busy} disabled={approversQuery.isPending || approversQuery.isLoadingError || noApprovalLine} onClick={() => void submit()} data-request-submit>
                 {t('req.form.submit')}
               </Button>
             )}
