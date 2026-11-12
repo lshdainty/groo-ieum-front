@@ -39,8 +39,10 @@ const AuthCallbackPage = () => {
         const returnedState = query.get('state');
         const savedState = getSavedState();
         const verifier = getCodeVerifier();
-        // verifier 없거나 state(CSRF) 불일치 시 거부
-        if (!verifier || (savedState && returnedState && savedState !== returnedState)) {
+        // verifier 가 없거나 state(CSRF) 가 저장값과 다르면 거부한다. 주소에 state 가 없거나
+        // 저장해 둔 state 가 없는 것도 불일치다 — 한쪽이 비었다고 검사를 건너뛰면 공격자가
+        // state 를 뺀 주소로 자기 code 를 피해자 브라우저에서 교환시킬 수 있다(보안 점검 CLI-5).
+        if (!verifier || !savedState || !returnedState || savedState !== returnedState) {
           clearPkce();
           fail('stateMismatch');
           return;
@@ -52,8 +54,8 @@ const AuthCallbackPage = () => {
           window.history.replaceState({}, '', window.location.pathname);
           // 로그인하려던 화면이 있으면 그리로(같은 출처 경로만), 없으면 대시보드
           navigate(takeReturnPath() ?? '/dashboard', { replace: true });
-        } catch (err) {
-          console.error('Code exchange failed:', err);
+        } catch {
+          // 오류를 콘솔에 남기지 않는다 — axios 오류에는 요청 본문(인가 code · code_verifier)이 실려 있다(보안 점검 CLI-5)
           clearPkce();
           fail('exchangeFailed');
         }
