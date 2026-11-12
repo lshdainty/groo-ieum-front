@@ -11,6 +11,7 @@ import { ResponsiveDialog, ResponsiveDialogBody, ResponsiveDialogCancel, Respons
 import { Field } from '@/shared/ds/field'
 import { Input } from '@/shared/ds/input'
 import { useSnackbar } from '@/shared/ds/snackbar'
+import { usePermission } from '@/entities/session'
 import { useCompanyTypesQuery, useCountryCodeTypesQuery } from '@/entities/type'
 import { usePostUploadProfileMutation, type GetUsersResp, type PutUserReq } from '@/entities/user'
 import { DayField } from '@/shared/ui/groo/day-field'
@@ -89,6 +90,9 @@ const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFo
   const snackbar = useSnackbar()
   const { mutateAsync: uploadProfile, isPending: uploading } = usePostUploadProfileMutation()
   const { data: companies = [] } = useCompanyTypesQuery()
+  // 회사(소속)는 사용자 · 권한 관리자만 바꾼다 — 서버도 그 밖의 변경은 403 으로 거절한다(보안 점검 IEU-3)
+  const { hasAnyPermission } = usePermission()
+  const canChangeCompany = hasAnyPermission(['USER:MANAGE', 'ROLE:MANAGE'])
   const { data: countries = [] } = useCountryCodeTypesQuery()
   const [initial] = useState(() => initialOf(user, ''))
   const [values, setValues] = useState<Values>(initial)
@@ -109,7 +113,7 @@ const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFo
     name: !values.name.trim(),
     email: !emailOk,
     birth: !values.birth,
-    company: !values.company,
+    company: canChangeCompany && !values.company,
     workTime: !values.workTime,
     country: !values.country,
   }
@@ -230,7 +234,13 @@ const UserEditDialog = ({ open, onOpenChange, user, title, onSave, onCloseAutoFo
             </Field>
             <DayField label={t('edit.birth')} placeholder={ta('user.userBirthPlaceholder')} value={values.birth} onValueChange={(d) => set('birth', d)} invalid={showErrors && errors.birth} errorMessage={t('edit.birthRequired')} />
             <Checkbox label={t('edit.lunarBirthday')} checked={values.lunar} onCheckedChange={(c) => set('lunar', c === true)} />
-            <CompanyField value={values.company} onValueChange={(v) => set('company', v)} options={companies} required invalid={showErrors && errors.company} />
+            {canChangeCompany ? (
+              <CompanyField value={values.company} onValueChange={(v) => set('company', v)} options={companies} required invalid={showErrors && errors.company} />
+            ) : (
+              <Field label={ta('user.company')} readOnly>
+                <Input value={companies.find((c) => c.code === values.company)?.name ?? user.user_origin_company_name ?? values.company} readOnly />
+              </Field>
+            )}
             <WorkTimeField value={values.workTime} onValueChange={(v) => set('workTime', v)} required invalid={showErrors && errors.workTime} />
             <CountryField value={values.country} onValueChange={(v) => set('country', v)} options={countries} required invalid={showErrors && errors.country} />
           </div>
