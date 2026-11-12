@@ -92,6 +92,8 @@ export interface GetUserApproversResp {
   approvers: ApproverDetailResp[]
   max_available_count: number
   is_auto_approval: boolean
+  /** 결재선 없음 — 결재가 필요한 신청은 서버가 VACATION_015 로 거절한다(자기 · 상위 부서장이 없고 최상위 부서장도 아님) */
+  no_approval_line?: boolean
 }
 
 export interface GetUserIdDuplicateReq {

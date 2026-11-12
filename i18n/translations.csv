@@ -1255,6 +1255,7 @@ common,failure.code.planExists,이미 있는 휴가 플랜이에요.,This leave 
 common,failure.code.userPlanExists,이미 이 사용자에게 부여한 플랜이에요.,This plan is already granted to the user.
 common,failure.code.planPolicyExists,이미 플랜에 들어 있는 정책이에요.,This policy is already in the plan.
 common,failure.code.policyNameDuplicate,같은 이름의 휴가 정책이 있어요.,A leave policy with the same name already exists.
+common,failure.code.noApprovalLine,결재선이 없어 신청할 수 없어요. 관리자에게 부서장 지정을 요청해주세요.,There's no approver for this request. Ask an administrator to assign a department head.
 common,failure.code.workStarted,이미 시작한 근무예요.,Work has already started.
 common,failure.code.workEnded,이미 끝난 근무예요.,Work has already ended.
 common,failure.code.workTime,시작 시간과 끝 시간을 확인해주세요.,Check the start and end times.
@@ -1889,6 +1890,7 @@ vacation,req.form.approverPickTitle,{{k}}단계 결재자,Step {{k}} approver
 vacation,req.form.approverTaken,{{k}}단계에 골랐어요,Picked for step {{k}}
 vacation,req.form.autoApproval,결재 없이 바로 받아요.,Received right away without approval.
 vacation,req.form.autoApprovalCallout,결재 단계는 있지만 자동으로 승인돼요.,"This policy has approval steps, but they're approved automatically."
+vacation,req.form.noApprovalLineCallout,결재선이 없어 이 휴가는 신청할 수 없어요. 관리자에게 부서장 지정을 요청해주세요.,There's no approver for this leave yet. Ask an administrator to assign a department head.
 vacation,req.form.reducedCallout,정책은 {{required}}단계지만 결재할 수 있는 사람이 {{available}}명이라 {{available}}단계로 받아요.,"The policy asks for {{required}} steps, but only {{available}} people can approve, so it needs {{available}}."
 vacation,req.form.approversFailureTitle,결재자를 불러오지 못했어요,Couldn't load approvers
 vacation,req.form.notice,모두 승인되면 받은 휴가에 바로 더해져요.,"Once everyone approves, it's added to your leave right away."
