@@ -15,7 +15,7 @@ interface UserInfoContentProps {
  */
 const UserInfoContent = ({ user }: UserInfoContentProps) => {
   const { t } = useTranslation('user')
-  const birth = parseBirth(user.user_birth)
+  const birth = parseBirth(user.user_birth ?? undefined)
   const org = [user.user_origin_company_name, user.main_department_name_kr].filter(Boolean).join(' / ')
   const rows: { id: string; label: string; value: string; anywhere?: boolean }[] = [
     { id: 'id', label: t('info.userId'), value: user.user_id, anywhere: true },

@@ -20,6 +20,8 @@ export interface GetUserResp {
   user_name: string
   user_email: string
   user_birth: string
+  /** 생일 월-일(MM-dd) */
+  user_birth_month_day?: string | null
   user_work_time: string
   join_date: string
   roles: RoleDetailResp[]
@@ -44,7 +46,10 @@ export interface GetUsersResp {
   user_id: string
   user_name: string
   user_email: string
-  user_birth: string
+  /** 생년월일 전체 — 사용자 · 권한 관리자에게만 온다. 그 밖에는 null(보안 점검 IEU-8) */
+  user_birth: string | null
+  /** 생일 월-일(MM-dd) — 누구에게나 온다. 생일 · 회비 화면은 이 칸을 쓴다 */
+  user_birth_month_day?: string | null
   user_work_time: string
   join_date: string
   roles: RoleDetailResp[]
