@@ -35,7 +35,7 @@ export const WIDGETS: readonly Widget[] = [
   { id: 'today-work-status', labelKey: 'widget.workHistoryStatus', permissions: ['WORK:READ'], place: 'narrow', seeAll: WORK_REPORT },
   { id: 'month-stats', labelKey: 'widget.monthlyVacationStats', permissions: ['VACATION:READ'], place: 'wide', seeAll: VACATION_HISTORY },
   { id: 'type-stats', labelKey: 'widget.vacationTypeStats', permissions: ['VACATION:READ'], place: 'narrow', seeAll: VACATION_HISTORY },
-  { id: 'system-check', labelKey: 'widget.systemDailyCheck', place: 'wide' },
+  { id: 'system-check', labelKey: 'widget.systemDailyCheck', permissions: ['WORK:READ'], place: 'wide' },
   { id: 'profile', labelKey: 'widget.myInfo', permissions: ['USER:READ'], place: 'narrow' },
   { id: 'schedule', labelKey: 'widget.workSchedule', permissions: ['USER:READ'], place: 'wide', seeAll: { path: '/work/schedule', permissions: ['WORK:READ'] } },
   { id: 'vacation-application', labelKey: 'widget.vacationApplicationHistory', permissions: ['VACATION:REQUEST'], place: 'wide', seeAll: VACATION_APPLICATION },
