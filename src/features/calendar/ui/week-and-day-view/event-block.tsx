@@ -27,7 +27,7 @@ export function EventBlock({ event, onClick }: { event: IEvent; onClick: (event:
         tabIndex={0}
         data-slot='week-event'
         className={cn(
-          'flex cursor-pointer select-none flex-col gap-x0_5 overflow-hidden whitespace-nowrap rounded-sm px-x2 py-x1_5 text-t2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring',
+          'flex cursor-pointer select-none flex-col gap-x0_5 overflow-hidden whitespace-nowrap rounded-r1 px-x2 py-x1_5 text-t2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring',
           durationInMinutes < 35 && 'justify-center py-0'
         )}
         style={{ height: `${heightInPixels}px`, background: tone.bg, color: tone.fg }}
