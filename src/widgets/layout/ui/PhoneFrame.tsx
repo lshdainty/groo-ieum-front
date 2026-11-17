@@ -18,7 +18,7 @@ import { useDesktop } from '../lib/use-desktop'
 import { useCurrentScreenAction } from '../lib/screen-action'
 import { useCurrentScreenHeader } from '../lib/screen-header'
 import { parentPathOf, screenTitleKeyOf, type NavGroup } from '../model/nav'
-import { AccountRow } from './AccountRow'
+import { AccountMenuSheet, AccountRow } from './AccountRow'
 import { NavGroups } from './NavGroups'
 
 /**
@@ -36,6 +36,8 @@ export function PhoneFrame({ groups }: { groups: NavGroup[] }) {
   const [openAt, setOpenAt] = useState<string | null>(null)
   const open = !desktop && openAt === pathname
   const setOpen = (next: boolean) => setOpenAt(next ? pathname : null)
+  // 계정 메뉴 시트는 서랍 밖에서 연다 — 서랍 안에서 열면 시트 딤이 서랍을 덮지 못한다(AccountRow 머리말)
+  const [accountOpen, setAccountOpen] = useState(false)
   const titleKey = screenTitleKeyOf(pathname)
   const parentPath = parentPathOf(pathname)
   const navigate = useNavigate()
@@ -85,11 +87,18 @@ export function PhoneFrame({ groups }: { groups: NavGroup[] }) {
           </SidePanelBody>
           <SidePanelFooter>
             <div className='min-w-0 flex-1'>
-              <AccountRow surface='sheet' onOpenDialog={() => setOpen(false)} />
+              <AccountRow
+                surface='sheet'
+                onOpenMenu={() => {
+                  setOpen(false)
+                  setAccountOpen(true)
+                }}
+              />
             </div>
           </SidePanelFooter>
         </SidePanelContent>
       </SidePanel>
+      <AccountMenuSheet open={accountOpen} onOpenChange={setAccountOpen} />
     </>
   )
 }

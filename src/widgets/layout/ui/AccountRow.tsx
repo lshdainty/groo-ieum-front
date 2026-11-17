@@ -5,7 +5,7 @@ import { CircleUser, EllipsisVertical, KeyRound, LogOut, Monitor } from 'lucide-
 
 import { Avatar } from '@/shared/ds/avatar'
 import { Menu, MenuContent, MenuGroup, MenuItem, MenuTrigger } from '@/shared/ds/menu'
-import { MenuSheet, MenuSheetContent, MenuSheetGroup, MenuSheetItem, MenuSheetTrigger } from '@/shared/ds/menu-sheet'
+import { MenuSheet, MenuSheetContent, MenuSheetGroup, MenuSheetItem } from '@/shared/ds/menu-sheet'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ds/tooltip'
 import { RootContext } from '@/shared/ds/side-navigation/side-navigation-context'
 import { config } from '@/shared/config'
@@ -20,6 +20,9 @@ import { ThemeChooser } from './ThemeChooser'
  * 메뉴: 내 정보 · 비밀번호 바꾸기 · 화면 테마(기기 설정 · 라이트 · 다크) · 로그아웃. 768 이상 Menu(줄 오른쪽 · 아래 끝 맞춤 — 사이드바에서
  * 여는 목록은 옆 펼침이 그림이 고른 예외), 미만 Menu Sheet.
  * 내 정보 · 비밀번호 바꾸기는 지금 대화상자를 그대로 연다(Q4 — 새 모양은 I-24 29b 가 그린다).
+ * 폰은 줄이 옆 패널(서랍) 안에 있어, 같은 층(z-modal)의 메뉴 시트를 서랍 안에서 열면 시트의 딤이 서랍을 덮지 못한다
+ * (QA IE — 서랍이 딤 밖에 밝게 남음). 그래서 줄은 "열어 달라" 고만 알리고(onOpenMenu), 틀(PhoneFrame)이 서랍을
+ * 먼저 닫은 뒤 서랍 밖에서 AccountMenuSheet 를 연다 — Menu Sheet 의 "고른 동작이 확인을 열면 메뉴 시트가 닫힌 뒤 엽니다" 와 같은 꼴.
  */
 
 type Surface = 'menu' | 'sheet'
@@ -27,16 +30,13 @@ type Surface = 'menu' | 'sheet'
 // 768 ~ 1279(터치로 쓰는 폭) 메뉴 줄 누르는 영역 44 — ds Menu 줄은 39 라 호출처에서 키운다(1280 이상은 그대로 39)
 const MENU_ROW_TOUCH = 'md:max-lg:min-h-[44px]'
 
-export function AccountRow({ surface, onOpenDialog }: { surface: Surface; onOpenDialog?: () => void }) {
+/** 계정 메뉴의 항목 — 사이드바 Menu 와 폰 AccountMenuSheet 가 같이 쓴다 */
+function useAccountMenu(onOpenDialog?: () => void) {
   const { t } = useTranslation('sidebar')
   const queryClient = useQueryClient()
   const { loginUser, logout } = useUser()
   const { canEdit, openEdit, openPassword } = useAccountDialogs()
   const [themeOpen, setThemeOpen] = useState(false)
-  const collapsed = useContext(RootContext)?.collapsed ?? false
-
-  // 틀은 로그인한 사람에게만 그린다(로그인 전에는 Router 가 틀을 안 그린다)
-  if (!loginUser) return null
 
   const handleLogout = () => {
     // React Query 캐시 제거
@@ -45,6 +45,23 @@ export function AccountRow({ surface, onOpenDialog }: { surface: Surface; onOpen
     logout()
   }
 
+  const items = {
+    edit: { label: t('footer.account'), icon: <CircleUser aria-hidden />, onSelect: () => { onOpenDialog?.(); openEdit() } },
+    password: { label: t('footer.changePassword'), icon: <KeyRound aria-hidden />, onSelect: () => { onOpenDialog?.(); openPassword() } },
+    theme: { label: t('footer.theme'), icon: <Monitor aria-hidden />, onSelect: () => setThemeOpen(true) },
+    logout: { label: t('footer.logout'), icon: <LogOut aria-hidden />, onSelect: handleLogout },
+  }
+  return { loginUser, canEdit, items, themeOpen, setThemeOpen }
+}
+
+export function AccountRow({ surface, onOpenMenu }: { surface: Surface; onOpenMenu?: () => void }) {
+  const { t } = useTranslation('sidebar')
+  const { loginUser, canEdit, items, themeOpen, setThemeOpen } = useAccountMenu()
+  const collapsed = useContext(RootContext)?.collapsed ?? false
+
+  // 틀은 로그인한 사람에게만 그린다(로그인 전에는 Router 가 틀을 안 그린다)
+  if (!loginUser) return null
+
   const photo = loginUser.profile_url ? `${config.baseUrl}${loginUser.profile_url}` : undefined
   const accountName = t('footer.accountMenu', { name: loginUser.user_name })
 
@@ -52,6 +69,8 @@ export function AccountRow({ surface, onOpenDialog }: { surface: Surface; onOpen
     <button
       type='button'
       aria-label={accountName}
+      // 폰 — 시트는 틀이 서랍 밖에서 연다(위 머리말)
+      {...(surface === 'sheet' ? { onClick: onOpenMenu, 'aria-haspopup': 'dialog' as const } : {})}
       className={cn(
         'flex min-h-[44px] w-full cursor-pointer items-center gap-x3 rounded-r2_5 border-0 bg-transparent px-x2 py-x1_5 text-left font-sans',
         'hover:bg-bg-layer-default-pressed active:bg-bg-layer-default-pressed aria-expanded:bg-bg-layer-default-pressed',
@@ -75,63 +94,66 @@ export function AccountRow({ surface, onOpenDialog }: { surface: Surface; onOpen
     </button>
   )
 
-  const items = {
-    edit: { label: t('footer.account'), icon: <CircleUser aria-hidden />, onSelect: () => { onOpenDialog?.(); openEdit() } },
-    password: { label: t('footer.changePassword'), icon: <KeyRound aria-hidden />, onSelect: () => { onOpenDialog?.(); openPassword() } },
-    theme: { label: t('footer.theme'), icon: <Monitor aria-hidden />, onSelect: () => setThemeOpen(true) },
-    logout: { label: t('footer.logout'), icon: <LogOut aria-hidden />, onSelect: handleLogout },
-  }
+  if (surface === 'sheet') return trigger
 
   return (
     <>
-      {surface === 'menu' ? (
-        <Menu>
-          {collapsed ? (
-            // 접힘 — 이름은 말풍선(메뉴가 열려 있는 동안은 말풍선을 숨긴다)
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <MenuTrigger asChild>{trigger}</MenuTrigger>
-              </TooltipTrigger>
-              <TooltipContent side='right'>{loginUser.user_name}</TooltipContent>
-            </Tooltip>
-          ) : (
-            <MenuTrigger asChild>{trigger}</MenuTrigger>
+      <Menu>
+        {collapsed ? (
+          // 접힘 — 이름은 말풍선(메뉴가 열려 있는 동안은 말풍선을 숨긴다)
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <MenuTrigger asChild>{trigger}</MenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side='right'>{loginUser.user_name}</TooltipContent>
+          </Tooltip>
+        ) : (
+          <MenuTrigger asChild>{trigger}</MenuTrigger>
+        )}
+        <MenuContent side='right' align='end'>
+          {canEdit && (
+            <MenuGroup>
+              <MenuItem {...items.edit} className={MENU_ROW_TOUCH} />
+              <MenuItem {...items.password} className={MENU_ROW_TOUCH} />
+            </MenuGroup>
           )}
-          <MenuContent side='right' align='end'>
-            {canEdit && (
-              <MenuGroup>
-                <MenuItem {...items.edit} className={MENU_ROW_TOUCH} />
-                <MenuItem {...items.password} className={MENU_ROW_TOUCH} />
-              </MenuGroup>
-            )}
-            <MenuGroup>
-              {/* 메뉴는 실행만 한다(고른 표시 없음) — 지금 값은 고르기 창이 보인다 */}
-              <MenuItem {...items.theme} className={MENU_ROW_TOUCH} />
-            </MenuGroup>
-            <MenuGroup>
-              <MenuItem {...items.logout} className={MENU_ROW_TOUCH} />
-            </MenuGroup>
-          </MenuContent>
-        </Menu>
-      ) : (
-        <MenuSheet>
-          <MenuSheetTrigger asChild>{trigger}</MenuSheetTrigger>
-          <MenuSheetContent title={loginUser.user_name}>
-            {canEdit && (
-              <MenuSheetGroup>
-                <MenuSheetItem {...items.edit} />
-                <MenuSheetItem {...items.password} />
-              </MenuSheetGroup>
-            )}
+          <MenuGroup>
+            {/* 메뉴는 실행만 한다(고른 표시 없음) — 지금 값은 고르기 창이 보인다 */}
+            <MenuItem {...items.theme} className={MENU_ROW_TOUCH} />
+          </MenuGroup>
+          <MenuGroup>
+            <MenuItem {...items.logout} className={MENU_ROW_TOUCH} />
+          </MenuGroup>
+        </MenuContent>
+      </Menu>
+
+      <ThemeChooser open={themeOpen} onOpenChange={setThemeOpen} />
+    </>
+  )
+}
+
+/** 폰 계정 메뉴 — 틀(PhoneFrame)이 서랍을 닫은 뒤 서랍 밖에서 연다(위 머리말) */
+export function AccountMenuSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const { loginUser, canEdit, items, themeOpen, setThemeOpen } = useAccountMenu()
+  if (!loginUser) return null
+  return (
+    <>
+      <MenuSheet open={open} onOpenChange={onOpenChange}>
+        <MenuSheetContent title={loginUser.user_name}>
+          {canEdit && (
             <MenuSheetGroup>
-              <MenuSheetItem {...items.theme} />
+              <MenuSheetItem {...items.edit} />
+              <MenuSheetItem {...items.password} />
             </MenuSheetGroup>
-            <MenuSheetGroup>
-              <MenuSheetItem {...items.logout} />
-            </MenuSheetGroup>
-          </MenuSheetContent>
-        </MenuSheet>
-      )}
+          )}
+          <MenuSheetGroup>
+            <MenuSheetItem {...items.theme} />
+          </MenuSheetGroup>
+          <MenuSheetGroup>
+            <MenuSheetItem {...items.logout} />
+          </MenuSheetGroup>
+        </MenuSheetContent>
+      </MenuSheet>
 
       <ThemeChooser open={themeOpen} onOpenChange={setThemeOpen} />
     </>
