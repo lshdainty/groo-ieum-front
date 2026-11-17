@@ -12,8 +12,19 @@ import '@/index.css'
 import { AppHistoryRouter } from '@/app/router/AppHistoryRouter'
 import { RouteErrorBoundary } from '@/app/router/RouteErrorBoundary'
 import { installChunkReload } from '@/app/chunk-reload'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from '@/shared/ds/alert-dialog'
 import { BottomSheet, BottomSheetBody, BottomSheetContent, BottomSheetFooter } from '@/shared/ds/bottom-sheet'
 import { Button } from '@/shared/ds/button'
+import { Dialog, DialogBody, DialogContent } from '@/shared/ds/dialog'
+import { MenuSheet, MenuSheetContent, MenuSheetGroup, MenuSheetItem } from '@/shared/ds/menu-sheet'
 import { keyboardToolbarReserve } from '@/shared/ds/overlay'
 import { SnackbarProvider, useSnackbar } from '@/shared/ds/snackbar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ds/tooltip'
@@ -71,6 +82,71 @@ function SheetScene() {
   )
 }
 
+// 딤이 열린 동안 body 바탕(src/index.css) — 앱 틀(Layout 의 h-svh 틀과 같은 불투명 본문)을 깔고 표면을 window.__check.dim 으로 연다.
+// short 면 틀을 화면보다 짧게 둔다(body 상자 밖 — html 바탕이 보이는 곳 — 도 모습이 그대로인지 본다)
+type DimState = { sheet: boolean; inner: boolean; menu: boolean; dialog: boolean; ask: boolean; stage: boolean }
+const DIM_CLOSED: DimState = { sheet: false, inner: false, menu: false, dialog: false, ask: false, stage: false }
+
+function DimScene() {
+  const [s, setS] = useState(DIM_CLOSED)
+  const [stage, setStage] = useState<HTMLDivElement | null>(null)
+  const short = new URLSearchParams(window.location.search).has('short')
+  useEffect(() => {
+    window.__check.dim = (next: Partial<DimState>) => setS((prev) => ({ ...prev, ...next }))
+  }, [])
+  const none = () => {}
+  return (
+    <div className={short ? 'flex h-[300px]' : 'flex h-svh'}>
+      <div className='flex min-w-0 flex-1 flex-col gap-x4 overflow-hidden bg-bg-layer-basement p-x4'>
+        <p>뒤 화면</p>
+        {/* 카탈로그 무대처럼 body 바로 아래가 아닌 자리 */}
+        <div ref={setStage} data-check='stage' className='relative h-[120px] overflow-hidden' />
+      </div>
+      <BottomSheet open={s.sheet} onOpenChange={none}>
+        <BottomSheetContent title='시험 시트' aria-describedby={undefined}>
+          <BottomSheetBody>
+            <input aria-label='내용' />
+          </BottomSheetBody>
+          <BottomSheet open={s.inner} onOpenChange={none}>
+            <BottomSheetContent title='위 시트' aria-describedby={undefined}>
+              <BottomSheetBody>위</BottomSheetBody>
+            </BottomSheetContent>
+          </BottomSheet>
+        </BottomSheetContent>
+      </BottomSheet>
+      <MenuSheet open={s.menu} onOpenChange={none}>
+        <MenuSheetContent title='메뉴'>
+          <MenuSheetGroup>
+            <MenuSheetItem label='고치기' />
+          </MenuSheetGroup>
+        </MenuSheetContent>
+      </MenuSheet>
+      <Dialog open={s.dialog} onOpenChange={none}>
+        <DialogContent title='메모' size='medium'>
+          <DialogBody>본문</DialogBody>
+        </DialogContent>
+      </Dialog>
+      <AlertDialog open={s.ask} onOpenChange={none}>
+        <AlertDialogContent>
+          <AlertDialogTitle>그만 쓸까요?</AlertDialogTitle>
+          <AlertDialogDescription>쓰던 내용은 사라져요.</AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>계속 쓰기</AlertDialogCancel>
+            <AlertDialogAction>그만 쓰기</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {stage && (
+        <BottomSheet open={s.stage} onOpenChange={none} modal={false} container={stage}>
+          <BottomSheetContent title='견본' aria-describedby={undefined}>
+            <BottomSheetBody>본문</BottomSheetBody>
+          </BottomSheetContent>
+        </BottomSheet>
+      )}
+    </div>
+  )
+}
+
 function Thrower({ chunk }: { chunk: boolean }): ReactNode {
   throw chunk ? new TypeError('Importing a module script failed.') : new Error('render failed')
 }
@@ -117,6 +193,13 @@ function Scene() {
       <SnackbarProvider>
         <SnackbarScene />
       </SnackbarProvider>
+    )
+  }
+  if (scene === 'dim') {
+    return (
+      <AppHistoryRouter>
+        <DimScene />
+      </AppHistoryRouter>
     )
   }
   if (scene === 'tooltip') {

@@ -63,6 +63,44 @@ html {
     @apply bg-bg-layer-basement text-fg-neutral;
   }
 
+  /*
+   * 딤이 열린 동안 body 바탕색을 딤 토큰으로 — 시트(Menu Sheet 포함) · 대화상자 · 확인창의 딤이 보이는 동안(groo-damda-front #630).
+   *
+   * iPhone Safari 26 에서 키보드가 뜨면 키보드 위 띠는 body 의 **바탕색**(background-color)으로 칠해진다 — 입력 도구줄만 뜬 상태도,
+   * 주소 알약 · 도구줄이 함께 뜬 상태도. fixed 층은 어떤 크기 · 층으로도 닿지 않고(딤을 top −2000 · 높이 6000 · z 최대로 두어도),
+   * body 의 background-image 는 계산값에 들어가도 띠에 그리지 않는다(2026-11-18 QA 실기기 · iPhone 17 Pro · Safari 26, 담다 dev).
+   * 딤 넘침(shared/ds/overlay/dim-bounds.ts)은 그대로 둔다.
+   *
+   * 색은 새로 만들지 않는다 — body 바탕색을 딤 토큰(overlay-dim-light · 다크 overlay-dim-dark, 딤의 dark: 와 같은 .dark 조건) 그대로 둔다.
+   * 반투명이라 그 밑의 html 바탕에 겹쳐 그려진다(실측: 라이트 띠 122,122,124 · 위 딤 127,127,127). 그래서 **html 바탕이 body 원래
+   * 바탕과 같아야** 딤 아래 바탕과 같은 색이 된다. 이음은 html 에 바탕을 두지 않아(body 바탕이 캔버스로 번져 그려진다) 열린 동안만
+   * html 바탕을 body 원래 바탕(bg-layer-basement — 라이트 · 다크 모두 같은 토큰)으로 맞춘다. 닫힌 때와 열린 때 캔버스 색은 같다.
+   *
+   * 열린 동안 키보드와 상관없이 늘 건다 — html 에 바탕이 있으면 body 바탕은 body 상자에만 그려지고, 그 상자는 앱 틀(Layout 의
+   * h-svh 틀 — 사이드바 bg-layer-default · 본문 bg-layer-basement, 셸 밖 화면의 OutsideShell min-h-dvh bg-layer-default)이
+   * 불투명하게 덮어 보이지 않는다. 틀 아래로 남는 곳은 html 바탕(= 원래 바탕)이라 키보드가 없을 때 모습은 그대로다.
+   * 표식은 딤 자신의 상태다 — body 바로 아래로 포털된 딤이 data-state=open. 닫힘이 시작되면(data-state=closed) 바로 걷히고,
+   * 겹친 표면은 마지막 딤이 닫힐 때 걷힌다. 카탈로그 무대 안의 견본(무대에 그려져 body 바로 아래가 아니다)은 세지 않는다.
+   * scripts/check-overlay.mjs 가 실제 시트 · 대화상자 · 확인창을 열고 닫아 계산된 바탕색으로 맞춰 본다.
+   */
+  :root:has(
+      > body
+        > :is(
+          [data-slot="bottom-sheet-overlay"],
+          [data-slot="dialog-overlay"],
+          [data-slot="alert-dialog-overlay"]
+        )[data-state="open"]
+    ) {
+    background-color: var(--color-bg-layer-basement);
+
+    & > body {
+      background-color: var(--overlay-dim-light);
+    }
+    & > body:is(.dark, .dark *) {
+      background-color: var(--overlay-dim-dark);
+    }
+  }
+
   /* 스크롤바 — scroll-area.md 전역 한 벌: 세로 · 가로 6px, 막대는 알약 stroke-neutral-solid, 바탕 투명.
    * Firefox 는 ::-webkit-scrollbar 를 몰라 thin + scrollbar-color — 크로미움은 두 속성이 걸리면 6px 을 버리므로 @supports 안에만 둔다. */
   ::-webkit-scrollbar {
