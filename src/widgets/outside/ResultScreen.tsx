@@ -92,7 +92,7 @@ export function ResultScreen({ kind, icon, title, description, documentTitle, ac
       <div ref={rootRef} className='flex flex-1 flex-col [&_h1]:outline-none'>
         <div className='flex flex-1 flex-col items-stretch justify-center py-x10'>{section}</div>
         <div
-          className='sticky z-(--z-sticky) flex flex-col bg-bg-layer-default pb-[calc(var(--spacing-x4)+env(safe-area-inset-bottom))] pl-[max(var(--spacing-x6),env(safe-area-inset-left))] pr-[max(var(--spacing-x6),env(safe-area-inset-right))] pt-x3'
+          className='sticky z-(--z-sticky) flex flex-col bg-bg-layer-default pb-[calc(var(--spacing-x4)+env(safe-area-inset-bottom))] pl-[max(var(--spacing-x6),var(--safe-left))] pr-[max(var(--spacing-x6),var(--safe-right))] pt-x3'
           style={{ bottom: kbInset }}
         >
           <Button type='button' variant='neutralSolid' size='large' className='w-full' loading={action.loading} onClick={action.onClick}>
