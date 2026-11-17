@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 시트 · 딤 · 스낵바 · 히스토리 · 오류 경계를 크로미움에서 확인한다 — groo-damda-front 에서 들인 겹침 수정(#621 · #623 · #626 ·
- * #627 · #628)의 담다 시험(vitest · jsdom)을 이 레포에 맞게 옮긴 것이다.
+ * #627 · #628 · #630)의 담다 시험(vitest · jsdom)을 이 레포에 맞게 옮긴 것이다.
  *
  * 이 레포에는 단위 테스트 러너가 없어 check-auth-callback 처럼 개발 서버와 Playwright 로 실제 화면을 돈다. 무대는
  * scripts/check-overlay/harness.tsx(개발 서버만 그린다 — 운영 빌드에 들어가지 않는다). 키보드는 크로미움에 없으므로
@@ -11,7 +11,8 @@
  * 사용: node scripts/check-overlay.mjs [이름 일부 — 그 시험만]
  * Playwright 의 Chromium 이 필요하다 — 처음 한 번 `npx playwright install chromium`.
  */
-import { dirname, resolve } from "node:path";
+import { readdirSync, readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { createServer } from "vite";
@@ -64,6 +65,74 @@ const sheetSurface = (page) =>
     const el = document.querySelector("[role=dialog]");
     return { bottom: el?.style.bottom ?? "", maxHeight: el?.style.maxHeight ?? "" };
   });
+
+// ── 딤이 열린 동안 body 바탕(src/index.css — 담다 #630) ──
+// 계산된 html · body 바탕색과, 같은 자리에서 푼 토큰 값(body 원래 바탕 · 딤 라이트 · 딤 다크)
+const bgColors = (page) =>
+  page.evaluate(() => {
+    const probe = (value) => {
+      const el = document.createElement("i");
+      el.style.backgroundColor = value;
+      document.body.appendChild(el);
+      const got = getComputedStyle(el).backgroundColor;
+      el.remove();
+      return got;
+    };
+    return {
+      html: getComputedStyle(document.documentElement).backgroundColor,
+      body: getComputedStyle(document.body).backgroundColor,
+      basement: probe("var(--color-bg-layer-basement)"),
+      dimLight: probe("var(--overlay-dim-light)"),
+      dimDark: probe("var(--overlay-dim-dark)"),
+    };
+  });
+const TRANSPARENT = "rgba(0, 0, 0, 0)";
+// 딤이 걸렸는지 — html 은 body 원래 바탕, body 는 그 판의 딤 토큰
+const dimmedOf = (c, dark = false) => c.html === c.basement && c.body === (dark ? c.dimDark : c.dimLight);
+// 걸리지 않았는지 — html 은 바탕 없음(body 바탕이 캔버스로 번진다), body 는 원래 바탕
+const plainOf = (c) => c.html === TRANSPARENT && c.body === c.basement;
+const setDim = async (page, next, wait = 0) => {
+  await page.evaluate((n) => window.__check.dim(n), next);
+  await page.waitForTimeout(wait);
+};
+const setDark = (page, on) =>
+  page.evaluate((v) => {
+    document.documentElement.classList.toggle("dark", v);
+    if (v) document.documentElement.setAttribute("data-theme", "dark");
+    else document.documentElement.removeAttribute("data-theme");
+  }, on);
+// 이 규칙을 끈 모습(열린 표면은 그대로) — 규칙 전의 html · body 바탕
+const RULE_OFF =
+  "html { background-color: transparent !important } body { background-color: var(--color-bg-layer-basement) !important }";
+
+// src/index.css 의 딤 바탕 규칙 블록 — `:root:has(` 부터 그 블록이 닫히는 `\n  }` 까지
+const indexCss = readFileSync(resolve(ROOT, "src/index.css"), "utf8");
+const dimBlock = () => {
+  const start = indexCss.indexOf("\n  :root:has(");
+  if (start < 0) return null;
+  const end = indexCss.indexOf("\n  }\n", start);
+  return indexCss.slice(start, end + 4);
+};
+const cssFiles = (dir) =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? cssFiles(join(dir, e.name)) : e.name.endsWith(".css") ? [join(dir, e.name)] : [],
+  );
+const codeFiles = (dir) =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory()
+      ? codeFiles(join(dir, e.name))
+      : /\.tsx?$/.test(e.name) && !/\.test\.tsx?$/.test(e.name)
+        ? [join(dir, e.name)]
+        : [],
+  );
+// 딤 표면 — [이름, 여는 값, 딤 slot]
+const DIM_SURFACES = [
+  ["시트", { sheet: true }, "bottom-sheet-overlay"],
+  ["Menu Sheet", { menu: true }, "bottom-sheet-overlay"],
+  ["대화상자", { dialog: true }, "dialog-overlay"],
+  ["확인창", { ask: true }, "alert-dialog-overlay"],
+  ["사이드 패널(폰 주 메뉴 서랍)", { panel: true }, "side-panel-overlay"],
+];
 
 const cases = [
   {
@@ -172,6 +241,256 @@ const cases = [
       },
     })),
   ]),
+  {
+    name: "body 딤 선언 — html 은 body 원래 바탕 토큰, body 는 딤 토큰(라이트 · 다크) 그대로, 색을 새로 만들지 않는다",
+    async run() {
+      const block = dimBlock();
+      if (!block) return ["src/index.css 에 :root:has( 규칙이 없다"];
+      const p = [];
+      const decls = [...block.matchAll(/([a-z-]+)\s*:\s*([^;{}]+);/g)].map((m) => `${m[1]}: ${m[2].trim()}`);
+      const want = [
+        "background-color: var(--color-bg-layer-basement)",
+        "background-color: var(--overlay-dim-light)",
+        "background-color: var(--overlay-dim-dark)",
+      ];
+      if (JSON.stringify(decls) !== JSON.stringify(want)) p.push(`선언 ${JSON.stringify(decls)}`);
+      // Safari 는 띠에 background-image 를 그리지 않는다(QA 실기기) — 바탕색만 쓴다
+      if (/background-image|gradient|#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|color-mix/i.test(block)) p.push("색 리터럴 · 그림 바탕이 있다");
+      // 다크 조건은 딤의 dark: 와 같은 .dark(문서 루트) — 이음 변형은 :where(.dark, .dark *)
+      if (!indexCss.includes("@custom-variant dark (&:where(.dark, .dark *));")) p.push("이음 dark 변형이 바뀌었다");
+      if (!block.includes("& > body:is(.dark, .dark *)")) p.push("다크 규칙의 조건이 딤과 다르다");
+      return p;
+    },
+  },
+  {
+    name: "html 바탕 조건 — body 원래 바탕은 bg-layer-basement 한 토큰이고, 다른 CSS · 스크립트가 html · body 바탕을 바꾸지 않는다",
+    async run() {
+      const p = [];
+      if (!/\n {2}body \{\s*@apply bg-bg-layer-basement text-fg-neutral;\s*\}/.test(indexCss)) p.push("body 원래 바탕이 bg-layer-basement 가 아니다");
+      // 토큰은 라이트(@theme) · 다크([data-theme=dark], .dark) 두 곳에서만 정한다 — html · body 가 같은 값을 받는다
+      const defs = cssFiles(resolve(ROOT, "src")).flatMap((f) =>
+        [...readFileSync(f, "utf8").matchAll(/--color-bg-layer-basement:\s*([^;]+);/g)].map((m) => m[1]),
+      );
+      if (JSON.stringify(defs) !== JSON.stringify(["var(--color-gray-200)", "#1a1f2e"])) p.push(`토큰 정의 ${JSON.stringify(defs)}`);
+      for (const f of cssFiles(resolve(ROOT, "src"))) {
+        const css = readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+        for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+          const selector = m[1].trim();
+          if (!/(^|[\s,>&])(html|body|:root)\b/.test(selector)) continue;
+          if (!/background(-color|-image)?\s*:|@apply[^;]*\bbg-/.test(m[2])) continue;
+          // 중첩 규칙은 바깥 블록의 선언 뒤에 이어 읽힌다 — 끝이 `& > body…` 인 것이 이 규칙의 body 부분이다
+          const allowed =
+            f.endsWith("src/index.css") &&
+            (selector === "body" || /(^|;)\s*& > body(:is\(\.dark, \.dark \*\))?$/.test(selector) || selector.startsWith(":root:has("));
+          if (!allowed) p.push(`${f.replace(ROOT, "")} ${selector.replace(/\s+/g, " ").slice(0, 60)}`);
+        }
+      }
+      const writers = codeFiles(resolve(ROOT, "src")).filter((f) =>
+        /(documentElement|body)\.style\.(background|setProperty\(\s*["']background)/.test(readFileSync(f, "utf8")),
+      );
+      if (writers.length) p.push(`스크립트가 바탕을 바꾼다 ${writers.join(", ")}`);
+      // 실제 화면 — 닫힌 동안 html 은 바탕 없음 · body 는 원래 바탕, 열린 동안 html 은 그 원래 바탕(라이트 · 다크)
+      const { ctx, page } = await open("dim");
+      for (const dark of [false, true]) {
+        await setDark(page, dark);
+        const closed = await bgColors(page);
+        await setDim(page, { sheet: true }, 400);
+        const opened = await bgColors(page);
+        await setDim(page, { sheet: false }, 400);
+        const mode = dark ? "다크" : "라이트";
+        if (!plainOf(closed)) p.push(`${mode} 닫힘 ${JSON.stringify(closed)}`);
+        if (opened.html !== closed.body) p.push(`${mode} 열린 html ${opened.html} ≠ body 원래 ${closed.body}`);
+      }
+      await ctx.close();
+      return p;
+    },
+  },
+  ...DIM_SURFACES.map(([label, openState, slot]) => ({
+    name: `body 딤 — ${label}: 열면 걸고, 닫힘이 시작되면(data-state=closed) 바로 걷는다`,
+    async run() {
+      const { ctx, page } = await open("dim");
+      const p = [];
+      if (!plainOf(await bgColors(page))) p.push("아무것도 안 열었는데 걸렸다");
+      await setDim(page, openState, 50);
+      const parent = await page.evaluate((s) => document.querySelector(`[data-slot=${s}]`)?.parentElement === document.body, slot);
+      if (!parent) p.push("딤이 body 바로 아래가 아니다");
+      if (!dimmedOf(await bgColors(page))) p.push("열었는데 걸리지 않았다");
+      const off = Object.fromEntries(Object.keys(openState).map((k) => [k, false]));
+      await setDim(page, off);
+      const state = await page.evaluate((s) => document.querySelector(`[data-slot=${s}]`)?.dataset.state ?? "gone", slot);
+      const closing = await bgColors(page);
+      await page.waitForTimeout(500);
+      const gone = await bgColors(page);
+      await ctx.close();
+      if (state !== "closed") p.push(`닫히는 딤을 못 봤다(${state})`);
+      if (!plainOf(closing)) p.push(`닫히는 동안 남았다 ${JSON.stringify(closing)}`);
+      if (!plainOf(gone)) p.push(`닫힌 뒤 남았다 ${JSON.stringify(gone)}`);
+      return p;
+    },
+  })),
+  {
+    name: "body 딤 — 겹친 표면(시트 위 확인창 · 시트 위 시트)은 위 표면이 닫혀도 남고, 마지막 표면이 닫힐 때 걷는다",
+    async run() {
+      const { ctx, page } = await open("dim");
+      const p = [];
+      await setDim(page, { sheet: true, ask: true }, 400);
+      if (!dimmedOf(await bgColors(page))) p.push("시트 + 확인창에 걸리지 않았다");
+      await setDim(page, { ask: false });
+      if (!dimmedOf(await bgColors(page))) p.push("확인창이 닫히기 시작하자 걷혔다");
+      await page.waitForTimeout(400);
+      if (!dimmedOf(await bgColors(page))) p.push("확인창이 닫힌 뒤 걷혔다(시트가 열려 있다)");
+      await setDim(page, { inner: true }, 400);
+      const twoSheets = await page.locator("[data-slot=bottom-sheet-overlay]").count();
+      await setDim(page, { inner: false }, 500);
+      if (twoSheets !== 2) p.push(`시트 위 시트 딤 ${twoSheets}개`);
+      if (!dimmedOf(await bgColors(page))) p.push("위 시트가 닫히자 걷혔다");
+      await setDim(page, { sheet: false });
+      if (!plainOf(await bgColors(page))) p.push("마지막 시트가 닫혀도 남았다");
+      await ctx.close();
+      return p;
+    },
+  },
+  {
+    name: "body 딤 — 다크는 다크 딤 토큰, 라이트로 바꾸면 라이트 딤",
+    async run() {
+      const { ctx, page } = await open("dim");
+      await setDark(page, true);
+      await setDim(page, { dialog: true }, 300);
+      const dark = await bgColors(page);
+      await setDark(page, false);
+      const light = await bgColors(page);
+      await ctx.close();
+      const p = [];
+      if (!dimmedOf(dark, true)) p.push(`다크 ${JSON.stringify(dark)}`);
+      if (dark.dimDark === dark.dimLight) p.push("다크 딤과 라이트 딤이 같다");
+      if (!dimmedOf(light)) p.push(`라이트 ${JSON.stringify(light)}`);
+      return p;
+    },
+  },
+  {
+    name: "body 딤 — 카탈로그 무대 안의 견본(body 바로 아래가 아니다)은 세지 않는다",
+    async run() {
+      const { ctx, page } = await open("dim");
+      await setDim(page, { stage: true }, 300);
+      const inStage = await page.evaluate(() => {
+        const dim = document.querySelector("[data-slot=bottom-sheet-overlay]");
+        return dim?.dataset.state === "open" && dim.parentElement !== document.body;
+      });
+      const c = await bgColors(page);
+      await ctx.close();
+      const p = [];
+      if (!inStage) p.push("무대 안 견본 딤을 못 찾았다");
+      if (!plainOf(c)) p.push(`견본에 걸렸다 ${JSON.stringify(c)}`);
+      return p;
+    },
+  },
+  ...[
+    ["시트를", { sheet: true }],
+    ["서랍을", { panel: true }],
+  ].flatMap(([surface, openState]) =>
+    [
+      ["화면 높이 틀(h-svh)", ""],
+      ["화면보다 짧은 틀 — body 상자 밖", "&short"],
+    ].flatMap(([frame, query]) =>
+    [false, true].map((dark) => ({
+      name: `body 딤 — 키보드 없이 ${surface} 연 모습은 규칙을 끈 모습과 픽셀까지 같다(${frame} · ${dark ? "다크" : "라이트"})`,
+      async run() {
+        const { ctx, page } = await open(`dim${query}`);
+        await setDark(page, dark);
+        await setDim(page, openState, 600);
+        const shot = () => page.screenshot({ caret: "hide", animations: "disabled" });
+        const on = await shot();
+        const c = await bgColors(page);
+        await page.addStyleTag({ content: RULE_OFF });
+        const off = await shot();
+        await ctx.close();
+        const p = [];
+        if (!dimmedOf(c, dark)) p.push(`규칙이 걸리지 않았다 ${JSON.stringify(c)}`);
+        if (!on.equals(off)) p.push("규칙을 켜고 끈 모습이 다르다");
+        return p;
+      },
+    })),
+  )),
+  {
+    name: "서랍(Side Panel) 딤 — 시트와 같은 범위로 화면 위아래로 한 화면씩 넘친다(inset-0 없음)",
+    async run() {
+      const { ctx, page } = await open("dim");
+      await setDim(page, { panel: true }, 400);
+      const got = await page.evaluate(() => {
+        const dim = document.querySelector("[data-slot=side-panel-overlay]");
+        const r = dim?.getBoundingClientRect();
+        return dim && { cls: dim.className, top: Math.round(r.top), bottom: Math.round(r.bottom), corner: document.elementFromPoint(385, 2) === dim };
+      });
+      await ctx.close();
+      if (!got) return ["서랍 딤이 없다"];
+      const p = [];
+      if (/(^|\s)inset-0(\s|$)/.test(got.cls)) p.push("딤에 inset-0 이 남았다");
+      if (!got.cls.includes("-top-[100lvh]")) p.push("딤에 넘침 범위 클래스가 없다");
+      if (got.top !== -LAYOUT || got.bottom !== LAYOUT * 2) p.push(`딤 범위 ${got.top}~${got.bottom}`);
+      if (!got.corner) p.push("서랍 밖 귀퉁이를 누르면 딤이 아니다");
+      return p;
+    },
+  },
+  {
+    name: "서랍 닫힌 직후 — 나가는 딤 · 패널은 누름을 흘리고 body 막기가 풀리며, 다른 자리 첫 탭은 바로 닿는다",
+    async run() {
+      const { ctx, page } = await open("dim");
+      await setDim(page, { panel: true }, 400);
+      const close = await page.locator("[data-slot=side-panel-close]").boundingBox();
+      const behind = await page.locator("[data-check=behind]").boundingBox();
+      const blockedWhileOpen = await page.evaluate(() => document.body.style.pointerEvents);
+      await page.mouse.click(close.x + close.width / 2, close.y + close.height / 2);
+      const closing = await page.evaluate(() => {
+        const dim = document.querySelector("[data-slot=side-panel-overlay]");
+        const panel = document.querySelector("[data-slot=side-panel-content]");
+        return {
+          dimState: dim?.dataset.state,
+          dim: dim && getComputedStyle(dim).pointerEvents,
+          panel: panel && getComputedStyle(panel).pointerEvents,
+          body: document.body.style.pointerEvents,
+        };
+      });
+      // 다른 자리 — 서랍이 나가는 자리 밑(왼쪽 아래)의 뒤 화면 단추를 곧바로 누른다
+      await page.mouse.click(behind.x + 40, behind.y + behind.height / 2);
+      const clicks = await page.evaluate(() => window.__check.behindClicks);
+      await ctx.close();
+      const p = [];
+      if (blockedWhileOpen !== "none") p.push(`열린 동안 body 막기가 없다(${blockedWhileOpen})`);
+      if (closing.dimState !== "closed") p.push(`닫히는 딤을 못 봤다(${closing.dimState})`);
+      if (closing.dim !== "none") p.push(`닫히는 딤 pointer-events ${closing.dim}`);
+      if (closing.panel !== "none") p.push(`닫히는 패널 pointer-events ${closing.panel}`);
+      if (closing.body === "none") p.push("body 막기가 남았다");
+      if (clicks !== 1) p.push(`닫자마자 누른 뒤 화면 단추가 ${clicks}번 눌렸다`);
+      return p;
+    },
+  },
+  {
+    name: "서랍 닫힌 직후 — 닫은 자리 따닥의 두 번째 탭만 삼키고, 그다음 누름은 통과한다",
+    async run() {
+      const { ctx, page } = await open("dim");
+      await page.evaluate(() => {
+        window.__docClicks = 0;
+        document.addEventListener("click", (e) => {
+          if (e.detail > 0) window.__docClicks += 1;
+        });
+      });
+      await setDim(page, { panel: true }, 400);
+      const close = await page.locator("[data-slot=side-panel-close]").boundingBox();
+      const x = close.x + close.width / 2;
+      const y = close.y + close.height / 2;
+      await page.mouse.click(x, y);
+      const afterClose = await page.evaluate(() => window.__docClicks);
+      await page.mouse.click(x, y); // 따닥의 두 번째 — 삼킨다
+      const afterSecond = await page.evaluate(() => window.__docClicks);
+      await page.mouse.click(x, y); // 그다음 — 통과
+      const afterThird = await page.evaluate(() => window.__docClicks);
+      await ctx.close();
+      const p = [];
+      if (afterSecond !== afterClose) p.push("같은 자리 두 번째 탭이 뒤 화면에 닿았다");
+      if (afterThird !== afterSecond + 1) p.push("세 번째 탭까지 삼켰다");
+      return p;
+    },
+  },
   {
     name: "닫힌 직후 — 내려가는 딤 · 시트는 누름을 흘리고 body 막기가 풀리며, 다른 자리 첫 탭은 바로 닿는다",
     async run() {
