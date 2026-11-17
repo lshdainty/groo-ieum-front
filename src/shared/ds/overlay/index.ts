@@ -9,6 +9,7 @@ export {
   type OpenChange,
 } from "./overlay-utils";
 export {
+  afterBackSlotsSettle,
   useBackClose,
   whenBackSlotsSettled,
 } from "./use-back-close";

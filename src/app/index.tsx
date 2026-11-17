@@ -8,7 +8,7 @@ import { UserProvider } from '@/entities/session'
 import { apiClient } from '@/shared/api'
 import { QueryProvider, WriteFailureBridge } from '@/app/providers'
 import { AppRouter } from '@/app/router'
-import { BrowserRouter } from 'react-router-dom'
+import { AppHistoryRouter } from '@/app/router/AppHistoryRouter'
 import { lazy, Suspense } from 'react'
 
 // interceptor 초기화를 위해 api import 유지
@@ -37,13 +37,14 @@ export function App() {
             {/* 불러오는 중 상태 글 — 앱 맨 위에 한 번(skeleton.md). 스켈레톤이 마운트하며 여기에 알린다 */}
             <LoadingAnnouncer>
               <WriteFailureBridge />
-              <BrowserRouter basename='/'>
+              {/* BrowserRouter 와 같되, 시트를 닫은 되돌림이 끝난 뒤에 옮긴다(app/router/app-history.ts) */}
+              <AppHistoryRouter>
                 <UserProvider>
                   <PermissionProvider>
                     <AppRouter />
                   </PermissionProvider>
                 </UserProvider>
-              </BrowserRouter>
+              </AppHistoryRouter>
             </LoadingAnnouncer>
           </TooltipProvider>
         </SnackbarProvider>
