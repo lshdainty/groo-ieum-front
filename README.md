@@ -102,8 +102,11 @@ src/
 # 의존성 설치
 npm install
 
-# 개발 서버 실행 (http://localhost:3001)
+# 개발 서버 실행 (http://localhost:3001 — 이 컴퓨터에서만 열린다)
 npm run dev
+
+# 같은 네트워크의 다른 기기에서 볼 때만 (개발 서버를 LAN 에 연다)
+npm run dev:host
 
 # 프로덕션 빌드 (타입 체크 포함)
 npm run build
