@@ -1299,6 +1299,10 @@ auth,callback.finishing,로그인 마무리 중,Finishing sign-in
 login,sso.description,그루 계정으로 로그인해주세요.,Sign in with your 그루 account.
 login,sso.login,그루 계정으로 로그인,Sign in with 그루
 login,sso.failed,로그인을 시작하지 못했어요. 잠시 뒤 다시 시도해주세요.,Couldn't start sign-in. Please try again in a moment.
+login,signedOut.done,로그아웃했어요.,You're signed out.
+login,signedOut.accountStill,그루 계정은 이 브라우저에 아직 로그인돼 있어요. 여럿이 쓰는 컴퓨터라면 그루 계정에서도 로그아웃하세요.,"Your 그루 account is still signed in on this browser. On a shared computer, sign out of your 그루 account too."
+login,signedOut.signOutAccount,그루 계정에서도 로그아웃,Sign out of 그루 account too
+login,signedOut.accountDone,그루 계정에서도 로그아웃했어요.,You're signed out of your 그루 account too.
 user,pwForce.title,비밀번호를 바꿔주세요,Change your password
 user,pwForce.description,임시 비밀번호로 로그인했어요. 계속 쓰려면 새 비밀번호로 바꿔주세요.,"You signed in with a temporary password. To keep using 그루 이음, change it to a new password."
 user,pwForce.docTitle,비밀번호 바꾸기,Change password

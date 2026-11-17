@@ -6,3 +6,4 @@ export {
 } from '@/shared/lib/password'
 export { usePageTitle } from '@/shared/lib/page-title'
 export { safeReturnPath, loginPathFor, saveReturnPath, takeReturnPath } from '@/shared/lib/return-path'
+export { setLogoutMark, clearLogoutMark, hasLogoutMark } from '@/shared/lib/logout-mark'

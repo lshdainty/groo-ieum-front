@@ -89,3 +89,13 @@ export const PASSWORD_CHANGE_REQUIRED_CODE = 'AUTH_003'
 
 export const isPasswordChangeRequiredResponse = (status: number | undefined, data: unknown): boolean =>
   status === 403 && (data as { code?: unknown } | undefined)?.code === PASSWORD_CHANGE_REQUIRED_CODE
+
+/*
+ * 이음에서 로그아웃한 그 SSO 로그인으로 돌아온 인가코드 교환(POST /auth/exchange-code)을 서버가 401 과 함께 거절하는 코드
+ * (보안 점검 CLI-6). 계정이 틀린 게 아니다 — 비밀번호를 다시 받으면(SSO prompt=login) 풀린다. 콜백이 그 길로 한 번 다시 보낸다.
+ * 갈래는 코드로만 고른다(서버 글은 쓰지 않는다).
+ */
+export const LOGGED_OUT_SSO_LOGIN_CODE = 'AUTH_010'
+
+export const isLoggedOutSsoLoginResponse = (data: unknown): boolean =>
+  (data as { code?: unknown } | undefined)?.code === LOGGED_OUT_SSO_LOGIN_CODE

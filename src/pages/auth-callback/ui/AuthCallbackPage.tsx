@@ -1,7 +1,11 @@
 import { sessionApi } from '@/entities/session';
-import { getCodeVerifier, getSavedState, clearPkce } from '@/features/auth/lib/pkce';
+import { getCodeVerifier, getSavedState, clearPkce, wasReauthRequested } from '@/features/auth/lib/pkce';
+import { startSsoLogin } from '@/features/auth/lib/sso-redirect';
+import { isLoggedOutSsoLoginResponse } from '@/shared/api/failure-codes';
+import { clearLogoutMark, setLogoutMark } from '@/shared/lib/logout-mark';
 import { loginPathFor, takeReturnPath } from '@/shared/lib/return-path';
 import { ResultScreen, WaitingScreen } from '@/widgets/outside';
+import { isAxiosError } from 'axios';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +18,10 @@ type CallbackFailure = 'stateMismatch' | 'exchangeFailed' | 'noCode';
  * SSO에서 인증 완료 후 리다이렉트되어 JWT 토큰을 처리합니다.
  * SSO 토큰을 HR 토큰으로 교환하여 저장합니다.
  * 기다리는 동안은 흰 면 + 원, 실패하면 결과 화면 + [다시 로그인하기](저절로 넘어가지 않는다 — 사용자가 고른다).
+ *
+ * 하나만 저절로 다시 간다(보안 점검 CLI-6) — 이음에서 로그아웃한 그 SSO 로그인으로 돌아와 서버가 교환을 거절하면(AUTH_010)
+ * 비밀번호를 다시 받도록 prompt=login 으로 SSO 로그인을 한 번 다시 시작한다. 계정 문제가 아니라 다시 인증하면 풀리는 거절이다.
+ * 이미 prompt=login 으로 보낸 시도가 또 거절되면 맴돌지 않고 실패 화면을 보여 준다.
  */
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
@@ -47,16 +55,32 @@ const AuthCallbackPage = () => {
           fail('stateMismatch');
           return;
         }
+        // 이번 시도를 prompt=login 으로 보냈는가 — clearPkce 가 같이 지우므로 먼저 읽는다
+        const reauthRequested = wasReauthRequested();
         try {
           const redirectUri = `${window.location.origin}/auth/callback`;
           await sessionApi.exchangeCode({ code, codeVerifier: verifier, redirectUri });
           clearPkce();
+          // 다시 들어왔다 — 직접 로그아웃한 표시를 걷는다(다음 로그인부터는 SSO 로그인을 그대로 쓴다)
+          clearLogoutMark();
           window.history.replaceState({}, '', window.location.pathname);
           // 로그인하려던 화면이 있으면 그리로(같은 출처 경로만), 없으면 대시보드
           navigate(takeReturnPath() ?? '/dashboard', { replace: true });
-        } catch {
+        } catch (error) {
           // 오류를 콘솔에 남기지 않는다 — axios 오류에는 요청 본문(인가 code · code_verifier)이 실려 있다(보안 점검 CLI-5)
           clearPkce();
+          // 이음에서 로그아웃한 그 SSO 로그인이다(AUTH_010) — 응답의 code 만 읽는다. 표시를 남기고 비밀번호를 다시 받으러 간다.
+          // 복귀 경로는 꺼내지 않고 둔다(다시 돌아온 콜백이 쓴다). 떠나는 동안은 기다림 화면 그대로다.
+          if (!reauthRequested && isAxiosError(error) && isLoggedOutSsoLoginResponse(error.response?.data)) {
+            setLogoutMark();
+            try {
+              await startSsoLogin({ reauth: true });
+              return;
+            } catch {
+              // 다시 시작하지 못했다(저장소 · crypto) — 아래 실패 화면으로
+              clearPkce();
+            }
+          }
           fail('exchangeFailed');
         }
         return;
