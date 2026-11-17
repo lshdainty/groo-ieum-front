@@ -83,6 +83,50 @@ function SheetScene() {
   )
 }
 
+// 키보드가 뜬 채 닫기(담다 #631 — overlay/close-after-keyboard.ts · release-press.ts). 처음부터 연 표면 하나 — 폼 시트, ?dialog 면
+// 대화상자(폼 대화상자는 [×] 가 없어 폼이 아닌 것) — 와 입력 칸 · 뒤 화면 경로. ?dirty 면 바뀐 값이 있다. 실제로 닫힌 횟수는
+// window.__check.closes, 표면을 내리는 손잡이는 window.__check.unmount(기다리는 동안 내려가면 늦게 닫지 않는지 본다)
+function KeyboardScene() {
+  const params = new URLSearchParams(window.location.search)
+  const dialog = params.has('dialog')
+  const dirty = params.has('dirty')
+  const [open, setOpen] = useState(true)
+  const [mounted, setMounted] = useState(true)
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.__check.closes = 0
+    window.__check.unmount = () => setMounted(false)
+  }, [])
+  useEffect(() => {
+    window.__check.navigate = navigate
+  }, [navigate])
+  const onOpenChange = (next: boolean) => {
+    if (!next) window.__check.closes = Number(window.__check.closes) + 1
+    setOpen(next)
+  }
+  const field = <input data-check='input' aria-label='내용' />
+  return (
+    <div className='flex min-h-dvh flex-col gap-x4 p-x4'>
+      <p data-check='path'>{pathname}</p>
+      {mounted &&
+        (dialog ? (
+          <Dialog dirty={dirty} open={open} onOpenChange={onOpenChange}>
+            <DialogContent title='메모' aria-describedby={undefined}>
+              <DialogBody>{field}</DialogBody>
+            </DialogContent>
+          </Dialog>
+        ) : (
+          <BottomSheet form dirty={dirty} open={open} onOpenChange={onOpenChange}>
+            <BottomSheetContent title='업무 추가' aria-describedby={undefined}>
+              <BottomSheetBody>{field}</BottomSheetBody>
+            </BottomSheetContent>
+          </BottomSheet>
+        ))}
+    </div>
+  )
+}
+
 // 딤이 열린 동안 body 바탕(src/index.css) — 앱 틀(Layout 의 h-svh 틀과 같은 불투명 본문)을 깔고 표면을 window.__check.dim 으로 연다.
 // short 면 틀을 화면보다 짧게 둔다(body 상자 밖 — html 바탕이 보이는 곳 — 도 모습이 그대로인지 본다).
 // panel 은 폰 주 메뉴 서랍(왼쪽 Side Panel) — [×] 로 닫을 수 있고, 뒤 화면 바닥 단추로 닫은 직후 첫 탭을 본다
@@ -219,6 +263,15 @@ function Scene() {
     return (
       <AppHistoryRouter>
         <DimScene />
+      </AppHistoryRouter>
+    )
+  }
+  if (scene === 'keyboard') {
+    return (
+      <AppHistoryRouter>
+        <Routes>
+          <Route path='*' element={<KeyboardScene />} />
+        </Routes>
       </AppHistoryRouter>
     )
   }
