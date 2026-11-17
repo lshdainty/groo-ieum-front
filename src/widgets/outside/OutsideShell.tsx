@@ -21,7 +21,7 @@ export function OutsideShell({ children, layout = 'center' }: OutsideShellProps)
       {center ? (
         <main
           id='main'
-          className='flex flex-1 flex-col items-center justify-center pb-x10 pt-[max(var(--spacing-x10),env(safe-area-inset-top))] pl-[max(var(--spacing-x6),env(safe-area-inset-left))] pr-[max(var(--spacing-x6),env(safe-area-inset-right))]'
+          className='flex flex-1 flex-col items-center justify-center pb-x10 pt-[max(var(--spacing-x10),env(safe-area-inset-top))] pl-[max(var(--spacing-x6),var(--safe-left))] pr-[max(var(--spacing-x6),var(--safe-right))]'
         >
           {children}
         </main>
