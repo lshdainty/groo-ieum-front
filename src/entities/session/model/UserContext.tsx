@@ -5,6 +5,7 @@ import { isAxiosError } from 'axios'
 import { createContext, ReactNode, useContext, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { saveReturnPath } from '@/shared/lib/return-path'
+import { setLogoutMark } from '@/shared/lib/logout-mark'
 
 // 로그인 체크를 건너뛸 경로
 const AUTH_PATHS = ['/login', '/logout', '/auth/callback']
@@ -91,8 +92,11 @@ export function UserProvider({ children }: UserProviderProps) {
     setOverride({ user: null, at: Date.now() })
   }
 
-  // 로그아웃 함수 (HttpOnly 쿠키 삭제)
+  // 로그아웃 함수 (HttpOnly 쿠키 삭제) — 이음만 끝낸다. 그루 계정(SSO) 로그인과 다른 서비스는 그대로다(보안 점검 CLI-6)
   const logout = async () => {
+    // 직접 누른 로그아웃의 표시 — 다시 들어올 때 SSO 가 비밀번호를 다시 받게 한다(세션 만료로 가는 길에는 남기지 않는다).
+    // 요청보다 먼저 남긴다 — 응답을 기다리다 탭이 닫혀도 남는다
+    setLogoutMark()
     try {
       await sessionApi.logout()
     } catch (e) {
@@ -100,7 +104,8 @@ export function UserProvider({ children }: UserProviderProps) {
     }
     saveReturnPath(null)
     setOverride({ user: null, at: Date.now() })
-    window.location.href = '/login'
+    // out=1 — 로그인 화면이 "로그아웃했어요" 안내와 [그루 계정에서도 로그아웃] 을 보여 준다
+    window.location.href = '/login?out=1'
   }
 
   // 유저 정보 새로고침 (프로필 수정 후 등)

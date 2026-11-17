@@ -6,10 +6,13 @@
  *
  * SSO 로그인 시작 시 verifier/state 를 만들어 sessionStorage 에 잠깐 보관하고,
  * 콜백(?code=)에서 token 교환에 사용한 뒤 즉시 삭제한다(영구 저장 금지).
+ * 이번 시도를 prompt=login(비밀번호 다시 받기)으로 보냈는지도 같이 적어 두고 같이 지운다 —
+ * 콜백이 같은 거절(AUTH_010)에 맴돌지 않게 하는 표시다(보안 점검 CLI-6).
  */
 
 const VERIFIER_KEY = 'pkce_code_verifier'
 const STATE_KEY = 'pkce_state'
+const REAUTH_KEY = 'pkce_reauth'
 
 /** Uint8Array → base64url (padding 제거). */
 function toBase64Url(bytes: Uint8Array): string {
@@ -39,9 +42,17 @@ export function generateState(): string {
   return toBase64Url(bytes)
 }
 
-export function savePkce(verifier: string, state: string): void {
+/** reauth — 이번 시도를 prompt=login 으로 보낸다(지난 시도의 표시는 덮어쓴다). */
+export function savePkce(verifier: string, state: string, reauth: boolean = false): void {
   sessionStorage.setItem(VERIFIER_KEY, verifier)
   sessionStorage.setItem(STATE_KEY, state)
+  if (reauth) sessionStorage.setItem(REAUTH_KEY, '1')
+  else sessionStorage.removeItem(REAUTH_KEY)
+}
+
+/** 이번 시도를 prompt=login 으로 보냈는가 — clearPkce 앞에서 읽는다. */
+export function wasReauthRequested(): boolean {
+  return sessionStorage.getItem(REAUTH_KEY) !== null
 }
 
 export function getCodeVerifier(): string | null {
@@ -55,4 +66,5 @@ export function getSavedState(): string | null {
 export function clearPkce(): void {
   sessionStorage.removeItem(VERIFIER_KEY)
   sessionStorage.removeItem(STATE_KEY)
+  sessionStorage.removeItem(REAUTH_KEY)
 }
