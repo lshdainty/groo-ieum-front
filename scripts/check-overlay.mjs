@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * 시트 · 딤 · 스낵바 · 히스토리 · 오류 경계를 크로미움에서 확인한다 — groo-damda-front 에서 들인 겹침 수정(#621 · #623 · #626 ·
- * #627 · #628 · #630)의 담다 시험(vitest · jsdom)을 이 레포에 맞게 옮긴 것이다.
+ * 시트 · 딤 · 스낵바 · 히스토리 · 오류 경계 · 키보드가 뜬 채 닫기를 크로미움에서 확인한다 — groo-damda-front 에서 들인 겹침 수정
+ * (#621 · #623 · #626 · #627 · #628 · #630 · #631)의 담다 시험(vitest · jsdom)을 이 레포에 맞게 옮긴 것이다.
  *
  * 이 레포에는 단위 테스트 러너가 없어 check-auth-callback 처럼 개발 서버와 Playwright 로 실제 화면을 돈다. 무대는
  * scripts/check-overlay/harness.tsx(개발 서버만 그린다 — 운영 빌드에 들어가지 않는다). 키보드는 크로미움에 없으므로
@@ -133,6 +133,409 @@ const DIM_SURFACES = [
   ["확인창", { ask: true }, "alert-dialog-overlay"],
   ["사이드 패널(폰 주 메뉴 서랍)", { panel: true }, "side-panel-overlay"],
 ];
+
+// ── 키보드가 뜬 채 닫기(담다 #631) ──
+// 무대 keyboard — 처음부터 열린 폼 표면(시트, ?dialog 면 1280 대화상자) 하나와 입력 칸. 실제로 닫힌 횟수는 __check.closes.
+// 키보드는 가짜 보이는 영역으로 올린다(714 → 384, 가린 높이 330 — 판정 60 을 넘는다)
+const KB_UP = 384;
+const KB_HALF = 600; // 반쯤 돌아온 resize — 가린 높이 114, 아직 키보드
+const KB_WAIT = 400; // KEYBOARD_CLOSE_WAIT_MS
+
+async function openKeyboard({ dialog = false, dirty = false, keyboard = true, ua } = {}) {
+  const scene = `keyboard${dialog ? "&dialog" : ""}${dirty ? "&dirty" : ""}`;
+  const opened = await open(scene, { width: dialog ? 1280 : 390, ua });
+  const { page } = opened;
+  await page.locator(`[data-slot=${dialog ? "dialog" : "bottom-sheet"}-close]`).waitFor();
+  await page.waitForTimeout(400);
+  if (keyboard) {
+    await page.evaluate((h) => {
+      document.querySelector("[data-check=input]").focus();
+      window.__vv(h, 0);
+    }, KB_UP);
+    await page.waitForTimeout(50);
+  }
+  return opened;
+}
+const closesOf = (page) => page.evaluate(() => Number(window.__check.closes));
+const kbDown = (page) => page.evaluate((h) => window.__vv(h, 0), LAYOUT);
+const inputFocused = (page) =>
+  page.evaluate(() => document.activeElement === document.querySelector("[data-check=input]"));
+// [×] 에 손가락(또는 마우스) 누름 — 단추 가운데(또는 밖으로 밀어 dx), 이어 click 을 보낼지
+const press = (page, slot, { type = "touch", dx = 0, end = "pointerup", click = false } = {}) =>
+  page.evaluate(
+    ([s, t, d, e, c]) => {
+      const el = document.querySelector(`[data-slot=${s}]`);
+      const box = el.getBoundingClientRect();
+      const x = box.left + box.width / 2;
+      const y = box.top + box.height / 2;
+      const fire = (name, px) =>
+        el.dispatchEvent(
+          new PointerEvent(name, {
+            bubbles: true,
+            cancelable: true,
+            pointerId: 7,
+            pointerType: t,
+            isPrimary: true,
+            button: 0,
+            clientX: px,
+            clientY: y,
+          }),
+        );
+      fire("pointerdown", x);
+      fire(e, x + d);
+      if (!c) return null;
+      const ev = new MouseEvent("click", { bubbles: true, cancelable: true, detail: 1, clientX: x, clientY: y });
+      el.dispatchEvent(ev);
+      return ev.defaultPrevented;
+    },
+    [slot, type, dx, end, click],
+  );
+
+function KEYBOARD_CASES() {
+  return [
+    ...[
+      ["시트", false, "bottom-sheet-close"],
+      ["대화상자(1280 · 태블릿 키보드)", true, "dialog-close"],
+    ].map(([label, dialog, slot]) => ({
+      name: `키보드가 뜬 채 닫기 — ${label} [×]: 칸의 초점을 빼 키보드를 내리고, 보이는 영역이 돌아온 뒤 닫는다`,
+      async run() {
+        const { ctx, page, errors } = await openKeyboard({ dialog });
+        const before = await inputFocused(page);
+        await page.evaluate((s) => document.querySelector(`[data-slot=${s}]`).click(), slot);
+        const right = await page.evaluate(() => ({
+          closes: Number(window.__check.closes),
+          inSurface: !!document.activeElement?.closest("[role=dialog]"),
+        }));
+        const blurred = !(await inputFocused(page));
+        await page.waitForTimeout(150);
+        const waiting = await closesOf(page);
+        await kbDown(page);
+        await page.waitForTimeout(30);
+        const after = await closesOf(page);
+        await ctx.close();
+        const p = [];
+        if (!before) p.push("칸에 초점이 없었다(무대)");
+        if (right.closes !== 0) p.push("키보드가 떠 있는데 바로 닫았다");
+        if (!blurred) p.push("칸에 초점이 남았다(키보드가 안 내려간다)");
+        if (!right.inSurface) p.push("초점이 표면 밖으로 나갔다");
+        if (waiting !== 0) p.push("보이는 영역이 돌아오기 전에 닫았다");
+        if (after !== 1) p.push(`돌아온 뒤 닫힌 횟수 ${after}`);
+        if (errors.length) p.push(errors.join(" / "));
+        return p;
+      },
+    })),
+    {
+      name: `키보드가 뜬 채 닫기 — 보이는 영역이 돌아왔다는 알림이 없어도 상한(${KB_WAIT}ms) 뒤에 닫는다`,
+      async run() {
+        const { ctx, page } = await openKeyboard();
+        await page.locator("[data-slot=bottom-sheet-close]").dispatchEvent("click");
+        await page.waitForTimeout(KB_WAIT - 150);
+        const early = await closesOf(page);
+        await page.waitForTimeout(300);
+        const late = await closesOf(page);
+        await ctx.close();
+        const p = [];
+        if (early !== 0) p.push("상한 전에 닫았다");
+        if (late !== 1) p.push(`상한 뒤 닫힌 횟수 ${late}`);
+        return p;
+      },
+    },
+    {
+      name: "키보드가 뜬 채 닫기 — 기다리는 동안 다시 눌러도([×] · Esc · [×]) 한 번만 닫는다",
+      async run() {
+        const { ctx, page } = await openKeyboard();
+        const close = page.locator("[data-slot=bottom-sheet-close]");
+        await close.dispatchEvent("click");
+        await page.keyboard.press("Escape");
+        await close.dispatchEvent("click");
+        await page.waitForTimeout(KB_WAIT + 100);
+        const closes = await closesOf(page);
+        await ctx.close();
+        return closes === 1 ? [] : [`닫힌 횟수 ${closes}`];
+      },
+    },
+    {
+      name: "키보드가 뜬 채 닫기 — 보이는 영역이 반쯤 돌아온 resize 에는 아직 닫지 않는다",
+      async run() {
+        const { ctx, page } = await openKeyboard();
+        await page.locator("[data-slot=bottom-sheet-close]").dispatchEvent("click");
+        await page.evaluate((h) => window.__vv(h, 0), KB_HALF);
+        await page.waitForTimeout(30);
+        const half = await closesOf(page);
+        await kbDown(page);
+        await page.waitForTimeout(30);
+        const full = await closesOf(page);
+        await ctx.close();
+        const p = [];
+        if (half !== 0) p.push("반쯤 돌아왔는데 닫았다");
+        if (full !== 1) p.push(`다 돌아온 뒤 닫힌 횟수 ${full}`);
+        return p;
+      },
+    },
+    {
+      name: "키보드가 뜬 채 닫기 — 키보드가 없으면 그 자리에서 바로 닫는다(지금 동작 그대로)",
+      async run() {
+        const { ctx, page } = await openKeyboard({ keyboard: false });
+        const closes = await page.evaluate(() => {
+          document.querySelector("[data-slot=bottom-sheet-close]").click();
+          return Number(window.__check.closes);
+        });
+        await ctx.close();
+        return closes === 1 ? [] : [`같은 틱에 닫힌 횟수 ${closes}`];
+      },
+    },
+    {
+      name: "키보드가 뜬 채 닫기 — 초점 칸 없이 키보드만 내려가는 중(도구줄 [완료] 뒤 곧바로 [×])이어도 다 내려간 뒤에 닫는다",
+      async run() {
+        const { ctx, page } = await openKeyboard();
+        await page.evaluate(() => document.querySelector("[data-check=input]").blur());
+        await page.locator("[data-slot=bottom-sheet-close]").dispatchEvent("click");
+        const waiting = await closesOf(page);
+        await kbDown(page);
+        await page.waitForTimeout(30);
+        const after = await closesOf(page);
+        await ctx.close();
+        const p = [];
+        if (waiting !== 0) p.push("키보드가 내려가는 중인데 바로 닫았다");
+        if (after !== 1) p.push(`내려간 뒤 닫힌 횟수 ${after}`);
+        return p;
+      },
+    },
+    {
+      name: "키보드가 뜬 채 닫기 — 기다리는 동안 시트가 내려가면(언마운트) 늦게 닫지 않는다",
+      async run() {
+        const { ctx, page, errors } = await openKeyboard();
+        await page.locator("[data-slot=bottom-sheet-close]").dispatchEvent("click");
+        await page.evaluate(() => window.__check.unmount());
+        await kbDown(page);
+        await page.waitForTimeout(KB_WAIT + 100);
+        const closes = await closesOf(page);
+        await ctx.close();
+        const p = [];
+        if (closes !== 0) p.push(`내려간 뒤 늦게 닫았다(${closes})`);
+        if (errors.length) p.push(errors.join(" / "));
+        return p;
+      },
+    },
+    // ── 닫기 [×] 를 뗄 때 닫기(release-press) ──
+    {
+      name: "[×] 뗄 때 — 키보드가 뜬 채 손가락으로 누르면 click 이 오지 않아도(pointerdown · pointerup 만) 닫는다",
+      async run() {
+        const { ctx, page } = await openKeyboard();
+        await press(page, "bottom-sheet-close");
+        const blurred = !(await inputFocused(page));
+        await kbDown(page);
+        await page.waitForTimeout(30);
+        const closes = await closesOf(page);
+        await ctx.close();
+        const p = [];
+        if (!blurred) p.push("뗐는데 키보드를 내리지 않았다");
+        if (closes !== 1) p.push(`닫힌 횟수 ${closes}`);
+        return p;
+      },
+    },
+    {
+      name: "[×] 뗄 때 — 이어 온 같은 누름의 click 은 거둔다(닫기는 한 번)",
+      async run() {
+        const { ctx, page } = await openKeyboard();
+        await press(page, "bottom-sheet-close");
+        await kbDown(page); // 뗄 때 청한 닫기가 끝난다
+        await page.waitForTimeout(30);
+        await page.evaluate(() =>
+          document
+            .querySelector("[data-slot=bottom-sheet-close]")
+            ?.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, detail: 1 })),
+        );
+        await page.waitForTimeout(KB_WAIT + 100);
+        const closes = await closesOf(page);
+        await ctx.close();
+        return closes === 1 ? [] : [`닫힌 횟수 ${closes}`];
+      },
+    },
+    {
+      name: "[×] 뗄 때 — 바뀐 값이 있으면 뗄 때 한 번만 묻고, 이어 온 click 이 다시 청하지 않는다",
+      async run() {
+        const { ctx, page } = await openKeyboard({ dirty: true });
+        await press(page, "bottom-sheet-close", { click: true });
+        await kbDown(page);
+        await page.waitForTimeout(400);
+        const asked = await page.locator('[role=alertdialog][data-state="open"]').count();
+        const closes = await closesOf(page);
+        await ctx.close();
+        const p = [];
+        if (asked !== 1) p.push(`확인창 ${asked}개`);
+        if (closes !== 0) p.push("묻지 않고 닫았다");
+        return p;
+      },
+    },
+    ...[
+      ["단추 밖으로 밀고 떼면", { dx: 200 }],
+      ["터치가 취소되면(pointercancel — 스크롤 · 끌기)", { end: "pointercancel" }],
+      ["마우스는", { type: "mouse" }],
+    ].map(([label, opts]) => ({
+      name: `[×] 뗄 때 — ${label} 뗄 때 닫지 않는다`,
+      async run() {
+        const { ctx, page } = await openKeyboard();
+        await press(page, "bottom-sheet-close", opts);
+        const focused = await inputFocused(page);
+        await kbDown(page);
+        await page.waitForTimeout(KB_WAIT + 100);
+        const closes = await closesOf(page);
+        await ctx.close();
+        const p = [];
+        if (!focused) p.push("칸의 초점을 뺐다(닫기를 청했다)");
+        if (closes !== 0) p.push(`닫혔다(${closes})`);
+        return p;
+      },
+    })),
+    {
+      name: "[×] 뗄 때 — 마우스 · 키보드 없는 터치는 click 그대로다(뗄 때는 닫지 않고 click 에 닫는다)",
+      async run() {
+        const p = [];
+        for (const [label, keyboard, type] of [
+          ["마우스", true, "mouse"],
+          ["키보드 없는 터치", false, "touch"],
+        ]) {
+          const { ctx, page } = await openKeyboard({ keyboard });
+          await press(page, "bottom-sheet-close", { type });
+          const onRelease = await closesOf(page);
+          await page.evaluate(() =>
+            document
+              .querySelector("[data-slot=bottom-sheet-close]")
+              .dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, detail: 1 })),
+          );
+          if (keyboard) await kbDown(page);
+          await page.waitForTimeout(30);
+          const onClick = await closesOf(page);
+          await ctx.close();
+          if (onRelease !== 0) p.push(`${label} — 뗄 때 닫았다`);
+          if (onClick !== 1) p.push(`${label} — click 에 닫힌 횟수 ${onClick}`);
+        }
+        return p;
+      },
+    },
+    {
+      name: "[×] 뗄 때 — 키보드(Enter · Space)로 누른 click(detail 0)은 그대로 닫는다",
+      async run() {
+        const p = [];
+        for (const key of ["Enter", "Space"]) {
+          const { ctx, page } = await openKeyboard();
+          await page.evaluate(() => document.querySelector("[data-slot=bottom-sheet-close]").focus());
+          await page.keyboard.press(key);
+          await kbDown(page);
+          await page.waitForTimeout(30);
+          const closes = await closesOf(page);
+          await ctx.close();
+          if (closes !== 1) p.push(`${key} — 닫힌 횟수 ${closes}`);
+        }
+        return p;
+      },
+    },
+    {
+      name: "[×] 뗄 때 — 대화상자(1280 · 태블릿)도 같고, 이어 온 click 은 Radix 닫기로 넘기지 않는다",
+      async run() {
+        const { ctx, page } = await openKeyboard({ dialog: true });
+        const prevented = await press(page, "dialog-close", { click: true });
+        const blurred = !(await inputFocused(page));
+        await kbDown(page);
+        await page.waitForTimeout(KB_WAIT + 100);
+        const closes = await closesOf(page);
+        await ctx.close();
+        const p = [];
+        if (!blurred) p.push("뗐는데 키보드를 내리지 않았다");
+        if (prevented !== true) p.push("이어 온 click 을 Radix 로 넘겼다");
+        if (closes !== 1) p.push(`닫힌 횟수 ${closes}`);
+        return p;
+      },
+    },
+    // ── 키보드 경로 히스토리(app-history.test) — 닫힌 뒤 누른 탭이 앞으로 칸을 잘라 뒤로 켜짐 · 앞으로 꺼짐 ──
+    ...[
+      ["키보드가 다 내려가고 시트가 닫힌 뒤", true],
+      ["시트가 닫히는 바로 그 틱(되돌림이 끝나기 전)", false],
+    ].map(([when, settledFirst]) => ({
+      name: `키보드 경로 히스토리 — ${when} 누른 탭은 한 번에 옮기고, 뒤로 켜짐 · 앞으로 꺼짐(닫은 칸이 앞으로 칸으로 남지 않는다)`,
+      async run() {
+        const { ctx, page, errors } = await openKeyboard();
+        const opened = await page.evaluate(() => ({ len: history.length, flag: history.state?.grooOverlayBack === true }));
+        await page.locator("[data-slot=bottom-sheet-close]").dispatchEvent("click");
+        const waiting = await page.evaluate(() => history.state?.grooOverlayBack === true);
+        if (settledFirst) {
+          await kbDown(page);
+          await page.waitForTimeout(600);
+          await page.evaluate(() => window.__check.navigate("/b"));
+        } else {
+          // 닫힌 정리가 칸 되돌림(history.go)을 건 바로 그때(popstate 전) — 키보드가 내려가며 iOS 가 보내는 scroll 도 함께
+          await page.evaluate((h) => {
+            const go = history.go.bind(history);
+            history.go = (d) => {
+              history.go = go;
+              go(d);
+              window.__check.navigate("/b");
+            };
+            window.visualViewport.dispatchEvent(new Event("scroll"));
+            window.__vv(h, 0);
+            window.dispatchEvent(new Event("scroll"));
+          }, LAYOUT);
+        }
+        await page.waitForTimeout(600);
+        const moved = await page.evaluate(() => ({
+          len: history.length,
+          path: location.pathname,
+          shown: document.querySelector("[data-check=path]")?.textContent,
+          flag: history.state?.grooOverlayBack === true,
+        }));
+        const forward = await page.evaluate(() => {
+          // 앞으로 칸이 있는지 — navigation API(크로미움)
+          return window.navigation ? window.navigation.canGoForward : null;
+        });
+        await page.goBack();
+        await page.waitForTimeout(300);
+        const back = await page.evaluate(() => ({ path: location.pathname, flag: history.state?.grooOverlayBack === true }));
+        await ctx.close();
+        const p = [];
+        if (!opened.flag) p.push("열 때 칸을 쌓지 않았다");
+        if (!waiting) p.push("키보드가 내려가는 동안 칸을 먼저 되돌렸다");
+        if (moved.path !== "/b" || moved.shown !== "/b") p.push(`옮긴 화면이 아니다 ${JSON.stringify(moved)}`);
+        if (moved.flag) p.push("닫은 시트 칸에 서 있다");
+        if (moved.len !== opened.len) p.push(`히스토리 길이 ${moved.len}(연 때 ${opened.len}) — 닫은 칸이 남았거나 두 번 옮겼다`);
+        if (forward === true) p.push("앞으로 가기가 켜져 있다");
+        if (back.path !== HARNESS || back.flag) p.push(`뒤로 가기가 ${JSON.stringify(back)}`);
+        if (errors.length) p.push(errors.join(" / "));
+        return p;
+      },
+    })),
+    {
+      name: "키보드 경로 히스토리 — 키보드가 뜬 채 뒤로 가기는 키보드를 내린 뒤 시트를 닫고(칸은 브라우저가 썼다) 화면은 그대로",
+      async run() {
+        const { ctx, page, errors } = await openKeyboard();
+        const opened = await page.evaluate(() => history.length);
+        await page.evaluate(() => history.back());
+        await page.waitForTimeout(150);
+        const waiting = await page.evaluate(() => ({
+          closes: Number(window.__check.closes),
+          input: document.activeElement === document.querySelector("[data-check=input]"),
+        }));
+        await kbDown(page);
+        await page.waitForTimeout(600);
+        const after = await page.evaluate(() => ({
+          closes: Number(window.__check.closes),
+          len: history.length,
+          path: location.pathname,
+          flag: history.state?.grooOverlayBack === true,
+        }));
+        await ctx.close();
+        const p = [];
+        if (waiting.closes !== 0) p.push("키보드가 내려가기 전에 닫았다");
+        if (waiting.input) p.push("칸에 초점이 남았다");
+        if (after.closes !== 1) p.push(`닫힌 횟수 ${after.closes}`);
+        if (after.path !== HARNESS || after.flag) p.push(`화면이 ${JSON.stringify(after)}`);
+        if (after.len !== opened) p.push(`히스토리 길이 ${after.len}(연 때 ${opened})`);
+        if (errors.length) p.push(errors.join(" / "));
+        return p;
+      },
+    },
+  ];
+}
 
 const cases = [
   {
@@ -657,6 +1060,8 @@ const cases = [
       return p;
     },
   },
+  // ── 키보드가 뜬 채 닫기(담다 #631 — close-after-keyboard.test · release-press.test · app-history.test 키보드 경로) ──
+  ...KEYBOARD_CASES(),
   {
     name: "Tooltip — 누른 뒤 스크립트가 옮긴 초점에는 열지 않고, 키보드 초점에는 연다",
     async run() {
