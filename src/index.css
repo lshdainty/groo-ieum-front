@@ -64,7 +64,8 @@ html {
   }
 
   /*
-   * 딤이 열린 동안 body 바탕색을 딤 토큰으로 — 시트(Menu Sheet 포함) · 대화상자 · 확인창의 딤이 보이는 동안(groo-damda-front #630).
+   * 딤이 열린 동안 body 바탕색을 딤 토큰으로 — 시트(Menu Sheet 포함) · 대화상자 · 확인창 · 사이드 패널(폰 주 메뉴 서랍)의 딤이 보이는
+   * 동안(groo-damda-front #630 — 사이드 패널은 이음 부품이라 이음에서 더했다).
    *
    * iPhone Safari 26 에서 키보드가 뜨면 키보드 위 띠는 body 의 **바탕색**(background-color)으로 칠해진다 — 입력 도구줄만 뜬 상태도,
    * 주소 알약 · 도구줄이 함께 뜬 상태도. fixed 층은 어떤 크기 · 층으로도 닿지 않고(딤을 top −2000 · 높이 6000 · z 최대로 두어도),
@@ -88,7 +89,8 @@ html {
         > :is(
           [data-slot="bottom-sheet-overlay"],
           [data-slot="dialog-overlay"],
-          [data-slot="alert-dialog-overlay"]
+          [data-slot="alert-dialog-overlay"],
+          [data-slot="side-panel-overlay"]
         )[data-state="open"]
     ) {
     background-color: var(--color-bg-layer-basement);

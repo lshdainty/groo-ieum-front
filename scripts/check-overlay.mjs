@@ -131,6 +131,7 @@ const DIM_SURFACES = [
   ["Menu Sheet", { menu: true }, "bottom-sheet-overlay"],
   ["대화상자", { dialog: true }, "dialog-overlay"],
   ["확인창", { ask: true }, "alert-dialog-overlay"],
+  ["사이드 패널(폰 주 메뉴 서랍)", { panel: true }, "side-panel-overlay"],
 ];
 
 const cases = [
@@ -384,15 +385,19 @@ const cases = [
     },
   },
   ...[
-    ["화면 높이 틀(h-svh)", ""],
-    ["화면보다 짧은 틀 — body 상자 밖", "&short"],
-  ].flatMap(([frame, query]) =>
+    ["시트를", { sheet: true }],
+    ["서랍을", { panel: true }],
+  ].flatMap(([surface, openState]) =>
+    [
+      ["화면 높이 틀(h-svh)", ""],
+      ["화면보다 짧은 틀 — body 상자 밖", "&short"],
+    ].flatMap(([frame, query]) =>
     [false, true].map((dark) => ({
-      name: `body 딤 — 키보드 없이 시트를 연 모습은 규칙을 끈 모습과 픽셀까지 같다(${frame} · ${dark ? "다크" : "라이트"})`,
+      name: `body 딤 — 키보드 없이 ${surface} 연 모습은 규칙을 끈 모습과 픽셀까지 같다(${frame} · ${dark ? "다크" : "라이트"})`,
       async run() {
         const { ctx, page } = await open(`dim${query}`);
         await setDark(page, dark);
-        await setDim(page, { sheet: true }, 600);
+        await setDim(page, openState, 600);
         const shot = () => page.screenshot({ caret: "hide", animations: "disabled" });
         const on = await shot();
         const c = await bgColors(page);
@@ -405,7 +410,87 @@ const cases = [
         return p;
       },
     })),
-  ),
+  )),
+  {
+    name: "서랍(Side Panel) 딤 — 시트와 같은 범위로 화면 위아래로 한 화면씩 넘친다(inset-0 없음)",
+    async run() {
+      const { ctx, page } = await open("dim");
+      await setDim(page, { panel: true }, 400);
+      const got = await page.evaluate(() => {
+        const dim = document.querySelector("[data-slot=side-panel-overlay]");
+        const r = dim?.getBoundingClientRect();
+        return dim && { cls: dim.className, top: Math.round(r.top), bottom: Math.round(r.bottom), corner: document.elementFromPoint(385, 2) === dim };
+      });
+      await ctx.close();
+      if (!got) return ["서랍 딤이 없다"];
+      const p = [];
+      if (/(^|\s)inset-0(\s|$)/.test(got.cls)) p.push("딤에 inset-0 이 남았다");
+      if (!got.cls.includes("-top-[100lvh]")) p.push("딤에 넘침 범위 클래스가 없다");
+      if (got.top !== -LAYOUT || got.bottom !== LAYOUT * 2) p.push(`딤 범위 ${got.top}~${got.bottom}`);
+      if (!got.corner) p.push("서랍 밖 귀퉁이를 누르면 딤이 아니다");
+      return p;
+    },
+  },
+  {
+    name: "서랍 닫힌 직후 — 나가는 딤 · 패널은 누름을 흘리고 body 막기가 풀리며, 다른 자리 첫 탭은 바로 닿는다",
+    async run() {
+      const { ctx, page } = await open("dim");
+      await setDim(page, { panel: true }, 400);
+      const close = await page.locator("[data-slot=side-panel-close]").boundingBox();
+      const behind = await page.locator("[data-check=behind]").boundingBox();
+      const blockedWhileOpen = await page.evaluate(() => document.body.style.pointerEvents);
+      await page.mouse.click(close.x + close.width / 2, close.y + close.height / 2);
+      const closing = await page.evaluate(() => {
+        const dim = document.querySelector("[data-slot=side-panel-overlay]");
+        const panel = document.querySelector("[data-slot=side-panel-content]");
+        return {
+          dimState: dim?.dataset.state,
+          dim: dim && getComputedStyle(dim).pointerEvents,
+          panel: panel && getComputedStyle(panel).pointerEvents,
+          body: document.body.style.pointerEvents,
+        };
+      });
+      // 다른 자리 — 서랍이 나가는 자리 밑(왼쪽 아래)의 뒤 화면 단추를 곧바로 누른다
+      await page.mouse.click(behind.x + 40, behind.y + behind.height / 2);
+      const clicks = await page.evaluate(() => window.__check.behindClicks);
+      await ctx.close();
+      const p = [];
+      if (blockedWhileOpen !== "none") p.push(`열린 동안 body 막기가 없다(${blockedWhileOpen})`);
+      if (closing.dimState !== "closed") p.push(`닫히는 딤을 못 봤다(${closing.dimState})`);
+      if (closing.dim !== "none") p.push(`닫히는 딤 pointer-events ${closing.dim}`);
+      if (closing.panel !== "none") p.push(`닫히는 패널 pointer-events ${closing.panel}`);
+      if (closing.body === "none") p.push("body 막기가 남았다");
+      if (clicks !== 1) p.push(`닫자마자 누른 뒤 화면 단추가 ${clicks}번 눌렸다`);
+      return p;
+    },
+  },
+  {
+    name: "서랍 닫힌 직후 — 닫은 자리 따닥의 두 번째 탭만 삼키고, 그다음 누름은 통과한다",
+    async run() {
+      const { ctx, page } = await open("dim");
+      await page.evaluate(() => {
+        window.__docClicks = 0;
+        document.addEventListener("click", (e) => {
+          if (e.detail > 0) window.__docClicks += 1;
+        });
+      });
+      await setDim(page, { panel: true }, 400);
+      const close = await page.locator("[data-slot=side-panel-close]").boundingBox();
+      const x = close.x + close.width / 2;
+      const y = close.y + close.height / 2;
+      await page.mouse.click(x, y);
+      const afterClose = await page.evaluate(() => window.__docClicks);
+      await page.mouse.click(x, y); // 따닥의 두 번째 — 삼킨다
+      const afterSecond = await page.evaluate(() => window.__docClicks);
+      await page.mouse.click(x, y); // 그다음 — 통과
+      const afterThird = await page.evaluate(() => window.__docClicks);
+      await ctx.close();
+      const p = [];
+      if (afterSecond !== afterClose) p.push("같은 자리 두 번째 탭이 뒤 화면에 닿았다");
+      if (afterThird !== afterSecond + 1) p.push("세 번째 탭까지 삼켰다");
+      return p;
+    },
+  },
   {
     name: "닫힌 직후 — 내려가는 딤 · 시트는 누름을 흘리고 body 막기가 풀리며, 다른 자리 첫 탭은 바로 닿는다",
     async run() {

@@ -25,6 +25,7 @@ import { BottomSheet, BottomSheetBody, BottomSheetContent, BottomSheetFooter } f
 import { Button } from '@/shared/ds/button'
 import { Dialog, DialogBody, DialogContent } from '@/shared/ds/dialog'
 import { MenuSheet, MenuSheetContent, MenuSheetGroup, MenuSheetItem } from '@/shared/ds/menu-sheet'
+import { SidePanel, SidePanelBody, SidePanelContent } from '@/shared/ds/side-panel'
 import { keyboardToolbarReserve } from '@/shared/ds/overlay'
 import { SnackbarProvider, useSnackbar } from '@/shared/ds/snackbar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ds/tooltip'
@@ -83,9 +84,10 @@ function SheetScene() {
 }
 
 // 딤이 열린 동안 body 바탕(src/index.css) — 앱 틀(Layout 의 h-svh 틀과 같은 불투명 본문)을 깔고 표면을 window.__check.dim 으로 연다.
-// short 면 틀을 화면보다 짧게 둔다(body 상자 밖 — html 바탕이 보이는 곳 — 도 모습이 그대로인지 본다)
-type DimState = { sheet: boolean; inner: boolean; menu: boolean; dialog: boolean; ask: boolean; stage: boolean }
-const DIM_CLOSED: DimState = { sheet: false, inner: false, menu: false, dialog: false, ask: false, stage: false }
+// short 면 틀을 화면보다 짧게 둔다(body 상자 밖 — html 바탕이 보이는 곳 — 도 모습이 그대로인지 본다).
+// panel 은 폰 주 메뉴 서랍(왼쪽 Side Panel) — [×] 로 닫을 수 있고, 뒤 화면 바닥 단추로 닫은 직후 첫 탭을 본다
+type DimState = { sheet: boolean; inner: boolean; menu: boolean; dialog: boolean; ask: boolean; stage: boolean; panel: boolean }
+const DIM_CLOSED: DimState = { sheet: false, inner: false, menu: false, dialog: false, ask: false, stage: false, panel: false }
 
 function DimScene() {
   const [s, setS] = useState(DIM_CLOSED)
@@ -136,6 +138,24 @@ function DimScene() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <SidePanel open={s.panel} onOpenChange={(panel) => setS((prev) => ({ ...prev, panel }))}>
+        <SidePanelContent side='left' title='그루 이음'>
+          <SidePanelBody scrollFog>
+            <p>주 메뉴</p>
+          </SidePanelBody>
+        </SidePanelContent>
+      </SidePanel>
+      {/* 서랍 뒤 화면의 단추 — 닫자마자 누른 첫 탭이 닿는지 본다 */}
+      <button
+        type='button'
+        data-check='behind'
+        className='fixed bottom-0 left-0 h-[56px] w-full'
+        onClick={() => {
+          window.__check.behindClicks = Number(window.__check.behindClicks) + 1
+        }}
+      >
+        뒤 화면
+      </button>
       {stage && (
         <BottomSheet open={s.stage} onOpenChange={none} modal={false} container={stage}>
           <BottomSheetContent title='견본' aria-describedby={undefined}>

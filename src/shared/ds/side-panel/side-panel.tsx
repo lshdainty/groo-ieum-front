@@ -4,7 +4,9 @@ import { X } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
 import { useLeaveConfirm } from "@/shared/ds/alert-dialog";
-import { useBackClose, useRefocusAfterBusy } from "@/shared/ds/overlay";
+import { useBackClose, useInertWhileClosing, useRefocusAfterBusy } from "@/shared/ds/overlay";
+import { CLOSING_INERT } from "@/shared/ds/overlay/closing-surface";
+import { OVERLAY_DIM_BOUNDS } from "@/shared/ds/overlay/dim-bounds";
 import { useInputButtonSurface } from "@/shared/ds/input-button";
 import { useScrollFog } from "@/shared/ds/scroll-fog";
 
@@ -39,7 +41,8 @@ import { useScrollFog } from "@/shared/ds/scroll-fog";
  * role="dialog" + aria-modal, 제목 aria-labelledby(h2) · 설명 aria-describedby(있을 때만).
  *
  * 모양: 화면 높이 전체(dvh), 붙은 쪽 끝 — 모서리 · 그림자 · 선 없이 딤(overlay-dim 라이트 0.50 · 다크 0.65)과 표면 색(bg-layer-floating)으로
- *   뜬다. 폭은 왼쪽 80% · 오른쪽 480 · 720 · 960(화면의 80% 를 넘지 않는다 — 딤이 늘 20% 남는다). 붙은 쪽 안전 영역(가로 노치)은 폭에
+ *   뜬다. 딤은 시트 · 대화상자와 같은 범위(OVERLAY_DIM_BOUNDS — 화면 위아래로 넘침)이고, 닫히는 딤 · 패널은 누름을 흘린다(CLOSING_INERT ·
+ *   useInertWhileClosing) [sso-front 판에서 손으로 더한 자리, SOURCE.md 14]. 폭은 왼쪽 80% · 오른쪽 480 · 720 · 960(화면의 80% 를 넘지 않는다 — 딤이 늘 20% 남는다). 붙은 쪽 안전 영역(가로 노치)은 폭에
  *   더하고(SEED 문서), 패널 내용 맨 아래에 아래 안전 영역을 둔다(바닥이 없어도).
  *   머리 위 24(+ 위 안전 영역) · 좌우 24 · 아래 16 · 최소 70 · 사이 6, 제목 t8 22 / 30 · 700 · 설명 t5 fg-neutral-muted. 닫기 버튼이 있으면
  *   머리 오른쪽 52. 닫기 버튼은 52 투명 상자 · 아이콘 22 fg-neutral-subtle — 아이콘이 위 28 · 오른쪽 24. 누르면 bg-layer-floating-pressed +
@@ -189,6 +192,8 @@ function SidePanel({ open: openProp, defaultOpen, onOpenChange, form = false, di
   useBackClose(open && narrow, (keep) => {
     if (!leave.request()) keep();
   });
+  // 닫는 순간 Radix 의 body 막기를 풀고 같은 자리 따닥만 삼킨다 — 나가는 300ms 동안 다른 자리 첫 탭은 닿는다(overlay/closing-surface.ts)
+  useInertWhileClosing(open && modal);
   // 주 메뉴(왼쪽)는 창이 768 이상으로 넓어지면 닫힌다
   React.useEffect(() => {
     if (!open || side !== "left") return;
@@ -228,10 +233,14 @@ SidePanelTrigger.displayName = "SidePanelTrigger";
 // ── 모양 ─────────────────────────────────────────────────────
 // 딤 — 300ms enter 로 나타나고 300ms exit 로 사라진다(모션 줄이기면 150ms)
 const OVERLAY = [
-  "fixed inset-0 z-(--z-modal) bg-[var(--overlay-dim-light)] dark:bg-[var(--overlay-dim-dark)]",
+  // 덮는 범위 — 화면 위아래로 넘친다(키보드 아래 띠까지, overlay/dim-bounds.ts). 열린 동안 body 바탕도 딤 토큰이다(src/index.css)
+  OVERLAY_DIM_BOUNDS,
+  "z-(--z-modal) bg-[var(--overlay-dim-light)] dark:bg-[var(--overlay-dim-dark)]",
   "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:[--tw-animation-duration:var(--motion-duration-d6)] data-[state=open]:ease-[var(--motion-ease-enter)]",
   "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:[--tw-animation-duration:var(--motion-duration-d6)] data-[state=closed]:ease-[var(--motion-ease-exit)]",
   "motion-reduce:data-[state]:[--tw-animation-duration:var(--motion-duration-d3)]",
+  // 사라지는 300ms 동안 누름을 흘려보낸다(overlay/closing-surface.ts)
+  CLOSING_INERT,
 ].join(" ");
 
 // 패널 — 높이 전체, 모서리 · 그림자 · 선 없음, 아래 안전 영역. 가로 손가락 끌기를 받도록 세로 스크롤 · 확대만 브라우저에 맡긴다
@@ -243,6 +252,8 @@ const CONTENT = [
   "data-[state=closed]:[--tw-animation-duration:var(--motion-duration-d6)] data-[state=closed]:ease-[var(--motion-ease-exit-expressive)]",
   // 모션 줄이기 — 미끄러지지 않고 150ms 서서히
   "motion-reduce:data-[state=open]:fade-in-0 motion-reduce:data-[state=closed]:fade-out-0 motion-reduce:data-[state]:[--tw-animation-duration:var(--motion-duration-d3)] motion-reduce:data-[state]:ease-[var(--motion-ease-enter)]",
+  // 나가는 300ms 동안 누름을 흘려보낸다(overlay/closing-surface.ts)
+  CLOSING_INERT,
 ].join(" ");
 
 // 붙은 쪽 — 폭에 그쪽 안전 영역을 더하고 그만큼 안쪽 여백을 둔다. 왼쪽은 화면 폭의 80%
