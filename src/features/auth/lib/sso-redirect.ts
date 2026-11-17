@@ -10,8 +10,8 @@ import { codeChallenge, generateCodeVerifier, generateState, savePkce } from '@/
  * SSO 로그인을 시작한다(PKCE 인가코드 흐름) — code_verifier/state 를 새로 만들어 보관하고
  * code_challenge(S256) 를 인가 요청에 붙여 떠난다.
  *
- * 직접 로그아웃한 표시가 있거나(logout-mark.ts) reauth 를 주면 prompt=login 을 붙인다 — SSO 가 살아 있는
- * 로그인을 쓰지 않고 비밀번호를 다시 받는다(보안 점검 CLI-6). 붙였는지는 이번 시도에 적어 둔다(pkce.ts).
+ * 직접 로그아웃했거나 교환이 거절된 표시가 있거나(logout-mark.ts) reauth 를 주면 prompt=login 을 붙인다 — SSO 가 살아 있는
+ * 로그인을 쓰지 않고 비밀번호를 다시 받는다(보안 점검 CLI-6 · 이음을 쓸 수 없는 계정에서 다른 계정으로 바꾸기). 붙였는지는 이번 시도에 적어 둔다(pkce.ts).
  * reauth 는 표시를 못 남기는 브라우저(저장소 차단)에서도 콜백의 다시 시작이 꼭 prompt=login 으로 가게 한다.
  */
 export const startSsoLogin = async (options: { reauth?: boolean } = {}): Promise<void> => {
