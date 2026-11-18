@@ -1,5 +1,6 @@
 import { getDay, isToday } from "date-fns";
 import dayjs from "dayjs";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCalendar } from "@/features/calendar/model/calendar-context";
@@ -9,9 +10,8 @@ import {
 } from "@/features/calendar/lib/helpers";
 import { formatDayText } from "@/shared/lib/date-text";
 import { cn } from "@/shared/lib/cn";
-import { useWeekdayHeader } from "@/shared/ui/groo/weekday-header";
-import { WeekdayProbe } from "@/shared/ui/groo/weekday-probe";
-import { WEEK_GRID_TEXT } from "@/shared/ui/groo/week-grid-text";
+import { useWeekdayFit, WeekdayProbe } from "@/shared/ds/date-picker";
+import { WEEK_GRID_TEXT } from "@/shared/ds/week-grid-text";
 
 import type { IEvent } from "@/features/calendar/model/interfaces";
 import { MonthChip, MonthChipSpacer, MonthMore } from "./month-chip";
@@ -27,21 +27,20 @@ const PHONE_METRICS: ChipMetrics = { avail: 73, chip: 18, more: 16, gap: 2 };
 
 /**
  * 요일 줄 — 높이 32 · t3 13/18 · fg-neutral-subtle, 일 fg-critical · 토 fg-brand (I-09 8). 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa,
- * 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256 — useWeekdayHeader)
+ * 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256 — ds useWeekdayFit), 글자는 200% 에서 멈춘다(#258 — ds WEEK_GRID_TEXT)
  */
 export function WeekdayRow() {
-  const { rowRef, shown, full } = useWeekdayHeader();
+  const rowRef = useRef<HTMLDivElement>(null);
+  const weekday = useWeekdayFit(rowRef);
   return (
     <div
       ref={rowRef}
       aria-hidden
-      data-weekday-row
       className={cn("grid h-x8 shrink-0 grid-cols-7 items-center px-[2px] text-center text-fg-neutral-subtle", WEEK_GRID_TEXT.t3)}
     >
-      {shown.map((day, index) => (
+      {weekday.weekdays.map((day, index) => (
         <span
           key={index}
-          data-weekday-cell
           className={cn(
             "relative min-w-0 whitespace-nowrap",
             index === 0 && "text-fg-critical",
@@ -49,7 +48,7 @@ export function WeekdayRow() {
           )}
         >
           {day}
-          <WeekdayProbe text={full[index]!} />
+          <WeekdayProbe>{weekday.full[index]}</WeekdayProbe>
         </span>
       ))}
     </div>

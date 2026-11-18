@@ -251,13 +251,21 @@ const cases = [
   ...[
     { lang: "en", width: 390, font: 1, want: "two" },
     { lang: "en", width: 320, font: 2, want: "fit" },
-    { lang: "en", width: 320, font: 3, want: "narrow" },
+    // 300% — 요일 글은 200% 에서 멈춘다(#258). 처음부터 키운 것과, 날짜 고르기를 연 채 키운 것(QA: 두 글자 요일이 겹쳤다 — 뜬 뒤에도 다시 잰다)
+    { lang: "en", width: 320, font: 3, want: "fit" },
+    { lang: "en", width: 320, font: 3, want: "fit", live: true },
     { lang: "ko", width: 320, font: 2, want: "ko" },
-  ].map(({ lang, width, font, want }) => ({
-    name: `요일 ${lang} ${width} · ${font * 100}% — ${{ two: "Su ~ Sa", fit: "칸에 들면 Su ~ Sa · 안 들면 S ~ S", narrow: "S ~ S", ko: "일 ~ 토" }[want]} 한 줄, 칸 안`,
+  ].map(({ lang, width, font, want, live }) => ({
+    name: `요일 ${lang} ${width} · ${font * 100}%${live ? " 뜬 뒤 키움" : ""} — ${{ two: "Su ~ Sa", fit: "칸에 들면 Su ~ Sa · 안 들면 S ~ S", narrow: "S ~ S", ko: "일 ~ 토" }[want]} 한 줄, 칸 안(겹치지 않음)${font > 2 ? ", 글자 200% 에서 멈춤" : ""}`,
     async run() {
-      const { ctx, page, errors } = await open("weekday", { width, query: `&lang=${lang}&font=${font}` });
+      const { ctx, page, errors } = await open("weekday", { width, query: `&lang=${lang}${live ? "" : `&font=${font}`}` });
       await page.locator("[data-slot=date-picker-weekday]").first().waitFor();
+      if (live) {
+        await page.waitForTimeout(300);
+        await page.evaluate((f) => {
+          document.documentElement.style.fontSize = `${f * 100}%`;
+        }, font);
+      }
       await page.waitForTimeout(300);
       const m = await page.evaluate(() => {
         const cells = [...document.querySelectorAll("[data-slot=date-picker-weekdays] [data-slot=date-picker-weekday]")];
@@ -266,7 +274,7 @@ const cases = [
           const r = label.getBoundingClientRect();
           const c = cell.getBoundingClientRect();
           const lh = parseFloat(getComputedStyle(label).lineHeight) || r.height;
-          return { text: label.textContent, lines: Math.round(r.height / lh), inside: r.left >= c.left - 0.5 && r.right <= c.right + 0.5, labelWidth: r.width, cellWidth: c.width };
+          return { text: label.textContent, size: parseFloat(getComputedStyle(label).fontSize), lines: Math.round(r.height / lh), inside: r.left >= c.left - 0.5 && r.right <= c.right + 0.5, labelWidth: r.width, cellWidth: c.width };
         });
       });
       await ctx.close();
@@ -283,6 +291,9 @@ const cases = [
         if (x.lines > 1) p.push(`"${x.text}" 가 ${x.lines} 줄`);
         if (!x.inside) p.push(`"${x.text}" 가 칸(${x.cellWidth.toFixed(1)}) 밖으로 나간다(${x.labelWidth.toFixed(1)})`);
       }
+      // 요일 글은 text-t4 14 의 200%(28) 에서 멈춘다(#258)
+      const size = Math.max(...m.map((x) => x.size));
+      if (size > 14 * Math.min(font, 2) + 0.5) p.push(`요일 글 ${size}px — 200% 상한 ${14 * Math.min(font, 2)}px 를 넘는다`);
       return p;
     },
   })),
@@ -293,13 +304,20 @@ const cases = [
     { lang: "en", width: 320, font: 1 },
     { lang: "en", width: 320, font: 2 },
     { lang: "en", width: 320, font: 3 },
+    { lang: "en", width: 320, font: 3, live: true },
     { lang: "en", width: 1280, font: 1 },
     { lang: "ko", width: 320, font: 2 },
-  ].map(({ lang, width, font }) => ({
-    name: `캘린더 요일 머리 ${lang} ${width} · ${font * 100}% — ${lang === "ko" ? "일 ~ 토" : "Su ~ Sa, 칸에 안 들면 S ~ S"} · 한 줄 · 두 글자는 칸 안 · 세 글자 없음(폰 월 · 넓은 월 · 년)`,
+  ].map(({ lang, width, font, live }) => ({
+    name: `캘린더 요일 머리 ${lang} ${width} · ${font * 100}%${live ? " 뜬 뒤 키움" : ""} — ${lang === "ko" ? "일 ~ 토" : "Su ~ Sa, 칸에 안 들면 S ~ S"} · 한 줄 · 두 글자는 칸 안(월 보기는 늘 칸 안) · 세 글자 없음(폰 월 · 넓은 월 · 년)`,
     async run() {
-      const { ctx, page, errors } = await open("calendar-weekday", { width, query: `&lang=${lang}&font=${font}` });
+      const { ctx, page, errors } = await open("calendar-weekday", { width, query: `&lang=${lang}${live ? "" : `&font=${font}`}` });
       await page.locator("[data-check=year] .grid-cols-7").first().waitFor();
+      if (live) {
+        await page.waitForTimeout(300);
+        await page.evaluate((f) => {
+          document.documentElement.style.fontSize = `${f * 100}%`;
+        }, font);
+      }
       await page.waitForTimeout(300);
       const rows = await page.evaluate(() =>
         ["phone", "desktop", "year"].flatMap((where) =>
@@ -311,7 +329,7 @@ const cases = [
             .map((row) => ({
             where,
             cells: [...row.children].map((cell) => {
-              const probe = cell.querySelector("[data-weekday-probe]");
+              const probe = cell.querySelector("[data-slot=weekday-probe]");
               const text = [...cell.childNodes].filter((n) => n !== probe).map((n) => n.textContent).join("");
               const range = document.createRange();
               const textNode = [...cell.childNodes].find((n) => n.nodeType === Node.TEXT_NODE);
@@ -347,7 +365,8 @@ const cases = [
           if (c.lines > 1) p.push(`${r.where} "${c.text}" 가 ${c.lines} 줄`);
           // 두 글자는 칸에 들 때만 쓰므로 늘 칸 안이다. 한 글자(한국어 포함)보다 더 줄일 꼴은 없다 — 년 보기 작은 달은 320 · 200% 에서
           // 한 글자도 칸(약 14)보다 넓다(그 칸 배치의 일이라 요일 규칙의 판정에서는 뺀다)
-          if (want === TWO && (c.left < c.cellLeft - 0.5 || c.right > c.cellRight + 0.5)) p.push(`${r.where} "${c.text}" 가 칸 밖으로 나간다`);
+          // 월 보기(폰 · 넓은) 칸은 200% 상한 글이면 어느 꼴이든 들어야 한다 — 겹치지 않는다
+          if ((want === TWO || r.where !== "year") && (c.left < c.cellLeft - 0.5 || c.right > c.cellRight + 0.5)) p.push(`${r.where} "${c.text}" 가 칸 밖으로 나간다`);
         }
       }
       // 요일 머리는 글자 크기 200% 에서 멈춘다(groo-design #258) — 월 보기 text-t3 13 · 년 보기 text-t2 12 의 두 배까지

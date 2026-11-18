@@ -8,6 +8,8 @@ import { mergeRefs } from "@/shared/ds/overlay";
 import { WheelPicker, WheelPickerColumn } from "@/shared/ds/wheel-picker";
 
 import { DayCell, OutsideCell, type DayState } from "./date-picker-day";
+import { useWeekdayNarrow } from "./weekday-fit";
+import { WeekdayProbe } from "./weekday-probe";
 import {
   datePickerLabels,
   addDays,
@@ -75,7 +77,7 @@ import { useDsText } from "@/shared/ds/i18n";
  *
  *   DatePicker          달력 — selection(single · range · multiple) × visibleRange(month · twoMonths · continuous).
  *                       value · onValueChange 는 쓰는 쪽이 가진다(제어 — 시트 · 팝오버의 draft). min · max · isDateDisabled ·
- *                       readOnlyStart(range) · maxSelectionCount(multiple) · presets · presetsLayout(range) · yearRange · today ·
+ *                       readOnlyStart(range) · maxSelectionCount(multiple) · presets · yearRange · today ·
  *                       autoFocus · labels · aria-label(기본 "날짜 선택") · aria-labelledby
  *
  * 값(Date 는 그 날의 로컬 0시로 다룬다 — 시간은 보지 않는다)
@@ -108,7 +110,8 @@ import { useDsText } from "@/shared/ds/i18n";
  * 시작이 든 달로 옮긴다(열 때와 같다). 달력에서 날을 누르면 칩 고름이 풀린다. 고른 칩은 값이 그 범위일 때만 남는다(초기화 등으로
  * 값이 바뀌면 풀린다) — 처음 그릴 때 값이 어느 칩의 범위와 같으면 그 칩을 골라 둔다. min · max · isDateDisabled 에 걸려 시작이나
  * 끝을 고를 수 없는 칩은 막는다(이름은 어디서나 같은 기간이라 범위를 잘라 넣지 않는다).
- * presetsLayout — scroll(시트, 한 줄 가로 스크롤 · 화면 끝까지 bleed) · wrap(팝오버, 줄바꿈). 기본은 continuous 면 scroll, 아니면 wrap.
+ * 칩 줄은 시트 · 팝오버 어디서나 한 줄 가로 스크롤(양 끝 Scroll Fog · 부모 화면 여백 밖까지 bleed)이다 — 줄을 바꾸지 않는다
+ * (date-picker.md "빠른 기간", chip.md "묶음 배치"의 예외 — 줄이 늘면 이어지는 달이 그만큼 낮아진다, groo-design #255).
  *
  * 키보드(WAI-ARIA Grid) — 날짜 하나만 Tab 순서에 든다(roving tabindex: 보이는 달의 고른 날 → 오늘 → 1일).
  *   ← → 하루 · ↑ ↓ 한 주 · Home End 그 주의 일요일 · 토요일 · PageUp PageDown 한 달(같은 날, 없으면 말일 — 두 달 보기는 두 달) ·
@@ -166,10 +169,8 @@ export type DatePickerRangeProps = DatePickerBaseProps & {
   onValueChange?: (value: DateRange) => void;
   /** 확정된 시작일 — 시작은 그대로, 시작 뒤의 날만 끝이 된다(진행 중인 기간 늘리기) */
   readOnlyStart?: boolean;
-  /** 빠른 기간 칩 — date-picker.md 의 한 벌에서 고른다 */
+  /** 빠른 기간 칩 — date-picker.md 의 한 벌에서 고른다. 줄은 어디서나 한 줄 가로 스크롤이다 */
   presets?: readonly DatePresetName[];
-  /** 칩 줄 — scroll(시트, 한 줄 가로 스크롤) · wrap(팝오버, 줄바꿈). 기본은 continuous 면 scroll, 아니면 wrap */
-  presetsLayout?: "scroll" | "wrap";
 };
 
 export type DatePickerMultipleProps = DatePickerBaseProps & {
@@ -190,7 +191,6 @@ type AnyProps = DatePickerBaseProps & {
   onValueChange?: (value: never) => void;
   readOnlyStart?: boolean;
   presets?: readonly DatePresetName[];
-  presetsLayout?: "scroll" | "wrap";
   maxSelectionCount?: number;
 };
 
@@ -203,7 +203,6 @@ const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
       onValueChange,
       readOnlyStart = false,
       presets,
-      presetsLayout,
       maxSelectionCount,
       visibleRange = "month",
       min,
@@ -829,14 +828,13 @@ const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
       </Button>
     );
 
-    const layoutOfPresets = presetsLayout ?? (continuous ? "scroll" : "wrap");
+    // 시트 · 팝오버 어디서나 한 줄 가로 스크롤 · 양 끝 흐림 · 화면 여백 밖까지(#255)
     const presetRow = presetList.length > 0 && (
       <ChipRadioGroup
         aria-label={labels.presets}
         data-slot="date-picker-presets"
-        data-layout={layoutOfPresets}
-        layout={layoutOfPresets}
-        bleed={layoutOfPresets === "scroll"}
+        layout="scroll"
+        bleed
         value={activePreset ?? ""}
         onValueChange={choosePreset}
         className={PRESETS}
@@ -1062,8 +1060,8 @@ DatePicker.displayName = "DatePicker";
 
 /**
  * 보이는 요일 줄 — 영어는 두 글자(Su Mo Tu We Th Fr Sa)로 맞추고, 칸에 들지 않는 폭 · 글자 크기에서만 한 글자(S M T W T F S)로 줄인다.
- * 요일 글은 줄을 바꾸지 않는다(date-picker.md ⓔ Weekday, groo-design #250). 칸마다 두 글자 견본(보이지 않음)을 두고 그 폭이 칸 폭을
- * 넘는 칸이 하나라도 있으면 한 글자로 — 견본 · 줄을 ResizeObserver 로 지켜, 창 폭 · 글자 크기가 바뀌면 다시 잰다. 한국어는 두 벌이 같다.
+ * 요일 글은 줄을 바꾸지 않는다(date-picker.md ⓔ Weekday, groo-design #250 · #256). 판정은 화면의 요일 머리와 같은 `useWeekdayNarrow`
+ * (weekday-fit.ts — 칸마다 두 글자 견본, 줄 · 견본 크기와 글자 크기 판이 바뀌면 다시 잰다). 한국어는 두 벌이 같다.
  */
 function WeekdayRow({
   labels,
@@ -1080,32 +1078,7 @@ function WeekdayRow({
   header?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>) {
   const ref = React.useRef<HTMLDivElement>(null);
-  const [narrow, setNarrow] = React.useState(false);
-  const key = labels.weekdays.join("\u0000");
-  React.useLayoutEffect(() => {
-    const row = ref.current;
-    if (!row) return;
-    const cells = Array.from(
-      row.querySelectorAll<HTMLElement>("[data-slot=date-picker-weekday]"),
-    );
-    const probes = cells.map((c) =>
-      c.querySelector<HTMLElement>("[data-slot=date-picker-weekday-probe]"),
-    );
-    const measure = () =>
-      setNarrow(
-        cells.some(
-          (c, i) =>
-            (probes[i]?.getBoundingClientRect().width ?? 0) >
-            c.getBoundingClientRect().width,
-        ),
-      );
-    measure();
-    if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(row);
-    for (const p of probes) if (p) observer.observe(p);
-    return () => observer.disconnect();
-  }, [key]);
+  const narrow = useWeekdayNarrow(ref, labels.weekdays.join("\u0000"));
   const shown = narrow ? labels.weekdaysNarrow : labels.weekdays;
   return (
     <div
@@ -1124,14 +1097,7 @@ function WeekdayRow({
           className={cn(WEEKDAY, "relative")}
         >
           <span aria-hidden={header || undefined}>{w}</span>
-          {/* 두 글자 견본 — 들어가는지 재는 데만 쓴다(보이지 않고 읽히지 않는다) */}
-          <span
-            aria-hidden
-            data-slot="date-picker-weekday-probe"
-            className="invisible absolute whitespace-nowrap"
-          >
-            {labels.weekdays[i]}
-          </span>
+          <WeekdayProbe>{labels.weekdays[i]}</WeekdayProbe>
         </div>
       ))}
     </div>
