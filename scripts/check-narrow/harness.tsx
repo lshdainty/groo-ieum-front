@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Pie, PieChart } from 'recharts'
 
-import '@/app/config/i18n'
+import i18n from '@/app/config/i18n'
 import '@/index.css'
 import { Button } from '@/shared/ds/button'
 import { Chart, ChartDonutCenter, chartDonutRadii } from '@/shared/ds/chart'
@@ -22,6 +22,9 @@ import { VacationTypeStatsContent } from '@/features/vacation-history/ui/Vacatio
 
 const params = new URLSearchParams(window.location.search)
 const scene = params.get('scene') ?? 'segmented'
+// ?lang= — 글 언어(영어 요일 판정), ?font= — 글자 크기 배율(html font-size)
+if (params.get('lang')) void i18n.changeLanguage(params.get('lang')!)
+if (params.get('font')) document.documentElement.style.fontSize = `${Number(params.get('font')) * 100}%`
 
 // 담다 segmented-control.test 의 TodoView 와 같은 세 칸
 function SegmentedScene() {
@@ -96,7 +99,18 @@ function ScreensScene() {
   )
 }
 
+// 한 달 날짜 고르기 — 요일 줄(영어 두 글자 Su ~ Sa, 칸에 안 들면 한 글자 S ~ S — groo-design #250). 폰 시트처럼 좌우 16 안
+function WeekdayScene() {
+  const [value, setValue] = useState<Date | undefined>()
+  return (
+    <div className='p-x4'>
+      <DatePicker selection='single' visibleRange='month' today={new Date(2026, 10, 18)} aria-label='날짜' value={value} onValueChange={setValue} />
+    </div>
+  )
+}
+
 function Scene() {
+  if (scene === 'weekday') return <WeekdayScene />
   if (scene === 'donut') return <DonutScene />
   if (scene === 'continuous') return <ContinuousScene />
   if (scene === 'field') return <FieldScene />
