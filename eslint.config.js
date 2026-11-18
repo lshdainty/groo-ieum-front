@@ -43,8 +43,9 @@ export default tseslint.config(
     },
   },
   {
-    // Desk 판 ds 에서 가져온 부품 — 안 쓰는 자리 인자는 `_` 로 시작한다(Desk eslint.config.js 와 같은 규칙, SOURCE.md)
-    files: ['src/shared/ds/**/*.{ts,tsx}'],
+    // Desk 판 ds 와 ds 가 부르는 groo 셈(shared/lib/groo — axisWidth 등)에서 가져온 것 — 안 쓰는 자리 인자는 `_` 로 시작한다
+    // (Desk eslint.config.js 와 같은 규칙, SOURCE.md)
+    files: ['src/shared/ds/**/*.{ts,tsx}', 'src/shared/lib/groo/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'error',
