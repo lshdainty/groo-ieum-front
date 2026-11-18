@@ -120,26 +120,161 @@ export interface ValueAxisProps {
   ticks: number[];
   tickFormatter: (v: number) => string;
   width: number;
+  /**
+   * 0 — 준 눈금을 하나도 빼지 않고 그린다. recharts 세로축의 기본(`"preserveEnd"`)은 **준 눈금(`ticks`)도** 글 높이 + `minTickGap`(8)
+   * 으로 겹침을 재 사이 눈금을 빼고, 그리는 자리 아래 끝에 걸친 0 도 뺀다 — 그래서 "−6만 · −4만 · 0"(−2만 빠짐) · "50조 · 150조"
+   * (0 · 100조 빠짐)처럼 고르지 않게 남았다(2026-11-18 QA). 세로 눈금은 1 · 2 · 5 간격 nice 눈금 그대로 그린다(chart.md "축 · 격자",
+   * 앱 `p_chart_cartesian` 도 세로 눈금을 칸마다 그린다 — `interval: 1`). 가로축 솎기(끝 글을 지킨다)는 `chartXAxisProps` 몫이다.
+   */
+  interval: 0;
+}
+
+const valueAxisOf = (
+  ticks: number[],
+  format: (v: number, ticks: readonly number[]) => string,
+): ValueAxisProps => {
+  const tickFormatter = (v: number) => format(v, ticks);
+  return {
+    domain: [ticks[0]!, ticks[ticks.length - 1]!],
+    ticks,
+    tickFormatter,
+    width: measureTickWidth(ticks.map(tickFormatter)),
+    interval: 0,
+  };
+};
+
+/** 기본 칸 수 — 앱 `niceChartAxis` 의 intervals 4 와 같다 */
+const NICE_STEPS = 4;
+
+/**
+ * 1 · 2 · 5 축을 [maxIntervals] 칸 안에 든 것으로 — 기본(네 칸 겨냥)이 들면 그대로, 넘치면 겨냥하는 칸 수를 하나씩 줄여 다시 센다
+ * (chart.md "세로 눈금이 겹치면 수를 줄입니다"). 한 칸 겨냥까지 내려도 넘치면 그 축을 쓴다(값 범위가 0 을 사이에 두면 두 칸).
+ */
+function fittedAxes<T>(
+  maxIntervals: number,
+  build: (targetSteps: number) => { axes: T; intervals: number },
+): T {
+  for (let t = NICE_STEPS; t > 1; t--) {
+    const r = build(t);
+    if (r.intervals <= maxIntervals) return r.axes;
+  }
+  return build(1).axes;
 }
 
 /**
  * 값 축 하나 — `niceAxis` 눈금(앱 `niceChartAxis` 와 같은 셈)을 recharts 에 그대로 주고, 그 눈금 글자 가운데 가장 긴 것으로
  * 폭을 잰다(스펙 chart.md "세로축의 폭은 가장 긴 글자가 잘리지 않게"). `<YAxis {...niceValueAxis(값들, formatAxisWon)} {...chartAxisProps()} />`.
  * 값은 지금 보이는 계열만 넘긴다 — 계열을 끄면 축이 남은 계열에 맞게 다시 잡힌다(recharts 자동 범위와 같다).
+ * 값이 모두 0 이면 0 ~ 1만(0 · 0.2만 · … · 1만)이다 — 앱 `niceChartAxis` 와 같다.
  *
  * 글자([format])는 눈금 목록을 함께 받는다 — 한 축은 한 단위라(chart.md "축 · 격자") 눈금 하나의 글자도 축 전체를 보고
  * 정한다. 그리는 글자와 폭을 잰 글자가 같은 목록 · 같은 셈이다.
+ *
+ * [maxIntervals] — 세로 눈금 글이 겹치지 않고 들어가는 칸 수(`chartValueIntervals` — 화면이 그리는 높이 · 눈금 줄 높이로 잰다).
+ * 눈금 사이가 눈금 글 줄 높이보다 좁아지면 칸 수를 줄여 1 · 2 · 5 축을 다시 센다(chart.md "세로 눈금이 겹치면 수를 줄입니다").
  */
 export function niceValueAxis(
   values: readonly number[],
   format: (v: number, ticks: readonly number[]) => string,
+  maxIntervals = Infinity,
 ): ValueAxisProps {
-  const a = niceAxis(Math.min(0, ...values), Math.max(0, ...values));
-  const tickFormatter = (v: number) => format(v, a.ticks);
-  return {
-    domain: [a.min, a.max],
-    ticks: a.ticks,
-    tickFormatter,
-    width: measureTickWidth(a.ticks.map(tickFormatter)),
-  };
+  const lo = Math.min(0, ...values);
+  const hi = Math.max(0, ...values);
+  const ticks = fittedAxes(maxIntervals, (t) => {
+    const a = niceAxis(lo, hi, t);
+    return { axes: a.ticks, intervals: a.ticks.length - 1 };
+  });
+  return valueAxisOf(ticks, format);
+}
+
+/**
+ * 이중 축(왼쪽 · 오른쪽) — 축마다 `niceAxis` 간격을 따로 잡고, 0 위 · 아래 칸 수를 둘 가운데 많은 쪽에 맞춘다(앱
+ * `p_chart_cartesian` 의 `above` · `below` 와 같은 셈). 두 축의 눈금이 같은 높이에 서서 한 축에 건 가로 격자(chart.md "이중 축")에
+ * 다른 축 눈금도 맞는다. 칸 수가 적은 축은 위(또는 아래)로 늘어난다 — 수입이 모두 0 이면 왼쪽 0 ~ 1만(다섯 칸), 지출 0 ~ 6만(세 칸)은
+ * 0 ~ 10만(다섯 칸)이 된다. 값 · 글자는 [niceValueAxis] 와 같다.
+ *
+ * [maxIntervals] — 맞춘 뒤의 칸 수(위 + 아래)가 넘치면 두 축을 함께 더 적은 칸으로 다시 센다(겨냥하는 칸 수를 둘 다 같이 줄인다).
+ */
+export function niceDualValueAxes(
+  left: readonly number[],
+  right: readonly number[],
+  format: (v: number, ticks: readonly number[]) => string,
+  maxIntervals = Infinity,
+): { left: ValueAxisProps; right: ValueAxisProps } {
+  const steps = fittedAxes(maxIntervals, (t) => {
+    const axes = [left, right].map((values) => {
+      const a = niceAxis(Math.min(0, ...values), Math.max(0, ...values), t);
+      const step = a.ticks[1]! - a.ticks[0]!;
+      return {
+        step,
+        above: Math.round(a.max / step),
+        below: Math.round(-a.min / step),
+      };
+    });
+    const above = Math.max(...axes.map((a) => a.above));
+    const below = Math.max(...axes.map((a) => a.below));
+    return {
+      axes: { above, below, steps: axes.map((a) => a.step) },
+      intervals: above + below,
+    };
+  });
+  const [l, r] = steps.steps.map((step) =>
+    valueAxisOf(
+      Array.from(
+        { length: steps.below + steps.above + 1 },
+        // + 0 — 0 칸이 −0 이 되지 않게
+        (_, i) => Math.round((i - steps.below) * step) + 0,
+      ),
+      format,
+    ),
+  );
+  return { left: l!, right: r! };
+}
+
+/** 눈금 글과 그리는 자리 사이 — ds `chartAxisProps` 의 tickMargin 8 */
+const X_TICK_MARGIN = 8;
+
+/** 가로 눈금 줄 높이 — 눈금 글 줄 높이 + 8(100% 23 · 200% 38). ds Chart 가 시간 가로축(chartXAxisProps)에 준다(앱 같은 셈) */
+export const chartXAxisHeight = (lineHeight: number): number =>
+  Math.ceil(lineHeight) + X_TICK_MARGIN;
+/** 눈금 글 줄 높이(`--text-t1--line-height` = 15 / 16rem) — 잴 수 없을 때(jsdom) 100% 값 */
+const TICK_LINE_FALLBACK = 15;
+
+/** 눈금 글 줄 높이(px) — rem 이라 글자 크기 설정을 따른다(100% 15 · 200% 30) */
+export function measureTickLineHeight(): number {
+  if (typeof document === "undefined") return TICK_LINE_FALLBACK;
+  const span = document.createElement("span");
+  span.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;left:-9999px;top:0;display:block;font-size:${AXIS_TICK_FONT_SIZE};line-height:var(--text-t1--line-height);`;
+  span.textContent = "0";
+  document.body.appendChild(span);
+  try {
+    return span.getBoundingClientRect().height || TICK_LINE_FALLBACK;
+  } finally {
+    span.remove();
+  }
+}
+
+/** 눈금 글 줄 높이 — 글자 크기가 바뀌면 다시 잰다(ds Chart 의 가로 눈금 · 세로축 폭과 같은 판) */
+export function useTickLineHeight(): number {
+  useTickFontVersion();
+  return measureTickLineHeight();
+}
+
+/**
+ * 세로 눈금 글이 겹치지 않고 들어가는 칸 수 — 눈금 사이(그리는 높이 ÷ 칸 수)가 눈금 글 줄 높이 이상이어야 한다
+ * (chart.md "세로 눈금이 겹치면 수를 줄입니다").
+ *
+ *   그리는 높이 = 차트 높이 − 위 여백 − 아래 여백 − (눈금 글 줄 높이 + 8)   — 가로 눈금 줄(chartXAxisHeight)
+ *   들어가는 칸 수 = max(1, ⌊그리는 높이 ÷ 눈금 글 줄 높이⌋)
+ *
+ * 여백은 차트에 준 margin(없으면 recharts 기본 5 · 5 — 앱엔 아래 여백이 없어 웹만 그만큼 더 뺀다). 폰 띠 140(위 8 · 아래 0) ·
+ * 글자 200%(줄 30) → 그리는 높이 140 − 8 − 0 − 38 = 94 → ⌊94 ÷ 30⌋ = 3 칸(앱과 같다).
+ */
+export function chartValueIntervals(
+  height: number,
+  lineHeight: number,
+  { top = 5, bottom = 5 }: { top?: number; bottom?: number } = {},
+): number {
+  const plot = height - top - bottom - chartXAxisHeight(lineHeight);
+  return Math.max(1, Math.floor(plot / Math.max(1, lineHeight)));
 }
