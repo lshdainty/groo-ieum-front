@@ -328,7 +328,7 @@ dashboard,widget.workHistoryStatus,업무이력 작성 현황,Work History Statu
 dashboard,widget.monthlyWorkAlert,월별 업무 미작성 알림,Monthly Work Alert
 dashboard,widget.allUserVacationStatus,전체 사용자 휴가 현황,All User Vacation Status
 dashboard,widget.departmentChart,조직도,Organization Chart
-dashboard,widget.empty.monthStats.title,올해 쓴 휴가가 없어요,No leave used this year
+dashboard,widget.empty.monthStats.title,올해 쓰거나 잡힌 휴가가 없어요,No leave used or scheduled this year
 dashboard,widget.empty.monthStats.description,아직 휴가 사용 내역이 없습니다,No vacation usage history yet
 dashboard,save,저장,Save
 work,report.title,업무 보고,Work Report
@@ -1397,8 +1397,11 @@ vacation,history.chart.dayUnit,일,d
 vacation,history.chart.hourUnit,시간,h
 vacation,history.chart.dayAxis,{{n}}일,{{n}}d
 vacation,history.chart.monthAxis,{{month}}월,{{month}}
-vacation,history.chart.monthName,"{{year}}년 월별 쓴 휴가, 합계 {{total}}","Leave used per month in {{year}}, total {{total}}"
-vacation,history.chart.monthNameNoYear,"월별 쓴 휴가, 합계 {{total}}","Leave used per month, total {{total}}"
+vacation,history.chart.monthName,"{{year}}년 달마다 휴가, {{totals}}","Leave per month in {{year}}, {{totals}}"
+vacation,history.chart.scheduled,예정,Scheduled
+vacation,history.chart.usedTotal,쓴 휴가 {{total}},used {{total}}
+vacation,history.chart.scheduledTotal,예정 {{total}},scheduled {{total}}
+vacation,history.chart.monthNameNoYear,"달마다 휴가, {{totals}}","Leave per month, {{totals}}"
 vacation,history.chart.tableMonth,달,Month
 vacation,history.chart.typeName,"유형별 남은 휴가, 합계 {{total}}","Remaining leave by type, total {{total}}"
 vacation,history.chart.tableShare,비중,Share
@@ -1758,14 +1761,14 @@ vacation,history.yearLabel,{{year}}년,{{year}}
 vacation,history.metricsAria,휴가 현황 요약,Leave summary
 vacation,history.metricsFailureTitle,휴가 현황을 불러오지 못했어요,Couldn't load your leave summary
 vacation,history.typeFailureTitle,유형별 남은 휴가를 불러오지 못했어요,Couldn't load remaining leave by type
-vacation,history.monthFailureTitle,달마다 쓴 휴가를 불러오지 못했어요,Couldn't load leave used per month
+vacation,history.monthFailureTitle,달마다 휴가를 불러오지 못했어요,Couldn't load leave per month
 vacation,history.recordsFailureTitle,휴가 기록을 불러오지 못했어요,Couldn't load leave records
 vacation,history.typeCardTitle,유형별 남은 휴가,Remaining leave by type
-vacation,history.monthCardTitle,달마다 쓴 휴가,Leave used per month
+vacation,history.monthCardTitle,달마다 휴가,Leave per month
 vacation,history.recordsTitle,휴가 기록,Leave records
 vacation,history.recordsTabsAria,휴가 기록 보기,Leave record views
 vacation,history.emptyType,남은 휴가가 없어요,No leave left
-vacation,history.emptyUsage,{{year}}년에 쓴 휴가가 없어요,No leave used in {{year}}
+vacation,history.emptyUsage,{{year}}년에 쓰거나 잡힌 휴가가 없어요,No leave used or scheduled in {{year}}
 vacation,history.emptyGrant,{{year}}년에 받은 휴가가 없어요,No leave received in {{year}}
 vacation,history.captionUsage,휴가 사용 내역,Leave usage
 vacation,history.captionGrant,휴가 부여 내역,Leave grants

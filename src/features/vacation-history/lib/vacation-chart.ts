@@ -5,18 +5,22 @@ import type { AvailableVacationByType, GetAvailableVacationsResp, GetUserMonthly
 
 export { formatUsedTime } from './vacation-time'
 
-/** 월별 막대 — 고른 해가 올해면 이번 달에서 끝난다(지나지 않은 달을 0 막대로 그리지 않는다). 지난 해 · 해를 모르면 열두 달 */
-export const monthBars = (
-  data: readonly GetUserMonthlyVacationStatsResp[] | undefined,
-  year?: number,
-  now: Date = new Date(),
-): GetUserMonthlyVacationStatsResp[] => {
-  const last = year != null && year === now.getFullYear() ? now.getMonth() + 1 : 12
-  return (data ?? []).filter((m) => m.month <= last)
-}
+/** 그 달의 예정(오늘 뒤로 잡힌 휴가) — 서버가 나눠 주기 전 판이면 0 */
+export const expectOf = (m: GetUserMonthlyVacationStatsResp): number => m.expect_used_time ?? 0
 
+/** 쓴 휴가도 예정도 하나도 없으면 false — 부르는 쪽이 비어 있음을 그린다 */
 export const hasMonthUsage = (data: readonly GetUserMonthlyVacationStatsResp[] | undefined): boolean =>
-  !!data && data.some((m) => m.used_time > 0)
+  !!data && data.some((m) => m.used_time > 0 || expectOf(m) > 0)
+
+/**
+ * 고른 해에 그릴 계열 — 쓴 휴가는 오늘까지, 예정은 오늘 뒤라 지난해는 쓴 휴가만 · 다음 해는 예정만 · 올해는 둘 다
+ * (groo-design chart.md "미리 잡는 일정의 값은 예외" — "다음 해처럼 전부 앞날이면 예정 계열만 보입니다"). 해를 모르면 둘 다
+ */
+export const monthSeries = (year?: number, now: Date = new Date()): { used: boolean; scheduled: boolean } => {
+  const current = now.getFullYear()
+  if (year == null) return { used: true, scheduled: true }
+  return { used: year <= current, scheduled: year >= current }
+}
 
 /**
  * 세로축 눈금 — 정수 일 단위, 간격은 1 · 2 · 5 × 10ⁿ 계열(groo-design chart.md "축 · 격자" — 3 · 4 · 6 일 간격을 쓰지 않는다).

@@ -465,6 +465,103 @@ const cases = [
       return p;
     },
   })),
+
+  // ── 달마다 휴가 — 쓴 휴가 · 예정 두 계열(groo-design #249, chart.md "미리 잡는 일정의 값은 예외") ──
+  ...[
+    { c: "this-dec", tiles: ["쓴 휴가", "예정"], used: [2, 4, 7, 10, 11], expect: [11, 12] },
+    { c: "this-nodec", tiles: ["쓴 휴가", "예정"], used: [2, 4, 7, 10, 11], expect: [11] },
+    { c: "last", tiles: ["쓴 휴가"], used: [2, 4, 7, 10, 11, 12], expect: [] },
+    { c: "next", tiles: ["예정"], used: [], expect: [1, 4, 12] },
+  ].map(({ c, tiles, used, expect }) => ({
+    name: `달마다 휴가 ${c} — 열두 달 · 타일 ${tiles.join(" · ")} · 쓴 휴가 채움 ${used.join(",") || "없음"} · 예정(옅은 바탕 + 1px 테두리) ${expect.join(",") || "없음"} · 나머지 빈 칸 · 제목`,
+    async run() {
+      const { ctx, page, errors } = await open("vacation", { width: 1280, query: `&case=${c}` });
+      await page.locator("[data-slot=chart] .recharts-xAxis-tick-labels text").first().waitFor();
+      await page.waitForTimeout(300);
+      const m = await page.evaluate(() => {
+        const labels = [...document.querySelectorAll(".recharts-xAxis-tick-labels .recharts-cartesian-axis-tick-value")]
+          .filter((e) => e.textContent)
+          .map((e) => {
+            const r = e.getBoundingClientRect();
+            return { month: parseInt(e.textContent, 10), x: (r.left + r.right) / 2 };
+          });
+        const monthAt = (x) => labels.reduce((a, b) => (Math.abs(b.x - x) < Math.abs(a.x - x) ? b : a)).month;
+        const rects = [...document.querySelectorAll(".recharts-bar-rectangle path")]
+          .map((p) => {
+            const r = p.getBoundingClientRect();
+            return {
+              fill: p.getAttribute("fill"),
+              stroke: p.getAttribute("stroke"),
+              strokeWidth: p.getAttribute("stroke-width"),
+              rounded: /A/.test(p.getAttribute("d") ?? ""),
+              top: r.top,
+              bottom: r.bottom,
+              height: r.height,
+              month: monthAt((r.left + r.right) / 2),
+            };
+          });
+        return {
+          months: labels.map((l) => l.month),
+          // 0 막대(높이 0)도 빈 칸이어야 한다 — 그려진 path 가 있으면 테두리가 바닥에 선으로 보인다
+          ghosts: rects.filter((r) => r.height <= 0.5).map((r) => `${r.month}월 ${r.fill}`),
+          rects: rects.filter((r) => r.height > 0.5),
+          tiles: [...document.querySelectorAll("[data-slot=chart-legend-tile] [data-slot=chart-legend-name]")].map((e) => e.textContent.trim()),
+          name: document.querySelector("[data-slot=chart]")?.getAttribute("aria-label") ?? "",
+          title: document.querySelector("[data-check=title]")?.textContent ?? "",
+        };
+      });
+      await ctx.close();
+      const p = [...errors];
+      expectEq(p, "가로축 열두 달", m.months, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+      if (m.ghosts.length) p.push(`빈 칸에 0 막대가 그려졌다 — ${m.ghosts.join(", ")}`);
+      expectEq(p, "타일", m.tiles, tiles);
+      const usedRects = m.rects.filter((r) => r.fill === "var(--color-chart-blue)");
+      const expectRects = m.rects.filter((r) => r.fill === "var(--color-chart-blue-subtle)");
+      if (usedRects.length + expectRects.length !== m.rects.length) p.push(`다른 색 막대 ${m.rects.map((r) => r.fill).join(",")}`);
+      expectEq(p, "쓴 휴가 막대 달", usedRects.map((r) => r.month).sort((a, b) => a - b), used);
+      expectEq(p, "예정 막대 달", expectRects.map((r) => r.month).sort((a, b) => a - b), expect);
+      for (const r of expectRects)
+        if (r.stroke !== "var(--color-chart-blue)" || r.strokeWidth !== "1") p.push(`${r.month}월 예정 테두리 ${r.stroke} ${r.strokeWidth}`);
+      for (const r of usedRects) if (r.stroke && r.stroke !== "none") p.push(`${r.month}월 쓴 휴가에 테두리 ${r.stroke}`);
+      // 한 칸에 둘이면 쓴 휴가 아래 · 예정 위 — 맨 위 막대만 둥글다
+      for (const e of expectRects) {
+        const u = usedRects.find((r) => r.month === e.month);
+        if (!e.rounded) p.push(`${e.month}월 예정 위 모서리가 없다`);
+        if (!u) continue;
+        if (Math.abs(e.bottom - u.top) > 1.5) p.push(`${e.month}월 예정(아래 ${e.bottom.toFixed(1)})이 쓴 휴가(위 ${u.top.toFixed(1)}) 위에 쌓이지 않았다`);
+        if (u.rounded) p.push(`${e.month}월 예정 아래 쓴 휴가가 둥글다`);
+      }
+      for (const u of usedRects) if (!expectRects.some((e) => e.month === u.month) && !u.rounded) p.push(`${u.month}월 쓴 휴가 위 모서리가 없다`);
+      if (m.title !== "달마다 휴가") p.push(`카드 제목 "${m.title}"`);
+      const year = new Date().getFullYear() + { "this-dec": 0, "this-nodec": 0, last: -1, next: 1 }[c];
+      if (!m.name.startsWith(`${year}년 달마다 휴가, `)) p.push(`차트 이름 "${m.name}"`);
+      for (const tile of tiles) if (!m.name.includes(tile)) p.push(`차트 이름에 ${tile} 가 없다 — "${m.name}"`);
+      return p;
+    },
+  })),
+  {
+    name: "달마다 휴가 툴팁 — 오늘이 든 달(11월)은 쓴 휴가 · 예정을 함께(\"11월 · 쓴 휴가 1일 · 예정 0.5일\")",
+    async run() {
+      const { ctx, page, errors } = await open("vacation", { width: 1280, query: "&case=this-dec" });
+      await page.locator(".recharts-bar-rectangle path").first().waitFor();
+      await page.waitForTimeout(300);
+      const at = await page.evaluate(() => {
+        const label = [...document.querySelectorAll(".recharts-xAxis-tick-labels .recharts-cartesian-axis-tick-value")].find((e) => e.textContent === "11월");
+        const plot = document.querySelector(".recharts-cartesian-grid")?.getBoundingClientRect();
+        const r = label.getBoundingClientRect();
+        return { x: (r.left + r.right) / 2, y: plot ? plot.top + plot.height / 2 : r.top - 40 };
+      });
+      await page.mouse.move(at.x, at.y);
+      await page.waitForTimeout(300);
+      const text = await page.locator("[data-slot=chart-tooltip]").innerText().catch(() => "");
+      await ctx.close();
+      const p = [...errors];
+      const flat = text.replace(/\s+/g, " ").trim();
+      for (const want of ["11월", "쓴 휴가 1일", "예정 0.5일"]) if (!flat.includes(want)) p.push(`툴팁에 "${want}" 가 없다 — "${flat}"`);
+      if (flat.indexOf("쓴 휴가") > flat.indexOf("예정")) p.push(`쓴 휴가가 예정보다 먼저가 아니다 — "${flat}"`);
+      return p;
+    },
+  },
 ];
 
 const only = process.argv[2];
