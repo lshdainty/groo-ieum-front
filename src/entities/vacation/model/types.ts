@@ -180,8 +180,12 @@ export interface GetUserMonthlyVacationStatsReq {
 
 export interface GetUserMonthlyVacationStatsResp {
   month: number
+  /** 그 달에 오늘(회사 기준 날짜)까지 쓴 휴가 */
   used_time: number
   used_time_str: string
+  /** 그 달에 오늘 뒤로 잡힌 휴가(예정) — 서버가 나눠 주기 전 판에는 없다(0 으로 본다) */
+  expect_used_time?: number
+  expect_used_time_str?: string
 }
 
 export interface GetUserVacationStatsReq {

@@ -6,6 +6,7 @@
 /* eslint-disable react-refresh/only-export-components -- 내보내지 않는 시험 진입 파일 */
 import * as React from 'react'
 import { createRoot } from 'react-dom/client'
+import { useTranslation } from 'react-i18next'
 import { Area, AreaChart, Bar, BarChart, Line, XAxis } from 'recharts'
 
 import '@/app/config/i18n'
@@ -113,7 +114,41 @@ function MonthScene() {
   )
 }
 
+// 달마다 휴가 — 쓴 휴가(오늘까지) · 예정(오늘 뒤)을 나눈 서버 값(groo-design #249). ?case=
+//   this-dec   올해 — 11월(오늘이 든 달) 쓴 1일 + 예정 0.5일, 12월 예정 2일
+//   this-nodec 올해 — 12월 예정 없음(빈 칸)
+//   last       지난해 — 쓴 휴가만(12월까지)
+//   next       다음 해 — 예정만
+// 해는 이 브라우저의 올해 기준이다(쓴 · 예정 가르기는 서버 몫이라 값은 고정)
+const VAC_CASES: Record<string, { yearOffset: number; used: number[]; expect: number[] }> = {
+  'this-dec': { yearOffset: 0, used: [0, 1, 0, 3, 0, 0, 0.5, 0, 0, 2, 1, 0], expect: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 2] },
+  'this-nodec': { yearOffset: 0, used: [0, 1, 0, 3, 0, 0, 0.5, 0, 0, 2, 1, 0], expect: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0] },
+  last: { yearOffset: -1, used: [0, 1, 0, 3, 0, 0, 0.5, 0, 0, 2, 1, 1], expect: Array(12).fill(0) },
+  next: { yearOffset: 1, used: Array(12).fill(0), expect: [1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0.5] },
+}
+
+function VacationScene() {
+  const { t } = useTranslation('vacation')
+  const c = VAC_CASES[params.get('case') ?? 'this-dec']!
+  const data = c.used.map((u, i) => ({
+    month: i + 1,
+    used_time: u,
+    used_time_str: `${u}일`,
+    expect_used_time: c.expect[i]!,
+    expect_used_time_str: `${c.expect[i]}일`,
+  }))
+  return (
+    <div className='px-x4 py-x4'>
+      <div className='rounded-r4 bg-bg-layer-default p-x5'>
+        <h2 data-check='title'>{t('history.monthCardTitle')}</h2>
+        <MonthVacationStatsContent data={data} year={new Date().getFullYear() + c.yearOffset} />
+      </div>
+    </div>
+  )
+}
+
 function Scene() {
+  if (scene === 'vacation') return <VacationScene />
   if (scene === 'dots') return <DotsScene />
   if (scene === 'xaxis') return <XAxisScene />
   if (scene === 'month') return <MonthScene />
