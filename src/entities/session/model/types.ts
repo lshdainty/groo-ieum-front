@@ -22,6 +22,8 @@ export interface GetLoginCheck {
   is_login: string
   profile_url?: string
   password_change_required?: string
+  /** 회사 기준 타임존(IANA ID, 예: "Asia/Seoul") — 서버가 날짜를 셀 때 쓰는 시계. 서버가 싣기 전 판에는 없다 */
+  company_timezone?: string
 }
 
 // Token Exchange Types

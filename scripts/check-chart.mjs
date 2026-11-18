@@ -26,9 +26,11 @@ await server.listen();
 const base = server.resolvedUrls.local[0].replace(/\/$/, "");
 const browser = await chromium.launch();
 
-async function open(scene, { width = 390, query = "" } = {}) {
-  const ctx = await browser.newContext({ locale: "ko-KR", viewport: { width, height: 800 } });
+async function open(scene, { width = 390, query = "", timezoneId, now } = {}) {
+  const ctx = await browser.newContext({ locale: "ko-KR", viewport: { width, height: 800 }, ...(timezoneId ? { timezoneId } : {}) });
   const page = await ctx.newPage();
+  // 브라우저 시계를 정한 때로 — 회사 날짜와 브라우저 날짜가 다른 경우(해 넘김)
+  if (now) await page.clock.setFixedTime(now);
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(`${base}${HARNESS}?scene=${scene}${query}`);
@@ -559,6 +561,99 @@ const cases = [
       const flat = text.replace(/\s+/g, " ").trim();
       for (const want of ["11월", "쓴 휴가 1일", "예정 0.5일"]) if (!flat.includes(want)) p.push(`툴팁에 "${want}" 가 없다 — "${flat}"`);
       if (flat.indexOf("쓴 휴가") > flat.indexOf("예정")) p.push(`쓴 휴가가 예정보다 먼저가 아니다 — "${flat}"`);
+      return p;
+    },
+  },
+
+  // ── 같은 시계 — 해 고르기도 회사 기준 오늘(groo-design #251). 브라우저 날짜와 회사 날짜가 다른 해 넘김 ──
+  {
+    name: "회사 오늘(companyToday) — 브라우저 LA 2026-12-31 20:00 · 회사 서울이면 2027-01-01, 타임존 없거나 모르면 브라우저 날짜",
+    async run() {
+      const { ctx, page, errors } = await open("lib", { timezoneId: "America/Los_Angeles", now: new Date("2026-12-31T20:00:00-08:00") });
+      const g = await page.evaluate(() => {
+        const { companyToday } = window.__chart;
+        return [companyToday("Asia/Seoul"), companyToday(null), companyToday("Mars/Olympus"), companyToday("America/Los_Angeles")];
+      });
+      await ctx.close();
+      const p = [...errors];
+      expectEq(p, "회사 서울", g[0], { year: 2027, month: 1, day: 1 });
+      expectEq(p, "타임존 없음", g[1], { year: 2026, month: 12, day: 31 });
+      expectEq(p, "모르는 타임존", g[2], { year: 2026, month: 12, day: 31 });
+      expectEq(p, "회사 LA", g[3], { year: 2026, month: 12, day: 31 });
+      return p;
+    },
+  },
+  ...[
+    // 브라우저는 12월 31일(LA), 회사는 1월 1일(서울) — 회사로는 2027 이 올해 · 2026 이 지난해
+    { tz: "Asia/Seoul", browser: "America/Los_Angeles", now: "2026-12-31T20:00:00-08:00", y: 2027, tiles: ["쓴 휴가", "예정"] },
+    { tz: "Asia/Seoul", browser: "America/Los_Angeles", now: "2026-12-31T20:00:00-08:00", y: 2026, tiles: ["쓴 휴가"] },
+    // 브라우저는 1월 1일(서울), 회사는 12월 31일(LA) — 회사로는 2026 이 올해 · 2027 이 다음 해
+    { tz: "America/Los_Angeles", browser: "Asia/Seoul", now: "2027-01-01T09:00:00+09:00", y: 2027, tiles: ["예정"] },
+    { tz: "America/Los_Angeles", browser: "Asia/Seoul", now: "2027-01-01T09:00:00+09:00", y: 2026, tiles: ["쓴 휴가", "예정"] },
+  ].map(({ tz, browser: browserTz, now, y, tiles }) => ({
+    name: `해 고르기는 회사 오늘 — 회사 ${tz} · 브라우저 ${browserTz} ${now.slice(0, 10)} 에 ${y}년이면 타일 ${tiles.join(" · ")}`,
+    async run() {
+      const { ctx, page, errors } = await open("vacation", { width: 1280, query: `&case=this-dec&tz=${tz}&y=${y}`, timezoneId: browserTz, now: new Date(now) });
+      await page.locator("[data-slot=chart-legend-tile]").first().waitFor();
+      const got = await page.evaluate(() =>
+        [...document.querySelectorAll("[data-slot=chart-legend-tile] [data-slot=chart-legend-name]")].map((e) => e.textContent.trim()),
+      );
+      await ctx.close();
+      const p = [...errors];
+      expectEq(p, "타일", got, tiles);
+      return p;
+    },
+  })),
+
+  // ── 예정 표식 — 타일 점 · 툴팁 색 네모도 막대처럼 옅은 바탕 + 1px 계열 색 테두리(groo-design #251) ──
+  {
+    name: "예정 표식 — 타일 점 · 툴팁 색 네모가 옅은 바탕(chart-blue-subtle) + 1px chart-blue 테두리, 쓴 휴가는 채움",
+    async run() {
+      const { ctx, page, errors } = await open("vacation", { width: 1280, query: "&case=this-dec" });
+      await page.locator(".recharts-bar-rectangle path").first().waitFor();
+      await page.waitForTimeout(300);
+      const resolve = () =>
+        page.evaluate(() => {
+          const probe = (value) => {
+            const el = document.createElement("i");
+            el.style.backgroundColor = value;
+            document.body.appendChild(el);
+            const got = getComputedStyle(el).backgroundColor;
+            el.remove();
+            return got;
+          };
+          return { blue: probe("var(--color-chart-blue)"), subtle: probe("var(--color-chart-blue-subtle)") };
+        });
+      const mark = (sel) =>
+        page.evaluate((s) =>
+          [...document.querySelectorAll(s)].map((el) => {
+            const cs = getComputedStyle(el);
+            return { marker: el.getAttribute("data-marker"), bg: cs.backgroundColor, width: cs.borderTopWidth, style: cs.borderTopStyle, color: cs.borderTopColor, size: el.getBoundingClientRect().width };
+          }), sel);
+      const colors = await resolve();
+      const dots = await mark("[data-slot=chart-legend-dot]");
+      const at = await page.evaluate(() => {
+        const label = [...document.querySelectorAll(".recharts-xAxis-tick-labels .recharts-cartesian-axis-tick-value")].find((e) => e.textContent === "11월");
+        const plot = document.querySelector(".recharts-cartesian-grid")?.getBoundingClientRect();
+        const r = label.getBoundingClientRect();
+        return { x: (r.left + r.right) / 2, y: plot ? plot.top + plot.height / 2 : r.top - 40 };
+      });
+      await page.mouse.move(at.x, at.y);
+      await page.waitForTimeout(300);
+      const swatches = await mark("[data-slot=chart-tooltip-swatch]");
+      await ctx.close();
+      const p = [...errors];
+      const check = (where, list) => {
+        if (list.length !== 2) return p.push(`${where} ${list.length} 개`);
+        const [used, plan] = list;
+        if (used.marker != null || used.width !== "0px" || used.bg !== colors.blue) p.push(`${where} 쓴 휴가가 채움이 아니다 ${JSON.stringify(used)}`);
+        if (plan.marker !== "outline") p.push(`${where} 예정 data-marker ${plan.marker}`);
+        if (plan.bg !== colors.subtle) p.push(`${where} 예정 바탕 ${plan.bg} ≠ ${colors.subtle}`);
+        if (plan.width !== "1px" || plan.style !== "solid" || plan.color !== colors.blue) p.push(`${where} 예정 테두리 ${plan.width} ${plan.style} ${plan.color}`);
+        if (Math.abs(plan.size - 8) > 0.5) p.push(`${where} 예정 표식 크기 ${plan.size}`);
+      };
+      check("타일 점", dots);
+      check("툴팁 색 네모", swatches);
       return p;
     },
   },
