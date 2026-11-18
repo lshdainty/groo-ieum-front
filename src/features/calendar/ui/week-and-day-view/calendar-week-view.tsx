@@ -7,6 +7,7 @@ import { dayTone } from '@/features/calendar/ui/month-view/day-tone';
 import { formatDayText, formatHourMinute } from '@/shared/lib/date-text';
 import { useWeekdayHeader } from '@/shared/ui/groo/weekday-header';
 import { WeekdayProbe } from '@/shared/ui/groo/weekday-probe';
+import { WEEK_GRID_TEXT } from '@/shared/ui/groo/week-grid-text';
 import { useCanAddEvent } from '@/features/calendar/model/use-can-edit-event';
 import { useCalendar } from '@/features/calendar/model/calendar-context';
 
@@ -64,7 +65,8 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
                 return (
                   <div key={index} data-weekday-cell className='relative min-w-0 py-2 text-center text-xs font-medium'>
                     {/* 요일 — 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa(세 글자로 늘리지 않는다), 칸에 들지 않으면 한 글자(groo-design #256) */}
-                    <div className={cn('whitespace-nowrap', tone)}>
+                    {/* 요일 · 날짜 숫자는 글자 크기 200% 에서 멈춘다(groo-design #258). 공휴일 이름은 그대로 커진다 */}
+                    <div className={cn('whitespace-nowrap', WEEK_GRID_TEXT.t2, tone)}>
                       {weekdayShown[dayOfWeek]} <span className='ml-1 font-semibold'>{format(day, 'd')}</span>
                     </div>
                     <WeekdayProbe text={weekdayFull[dayOfWeek]!} />

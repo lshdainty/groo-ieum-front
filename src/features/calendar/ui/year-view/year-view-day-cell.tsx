@@ -2,6 +2,7 @@ import { isToday } from 'date-fns'
 import dayjs from 'dayjs'
 
 import { cn } from '@/shared/lib/cn'
+import { WEEK_GRID_TEXT } from '@/shared/ui/groo/week-grid-text'
 import { eventTone } from '@/features/calendar/lib/helpers'
 import { useCalendar } from '@/features/calendar/model/calendar-context'
 import { dayTone } from '@/features/calendar/ui/month-view/day-tone'
@@ -32,7 +33,7 @@ const YearViewDayCell = ({ day, date, events, onPick }: IProps) => {
       type='button'
       className='flex h-11 flex-1 flex-col items-center justify-start gap-x0_5 rounded-r2 border-0 bg-transparent pt-x1 hover:bg-bg-neutral-weak focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focus-ring'
     >
-      <div className={cn('flex size-6 items-center justify-center rounded-full text-t2 font-medium', tone, isToday(date) && 'bg-bg-neutral-weak font-bold')}>{day}</div>
+      <div className={cn('flex size-6 items-center justify-center rounded-full font-medium', WEEK_GRID_TEXT.t2, tone, isToday(date) && 'bg-bg-neutral-weak font-bold')}>{day}</div>
       {events.length > 0 && (
         <div className='mt-x0_5 flex items-center gap-x0_5'>
           {events.slice(0, events.length <= MAX_DOTS ? MAX_DOTS : 1).map((event) => (
