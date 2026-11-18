@@ -18,6 +18,9 @@ import { SegmentedControl, SegmentedControlItem } from '@/shared/ds/segmented-co
 import { GrantTimeField } from '@/shared/ui/groo/grant-time-field'
 import { CalendarProvider } from '@/features/calendar/model/calendar-context'
 import { CalendarToolbar } from '@/features/calendar/ui/header/calendar-toolbar'
+import { WeekdayHead } from '@/features/calendar/ui/month-view/month-view-desktop'
+import { WeekdayRow } from '@/features/calendar/ui/month-view/month-view-phone'
+import { YearViewMonth } from '@/features/calendar/ui/year-view/year-view-month'
 import { VacationTypeStatsContent } from '@/features/vacation-history/ui/VacationTypeStatsContent'
 
 const params = new URLSearchParams(window.location.search)
@@ -109,7 +112,28 @@ function WeekdayScene() {
   )
 }
 
+// 캘린더 요일 머리 — 폰 월 보기 줄 · 넓은 월 보기 머리 · 년 보기 작은 달(폰은 두 칸이라 화면 폭 절반). groo-design #256
+function CalendarWeekdayScene() {
+  return (
+    <CalendarProvider users={[]}>
+    <div className='flex flex-col gap-x4'>
+      <div data-check='phone'>
+        <WeekdayRow />
+      </div>
+      <div data-check='desktop' className='px-x4'>
+        <WeekdayHead />
+      </div>
+      <div data-check='year' className='grid grid-cols-2 gap-x4 px-x4'>
+        <YearViewMonth month={new Date(2026, 10, 1)} events={[]} onPickMonth={() => {}} />
+        <YearViewMonth month={new Date(2026, 11, 1)} events={[]} onPickMonth={() => {}} />
+      </div>
+    </div>
+    </CalendarProvider>
+  )
+}
+
 function Scene() {
+  if (scene === 'calendar-weekday') return <CalendarWeekdayScene />
   if (scene === 'weekday') return <WeekdayScene />
   if (scene === 'donut') return <DonutScene />
   if (scene === 'continuous') return <ContinuousScene />

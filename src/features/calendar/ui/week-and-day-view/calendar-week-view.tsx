@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import { dayTone } from '@/features/calendar/ui/month-view/day-tone';
 import { formatDayText, formatHourMinute } from '@/shared/lib/date-text';
+import { useWeekdayHeader } from '@/shared/ui/groo/weekday-header';
+import { WeekdayProbe } from '@/shared/ui/groo/weekday-probe';
 import { useCanAddEvent } from '@/features/calendar/model/use-can-edit-event';
 import { useCalendar } from '@/features/calendar/model/calendar-context';
 
@@ -30,6 +32,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
   const { i18n } = useTranslation();
   const { selectedDate, workingHours, visibleHours, findHolidayByDate } = useCalendar();
   const canAddEvent = useCanAddEvent();
+  const { rowRef: weekdayRowRef, shown: weekdayShown, full: weekdayFull } = useWeekdayHeader();
 
   const locale = i18n.language === 'ko' ? ko : enUS;
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, singleDayEvents);
@@ -47,7 +50,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
           {/* Week header */}
           <div className='relative z-20 flex border-b border-stroke-neutral-subtle'>
             <div className='w-18'></div>
-            <div className='grid flex-1 grid-cols-7 divide-x divide-stroke-neutral-subtle border-l border-stroke-neutral-subtle'>
+            <div ref={weekdayRowRef} data-weekday-row className='grid flex-1 grid-cols-7 divide-x divide-stroke-neutral-subtle border-l border-stroke-neutral-subtle'>
               {weekDays.map((day, index) => {
                 const dayOfWeek = day.getDay();
                 const isSunday = dayOfWeek === 0;
@@ -59,10 +62,12 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
                 const tone = dayTone({ currentMonth: true, sunday: isSunday, saturday: isSaturday, holiday });
 
                 return (
-                  <div key={index} className='py-2 text-center text-xs font-medium'>
-                    <div className={tone}>
-                      {format(day, 'EE', { locale })} <span className='ml-1 font-semibold'>{format(day, 'd')}</span>
+                  <div key={index} data-weekday-cell className='relative min-w-0 py-2 text-center text-xs font-medium'>
+                    {/* 요일 — 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa(세 글자로 늘리지 않는다), 칸에 들지 않으면 한 글자(groo-design #256) */}
+                    <div className={cn('whitespace-nowrap', tone)}>
+                      {weekdayShown[dayOfWeek]} <span className='ml-1 font-semibold'>{format(day, 'd')}</span>
                     </div>
+                    <WeekdayProbe text={weekdayFull[dayOfWeek]!} />
                     {holiday && <div className={cn('mt-0.5 text-xs', tone)}>{holiday.holiday_name}</div>}
                   </div>
                 );

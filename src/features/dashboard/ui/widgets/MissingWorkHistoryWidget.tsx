@@ -4,6 +4,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/cn'
+import { useWeekdayHeader } from '@/shared/ui/groo/weekday-header'
+import { WeekdayProbe } from '@/shared/ui/groo/weekday-probe'
 import { Button } from '@/shared/ds/button'
 import { Skeleton } from '@/shared/ds/skeleton'
 import { useUnregisteredWorkDatesQuery } from '@/entities/work'
@@ -16,7 +18,7 @@ import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
  * 다음 달 단추는 이번 달에서 막는다(앞으로 올 달에는 쓰지 않은 날이 없다). 이 격자는 화면 몫이라 ds Date Picker 를 쓰지 않는다(좁은 열에 들지 않는다).
  */
 export const MissingWorkHistoryWidget = () => {
-  const { t, i18n } = useTranslation('dashboard')
+  const { t } = useTranslation('dashboard')
   const today = dayjs()
   const [month, setMonth] = useState(() => today.startOf('month'))
   const query = useUnregisteredWorkDatesQuery(month.year(), month.month() + 1, { quiet: true })
@@ -30,8 +32,8 @@ export const MissingWorkHistoryWidget = () => {
   const cells: (number | null)[] = [...Array<null>(lead).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)]
   while (cells.length % 7 !== 0) cells.push(null)
   const weeks = Array.from({ length: cells.length / 7 }, (_, i) => cells.slice(i * 7, i * 7 + 7))
-  const weekdayFormat = new Intl.DateTimeFormat(i18n.language.startsWith('ko') ? 'ko-KR' : 'en-US', { weekday: 'narrow' })
-  const weekdays = Array.from({ length: 7 }, (_, i) => weekdayFormat.format(new Date(2023, 0, 1 + i)))
+  // 요일 머리 — 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa, 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256)
+  const { rowRef: weekdayRowRef, shown: weekdayShown, full: weekdayFull, long: weekdayLong } = useWeekdayHeader<HTMLTableRowElement>()
 
   const readDay = (d: number) => t('missing.dayMissing', { month: month.month() + 1, day: d })
 
@@ -52,10 +54,11 @@ export const MissingWorkHistoryWidget = () => {
         <table className='mt-x2 w-full table-fixed border-collapse' data-missing-grid>
           <caption className='sr-only'>{monthText}</caption>
           <thead>
-            <tr>
-              {weekdays.map((w, i) => (
-                <th key={i} scope='col' className='h-x7 p-0 text-t2 font-normal text-fg-neutral-subtle'>
+            <tr ref={weekdayRowRef} data-weekday-row>
+              {weekdayShown.map((w, i) => (
+                <th key={i} scope='col' abbr={weekdayLong[i]} data-weekday-cell className='relative h-x7 whitespace-nowrap p-0 text-t2 font-normal text-fg-neutral-subtle'>
                   {w}
+                  <WeekdayProbe text={weekdayFull[i]!} />
                 </th>
               ))}
             </tr>
