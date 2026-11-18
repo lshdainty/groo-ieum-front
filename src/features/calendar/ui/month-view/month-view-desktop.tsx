@@ -6,6 +6,7 @@ import { cn } from "@/shared/lib/cn";
 import { formatDayText } from "@/shared/lib/date-text";
 import { useWeekdayHeader } from "@/shared/ui/groo/weekday-header";
 import { WeekdayProbe } from "@/shared/ui/groo/weekday-probe";
+import { WEEK_GRID_TEXT } from "@/shared/ui/groo/week-grid-text";
 import { calculateMonthEventPositions, getCalendarCells } from "@/features/calendar/lib/helpers";
 import { useCalendar } from "@/features/calendar/model/calendar-context";
 import { DragSelectProvider, useDragSelect } from "@/features/calendar/model/drag-select-context";
@@ -36,7 +37,7 @@ export function WeekdayHead() {
       ref={rowRef}
       aria-hidden
       data-weekday-row
-      className="grid h-x9 grid-cols-7 items-center border-b border-stroke-neutral-subtle text-center text-t3 text-fg-neutral-subtle"
+      className={cn("grid h-x9 grid-cols-7 items-center border-b border-stroke-neutral-subtle text-center text-fg-neutral-subtle", WEEK_GRID_TEXT.t3)}
     >
       {shown.map((day, index) => (
         <span
@@ -138,7 +139,8 @@ function MonthGrid({ singleDayEvents, multiDayEvents, onEventClick, onCreate }: 
                     data-slot="month-day-number"
                     className={cn(
                       // 원 26(글자 13/18 + 8) — 글자가 커지면 원도 따라 커진다
-                      "grid size-[calc(var(--text-t3--line-height)+8px)] shrink-0 place-items-center rounded-full text-t3 font-medium tabular-nums focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring",
+                      "grid size-[calc(min(var(--text-t3--line-height),calc(var(--text-t3-static--line-height)_*_2))_+_8px)] shrink-0 place-items-center rounded-full font-medium tabular-nums focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring",
+                      WEEK_GRID_TEXT.t3,
                       selected
                         ? "bg-bg-neutral-inverted font-bold text-fg-neutral-inverted"
                         : cn(dayTone({ currentMonth, sunday, saturday, holiday: holidayInfo }), today && "bg-bg-neutral-weak font-bold"),

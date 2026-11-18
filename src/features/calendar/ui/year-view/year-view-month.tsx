@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/shared/lib/cn'
 import { useWeekdayHeader } from '@/shared/ui/groo/weekday-header'
 import { WeekdayProbe } from '@/shared/ui/groo/weekday-probe'
+import { WEEK_GRID_TEXT } from '@/shared/ui/groo/week-grid-text'
 import { YearViewDayCell } from '@/features/calendar/ui/year-view/year-view-day-cell'
 
 import type { IEvent } from '@/features/calendar/model/interfaces'
@@ -30,7 +31,7 @@ const YearViewMonth = ({ month, events, onPickMonth }: IProps) => {
   }, [month])
 
   return (
-    <div className='flex flex-col overflow-hidden rounded-r4 border border-stroke-neutral-subtle'>
+    <div data-year-month className='flex flex-col overflow-hidden rounded-r4 border border-stroke-neutral-subtle'>
       <button
         type='button'
         onClick={() => onPickMonth(new Date(month.getFullYear(), month.getMonth(), 1))}
@@ -45,7 +46,7 @@ const YearViewMonth = ({ month, events, onPickMonth }: IProps) => {
             <div
               key={index}
               data-weekday-cell
-              className={cn('relative min-w-0 whitespace-nowrap text-t2 font-medium text-fg-neutral-subtle', index === 0 && 'text-fg-critical', index === 6 && 'text-fg-informative')}
+              className={cn('relative min-w-0 whitespace-nowrap font-medium text-fg-neutral-subtle', WEEK_GRID_TEXT.t2, index === 0 && 'text-fg-critical', index === 6 && 'text-fg-informative')}
             >
               {day}
               <WeekdayProbe text={full[index]!} />

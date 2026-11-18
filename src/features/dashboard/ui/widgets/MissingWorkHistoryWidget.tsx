@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/shared/lib/cn'
 import { useWeekdayHeader } from '@/shared/ui/groo/weekday-header'
 import { WeekdayProbe } from '@/shared/ui/groo/weekday-probe'
+import { WEEK_GRID_TEXT } from '@/shared/ui/groo/week-grid-text'
 import { Button } from '@/shared/ds/button'
 import { Skeleton } from '@/shared/ds/skeleton'
 import { useUnregisteredWorkDatesQuery } from '@/entities/work'
@@ -56,7 +57,7 @@ export const MissingWorkHistoryWidget = () => {
           <thead>
             <tr ref={weekdayRowRef} data-weekday-row>
               {weekdayShown.map((w, i) => (
-                <th key={i} scope='col' abbr={weekdayLong[i]} data-weekday-cell className='relative h-x7 whitespace-nowrap p-0 text-t2 font-normal text-fg-neutral-subtle'>
+                <th key={i} scope='col' abbr={weekdayLong[i]} data-weekday-cell className={cn('relative h-x7 whitespace-nowrap p-0 font-normal text-fg-neutral-subtle', WEEK_GRID_TEXT.t2)}>
                   {w}
                   <WeekdayProbe text={weekdayFull[i]!} />
                 </th>
@@ -76,7 +77,8 @@ export const MissingWorkHistoryWidget = () => {
                     <td key={di} className='h-x9 p-0 text-center' data-day={d} data-missing={isMissing || undefined}>
                       <span
                         className={cn(
-                          'inline-flex size-[30px] items-center justify-center rounded-full text-t3 font-medium tabular-nums text-fg-neutral',
+                          'inline-flex size-[30px] items-center justify-center rounded-full font-medium tabular-nums text-fg-neutral',
+                          WEEK_GRID_TEXT.t3,
                           future && 'font-normal text-fg-neutral-subtle',
                           isToday && 'font-bold outline-[1.5px] -outline-offset-[1.5px] outline-stroke-neutral-contrast',
                           isMissing && 'bg-bg-critical-weak font-bold text-fg-critical-contrast',

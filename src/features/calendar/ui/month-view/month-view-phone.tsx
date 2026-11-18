@@ -11,6 +11,7 @@ import { formatDayText } from "@/shared/lib/date-text";
 import { cn } from "@/shared/lib/cn";
 import { useWeekdayHeader } from "@/shared/ui/groo/weekday-header";
 import { WeekdayProbe } from "@/shared/ui/groo/weekday-probe";
+import { WEEK_GRID_TEXT } from "@/shared/ui/groo/week-grid-text";
 
 import type { IEvent } from "@/features/calendar/model/interfaces";
 import { MonthChip, MonthChipSpacer, MonthMore } from "./month-chip";
@@ -35,7 +36,7 @@ export function WeekdayRow() {
       ref={rowRef}
       aria-hidden
       data-weekday-row
-      className="grid h-x8 shrink-0 grid-cols-7 items-center px-[2px] text-center text-t3 text-fg-neutral-subtle"
+      className={cn("grid h-x8 shrink-0 grid-cols-7 items-center px-[2px] text-center text-fg-neutral-subtle", WEEK_GRID_TEXT.t3)}
     >
       {shown.map((day, index) => (
         <span
@@ -138,7 +139,8 @@ export function CalendarMonthViewPhone({
                   data-slot="month-day-number"
                   className={cn(
                     // 원 26(글자 14/19 + 7) — 글자가 커지면 원도 따라 커진다
-                    "grid size-[calc(var(--text-t4--line-height)+7px)] shrink-0 place-items-center rounded-full text-t4 font-medium tabular-nums",
+                    "grid size-[calc(min(var(--text-t4--line-height),calc(var(--text-t4-static--line-height)_*_2))_+_7px)] shrink-0 place-items-center rounded-full font-medium tabular-nums",
+                    WEEK_GRID_TEXT.t4,
                     dayTone({ currentMonth, sunday, saturday, holiday: holidayInfo }),
                     today && "bg-bg-neutral-weak font-bold",
                   )}

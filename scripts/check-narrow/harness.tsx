@@ -21,6 +21,7 @@ import { CalendarToolbar } from '@/features/calendar/ui/header/calendar-toolbar'
 import { WeekdayHead } from '@/features/calendar/ui/month-view/month-view-desktop'
 import { WeekdayRow } from '@/features/calendar/ui/month-view/month-view-phone'
 import { YearViewMonth } from '@/features/calendar/ui/year-view/year-view-month'
+import { CalendarYearView } from '@/features/calendar/ui/year-view/calendar-year-view'
 import { VacationTypeStatsContent } from '@/features/vacation-history/ui/VacationTypeStatsContent'
 
 const params = new URLSearchParams(window.location.search)
@@ -132,7 +133,19 @@ function CalendarWeekdayScene() {
   )
 }
 
+// 캘린더 년 보기 — 열두 작은 달. 날짜 칸이 요일 · 날짜 글보다 좁아지면 한 줄 달 수를 줄인다(groo-design #257)
+function YearViewScene() {
+  return (
+    <CalendarProvider users={[]}>
+      <div data-check='year-view' style={{ height: 2000 }}>
+        <CalendarYearView allEvents={[]} onPickMonth={() => {}} />
+      </div>
+    </CalendarProvider>
+  )
+}
+
 function Scene() {
+  if (scene === 'year-view') return <YearViewScene />
   if (scene === 'calendar-weekday') return <CalendarWeekdayScene />
   if (scene === 'weekday') return <WeekdayScene />
   if (scene === 'donut') return <DonutScene />
