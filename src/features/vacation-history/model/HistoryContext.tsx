@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
+import { useCompanyToday } from '@/entities/session';
 
 interface HistoryContextType {
   selectedYear: string;
@@ -8,7 +9,9 @@ interface HistoryContextType {
 const HistoryContext = createContext<HistoryContextType | null>(null);
 
 export const HistoryProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  // 처음 고른 해 — 회사 기준 오늘의 해(브라우저 연도가 아니다 — 서버가 쓴 · 예정을 가르는 오늘과 같은 시계)
+  const currentYear = useCompanyToday().year;
+  const [selectedYear, setSelectedYear] = useState<string>(String(currentYear));
 
   return (
     <HistoryContext.Provider value={{ selectedYear, setSelectedYear }}>

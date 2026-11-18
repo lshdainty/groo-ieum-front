@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { ResultSection } from '@/shared/ds/result-section'
 import { Skeleton } from '@/shared/ds/skeleton'
-import { useUser } from '@/entities/session'
+import { useCompanyToday, useUser } from '@/entities/session'
 import { useUserMonthlyVacationStatsQuery } from '@/entities/vacation'
 import { hasMonthUsage } from '@/features/vacation-history/lib/vacation-chart'
 import { MonthVacationStatsContent } from '@/features/vacation-history/ui/MonthVacationStatsContent'
@@ -15,14 +15,15 @@ export const MonthStatsWidget = () => {
   const { t } = useTranslation('dashboard')
   const { loginUser } = useUser()
   const userId = loginUser?.user_id || ''
-  const year = new Date().getFullYear()
+  // 올해 — 회사 기준 오늘의 해(서버가 쓴 · 예정을 가르는 오늘과 같은 시계, 브라우저 연도가 아니다)
+  const year = useCompanyToday().year
   const query = useUserMonthlyVacationStatsQuery(userId, String(year), { quiet: true })
 
   return (
     <WidgetFrame id='month-stats'>
       <WidgetBoundary id='month-stats' queries={[query]} fallback={<MonthStatsSkeleton />}>
         {query.data && hasMonthUsage(query.data) ? (
-          <MonthVacationStatsContent data={query.data} year={year} />
+          <MonthVacationStatsContent data={query.data} year={year} currentYear={year} />
         ) : (
           <ResultSection size='medium' icon={<BarChart3 />} title={t('widget.empty.monthStats.title')} />
         )}

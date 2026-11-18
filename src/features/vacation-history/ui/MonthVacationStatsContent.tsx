@@ -42,12 +42,21 @@ const USED_UNDER = 'used_under'
  * 높이 200 · 가로 점선 격자만 · 세로축 "{n}일" 정수 눈금(간격 1 · 2 · 5 — `dayTicks`, 보이는 계열을 쌓은 높이로) · 가로축 "{m}월"(ds `chartXAxisProps`).
  * 쓴 휴가도 예정도 없는 해는 부르는 쪽이 비어 있음을 그린다. 차트 이름 "{yyyy}년 달마다 휴가, 쓴 휴가 {합계} · 예정 {합계}" + 숨은 표.
  */
-export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthlyVacationStatsResp[]; year?: number }) => {
+export const MonthVacationStatsContent = ({
+  data,
+  year,
+  currentYear,
+}: {
+  data: GetUserMonthlyVacationStatsResp[]
+  year?: number
+  /** 회사 기준 오늘의 해(`useCompanyToday().year`) — 지난해 · 올해 · 다음 해를 이 해로 가른다 */
+  currentYear: number
+}) => {
   const { t } = useTranslation('vacation')
   const gt = useGrantTimeText()
   const legendId = useId()
   const [hidden, setHidden] = useState<Set<string>>(new Set())
-  const series = monthSeries(year)
+  const series = monthSeries(year, currentYear)
   const showUsed = series.used && !hidden.has(USED)
   const showScheduled = series.scheduled && !hidden.has(SCHEDULED)
   const bars = data.map((m) => {
@@ -78,7 +87,10 @@ export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthly
   const name = t(year != null ? 'history.chart.monthName' : 'history.chart.monthNameNoYear', { year, totals })
   const tiles = [
     ...(series.used ? [{ key: USED, label: t('history.usedVacation'), color: 'blue' as const, total: usedTotal }] : []),
-    ...(series.scheduled ? [{ key: SCHEDULED, label: t('history.chart.scheduled'), color: 'blue' as const, total: scheduledTotal }] : []),
+    // 예정은 막대와 같은 표식 — 옅은 바탕 + 1px 테두리(같은 파랑의 쓴 휴가와 가른다, groo-design #251)
+    ...(series.scheduled
+      ? [{ key: SCHEDULED, label: t('history.chart.scheduled'), color: 'blue' as const, total: scheduledTotal, marker: 'outline' as const }]
+      : []),
   ]
 
   return (
@@ -100,7 +112,12 @@ export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthly
           />
           <ChartTooltip
             content={(props) => (
-              <ChartTooltipContent {...props} headFormatter={monthText} valueFormatter={(_, key) => valueOf(props.label, key)} />
+              <ChartTooltipContent
+                {...props}
+                headFormatter={monthText}
+                valueFormatter={(_, key) => valueOf(props.label, key)}
+                markers={{ [SCHEDULED]: 'outline' }}
+              />
             )}
           />
           {series.used && (

@@ -18,5 +18,6 @@ export { authKeys, useLoginCheckQuery } from '@/entities/session/api/sessionQuer
 
 // Contexts
 export { UserProvider, useUser } from '@/entities/session/model/UserContext'
+export { useCompanyToday } from '@/entities/session/model/company-today'
 export { PermissionProvider, usePermission } from '@/entities/session/model/PermissionContext'
 export type { Permission } from '@/entities/session/model/PermissionContext'

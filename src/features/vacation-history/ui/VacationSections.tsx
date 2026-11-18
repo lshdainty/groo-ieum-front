@@ -13,6 +13,7 @@ import {
   useUserVacationHistoryQuery,
   useUserVacationStatsQuery,
 } from '@/entities/vacation'
+import { useCompanyToday } from '@/entities/session'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { Band } from '@/widgets/layout/ui/ScreenBands'
 import { hasMonthUsage, typeSlices } from '@/features/vacation-history/lib/vacation-chart'
@@ -101,7 +102,9 @@ export function VacationSections({
 }) {
   const { t } = useTranslation('vacation')
   const desktop = useDesktop()
-  const baseDate = dayjs().year(parseInt(year, 10)).format('YYYY-MM-DDT23:59:59')
+  // [userClock] 고른 해의 "오늘" — 회사 기준 오늘의 달 · 날(서버가 쓴 · 예정을 가르는 오늘과 같은 시계). 2월 29일은 없는 해에 3월 1일
+  const today = useCompanyToday()
+  const baseDate = dayjs(new Date(parseInt(year, 10), today.month - 1, today.day)).format('YYYY-MM-DDT23:59:59')
   const stats = useUserVacationStatsQuery(userId, baseDate, { quiet: true })
   const types = useAvailableVacationsQuery(userId, baseDate, { quiet: true })
   const months = useUserMonthlyVacationStatsQuery(userId, year, { quiet: true })
@@ -137,7 +140,7 @@ export function VacationSections({
     <ChartSkeleton size='bar' />,
     t('history.monthFailureTitle'),
     months.data && hasMonthUsage(months.data) ? (
-      <MonthVacationStatsContent data={months.data} year={yearNum} />
+      <MonthVacationStatsContent data={months.data} year={yearNum} currentYear={today.year} />
     ) : (
       <ResultSection size='medium' icon={<BarChart3 />} title={t('history.emptyUsage', { year })} />
     )

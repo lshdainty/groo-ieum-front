@@ -13,13 +13,13 @@ export const hasMonthUsage = (data: readonly GetUserMonthlyVacationStatsResp[] |
   !!data && data.some((m) => m.used_time > 0 || expectOf(m) > 0)
 
 /**
- * 고른 해에 그릴 계열 — 쓴 휴가는 오늘까지, 예정은 오늘 뒤라 지난해는 쓴 휴가만 · 다음 해는 예정만 · 올해는 둘 다
- * (groo-design chart.md "미리 잡는 일정의 값은 예외" — "다음 해처럼 전부 앞날이면 예정 계열만 보입니다"). 해를 모르면 둘 다
+ * 고른 해에 그릴 계열 — 쓴 휴가는 오늘까지, 예정은 오늘 뒤라 지난해는 쓴 휴가만 · 다음 해는 예정만 · 올해는 0 이어도 둘 다
+ * (groo-design chart.md "미리 잡는 일정의 값은 예외" — 값이 있을 수 없는 계열은 타일을 두지 않는다). [currentYear] 는 회사 기준 오늘의 해
+ * (`useCompanyToday` — 서버가 쓴 · 예정을 가르는 오늘과 같은 시계, 브라우저 연도가 아니다). 해를 모르면 둘 다
  */
-export const monthSeries = (year?: number, now: Date = new Date()): { used: boolean; scheduled: boolean } => {
-  const current = now.getFullYear()
+export const monthSeries = (year: number | undefined, currentYear: number): { used: boolean; scheduled: boolean } => {
   if (year == null) return { used: true, scheduled: true }
-  return { used: year <= current, scheduled: year >= current }
+  return { used: year <= currentYear, scheduled: year >= currentYear }
 }
 
 /**

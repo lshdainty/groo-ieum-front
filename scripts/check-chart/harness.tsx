@@ -16,6 +16,7 @@ import * as series from '@/shared/ds/chart/chart-series'
 import * as variants from '@/shared/ds/chart/chart-variants'
 import * as axisWidth from '@/shared/lib/groo/axisWidth'
 import * as chartAxis from '@/shared/lib/groo/chartAxis'
+import { companyToday } from '@/shared/lib/company-date'
 import { dayTicks } from '@/features/vacation-history/lib/vacation-chart'
 import { MonthVacationStatsContent } from '@/features/vacation-history/ui/MonthVacationStatsContent'
 
@@ -58,6 +59,7 @@ window.__chart = {
   ...axisWidth,
   ...chartAxis,
   dayTicks,
+  companyToday,
   months,
   seriesDots,
   // 시험이 부를 때 글 폭을 재야 하는 것(niceValueAxis 의 width)은 문서가 선 뒤에 부른다
@@ -107,7 +109,7 @@ function MonthScene() {
     <div className='px-x4 py-x4'>
       <div className='rounded-r4 bg-bg-layer-default p-x5'>
         <div data-check='slot' style={width ? { width } : undefined}>
-          <MonthVacationStatsContent data={data} year={qa ? undefined : 2025} />
+          <MonthVacationStatsContent data={data} year={qa ? undefined : 2025} currentYear={companyToday(params.get('tz')).year} />
         </div>
       </div>
     </div>
@@ -119,7 +121,7 @@ function MonthScene() {
 //   this-nodec 올해 — 12월 예정 없음(빈 칸)
 //   last       지난해 — 쓴 휴가만(12월까지)
 //   next       다음 해 — 예정만
-// 해는 이 브라우저의 올해 기준이다(쓴 · 예정 가르기는 서버 몫이라 값은 고정)
+// 해는 회사 기준 오늘의 해 기준이다(?tz= 회사 타임존 — 없으면 브라우저 날짜, ?y= 고른 해를 직접). 쓴 · 예정 가르기는 서버 몫이라 값은 고정
 const VAC_CASES: Record<string, { yearOffset: number; used: number[]; expect: number[] }> = {
   'this-dec': { yearOffset: 0, used: [0, 1, 0, 3, 0, 0, 0.5, 0, 0, 2, 1, 0], expect: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 2] },
   'this-nodec': { yearOffset: 0, used: [0, 1, 0, 3, 0, 0, 0.5, 0, 0, 2, 1, 0], expect: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0] },
@@ -130,6 +132,9 @@ const VAC_CASES: Record<string, { yearOffset: number; used: number[]; expect: nu
 function VacationScene() {
   const { t } = useTranslation('vacation')
   const c = VAC_CASES[params.get('case') ?? 'this-dec']!
+  // 회사 기준 오늘 — 화면은 로그인 확인의 company_timezone 으로 같은 유틸(useCompanyToday)을 부른다
+  const today = companyToday(params.get('tz'))
+  const year = params.get('y') ? Number(params.get('y')) : today.year + c.yearOffset
   const data = c.used.map((u, i) => ({
     month: i + 1,
     used_time: u,
@@ -141,7 +146,7 @@ function VacationScene() {
     <div className='px-x4 py-x4'>
       <div className='rounded-r4 bg-bg-layer-default p-x5'>
         <h2 data-check='title'>{t('history.monthCardTitle')}</h2>
-        <MonthVacationStatsContent data={data} year={new Date().getFullYear() + c.yearOffset} />
+        <MonthVacationStatsContent data={data} year={year} currentYear={today.year} />
       </div>
     </div>
   )
