@@ -13,9 +13,12 @@ import {
   chartGridProps,
   chartXAxisProps,
 } from '@/shared/ds/chart'
-import { useAxisWidth } from '@/shared/lib/groo/axisWidth'
+import { chartValueIntervals, useAxisWidth, useTickLineHeight } from '@/shared/lib/groo/axisWidth'
 import type { GetUserMonthlyVacationStatsResp } from '@/entities/vacation'
 import { dayTicks, formatUsedTime, monthBars } from '@/features/vacation-history/lib/vacation-chart'
+
+/** 차트 높이 — 세로 눈금 칸 수(chartValueIntervals)도 이 높이로 센다 */
+const CHART_HEIGHT = 200
 
 /**
  * 월별 쓴 휴가(I-23 D 20) — 타일 하나(쓴 휴가 + 합계) · 막대 chart-blue 한 계열 · 높이 200 · 가로 점선 격자만 · 세로축 "{n}일" 정수 눈금
@@ -31,7 +34,12 @@ export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthly
   const sum = bars.reduce((a, m) => a + m.used_time, 0)
   const unit = { day: t('history.chart.dayUnit'), hour: t('history.chart.hourUnit'), minute: t('history.chart.minuteUnit') }
   const total = formatUsedTime(sum, unit)
-  const ticks = dayTicks(Math.max(0, ...bars.map((m) => m.used_time)))
+  // 세로 눈금이 겹치면 칸을 줄인다 — 그리는 높이(차트 200 − 위 · 아래 5 − 가로 눈금 줄) ÷ 눈금 글 줄 높이(글자 크기를 따른다)
+  const tickLine = useTickLineHeight()
+  const ticks = dayTicks(
+    Math.max(0, ...bars.map((m) => m.used_time)),
+    chartValueIntervals(CHART_HEIGHT, tickLine),
+  )
   const axisWidth = useAxisWidth(ticks.map((n) => t('history.chart.dayAxis', { n })))
   const monthText = (month: unknown) => t('history.chart.monthAxis', { month: String(month) })
   const strOf = (month: unknown) => {
@@ -43,7 +51,7 @@ export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthly
   return (
     <div className='flex flex-col' data-month-chart>
       <ChartLegendTiles id={legendId} items={[{ key: 'used', label: t('history.usedVacation'), color: 'blue', total }]} />
-      <Chart label={name} legendId={legendId} height={200}>
+      <Chart label={name} legendId={legendId} height={CHART_HEIGHT}>
         <BarChart data={bars}>
           <CartesianGrid {...chartGridProps} />
           <XAxis dataKey='month' {...chartXAxisProps(bars.map((m) => ({ label: monthText(m.month) })))} />
@@ -54,6 +62,8 @@ export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthly
             tickFormatter={(n: number) => t('history.chart.dayAxis', { n })}
             width={axisWidth}
             {...chartAxisProps()}
+            // 준 눈금을 하나도 빼지 않는다 — recharts 기본(preserveEnd)은 준 눈금도 겹친다고 보면 빼고 아래 끝 0 도 뺀다(담다 #635 niceValueAxis 와 같다)
+            interval={0}
           />
           <ChartTooltip
             content={(props) => (

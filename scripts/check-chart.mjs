@@ -81,7 +81,7 @@ const ticksOf = (page) =>
       [...document.querySelectorAll(`${sel} .recharts-cartesian-axis-tick-value`)]
         .map((el) => {
           const r = el.getBoundingClientRect();
-          return { text: el.textContent, left: r.left, right: r.right, fontSize: getComputedStyle(el).fontSize };
+          return { text: el.textContent, left: r.left, right: r.right, top: r.top, bottom: r.bottom, center: (r.left + r.right) / 2, fontSize: getComputedStyle(el).fontSize };
         })
         .filter((t) => t.text);
     const box = document.querySelector("[data-slot=chart]")?.getBoundingClientRect();
@@ -391,6 +391,13 @@ const cases = [
         if (Math.round(ticks.box.width) !== cw) p.push(`차트 폭 ${ticks.box.width}`);
         if (texts.at(-1) !== "11월") p.push(`끝 눈금 ${texts.at(-1)} (${texts.join(" · ")})`);
         if (minGap(ticks.x) < 8) p.push(`글 사이 ${minGap(ticks.x).toFixed(1)} < 8 (${texts.join(" · ")})`);
+        // 끝 글 자리를 비워 두므로(D-1, chart.md "끝 글 자리는 비워 둡니다") 건너뛴 간격이 끝까지 고르다 — 끝 글을 옮기거나 앞 글을 빼지 않는다
+        const steps = ticks.x.slice(1).map((t, i) => t.center - ticks.x[i].center);
+        if (steps.length && Math.max(...steps) - Math.min(...steps) > 1.5)
+          p.push(`간격이 고르지 않다 ${steps.map((d) => d.toFixed(1)).join(" · ")} (${texts.join(" · ")})`);
+        const months = texts.map((t) => parseInt(t, 10));
+        const monthSteps = new Set(months.slice(1).map((m, i) => m - months[i]));
+        if (monthSteps.size > 1) p.push(`건너뛰는 달 수가 고르지 않다 (${texts.join(" · ")})`);
         const sizes = [...new Set([...ticks.x, ...ticks.y].map((t) => t.fontSize))];
         expectEq(p, "눈금 글자 크기", sizes, [font === 2 ? "22px" : "11px"]);
         expectEq(p, "세로축", ticks.y.map((t) => t.text).sort((a, b) => parseFloat(a) - parseFloat(b)), ["0일", "1일", "2일", "3일"]);
@@ -398,6 +405,64 @@ const cases = [
       },
     })),
   ),
+
+  // ── 세로 눈금이 겹치면 칸 수를 줄인다(E — groo-design #247 · #248, chart.md "세로 눈금이 겹치면 수를 줄입니다") ──
+  libCase(
+    "세로 칸 수 — 그리는 높이 = 높이 − 위 · 아래 여백 − (줄 높이 + 8), 칸 = max(1, ⌊그리는 높이 ÷ 줄 높이⌋) · dayTicks 가 그 칸 안으로 줄인다 · 준 눈금은 interval 0",
+    () => {
+      const { chartValueIntervals: iv, dayTicks: d, niceValueAxis, formatAxisWon } = window.__chart;
+      return {
+        intervals: [iv(200, 15), iv(200, 30), iv(200, 45), iv(140, 30, { top: 8, bottom: 0 }), iv(40, 30)],
+        // d(3, 1) — 한 칸 겨냥까지 내려도 넘치면 그 축을 쓴다(담다 niceValueAxis 와 같다 — 0 · 2 · 4)
+        days: [d(4), d(4, 3), d(4, 2), d(13), d(13, 2), d(3, 1), d(25, 2), d(0.5, 1)],
+        nice: niceValueAxis([0, 28_000], formatAxisWon, 2).ticks,
+        niceInterval: niceValueAxis([0, 28_000], formatAxisWon).interval,
+      };
+    },
+    (g, p) => {
+      // 100% 줄 15: 200 − 10 − 23 = 167 → 11 · 200% 줄 30: 152 → 5 · 300% 줄 45: 137 → 3 · 폰 띠 140(위 8 · 아래 0) 200%: 94 → 3 · 아주 낮으면 1
+      expectEq(p, "칸 수", g.intervals, [11, 5, 3, 3, 1]);
+      expectEq(p, "dayTicks", g.days, [[0, 1, 2, 3, 4], [0, 2, 4], [0, 2, 4], [0, 5, 10, 15], [0, 10, 20], [0, 2, 4], [0, 20, 40], [0, 1]]);
+      expectEq(p, "niceValueAxis 두 칸", g.nice, [0, 20_000, 40_000]);
+      expectEq(p, "niceValueAxis interval", g.niceInterval, 0);
+    },
+  ),
+  ...[
+    { vw: 320, cw: 266, font: 2, how: "200% 로 처음 그림", atLoad: true },
+    { vw: 320, cw: 266, font: 2, how: "떠 있는 동안 200% 로 키움" },
+    { vw: 320, cw: 266, font: 3, how: "300% 로 처음 그림", atLoad: true },
+    { vw: 390, cw: 336, font: 3, how: "300% 로 처음 그림", atLoad: true },
+    // 떠 있는 동안 300% 로 키우는 경우는 넣지 않았다 — 담다 판 useTickLineHeight 가 React Compiler 에 줄 높이를 처음 값으로 묶여
+    // 칸 수가 그대로다(담다에서 고칠 결함, SOURCE.md 이력 참고). 200% 는 이 차트(높이 200)에서 다섯 칸이 들어 줄일 일이 없다
+  ].map(({ vw, cw, font, how, atLoad }) => ({
+    name: `세로 눈금 ${vw}(차트 ${cw}) · ${how} · 최대 4일 — 눈금이 하나도 빠지지 않고(0 포함) 글끼리 겹치지 않으며 칸 수가 그 높이에 든다`,
+    async run() {
+      const { ctx, page, errors } = await open("month", { width: vw, query: `&qa=1&cw=${cw}&peak=4${atLoad ? `&font=${font}` : ""}` });
+      await page.locator(".recharts-bar-rectangle").first().waitFor();
+      await page.waitForTimeout(200);
+      if (!atLoad) {
+        await page.evaluate((f) => {
+          document.documentElement.style.fontSize = `${f * 100}%`;
+        }, font);
+        await page.waitForTimeout(500);
+      }
+      const ticks = await ticksOf(page);
+      const want = await page.evaluate(() => {
+        const { dayTicks, chartValueIntervals, measureTickLineHeight } = window.__chart;
+        return dayTicks(4, chartValueIntervals(200, measureTickLineHeight())).map((n) => `${n}일`);
+      });
+      await ctx.close();
+      const p = [...errors, ...clipOf(ticks, ticks.box)];
+      const ys = [...ticks.y].sort((a, b) => a.top - b.top);
+      const texts = ys.map((t) => t.text).reverse();
+      expectEq(p, "세로 눈금", texts, want);
+      if (!texts.includes("0일")) p.push("0 이 빠졌다");
+      for (let i = 1; i < ys.length; i++)
+        if (ys[i].top < ys[i - 1].bottom - 0.5) p.push(`"${ys[i - 1].text}" · "${ys[i].text}" 가 ${(ys[i - 1].bottom - ys[i].top).toFixed(1)} 겹친다`);
+      if (font === 3 && want.length - 1 >= 4) p.push(`300% 인데 칸을 줄이지 않았다 (${want.join(" · ")})`);
+      return p;
+    },
+  })),
 ];
 
 const only = process.argv[2];

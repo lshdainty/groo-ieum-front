@@ -99,6 +99,8 @@ function MonthScene() {
   const qa = params.get('qa') === '1'
   const width = params.get('cw') ? Number(params.get('cw')) : undefined
   const used = qa ? [0, 1, 0, 3, 0, 0, 0.5, 0, 0, 2, 0] : [0, 0, 1.5, 0, 0, 0, 7, 0, 0, 0, 2, 13]
+  // ?peak= — 4월 값(세로축 최대)을 바꾼다(세로 눈금 칸 줄이기 판정)
+  if (qa && params.get('peak')) used[3] = Number(params.get('peak'))
   const data = used.map((u, i) => ({ month: i + 1, used_time: u, used_time_str: `${u}일` }))
   return (
     <div className='px-x4 py-x4'>

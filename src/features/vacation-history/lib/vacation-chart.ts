@@ -22,11 +22,25 @@ export const hasMonthUsage = (data: readonly GetUserMonthlyVacationStatsResp[] |
  * 세로축 눈금 — 정수 일 단위, 간격은 1 · 2 · 5 × 10ⁿ 계열(groo-design chart.md "축 · 격자" — 3 · 4 · 6 일 간격을 쓰지 않는다).
  * 4 일까지는 하루 간격(0 ~ 4), 그보다 크면 돈 축과 같은 `niceAxis` 셈(0 포함 · 끝을 간격에 맞춰 올림)이다. `niceAxis` 는 1 보다
  * 작은 간격을 반올림해 눈금이 겹치므로(0 · 0 · 1 · 1) 하루보다 촘촘하게 나누지 않는다 — 반나절 값도 정수 눈금 사이에 그린다.
+ *
+ * [maxIntervals] — 세로 눈금 글이 겹치지 않고 들어가는 칸 수(ds `chartValueIntervals` — 그리는 높이 ÷ 눈금 글 줄 높이). 칸이 넘치면
+ * 겨냥하는 칸 수를 하나씩 줄여 1 · 2 · 5 간격을 다시 센다(chart.md "세로 눈금이 겹치면 수를 줄입니다" — 담다 `niceValueAxis` 와 같은 셈).
  */
-export const dayTicks = (max: number): number[] => {
+export const dayTicks = (max: number, maxIntervals = Infinity): number[] => {
   const top = Math.max(1, Math.ceil(max))
-  if (top <= 4) return Array.from({ length: top + 1 }, (_, i) => i)
-  return niceAxis(0, top).ticks
+  const fits = (ticks: number[]) => ticks.length - 1 <= maxIntervals
+  if (top <= 4) {
+    const daily = Array.from({ length: top + 1 }, (_, i) => i)
+    if (fits(daily)) return daily
+  }
+  // 하루 이상 · 고른 간격만(1 보다 작은 간격은 niceAxis 가 반올림해 겹친다)
+  const whole = (ticks: number[]) =>
+    ticks.length > 1 && ticks.every((v, i) => Number.isInteger(v) && (i === 0 || v - ticks[i - 1]! === ticks[1]! - ticks[0]!)) && ticks[1]! - ticks[0]! >= 1
+  for (let target = 4; target > 1; target--) {
+    const ticks = niceAxis(0, top, target).ticks
+    if (whole(ticks) && fits(ticks)) return ticks
+  }
+  return niceAxis(0, top, 1).ticks
 }
 
 export type TypeSlice = ChartColored<AvailableVacationByType>
