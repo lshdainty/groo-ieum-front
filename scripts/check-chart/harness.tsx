@@ -93,16 +93,19 @@ function XAxisScene() {
   )
 }
 
-// 이음 화면 — 월별 쓴 휴가(지난 해라 열두 달). 쓴 달이 적고 0 이 대부분인 막대
+// 이음 화면 — 월별 쓴 휴가. 기본은 지난 해 열두 달 · 0 이 대부분인 막대(최대 13일).
+// QA 조건(?qa=1): 올해처럼 1 ~ 11월(오늘이 든 달에서 끝난다 — 날짜에 기대지 않게 year 없이 열한 달), 최대 3일, 차트 폭 ?cw=(336 · 266)
 function MonthScene() {
-  const data = Array.from({ length: 12 }, (_, i) => {
-    const used = [0, 0, 1.5, 0, 0, 0, 7, 0, 0, 0, 2, 13][i]!
-    return { month: i + 1, used_time: used, used_time_str: `${used}일` }
-  })
+  const qa = params.get('qa') === '1'
+  const width = params.get('cw') ? Number(params.get('cw')) : undefined
+  const used = qa ? [0, 1, 0, 3, 0, 0, 0.5, 0, 0, 2, 0] : [0, 0, 1.5, 0, 0, 0, 7, 0, 0, 0, 2, 13]
+  const data = used.map((u, i) => ({ month: i + 1, used_time: u, used_time_str: `${u}일` }))
   return (
     <div className='px-x4 py-x4'>
       <div className='rounded-r4 bg-bg-layer-default p-x5'>
-        <MonthVacationStatsContent data={data} year={2025} />
+        <div data-check='slot' style={width ? { width } : undefined}>
+          <MonthVacationStatsContent data={data} year={qa ? undefined : 2025} />
+        </div>
       </div>
     </div>
   )

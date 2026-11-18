@@ -84,8 +84,23 @@ const ticksOf = (page) =>
           return { text: el.textContent, left: r.left, right: r.right, fontSize: getComputedStyle(el).fontSize };
         })
         .filter((t) => t.text);
-    return { x: read(".recharts-xAxis-tick-labels"), y: read(".recharts-yAxis-tick-labels") };
+    const box = document.querySelector("[data-slot=chart]")?.getBoundingClientRect();
+    return {
+      x: read(".recharts-xAxis-tick-labels"),
+      y: read(".recharts-yAxis-tick-labels"),
+      box: box ? { left: box.left, right: box.right, width: box.width } : null,
+    };
   });
+
+// 글이 차트 상자 밖으로 나간 만큼(가로 · 세로축 글 모두) — 0 이면 잘리지 않는다
+const clipOf = (ticks, box) => {
+  const p = [];
+  for (const t of [...ticks.x, ...ticks.y]) {
+    if (t.left < box.left - 0.5) p.push(`"${t.text}" 왼쪽 ${(box.left - t.left).toFixed(1)} 잘림`);
+    if (t.right > box.right + 0.5) p.push(`"${t.text}" 오른쪽 ${(t.right - box.right).toFixed(1)} 잘림`);
+  }
+  return [...new Set(p)];
+};
 
 // 가로 눈금 글끼리 사이 — 가장 좁은 것
 const minGap = (xs) => {
@@ -332,10 +347,11 @@ const cases = [
       const { ctx, page, errors } = await open("month", { width, query: font ? `&font=${font}` : "" });
       await page.locator(".recharts-bar-rectangle").first().waitFor();
       await page.waitForTimeout(200);
-      const { x, y } = await ticksOf(page);
+      const ticks = await ticksOf(page);
+      const { x, y } = ticks;
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       await ctx.close();
-      const p = [...errors];
+      const p = [...errors, ...clipOf(ticks, ticks.box)];
       const texts = x.map((t) => t.text);
       if (minGap(x) < 8) p.push(`달 눈금 사이 ${minGap(x).toFixed(1)} < 8 (${texts.join(" · ")})`);
       if (texts.at(-1) !== "12월") p.push(`끝 눈금 ${texts.at(-1)}`);
@@ -345,6 +361,43 @@ const cases = [
       return p;
     },
   })),
+
+  // ── QA 조건(2026-11-18) — 올해처럼 1 ~ 11월 · 최대 3일 · 차트 폭 336(390 폭) · 266(320 폭), 글자 200% 는 처음부터 · 떠 있는 동안 키움 ──
+  // 끝 눈금은 오늘이 든 달(11월)이다 — 가로축은 오늘에서 끝나 12월은 아직 없다(chart.md "축 · 격자")
+  ...[
+    { vw: 390, cw: 336 },
+    { vw: 320, cw: 266 },
+  ].flatMap(({ vw, cw }) =>
+    [
+      { font: 1, how: "100%" },
+      { font: 2, how: "200% 로 처음 그림", atLoad: true },
+      { font: 2, how: "떠 있는 동안 200% 로 키움" },
+    ].map(({ font, how, atLoad }) => ({
+      name: `QA 달마다 쓴 휴가 ${vw}(차트 ${cw}) · ${how} — 끝 눈금 11월이 남고, 글 사이 8 이상, 가로 · 세로 글이 차트 밖으로 잘리지 않는다`,
+      async run() {
+        const { ctx, page, errors } = await open("month", { width: vw, query: `&qa=1&cw=${cw}${atLoad && font !== 1 ? `&font=${font}` : ""}` });
+        await page.locator(".recharts-bar-rectangle").first().waitFor();
+        await page.waitForTimeout(200);
+        if (!atLoad && font !== 1) {
+          await page.evaluate((f) => {
+            document.documentElement.style.fontSize = `${f * 100}%`;
+          }, font);
+          await page.waitForTimeout(500);
+        }
+        const ticks = await ticksOf(page);
+        await ctx.close();
+        const p = [...errors, ...clipOf(ticks, ticks.box)];
+        const texts = ticks.x.map((t) => t.text);
+        if (Math.round(ticks.box.width) !== cw) p.push(`차트 폭 ${ticks.box.width}`);
+        if (texts.at(-1) !== "11월") p.push(`끝 눈금 ${texts.at(-1)} (${texts.join(" · ")})`);
+        if (minGap(ticks.x) < 8) p.push(`글 사이 ${minGap(ticks.x).toFixed(1)} < 8 (${texts.join(" · ")})`);
+        const sizes = [...new Set([...ticks.x, ...ticks.y].map((t) => t.fontSize))];
+        expectEq(p, "눈금 글자 크기", sizes, [font === 2 ? "22px" : "11px"]);
+        expectEq(p, "세로축", ticks.y.map((t) => t.text).sort((a, b) => parseFloat(a) - parseFloat(b)), ["0일", "1일", "2일", "3일"]);
+        return p;
+      },
+    })),
+  ),
 ];
 
 const only = process.argv[2];
