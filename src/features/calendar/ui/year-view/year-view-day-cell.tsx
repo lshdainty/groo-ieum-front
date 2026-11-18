@@ -2,7 +2,7 @@ import { isToday } from 'date-fns'
 import dayjs from 'dayjs'
 
 import { cn } from '@/shared/lib/cn'
-import { WEEK_GRID_TEXT } from '@/shared/ui/groo/week-grid-text'
+import { WEEK_GRID_TEXT } from '@/shared/ds/week-grid-text'
 import { eventTone } from '@/features/calendar/lib/helpers'
 import { useCalendar } from '@/features/calendar/model/calendar-context'
 import { dayTone } from '@/features/calendar/ui/month-view/day-tone'

@@ -1,13 +1,13 @@
 import { addDays, areIntervalsOverlapping, format, isSameDay, parseISO, startOfWeek } from 'date-fns';
 import { enUS, ko } from 'date-fns/locale';
 import dayjs from 'dayjs';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { dayTone } from '@/features/calendar/ui/month-view/day-tone';
 import { formatDayText, formatHourMinute } from '@/shared/lib/date-text';
-import { useWeekdayHeader } from '@/shared/ui/groo/weekday-header';
-import { WeekdayProbe } from '@/shared/ui/groo/weekday-probe';
-import { WEEK_GRID_TEXT } from '@/shared/ui/groo/week-grid-text';
+import { useWeekdayFit, WeekdayProbe } from '@/shared/ds/date-picker';
+import { WEEK_GRID_TEXT } from '@/shared/ds/week-grid-text';
 import { useCanAddEvent } from '@/features/calendar/model/use-can-edit-event';
 import { useCalendar } from '@/features/calendar/model/calendar-context';
 
@@ -33,7 +33,8 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
   const { i18n } = useTranslation();
   const { selectedDate, workingHours, visibleHours, findHolidayByDate } = useCalendar();
   const canAddEvent = useCanAddEvent();
-  const { rowRef: weekdayRowRef, shown: weekdayShown, full: weekdayFull } = useWeekdayHeader();
+  const weekdayRowRef = useRef<HTMLDivElement>(null);
+  const weekday = useWeekdayFit(weekdayRowRef);
 
   const locale = i18n.language === 'ko' ? ko : enUS;
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, singleDayEvents);
@@ -51,7 +52,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
           {/* Week header */}
           <div className='relative z-20 flex border-b border-stroke-neutral-subtle'>
             <div className='w-18'></div>
-            <div ref={weekdayRowRef} data-weekday-row className='grid flex-1 grid-cols-7 divide-x divide-stroke-neutral-subtle border-l border-stroke-neutral-subtle'>
+            <div ref={weekdayRowRef} className='grid flex-1 grid-cols-7 divide-x divide-stroke-neutral-subtle border-l border-stroke-neutral-subtle'>
               {weekDays.map((day, index) => {
                 const dayOfWeek = day.getDay();
                 const isSunday = dayOfWeek === 0;
@@ -63,13 +64,18 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents, onEventClick
                 const tone = dayTone({ currentMonth: true, sunday: isSunday, saturday: isSaturday, holiday });
 
                 return (
-                  <div key={index} data-weekday-cell className='relative min-w-0 py-2 text-center text-xs font-medium'>
+                  <div key={index} className='relative min-w-0 py-2 text-center text-xs font-medium'>
                     {/* 요일 — 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa(세 글자로 늘리지 않는다), 칸에 들지 않으면 한 글자(groo-design #256) */}
                     {/* 요일 · 날짜 숫자는 글자 크기 200% 에서 멈춘다(groo-design #258). 공휴일 이름은 그대로 커진다 */}
                     <div className={cn('whitespace-nowrap', WEEK_GRID_TEXT.t2, tone)}>
-                      {weekdayShown[dayOfWeek]} <span className='ml-1 font-semibold'>{format(day, 'd')}</span>
+                      {weekday.weekdays[dayOfWeek]} <span className='ml-1 font-semibold'>{format(day, 'd')}</span>
                     </div>
-                    <WeekdayProbe text={weekdayFull[dayOfWeek]!} />
+                    {/* 견본 — 칸에 보일 두 글자 모습 그대로(요일 + 날짜) */}
+                    <WeekdayProbe>
+                      <span className={WEEK_GRID_TEXT.t2}>
+                        {weekday.full[dayOfWeek]} <span className='ml-1 font-semibold'>{format(day, 'd')}</span>
+                      </span>
+                    </WeekdayProbe>
                     {holiday && <div className={cn('mt-0.5 text-xs', tone)}>{holiday.holiday_name}</div>}
                   </div>
                 );

@@ -1,12 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/cn'
-import { useWeekdayHeader } from '@/shared/ui/groo/weekday-header'
-import { WeekdayProbe } from '@/shared/ui/groo/weekday-probe'
-import { WEEK_GRID_TEXT } from '@/shared/ui/groo/week-grid-text'
+import { useWeekdayFit, WeekdayProbe } from '@/shared/ds/date-picker'
+import { WEEK_GRID_TEXT } from '@/shared/ds/week-grid-text'
 import { Button } from '@/shared/ds/button'
 import { Skeleton } from '@/shared/ds/skeleton'
 import { useUnregisteredWorkDatesQuery } from '@/entities/work'
@@ -34,7 +33,8 @@ export const MissingWorkHistoryWidget = () => {
   while (cells.length % 7 !== 0) cells.push(null)
   const weeks = Array.from({ length: cells.length / 7 }, (_, i) => cells.slice(i * 7, i * 7 + 7))
   // 요일 머리 — 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa, 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256)
-  const { rowRef: weekdayRowRef, shown: weekdayShown, full: weekdayFull, long: weekdayLong } = useWeekdayHeader<HTMLTableRowElement>()
+  const weekdayRowRef = useRef<HTMLTableRowElement>(null)
+  const weekday = useWeekdayFit(weekdayRowRef)
 
   const readDay = (d: number) => t('missing.dayMissing', { month: month.month() + 1, day: d })
 
@@ -55,11 +55,11 @@ export const MissingWorkHistoryWidget = () => {
         <table className='mt-x2 w-full table-fixed border-collapse' data-missing-grid>
           <caption className='sr-only'>{monthText}</caption>
           <thead>
-            <tr ref={weekdayRowRef} data-weekday-row>
-              {weekdayShown.map((w, i) => (
-                <th key={i} scope='col' abbr={weekdayLong[i]} data-weekday-cell className={cn('relative h-x7 whitespace-nowrap p-0 font-normal text-fg-neutral-subtle', WEEK_GRID_TEXT.t2)}>
+            <tr ref={weekdayRowRef}>
+              {weekday.weekdays.map((w, i) => (
+                <th key={i} scope='col' abbr={weekday.long[i]} className={cn('relative h-x7 whitespace-nowrap p-0 font-normal text-fg-neutral-subtle', WEEK_GRID_TEXT.t2)}>
                   {w}
-                  <WeekdayProbe text={weekdayFull[i]!} />
+                  <WeekdayProbe>{weekday.full[i]}</WeekdayProbe>
                 </th>
               ))}
             </tr>

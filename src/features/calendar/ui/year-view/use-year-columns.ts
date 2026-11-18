@@ -28,7 +28,7 @@ export function useYearColumns() {
     const measure = () => {
       const need = Math.max(0, ...Array.from(probe.children).map((el) => el.getBoundingClientRect().width))
       const month = grid.querySelector<HTMLElement>('[data-year-month]')
-      const row = month?.querySelector<HTMLElement>('[data-weekday-row]')
+      const row = month?.querySelector<HTMLElement>('[data-year-weekdays]')
       const overhead = month && row ? month.getBoundingClientRect().width - row.getBoundingClientRect().width : 0
       const cellGap = row ? parseFloat(getComputedStyle(row).columnGap) || 0 : 0
       const gap = parseFloat(getComputedStyle(grid).columnGap) || 0
