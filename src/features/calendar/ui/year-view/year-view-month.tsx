@@ -4,6 +4,8 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/cn'
+import { useWeekdayHeader } from '@/shared/ui/groo/weekday-header'
+import { WeekdayProbe } from '@/shared/ui/groo/weekday-probe'
 import { YearViewDayCell } from '@/features/calendar/ui/year-view/year-view-day-cell'
 
 import type { IEvent } from '@/features/calendar/model/interfaces'
@@ -14,13 +16,11 @@ interface IProps {
   onPickMonth: (date: Date) => void
 }
 
-const WEEK_DAYS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const WEEK_DAYS_KO = ['일', '월', '화', '수', '목', '금', '토']
-
 const YearViewMonth = ({ month, events, onPickMonth }: IProps) => {
   const { i18n } = useTranslation()
   const isKo = i18n.language.startsWith('ko')
-  const weekDays = isKo ? WEEK_DAYS_KO : WEEK_DAYS_EN
+  // 요일 머리 — 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa, 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256)
+  const { rowRef, shown, full } = useWeekdayHeader()
   const monthName = format(month, isKo ? 'M월' : 'MMMM', { locale: isKo ? ko : enUS })
 
   const daysInMonth = useMemo(() => {
@@ -40,10 +40,15 @@ const YearViewMonth = ({ month, events, onPickMonth }: IProps) => {
       </button>
 
       <div className='flex-1 space-y-x2 p-x3'>
-        <div className='grid grid-cols-7 gap-x-x0_5 text-center'>
-          {weekDays.map((day, index) => (
-            <div key={index} className={cn('text-t2 font-medium text-fg-neutral-subtle', index === 0 && 'text-fg-critical', index === 6 && 'text-fg-informative')}>
+        <div ref={rowRef} data-weekday-row className='grid grid-cols-7 gap-x-x0_5 text-center'>
+          {shown.map((day, index) => (
+            <div
+              key={index}
+              data-weekday-cell
+              className={cn('relative min-w-0 whitespace-nowrap text-t2 font-medium text-fg-neutral-subtle', index === 0 && 'text-fg-critical', index === 6 && 'text-fg-informative')}
+            >
               {day}
+              <WeekdayProbe text={full[index]!} />
             </div>
           ))}
         </div>

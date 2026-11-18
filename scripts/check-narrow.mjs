@@ -286,6 +286,74 @@ const cases = [
       return p;
     },
   })),
+
+  // ── 캘린더 요일 머리 — 영어 두 글자 Su ~ Sa(넓어도 세 글자로 늘리지 않는다), 칸에 들지 않을 때만 한 글자 S ~ S, 줄을 바꾸지 않는다 ──
+  // (groo-design #256 international-design "날짜" — 날짜 고르기 · 캘린더 화면 · 열지도 어디서나 같은 요일 머리)
+  ...[
+    { lang: "en", width: 320, font: 1 },
+    { lang: "en", width: 320, font: 2 },
+    { lang: "en", width: 1280, font: 1 },
+    { lang: "ko", width: 320, font: 2 },
+  ].map(({ lang, width, font }) => ({
+    name: `캘린더 요일 머리 ${lang} ${width} · ${font * 100}% — ${lang === "ko" ? "일 ~ 토" : "Su ~ Sa, 칸에 안 들면 S ~ S"} · 한 줄 · 두 글자는 칸 안 · 세 글자 없음(폰 월 · 넓은 월 · 년)`,
+    async run() {
+      const { ctx, page, errors } = await open("calendar-weekday", { width, query: `&lang=${lang}&font=${font}` });
+      await page.locator("[data-check=year] .grid-cols-7").first().waitFor();
+      await page.waitForTimeout(300);
+      const rows = await page.evaluate(() =>
+        ["phone", "desktop", "year"].flatMap((where) =>
+          // 요일 줄 = 그 자리의 첫 일곱 칸 격자(년 보기는 작은 달마다) — 고치기 전 판에서도 같은 자리를 읽는다
+          [...document.querySelectorAll(`[data-check=${where}]`)]
+            .flatMap((box) => (where === "year" ? [...box.children] : [box]))
+            .map((box) => box.querySelector(".grid-cols-7"))
+            .filter(Boolean)
+            .map((row) => ({
+            where,
+            cells: [...row.children].map((cell) => {
+              const probe = cell.querySelector("[data-weekday-probe]");
+              const text = [...cell.childNodes].filter((n) => n !== probe).map((n) => n.textContent).join("");
+              const range = document.createRange();
+              const textNode = [...cell.childNodes].find((n) => n.nodeType === Node.TEXT_NODE);
+              range.selectNodeContents(textNode ?? cell);
+              const rects = [...range.getClientRects()].filter((r) => r.width > 0);
+              const c = cell.getBoundingClientRect();
+              return {
+                text,
+                lines: new Set(rects.map((r) => Math.round(r.top))).size,
+                left: Math.min(...rects.map((r) => r.left)),
+                right: Math.max(...rects.map((r) => r.right)),
+                cellLeft: c.left,
+                cellRight: c.right,
+                probeFits: (probe?.getBoundingClientRect().width ?? 0) <= c.width,
+              };
+            }),
+          })),
+        ),
+      );
+      await ctx.close();
+      const p = [...errors];
+      const TWO = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+      const NARROW = ["S", "M", "T", "W", "T", "F", "S"];
+      const KO = ["일", "월", "화", "수", "목", "금", "토"];
+      if (rows.length < 4) p.push(`요일 머리 ${rows.length} 줄`);
+      for (const r of rows) {
+        const texts = r.cells.map((c) => c.text);
+        const allFit = r.cells.every((c) => c.probeFits);
+        const want = lang === "ko" ? KO : allFit ? TWO : NARROW;
+        expectEq(p, `${r.where} 요일`, texts, want);
+        for (const c of r.cells) {
+          if (c.lines > 1) p.push(`${r.where} "${c.text}" 가 ${c.lines} 줄`);
+          // 두 글자는 칸에 들 때만 쓰므로 늘 칸 안이다. 한 글자(한국어 포함)보다 더 줄일 꼴은 없다 — 년 보기 작은 달은 320 · 200% 에서
+          // 한 글자도 칸(약 14)보다 넓다(그 칸 배치의 일이라 요일 규칙의 판정에서는 뺀다)
+          if (want === TWO && (c.left < c.cellLeft - 0.5 || c.right > c.cellRight + 0.5)) p.push(`${r.where} "${c.text}" 가 칸 밖으로 나간다`);
+        }
+      }
+      // 넓은 화면 100% 에서는 모든 머리가 두 글자(세 글자로 늘리지 않는다)
+      if (lang === "en" && width === 1280)
+        for (const r of rows) expectEq(p, `${r.where} 넓은 화면`, r.cells.map((c) => c.text), TWO);
+      return p;
+    },
+  })),
 ];
 
 const only = process.argv[2];

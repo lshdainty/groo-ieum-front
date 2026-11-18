@@ -9,6 +9,8 @@ import {
 } from "@/features/calendar/lib/helpers";
 import { formatDayText } from "@/shared/lib/date-text";
 import { cn } from "@/shared/lib/cn";
+import { useWeekdayHeader } from "@/shared/ui/groo/weekday-header";
+import { WeekdayProbe } from "@/shared/ui/groo/weekday-probe";
 
 import type { IEvent } from "@/features/calendar/model/interfaces";
 import { MonthChip, MonthChipSpacer, MonthMore } from "./month-chip";
@@ -19,30 +21,34 @@ import { useChipMetrics } from "./use-chip-metrics";
 /** 한 칸에 놓을 수 있는 줄 수의 상한 — 접는 것은 칩 자리 높이가 정한다(줄이 넘치면 "+N개") */
 const MAX_ROWS = 100;
 
-const WEEK_DAYS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const WEEK_DAYS_KO = ["일", "월", "화", "수", "목", "금", "토"];
-
 /** 칸 103 − 위 2 − 날 숫자 26 − 아래 2 = 73, 칩 18 · "+N개" 16 · 사이 2 (글자 100% 의 값 — 실제로는 잰다) */
 const PHONE_METRICS: ChipMetrics = { avail: 73, chip: 18, more: 16, gap: 2 };
 
-/** 요일 줄 — 높이 32 · t3 13/18 · fg-neutral-subtle, 일 fg-critical · 토 fg-brand (I-09 8) */
+/**
+ * 요일 줄 — 높이 32 · t3 13/18 · fg-neutral-subtle, 일 fg-critical · 토 fg-brand (I-09 8). 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa,
+ * 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256 — useWeekdayHeader)
+ */
 export function WeekdayRow() {
-  const { i18n } = useTranslation();
-  const weekDays = i18n.language.startsWith("ko") ? WEEK_DAYS_KO : WEEK_DAYS_EN;
+  const { rowRef, shown, full } = useWeekdayHeader();
   return (
     <div
+      ref={rowRef}
       aria-hidden
+      data-weekday-row
       className="grid h-x8 shrink-0 grid-cols-7 items-center px-[2px] text-center text-t3 text-fg-neutral-subtle"
     >
-      {weekDays.map((day, index) => (
+      {shown.map((day, index) => (
         <span
-          key={day}
+          key={index}
+          data-weekday-cell
           className={cn(
+            "relative min-w-0 whitespace-nowrap",
             index === 0 && "text-fg-critical",
             index === 6 && "text-fg-informative",
           )}
         >
           {day}
+          <WeekdayProbe text={full[index]!} />
         </span>
       ))}
     </div>

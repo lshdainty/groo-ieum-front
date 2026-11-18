@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/shared/lib/cn";
 import { formatDayText } from "@/shared/lib/date-text";
+import { useWeekdayHeader } from "@/shared/ui/groo/weekday-header";
+import { WeekdayProbe } from "@/shared/ui/groo/weekday-probe";
 import { calculateMonthEventPositions, getCalendarCells } from "@/features/calendar/lib/helpers";
 import { useCalendar } from "@/features/calendar/model/calendar-context";
 import { DragSelectProvider, useDragSelect } from "@/features/calendar/model/drag-select-context";
@@ -20,27 +22,30 @@ import { useChipMetrics } from "./use-chip-metrics";
 /** 한 칸에 놓을 수 있는 줄 수의 상한 — 접는 것은 칩 자리 높이가 정한다(줄이 넘치면 "+N개") */
 const MAX_ROWS = 100;
 
-const WEEK_DAYS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const WEEK_DAYS_KO = ["일", "월", "화", "수", "목", "금", "토"];
-
 /** 칸 104 − 위 4 − 날 숫자 26 − 아래 2 − 줄 사이 2 = 70, 칩 20 · "+N개" 18 · 사이 2 (글자 100% 의 값 — 실제로는 잰다) */
 const DESKTOP_METRICS: ChipMetrics = { avail: 70, chip: 20, more: 18, gap: 2 };
 
-/** 요일 머리 — 높이 36 · t3 13/18 · fg-neutral-subtle · 아래 1px 선. 일 fg-critical · 토 fg-informative */
+/**
+ * 요일 머리 — 높이 36 · t3 13/18 · fg-neutral-subtle · 아래 1px 선. 일 fg-critical · 토 fg-informative. 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa
+ * (넓어도 세 글자로 늘리지 않는다), 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256 — useWeekdayHeader)
+ */
 export function WeekdayHead() {
-  const { i18n } = useTranslation();
-  const weekDays = i18n.language.startsWith("ko") ? WEEK_DAYS_KO : WEEK_DAYS_EN;
+  const { rowRef, shown, full } = useWeekdayHeader();
   return (
     <div
+      ref={rowRef}
       aria-hidden
+      data-weekday-row
       className="grid h-x9 grid-cols-7 items-center border-b border-stroke-neutral-subtle text-center text-t3 text-fg-neutral-subtle"
     >
-      {weekDays.map((day, index) => (
+      {shown.map((day, index) => (
         <span
-          key={day}
-          className={cn(index === 0 && "text-fg-critical", index === 6 && "text-fg-informative")}
+          key={index}
+          data-weekday-cell
+          className={cn("relative min-w-0 whitespace-nowrap", index === 0 && "text-fg-critical", index === 6 && "text-fg-informative")}
         >
           {day}
+          <WeekdayProbe text={full[index]!} />
         </span>
       ))}
     </div>
