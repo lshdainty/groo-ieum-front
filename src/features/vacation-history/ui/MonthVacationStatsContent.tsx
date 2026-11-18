@@ -11,14 +11,16 @@ import {
   ChartTooltipContent,
   chartAxisProps,
   chartGridProps,
+  chartXAxisProps,
 } from '@/shared/ds/chart'
 import { useAxisWidth } from '@/shared/lib/groo/axisWidth'
 import type { GetUserMonthlyVacationStatsResp } from '@/entities/vacation'
 import { dayTicks, formatUsedTime, monthBars } from '@/features/vacation-history/lib/vacation-chart'
 
 /**
- * 월별 쓴 휴가(I-23 D 20) — 타일 하나(쓴 휴가 + 합계) · 막대 chart-blue 한 계열 · 높이 200 · 가로 점선 격자만 · 세로축 "{n}일" 정수 눈금 ·
- * 가로축 "{m}월". 고른 해가 올해면 이번 달에서 끝난다(year 를 주지 않으면 열두 달). 쓴 휴가가 하나도 없는 경우는 부르는 쪽이 비어 있음을 그린다.
+ * 월별 쓴 휴가(I-23 D 20) — 타일 하나(쓴 휴가 + 합계) · 막대 chart-blue 한 계열 · 높이 200 · 가로 점선 격자만 · 세로축 "{n}일" 정수 눈금
+ * (간격 1 · 2 · 5 계열 — `dayTicks`) · 가로축 "{m}월"(글자 사이 최소 8 로 들어가지 않으면 끝 달을 지키고 앞에서부터 건너뛴다 — ds `chartXAxisProps`,
+ * 한 해 안이라 연도는 붙지 않는다). 막대라 늘 찍는 점(`dots` — 선 차트의 선택)은 켜지 않는다. 고른 해가 올해면 이번 달에서 끝난다(year 를 주지 않으면 열두 달). 쓴 휴가가 하나도 없는 경우는 부르는 쪽이 비어 있음을 그린다.
  * 차트 이름 "{yyyy}년 월별 쓴 휴가, 합계 {합계}" + 숨은 표(달 · 쓴 휴가).
  */
 export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthlyVacationStatsResp[]; year?: number }) => {
@@ -44,7 +46,7 @@ export const MonthVacationStatsContent = ({ data, year }: { data: GetUserMonthly
       <Chart label={name} legendId={legendId} height={200}>
         <BarChart data={bars}>
           <CartesianGrid {...chartGridProps} />
-          <XAxis dataKey='month' tickFormatter={monthText} interval={0} {...chartAxisProps()} />
+          <XAxis dataKey='month' {...chartXAxisProps(bars.map((m) => ({ label: monthText(m.month) })))} />
           <YAxis
             domain={[0, ticks[ticks.length - 1] ?? 1]}
             ticks={ticks}
