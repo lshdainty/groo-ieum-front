@@ -90,7 +90,7 @@ const ticksOf = (page) =>
     return {
       x: read(".recharts-xAxis-tick-labels"),
       y: read(".recharts-yAxis-tick-labels"),
-      box: box ? { left: box.left, right: box.right, width: box.width } : null,
+      box: box ? { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width } : null,
     };
   });
 
@@ -410,7 +410,7 @@ const cases = [
 
   // ── 세로 눈금이 겹치면 칸 수를 줄인다(E — groo-design #247 · #248, chart.md "세로 눈금이 겹치면 수를 줄입니다") ──
   libCase(
-    "세로 칸 수 — 그리는 높이 = 높이 − 위 · 아래 여백 − (줄 높이 + 8), 칸 = max(1, ⌊그리는 높이 ÷ 줄 높이⌋) · dayTicks 가 그 칸 안으로 줄인다 · 준 눈금은 interval 0",
+    "세로 칸 수 — 그리는 높이 = 높이 − max(위, ⌈줄 ÷ 2⌉) − 아래 − (max(8, ⌈줄 ÷ 2⌉ + 4) + 줄), 칸 = max(1, ⌊그리는 높이 ÷ 줄 높이⌋) · dayTicks 가 그 칸 안으로 줄인다 · 준 눈금은 interval 0",
     () => {
       const { chartValueIntervals: iv, dayTicks: d, niceValueAxis, formatAxisWon } = window.__chart;
       return {
@@ -422,8 +422,9 @@ const cases = [
       };
     },
     (g, p) => {
-      // 100% 줄 15: 200 − 10 − 23 = 167 → 11 · 200% 줄 30: 152 → 5 · 300% 줄 45: 137 → 3 · 폰 띠 140(위 8 · 아래 0) 200%: 94 → 3 · 아주 낮으면 1
-      expectEq(p, "칸 수", g.intervals, [11, 5, 3, 3, 1]);
+      // 세로축 끝 글 자리(groo-design #250 · 담다 #640) — 기본 위 8 · 아래 5. 100% 줄 15: 200 − 8 − 5 − 27 = 160 → 10 ·
+      // 200% 줄 30: 200 − 15 − 5 − 49 = 131 → 4 · 300% 줄 45: 200 − 23 − 5 − 72 = 100 → 2 · 폰 띠 140(위 8 · 아래 0) 200%: 76 → 2 · 아주 낮으면 1
+      expectEq(p, "칸 수", g.intervals, [10, 4, 2, 2, 1]);
       expectEq(p, "dayTicks", g.days, [[0, 1, 2, 3, 4], [0, 2, 4], [0, 2, 4], [0, 5, 10, 15], [0, 10, 20], [0, 2, 4], [0, 20, 40], [0, 1]]);
       expectEq(p, "niceValueAxis 두 칸", g.nice, [0, 20_000, 40_000]);
       expectEq(p, "niceValueAxis interval", g.niceInterval, 0);
@@ -657,6 +658,44 @@ const cases = [
       return p;
     },
   },
+
+  // ── 세로축 끝 글의 자리(groo-design #250 · 담다 #640) — 위 여백 max(위, ⌈줄 ÷ 2⌉) · 가로 눈금 줄 시작 max(8, ⌈줄 ÷ 2⌉ + 4) ──
+  ...[
+    { vw: 320, cw: 266, font: 3, atLoad: true },
+    { vw: 320, cw: 266, font: 3, atLoad: false },
+    { vw: 390, cw: 336, font: 3, atLoad: true },
+    { vw: 390, cw: 336, font: 2, atLoad: false },
+  ].map(({ vw, cw, font, atLoad }) => ({
+    name: `세로축 끝 글 자리 ${vw}(차트 ${cw}) · ${font * 100}% ${atLoad ? "처음부터" : "뜬 뒤"} — 맨 위 세로 글이 차트 상자 안, 맨 아래 세로 글과 첫 가로 글이 겹치지 않음`,
+    async run() {
+      const { ctx, page, errors } = await open("month", { width: vw, query: `&qa=1&cw=${cw}&peak=4${atLoad ? `&font=${font}` : ""}` });
+      await page.locator(".recharts-bar-rectangle").first().waitFor();
+      await page.waitForTimeout(200);
+      if (!atLoad) {
+        await page.evaluate((f) => {
+          document.documentElement.style.fontSize = `${f * 100}%`;
+        }, font);
+        await page.waitForTimeout(500);
+      }
+      const ticks = await ticksOf(page);
+      await ctx.close();
+      const p = [...errors, ...clipOf(ticks, ticks.box)];
+      const top = Math.min(...ticks.y.map((t) => t.top));
+      const boxTop = await Promise.resolve(ticks.box.top);
+      if (top < boxTop - 0.5) p.push(`맨 위 세로 글이 차트 상자 위로 ${(boxTop - top).toFixed(1)} 나간다`);
+      // 맨 아래 세로 글과 첫 가로 글 — 글 상자(글꼴의 위아래 끝까지)가 겹치지 않는다. 세로로는 글 상자끼리 거의 맞닿을 수 있지만
+      // (가로 글은 대문자 높이로 맞춰 서서 글꼴 위 끝이 시작선보다 조금 위로 나온다) 세로 글은 세로축 칸, 가로 글은 그리는 자리 아래라 옆으로 갈린다
+      const bottomY = ticks.y.reduce((a, b) => (b.bottom > a.bottom ? b : a));
+      const firstX = ticks.x.reduce((a, b) => (b.left < a.left ? b : a));
+      const overlapX = Math.min(bottomY.right, firstX.right) - Math.max(bottomY.left, firstX.left);
+      const overlapY = Math.min(bottomY.bottom, firstX.bottom) - Math.max(bottomY.top, firstX.top);
+      if (overlapX > 0.5 && overlapY > 0.5) p.push(`맨 아래 세로 글("${bottomY.text}")과 첫 가로 글("${firstX.text}")이 겹친다(${overlapX.toFixed(1)} × ${overlapY.toFixed(1)})`);
+      // 가로 눈금 글은 맨 아래 세로 글의 줄 상자(줄 높이 절반이 아래로)보다 아래에서 시작한다 — 가로 글 위 끝(글꼴) ≥ 세로 글 가운데 + 줄 높이 ÷ 2 − 대문자 위 여유
+      const xStartBelowYCenter = firstX.top - (bottomY.top + bottomY.bottom) / 2;
+      if (xStartBelowYCenter < 0) p.push(`첫 가로 글이 맨 아래 세로 글 가운데보다 위에서 시작한다(${xStartBelowYCenter.toFixed(1)})`);
+      return p;
+    },
+  })),
 ];
 
 const only = process.argv[2];

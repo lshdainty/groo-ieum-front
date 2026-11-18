@@ -77,6 +77,10 @@ const segmentedOf = (page, scope = "body") =>
   }, scope);
 
 const TRANSPARENT = "rgba(0, 0, 0, 0)";
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const expectEq = (p, what, got, want) => {
+  if (!same(got, want)) p.push(`${what}: ${JSON.stringify(got)} ≠ ${JSON.stringify(want)}`);
+};
 
 // 도넛 — 차트 상자 높이 · 맞춤 표시 · 그려진 조각의 바깥 반지름(조각 경로의 첫 호 A rx) · svg 폭
 const donutOf = (page, scope = "body") =>
@@ -239,6 +243,46 @@ const cases = [
       });
       if (tracks.length < 2) p.push(`Segmented ${tracks.length} 개만 그려졌다`);
       if (donut.svgRight > donut.boxRight + 0.5) p.push("도넛이 자리 밖으로 나간다");
+      return p;
+    },
+  })),
+
+  // ── 날짜 고르기 요일 줄 — 영어는 두 글자 Su ~ Sa, 칸에 들지 않을 때만 한 글자 S ~ S, 줄을 바꾸지 않는다(groo-design #250 · 담다 #641) ──
+  ...[
+    { lang: "en", width: 390, font: 1, want: "two" },
+    { lang: "en", width: 320, font: 2, want: "fit" },
+    { lang: "en", width: 320, font: 3, want: "narrow" },
+    { lang: "ko", width: 320, font: 2, want: "ko" },
+  ].map(({ lang, width, font, want }) => ({
+    name: `요일 ${lang} ${width} · ${font * 100}% — ${{ two: "Su ~ Sa", fit: "칸에 들면 Su ~ Sa · 안 들면 S ~ S", narrow: "S ~ S", ko: "일 ~ 토" }[want]} 한 줄, 칸 안`,
+    async run() {
+      const { ctx, page, errors } = await open("weekday", { width, query: `&lang=${lang}&font=${font}` });
+      await page.locator("[data-slot=date-picker-weekday]").first().waitFor();
+      await page.waitForTimeout(300);
+      const m = await page.evaluate(() => {
+        const cells = [...document.querySelectorAll("[data-slot=date-picker-weekdays] [data-slot=date-picker-weekday]")];
+        return cells.map((cell) => {
+          const label = cell.querySelector(":scope > span:first-child");
+          const r = label.getBoundingClientRect();
+          const c = cell.getBoundingClientRect();
+          const lh = parseFloat(getComputedStyle(label).lineHeight) || r.height;
+          return { text: label.textContent, lines: Math.round(r.height / lh), inside: r.left >= c.left - 0.5 && r.right <= c.right + 0.5, labelWidth: r.width, cellWidth: c.width };
+        });
+      });
+      await ctx.close();
+      const p = [...errors];
+      const texts = m.map((x) => x.text);
+      const TWO = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+      const NARROW = ["S", "M", "T", "W", "T", "F", "S"];
+      const KO = ["일", "월", "화", "수", "목", "금", "토"];
+      if (want === "two") expectEq(p, "요일", texts, TWO);
+      if (want === "narrow") expectEq(p, "요일", texts, NARROW);
+      if (want === "ko") expectEq(p, "요일", texts, KO);
+      if (want === "fit" && !same(texts, TWO) && !same(texts, NARROW)) p.push(`요일 ${texts.join(" ")}`);
+      for (const x of m) {
+        if (x.lines > 1) p.push(`"${x.text}" 가 ${x.lines} 줄`);
+        if (!x.inside) p.push(`"${x.text}" 가 칸(${x.cellWidth.toFixed(1)}) 밖으로 나간다(${x.labelWidth.toFixed(1)})`);
+      }
       return p;
     },
   })),
