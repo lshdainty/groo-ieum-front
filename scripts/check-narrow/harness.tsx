@@ -133,7 +133,7 @@ function CalendarWeekdayScene() {
   )
 }
 
-// 캘린더 년 보기 — 열두 작은 달. 날짜 칸이 요일 · 날짜 글보다 좁아지면 한 줄 달 수를 줄인다(groo-design #257)
+// 캘린더 년 보기 — 열두 작은 달. 한 줄 달 수는 화면 폭으로만(2 · md 3 · lg 4), 작은 달 글은 글자 크기를 따르지 않는다(groo-design #260)
 function YearViewScene() {
   return (
     <CalendarProvider users={[]}>

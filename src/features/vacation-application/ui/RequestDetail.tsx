@@ -40,7 +40,7 @@ const MARK: Record<StepState, string> = {
 
 const dayClock = (value: string): string => `${formatDayText(value)} ${formatClock(value)}`
 
-const ApprovalSteps = ({ request }: { request: GetUserRequestedVacationsResp }) => {
+export const ApprovalSteps = ({ request }: { request: GetUserRequestedVacationsResp }) => {
   const { t } = useTranslation('vacation')
   const list = [...(request.approvers ?? [])].sort((a, b) => a.approval_order - b.approval_order)
   if (list.length === 0) {
@@ -64,8 +64,9 @@ const ApprovalSteps = ({ request }: { request: GetUserRequestedVacationsResp }) 
         return (
           <li key={a.approval_id} data-step={a.approval_order} data-step-state={state} className='flex gap-x3 px-global-gutter py-x3'>
             <span className='flex flex-col items-center self-stretch'>
-              <span aria-hidden className={cn('flex size-6 shrink-0 items-center justify-center rounded-full text-t2 font-bold tabular-nums', MARK[state])}>
-                {state === 'done' ? <Check className='size-4' /> : state === 'rejected' ? <X className='size-4' /> : a.approval_order}
+              {/* 단계 원 24 · 안의 순번은 원(틀)의 일부라 글자 크기 설정을 따르지 않는다(groo-design #260 — 고리 · 도장 가운데 글과 같다) */}
+              <span aria-hidden className={cn('flex size-[24px] shrink-0 items-center justify-center rounded-full text-t2-static font-bold tabular-nums', MARK[state])}>
+                {state === 'done' ? <Check className='size-[16px]' /> : state === 'rejected' ? <X className='size-[16px]' /> : a.approval_order}
               </span>
               {i < list.length - 1 && <span aria-hidden className='-mb-x3 mt-x1 w-[2px] flex-1 bg-stroke-neutral-subtle' />}
             </span>

@@ -59,7 +59,7 @@ export function DayEventList({
           data-slot="day-holiday"
           title={holiday.name}
           detail={t("holiday")}
-          prefix={<Bar color="var(--color-chart-red)" icon={<Flag aria-hidden className="size-4" />} />}
+          prefix={<Bar color="var(--color-chart-red)" icon={<Flag aria-hidden className="size-[16px]" />} />}
         />
       )}
       {events.map((e) => (

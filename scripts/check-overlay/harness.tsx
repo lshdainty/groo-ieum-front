@@ -22,8 +22,10 @@ import {
   AlertDialogTitle,
 } from '@/shared/ds/alert-dialog'
 import { BottomSheet, BottomSheetBody, BottomSheetContent, BottomSheetFooter } from '@/shared/ds/bottom-sheet'
-import { Button } from '@/shared/ds/button'
-import { Dialog, DialogBody, DialogContent } from '@/shared/ds/dialog'
+import { Button, ResponsivePair } from '@/shared/ds/button'
+import { Dialog, DialogBody, DialogContent, DialogFooter } from '@/shared/ds/dialog'
+import { HelpBubble, HelpBubbleContent, HelpBubbleTrigger } from '@/shared/ds/help-bubble'
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ds/popover'
 import { MenuSheet, MenuSheetContent, MenuSheetGroup, MenuSheetItem } from '@/shared/ds/menu-sheet'
 import { SidePanel, SidePanelBody, SidePanelContent } from '@/shared/ds/side-panel'
 import { keyboardToolbarReserve } from '@/shared/ds/overlay'
@@ -40,7 +42,10 @@ declare global {
 trackInputModality()
 installChunkReload()
 
-const scene = new URLSearchParams(window.location.search).get('scene') ?? 'sheet'
+const params = new URLSearchParams(window.location.search)
+const scene = params.get('scene') ?? 'sheet'
+// ?font= — 글자 크기 배율(html font-size, 처음부터)
+if (params.get('font')) document.documentElement.style.fontSize = `${Number(params.get('font')) * 100}%`
 window.__check = { keyboardToolbarReserve, behindClicks: 0 }
 
 function SheetScene() {
@@ -242,7 +247,99 @@ function TooltipScene() {
   )
 }
 
+// 머리 단추 자리(담다 #652 · groo-design #263) — ?surface= 하나를 처음부터 열어 둔다. 제목은 큰 글자에서 두 줄이 되게 길게
+const LONG_TITLE = '연차 사용 규정과 결재 순서를 함께 보는 안내'
+function HeaderScene() {
+  const surface = params.get('surface') ?? 'dialog'
+  const noop = () => {}
+  if (surface === 'dialog')
+    return (
+      <Dialog open onOpenChange={noop}>
+        <DialogContent title={LONG_TITLE} aria-describedby={undefined}>
+          <DialogBody>본문</DialogBody>
+        </DialogContent>
+      </Dialog>
+    )
+  if (surface === 'dialog-back')
+    return (
+      <Dialog open onOpenChange={noop}>
+        <DialogContent title={LONG_TITLE} onBack={noop} headerAction={<Button variant='ghost' size='small' layout='iconOnly' aria-label='더 보기' data-check='action'><svg /></Button>} aria-describedby={undefined}>
+          <DialogBody>본문</DialogBody>
+        </DialogContent>
+      </Dialog>
+    )
+  if (surface === 'sheet')
+    return (
+      <BottomSheet open onOpenChange={noop}>
+        <BottomSheetContent title={LONG_TITLE} onBack={noop} aria-describedby={undefined}>
+          <BottomSheetBody>본문</BottomSheetBody>
+        </BottomSheetContent>
+      </BottomSheet>
+    )
+  if (surface === 'popover')
+    return (
+      <Popover open>
+        <PopoverTrigger asChild>
+          <Button>열기</Button>
+        </PopoverTrigger>
+        <PopoverContent title={LONG_TITLE}>본문</PopoverContent>
+      </Popover>
+    )
+  if (surface === 'bubble')
+    return (
+      <div className='p-x16'>
+        <HelpBubble defaultOpen>
+          <HelpBubbleTrigger asChild>
+            <Button>도움말</Button>
+          </HelpBubbleTrigger>
+          <HelpBubbleContent title={LONG_TITLE} description='설명' showCloseButton />
+        </HelpBubble>
+      </div>
+    )
+  return (
+    <SidePanel open onOpenChange={noop}>
+      <SidePanelContent title={LONG_TITLE} aria-describedby={undefined}>
+        <SidePanelBody>본문</SidePanelBody>
+      </SidePanelContent>
+    </SidePanel>
+  )
+}
+
+// 긴 라벨(담다 #652 · button.md "글자 크기 설정") — 버튼은 놓인 자리보다 넓어지지 않고 라벨은 한 줄 "…", 짝 버튼은 넘치면 쌓고
+// 쌓인 뒤에도 길면 "…", 대화상자 바닥은 넘치면 주 버튼이 위로 쌓인다
+const LONG_LABEL = '엑셀 파일로 모든 휴가 내역을 내보내고 메일로 받기'
+function LabelScene() {
+  return (
+    <div className='flex flex-col gap-x6 p-x4'>
+      <div data-check='slot' style={{ width: 200 }}>
+        <Button data-check='long'>{LONG_LABEL}</Button>
+      </div>
+      <div data-check='pair' style={{ width: 300 }}>
+        <ResponsivePair>
+          <Button variant='neutralWeak'>취소</Button>
+          <Button data-check='pair-main'>{LONG_LABEL}</Button>
+        </ResponsivePair>
+      </div>
+      <Dialog open onOpenChange={() => {}}>
+        <DialogContent title='내보내기' aria-describedby={undefined}>
+          <DialogBody>본문</DialogBody>
+          <DialogFooter>
+            <Button variant='neutralWeak' size='small' data-check='foot-cancel'>
+              취소
+            </Button>
+            <Button size='small' data-check='foot-main'>
+              휴가 내역을 모두 내보내기
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
+
 function Scene() {
+  if (scene === 'header') return <HeaderScene />
+  if (scene === 'label') return <LabelScene />
   if (scene === 'boundary-error' || scene === 'boundary-chunk') {
     return (
       <AppHistoryRouter>

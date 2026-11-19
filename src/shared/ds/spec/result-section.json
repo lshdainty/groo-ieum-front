@@ -3,7 +3,7 @@
   "source": "specs/components/result-section.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "6537164907c2"
+    "sha256": "f7ff97647430"
   },
   "slots": {
     "root": "묶음 — 놓인 자리 가운데",
@@ -206,7 +206,7 @@
       "state": "enabled",
       "slot": "description",
       "prop": "foreground",
-      "note": "단어 단위 줄바꿈 — 최대 두 줄을 권한다"
+      "note": "단어 단위 줄바꿈 — 최대 두 줄을 권한다(100% 기준 — 큰 글자에서 줄 수로 자르지 않는다)"
     },
     {
       "rule": 0,

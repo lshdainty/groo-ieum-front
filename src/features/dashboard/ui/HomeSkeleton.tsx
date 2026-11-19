@@ -25,7 +25,7 @@ const SkeletonWidget = ({ rows = 3 }: { rows?: number }) => {
     )
   }
   return (
-    <Band title={<Skeleton text='t5' className='inline-block w-24' />}>{body}</Band>
+    <Band title={<Skeleton text='t5' className='inline-block w-[96px]' />}>{body}</Band>
   )
 }
 

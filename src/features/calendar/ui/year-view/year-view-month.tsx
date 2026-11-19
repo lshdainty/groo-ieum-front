@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/cn'
 import { useWeekdayFit, WeekdayProbe } from '@/shared/ds/date-picker'
-import { WEEK_GRID_TEXT } from '@/shared/ds/week-grid-text'
 import { YearViewDayCell } from '@/features/calendar/ui/year-view/year-view-day-cell'
 
 import type { IEvent } from '@/features/calendar/model/interfaces'
@@ -45,7 +44,7 @@ const YearViewMonth = ({ month, events, onPickMonth }: IProps) => {
           {weekday.weekdays.map((day, index) => (
             <div
               key={index}
-              className={cn('relative min-w-0 whitespace-nowrap font-medium text-fg-neutral-subtle', WEEK_GRID_TEXT.t2, index === 0 && 'text-fg-critical', index === 6 && 'text-fg-informative')}
+              className={cn('relative min-w-0 whitespace-nowrap text-t2-static font-medium text-fg-neutral-subtle', index === 0 && 'text-fg-critical', index === 6 && 'text-fg-informative')}
             >
               {day}
               <WeekdayProbe>{weekday.full[index]}</WeekdayProbe>
@@ -55,7 +54,7 @@ const YearViewMonth = ({ month, events, onPickMonth }: IProps) => {
 
         <div className='grid grid-cols-7 gap-x-x0_5 gap-y-x2'>
           {daysInMonth.map((day, index) => {
-            if (day === null) return <div key={`blank-${index}`} className='h-10' />
+            if (day === null) return <div key={`blank-${index}`} className='h-[40px]' />
             const date = new Date(month.getFullYear(), month.getMonth(), day)
             const dayEvents = events.filter((event) => isSameDay(parseISO(event.startDate), date))
             return <YearViewDayCell key={`day-${day}`} day={day} date={date} events={dayEvents} onPick={onPickMonth} />

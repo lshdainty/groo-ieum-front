@@ -1112,6 +1112,137 @@ const cases = [
       return p;
     },
   }))),
+
+  // ── 머리 단추는 제목 첫 줄 가운데(담다 #652 header-button-position.test · groo-design #263) ──
+  // 닫기 · ⋮ · ← 는 px 그대로이고, 글자를 키워 제목 줄이 높아지면 그 절반만큼 따라 내려간다 — 300%(처음부터 · 뜬 뒤)에서 단추 가운데와
+  // 제목 첫 줄 가운데의 거리가 100% 와 같고(0.5 이하), 단추 크기도 같다. 이음에만 있는 옆 패널(레시피 셈)도 같다
+  ...[
+    { surface: "dialog", buttons: ["dialog-close"] },
+    { surface: "dialog-back", buttons: ["dialog-close", "dialog-back", "action"] },
+    { surface: "sheet", buttons: ["bottom-sheet-close", "bottom-sheet-back"] },
+    { surface: "popover", buttons: ["popover-close"] },
+    { surface: "bubble", buttons: ["help-bubble-close"] },
+    { surface: "panel", buttons: ["side-panel-close"] },
+  ].flatMap(({ surface, buttons }) =>
+    [false, true].map((live) => ({
+      name: `머리 단추 ${surface} · 300% ${live ? "뜬 뒤" : "처음부터"} — ${buttons.join(" · ")} 가 제목 첫 줄 가운데를 따라 내려가고 크기는 그대로`,
+      async run() {
+        const measure = async (font, live) => {
+          const ctx = await browser.newContext({ locale: "ko-KR", viewport: { width: 390, height: LAYOUT } });
+          const page = await ctx.newPage();
+          const errors = [];
+          page.on("pageerror", (e) => errors.push(e.message));
+          await page.goto(`${base}${HARNESS}?scene=header&surface=${surface}${font !== 1 && !live ? `&font=${font}` : ""}`);
+          await page.locator('[data-slot$="-title"]').first().waitFor();
+          await page.waitForTimeout(450);
+          if (live) {
+            await page.evaluate((f) => {
+              document.documentElement.style.fontSize = `${f * 100}%`;
+            }, font);
+            await page.waitForTimeout(300);
+          }
+          const m = await page.evaluate((names) => {
+            const title = document.querySelector('[data-slot$="-title"]');
+            const range = document.createRange();
+            range.selectNodeContents(title);
+            const lines = [...range.getClientRects()].filter((r) => r.width > 0);
+            const first = lines.reduce((a, b) => (b.top < a.top ? b : a));
+            const lh = parseFloat(getComputedStyle(title).lineHeight);
+            const titleTop = title.getBoundingClientRect().top;
+            const titleCenter = titleTop + lh / 2;
+            const out = { lines: new Set(lines.map((r) => Math.round(r.top))).size, firstTop: first.top, titleTop };
+            for (const n of names) {
+              const el = document.querySelector(`[data-slot="${n}"]`) ?? document.querySelector(`[data-check="${n}"]`);
+              if (!el) {
+                out[n] = null;
+                continue;
+              }
+              const r = el.getBoundingClientRect();
+              out[n] = { center: (r.top + r.bottom) / 2 - titleCenter, w: Math.round(r.width), h: Math.round(r.height) };
+            }
+            return out;
+          }, buttons);
+          await ctx.close();
+          return { m, errors };
+        };
+        const a = await measure(1, false);
+        const b = await measure(3, live);
+        const p = [...a.errors, ...b.errors];
+        if (b.m.lines < 2) p.push(`300% 에서 제목이 ${b.m.lines} 줄 — 두 줄 이상이어야 판정이 뜻이 있다`);
+        for (const n of buttons) {
+          const x = a.m[n];
+          const y = b.m[n];
+          if (!x || !y) {
+            p.push(`${n} 가 없다`);
+            continue;
+          }
+          if (Math.abs(x.center - y.center) > 0.5) p.push(`${n} 가운데 − 제목 첫 줄 가운데 ${x.center.toFixed(1)} → ${y.center.toFixed(1)}`);
+          if (x.w !== y.w || x.h !== y.h) p.push(`${n} 크기 ${x.w}×${x.h} → ${y.w}×${y.h}`);
+        }
+        return p;
+      },
+    })),
+  ),
+
+  // ── 버튼 라벨은 한 줄 "…"(담다 #652 button.test · responsive-pair.test · groo-design #263 button.md "글자 크기 설정") ──
+  ...[false, true].map((live) => ({
+    name: `긴 라벨 · 300% ${live ? "뜬 뒤" : "처음부터"} — 버튼은 자리보다 넓어지지 않고 라벨은 한 줄 "…" · 짝 버튼은 쌓이고(주 버튼 위) "…" · 대화상자 바닥은 주 버튼이 위로 쌓인다`,
+    async run() {
+      const ctx = await browser.newContext({ locale: "ko-KR", viewport: { width: 390, height: LAYOUT } });
+      const page = await ctx.newPage();
+      const errors = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      await page.goto(`${base}${HARNESS}?scene=label${live ? "" : "&font=3"}`);
+      await page.locator("[data-check=foot-main]").waitFor();
+      await page.waitForTimeout(450);
+      if (live) {
+        await page.evaluate(() => {
+          document.documentElement.style.fontSize = "300%";
+        });
+        await page.waitForTimeout(300);
+      }
+      const m = await page.evaluate(() => {
+        const label = (btn) => {
+          const span = btn.querySelector("[data-slot=button-label]");
+          const r = span?.getBoundingClientRect();
+          const lh = span ? parseFloat(getComputedStyle(span).lineHeight) : 0;
+          return span
+            ? { lines: Math.round(r.height / lh), cut: span.scrollWidth > span.clientWidth + 0.5, ellipsis: getComputedStyle(span).textOverflow, text: btn.textContent }
+            : null;
+        };
+        const rect = (sel) => document.querySelector(sel).getBoundingClientRect();
+        const long = document.querySelector("[data-check=long]");
+        const pair = document.querySelector("[data-check=pair] [data-slot=responsive-pair]");
+        const main = document.querySelector("[data-check=pair-main]");
+        const cancel = pair.firstElementChild;
+        return {
+          long: { label: label(long), w: rect("[data-check=long]").width, slot: rect("[data-check=slot]").width },
+          pair: { label: label(main), mainTop: main.getBoundingClientRect().top, cancelTop: cancel.getBoundingClientRect().top, mainW: main.getBoundingClientRect().width, pairW: pair.getBoundingClientRect().width },
+          foot: { mainTop: rect("[data-check=foot-main]").top, cancelTop: rect("[data-check=foot-cancel]").top, main: label(document.querySelector("[data-check=foot-main]")) },
+          fontSize: getComputedStyle(document.documentElement).fontSize,
+        };
+      });
+      await ctx.close();
+      const p = [...errors];
+      if (m.fontSize !== "48px") p.push(`문서 글자 ${m.fontSize}`);
+      const L = m.long;
+      if (!L.label) p.push("긴 라벨에 라벨 span 이 없다");
+      else {
+        if (L.label.lines !== 1) p.push(`긴 라벨 ${L.label.lines} 줄`);
+        if (!L.label.cut || L.label.ellipsis !== "ellipsis") p.push(`긴 라벨이 "…" 로 줄지 않는다(${L.label.ellipsis})`);
+        if (L.label.text !== "엑셀 파일로 모든 휴가 내역을 내보내고 메일로 받기") p.push("라벨 글이 DOM 에 그대로가 아니다");
+      }
+      if (L.w > L.slot + 0.5) p.push(`버튼 ${L.w.toFixed(1)} 이 자리 ${L.slot} 보다 넓다`);
+      const P = m.pair;
+      if (!(P.mainTop < P.cancelTop)) p.push("짝 버튼이 쌓이지 않았거나 주 버튼이 아래다");
+      if (P.mainW > P.pairW + 0.5) p.push(`짝 주 버튼 ${P.mainW.toFixed(1)} 이 짝 폭 ${P.pairW.toFixed(1)} 보다 넓다`);
+      if (!P.label || P.label.lines !== 1 || !P.label.cut) p.push(`짝 주 버튼 라벨이 한 줄 "…" 가 아니다 ${JSON.stringify(P.label)}`);
+      if (!(m.foot.mainTop < m.foot.cancelTop)) p.push("대화상자 바닥이 쌓이지 않았거나 주 버튼이 아래다");
+      if (m.foot.main && m.foot.main.lines !== 1) p.push(`바닥 주 버튼 라벨 ${m.foot.main.lines} 줄`);
+      return p;
+    },
+  })),
+
 ];
 
 const only = process.argv[2];

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * 차트 축 · 점을 크로미움에서 확인한다 — groo-damda-front #625(한 축은 한 단위 · 눈금 간격 1 · 2 · 5 · 가로 눈금 글자 사이 최소 8 ·
- * 연도는 보이는 눈금에)와 58ea54c5(늘 찍는 점 dots) · 97e398f0(눈금 글자 rem)의 담다 시험(vitest — chart.test · axisWidth.test)
- * 판정을 이 레포에 맞게 옮긴 것이다. 이음 화면은 월별 쓴 휴가(MonthVacationStatsContent)를 실제 폭 · 글자 크기로 그려 잰다.
+ * 연도는 보이는 눈금에)와 58ea54c5(늘 찍는 점 dots)의 담다 시험(vitest — chart.test · axisWidth.test) 판정을 이 레포에 맞게 옮긴
+ * 것이다. 눈금 글은 글자 크기 설정을 따르지 않는다(11px · 줄 15 — groo-design #260, 담다 #650 · #651). 이음 화면은 월별 쓴 휴가(MonthVacationStatsContent)를 실제 폭 · 글자 크기로 그려 잰다.
  *
  * 이 레포에는 단위 테스트 러너가 없어 check-narrow 처럼 개발 서버와 Playwright 로 돈다. 셈 함수는 무대
  * scripts/check-chart/harness.tsx 가 window.__chart 에 건다(개발 서버만 그린다 — 운영 빌드에 들어가지 않는다).
@@ -207,7 +207,7 @@ const cases = [
 
   // ── 가로 눈금 솎기 · 연도(담다 chart.test "가로 눈금 — 솎기 · 보이는 눈금의 연도") · 축 기본값 ──
   libCase(
-    "가로 눈금 셈 — 간격 = ⌈칸 ÷ ⌊폭 ÷ (글 + 8)⌋⌉, 끝 눈금을 지키고, 연도는 보이는 눈금에 · 축 글자 사이 8 · 글자 rem",
+    "가로 눈금 셈 — 간격 = ⌈칸 ÷ ⌊폭 ÷ (글 + 8)⌋⌉, 끝 눈금을 지키고, 연도는 보이는 눈금에 · 축 글자 사이 8 · 글자 11px(글자 크기 설정을 따르지 않는다)",
     () => {
       const { chartXTickInterval: iv, chartXTickLabels: lb, chartXTickFullLabels: full, chartAxisProps, months } = window.__chart;
       return {
@@ -231,7 +231,7 @@ const cases = [
       expectEq(p, "여섯 칸마다", g.six, ["12월", "2025. 6.", "12월"]);
       expectEq(p, "해 없는 눈금", g.noYear, ["1주", "2주", "3주"]);
       expectEq(p, "글자 사이", g.gap, [8, 8]);
-      expectEq(p, "눈금 글자 크기", g.font, "0.6875rem");
+      expectEq(p, "눈금 글자 크기", g.font, "11px");
     },
   ),
 
@@ -303,21 +303,42 @@ const cases = [
       return p;
     },
   })),
-  {
-    name: "눈금 글자는 rem — 글자 크기 200% 면 11 → 22",
+  // 차트 그림 안 글(축 눈금)은 글자 크기 설정을 따르지 않는다(groo-design #260 — DESIGN.md Typography "그대로 두는 것") — 300% 에도 11px
+  ...[
+    { font: 1, how: "100%" },
+    { font: 3, how: "300% 처음부터", atLoad: true },
+    { font: 3, how: "300% 뜬 뒤" },
+  ].map(({ font, how, atLoad }) => ({
+    name: `눈금 글자는 그대로 — ${how} 에서 11px · 줄 높이 15(100% 와 같다)`,
     async run() {
-      const p = [];
-      for (const [font, want] of [[1, "11px"], [2, "22px"]]) {
-        const { ctx, page, errors } = await open("xaxis", { width: 1300, query: `&w=1200&font=${font}` });
-        const { x } = await ticksOf(page);
-        await ctx.close();
-        p.push(...errors);
-        const sizes = [...new Set(x.map((t) => t.fontSize))];
-        expectEq(p, `글자 크기 ${font * 100}%`, sizes, [want]);
+      const { ctx, page, errors } = await open("xaxis", { width: 1300, query: `&w=1200${atLoad ? `&font=${font}` : ""}` });
+      if (!atLoad && font !== 1) {
+        await page.waitForTimeout(200);
+        await page.evaluate((f) => {
+          document.documentElement.style.fontSize = `${f * 100}%`;
+        }, font);
+        await page.waitForTimeout(300);
       }
+      const { x } = await ticksOf(page);
+      // 세로축 폭을 재는 숨은 글도 같은 글꼴 — AXIS_TICK_FONT_SIZE 를 계산된 크기로 푼다
+      const measure = await page.evaluate(() => {
+        const el = document.createElement("span");
+        el.style.fontSize = window.__chart.AXIS_TICK_FONT_SIZE;
+        el.style.lineHeight = "var(--text-t1-static--line-height)";
+        document.body.appendChild(el);
+        const cs = getComputedStyle(el);
+        const out = { size: cs.fontSize, line: cs.lineHeight, root: getComputedStyle(document.documentElement).fontSize, tickLine: window.__chart.CHART_TICK_LINE };
+        el.remove();
+        return out;
+      });
+      await ctx.close();
+      const p = [...errors];
+      expectEq(p, "눈금 글자 크기", [...new Set(x.map((t) => t.fontSize))], ["11px"]);
+      expectEq(p, "세로축 폭을 재는 글", [measure.size, measure.line, measure.tickLine], ["11px", "15px", 15]);
+      if (font !== 1 && measure.root !== `${16 * font}px`) p.push(`문서 글자가 ${measure.root} — 키우지 않았다`);
       return p;
     },
-  },
+  })),
 
   // ── 이음 화면 — 월별 쓴 휴가 ──
   libCase(
@@ -401,7 +422,8 @@ const cases = [
         const monthSteps = new Set(months.slice(1).map((m, i) => m - months[i]));
         if (monthSteps.size > 1) p.push(`건너뛰는 달 수가 고르지 않다 (${texts.join(" · ")})`);
         const sizes = [...new Set([...ticks.x, ...ticks.y].map((t) => t.fontSize))];
-        expectEq(p, "눈금 글자 크기", sizes, [font === 2 ? "22px" : "11px"]);
+        // 눈금 글은 글자 크기 설정을 따르지 않는다(groo-design #260) — 200% 에도 11px
+        expectEq(p, "눈금 글자 크기", sizes, ["11px"]);
         expectEq(p, "세로축", ticks.y.map((t) => t.text).sort((a, b) => parseFloat(a) - parseFloat(b)), ["0일", "1일", "2일", "3일"]);
         return p;
       },
@@ -409,62 +431,58 @@ const cases = [
   ),
 
   // ── 세로 눈금이 겹치면 칸 수를 줄인다(E — groo-design #247 · #248, chart.md "세로 눈금이 겹치면 수를 줄입니다") ──
+  // 눈금 글은 글자 크기 설정을 따르지 않아(groo-design #260) 줄 높이는 늘 15 — 칸 수는 높이 · 여백으로만 센다(글자 크기가 바뀌어도 같다)
   libCase(
-    "세로 칸 수 — 그리는 높이 = 높이 − max(위, ⌈줄 ÷ 2⌉) − 아래 − (max(8, ⌈줄 ÷ 2⌉ + 4) + 줄), 칸 = max(1, ⌊그리는 높이 ÷ 줄 높이⌋) · dayTicks 가 그 칸 안으로 줄인다 · 준 눈금은 interval 0",
+    "세로 칸 수 — 그리는 높이 = 높이 − max(위, 8) − 아래 − 27, 칸 = ⌊그리는 높이 ÷ 15⌋(0 이상) · dayTicks 가 그 칸 안으로 줄인다 · 준 눈금은 interval 0",
     () => {
       const { chartValueIntervals: iv, dayTicks: d, niceValueAxis, formatAxisWon } = window.__chart;
       return {
-        intervals: [iv(200, 15), iv(200, 30), iv(200, 45), iv(140, 30, { top: 8, bottom: 0 }), iv(40, 30)],
+        intervals: [iv(200), iv(140, { top: 8, bottom: 0 }), iv(120), iv(40)],
         // d(3, 1) — 한 칸 겨냥까지 내려도 넘치면 그 축을 쓴다(담다 niceValueAxis 와 같다 — 0 · 2 · 4)
         days: [d(4), d(4, 3), d(4, 2), d(13), d(13, 2), d(3, 1), d(25, 2), d(0.5, 1)],
         nice: niceValueAxis([0, 28_000], formatAxisWon, 2).ticks,
         niceInterval: niceValueAxis([0, 28_000], formatAxisWon).interval,
+        // 글자 크기 판을 받던 옛 이름은 걷혔다(참조 0)
+        gone: ["useTickLineHeight", "measureTickLineHeight", "measureTickLineHeightAt", "chartXAxisHeight", "chartXTickGap"].filter((k) => k in window.__chart),
       };
     },
     (g, p) => {
-      // 세로축 끝 글 자리(groo-design #250 · 담다 #640) — 기본 위 8 · 아래 5. 100% 줄 15: 200 − 8 − 5 − 27 = 160 → 10 ·
-      // 200% 줄 30: 200 − 15 − 5 − 49 = 131 → 4 · 300% 줄 45: 200 − 23 − 5 − 72 = 100 → 2 · 폰 띠 140(위 8 · 아래 0) 200%: 76 → 2 · 아주 낮으면 1
-      expectEq(p, "칸 수", g.intervals, [10, 4, 2, 2, 1]);
+      // 기본 위 8 · 아래 5: 200 − 8 − 5 − 27 = 160 → 10 · 폰 띠 140(위 8 · 아래 0): 105 → 7 · 120: 80 → 5 · 아주 낮으면 0
+      expectEq(p, "칸 수", g.intervals, [10, 7, 5, 0]);
       expectEq(p, "dayTicks", g.days, [[0, 1, 2, 3, 4], [0, 2, 4], [0, 2, 4], [0, 5, 10, 15], [0, 10, 20], [0, 2, 4], [0, 20, 40], [0, 1]]);
       expectEq(p, "niceValueAxis 두 칸", g.nice, [0, 20_000, 40_000]);
       expectEq(p, "niceValueAxis interval", g.niceInterval, 0);
+      expectEq(p, "걷힌 이름", g.gone, []);
     },
   ),
   ...[
+    { vw: 320, cw: 266, font: 1, how: "100%" },
     { vw: 320, cw: 266, font: 2, how: "200% 로 처음 그림", atLoad: true },
-    { vw: 320, cw: 266, font: 2, how: "떠 있는 동안 200% 로 키움" },
     { vw: 320, cw: 266, font: 3, how: "300% 로 처음 그림", atLoad: true },
     { vw: 390, cw: 336, font: 3, how: "300% 로 처음 그림", atLoad: true },
-    // 떠 있는 동안 300% 로 키움 — 개발 서버는 React Compiler 를 거친 코드라, 줄 높이를 처음 값에 묶던 useTickLineHeight(담다 #638
-    // 전)면 칸 수가 그대로여서 "0 ~ 4일" 다섯 줄이 겹쳤다. 200% 는 이 차트(높이 200)에서 다섯 칸이 들어 줄일 일이 없다
     { vw: 320, cw: 266, font: 3, how: "떠 있는 동안 300% 로 키움" },
     { vw: 390, cw: 336, font: 3, how: "떠 있는 동안 300% 로 키움" },
   ].map(({ vw, cw, font, how, atLoad }) => ({
-    name: `세로 눈금 ${vw}(차트 ${cw}) · ${how} · 최대 4일 — 눈금이 하나도 빠지지 않고(0 포함) 글끼리 겹치지 않으며 칸 수가 그 높이에 든다`,
+    name: `세로 눈금 ${vw}(차트 ${cw}) · ${how} · 최대 4일 — 100% 와 같은 0 ~ 4일 다섯 눈금 · 11px, 하나도 빠지지 않고 겹치지 않는다`,
     async run() {
       const { ctx, page, errors } = await open("month", { width: vw, query: `&qa=1&cw=${cw}&peak=4${atLoad ? `&font=${font}` : ""}` });
       await page.locator(".recharts-bar-rectangle").first().waitFor();
       await page.waitForTimeout(200);
-      if (!atLoad) {
+      if (!atLoad && font !== 1) {
         await page.evaluate((f) => {
           document.documentElement.style.fontSize = `${f * 100}%`;
         }, font);
         await page.waitForTimeout(500);
       }
       const ticks = await ticksOf(page);
-      const want = await page.evaluate(() => {
-        const { dayTicks, chartValueIntervals, measureTickLineHeight } = window.__chart;
-        return dayTicks(4, chartValueIntervals(200, measureTickLineHeight())).map((n) => `${n}일`);
-      });
       await ctx.close();
       const p = [...errors, ...clipOf(ticks, ticks.box)];
       const ys = [...ticks.y].sort((a, b) => a.top - b.top);
       const texts = ys.map((t) => t.text).reverse();
-      expectEq(p, "세로 눈금", texts, want);
-      if (!texts.includes("0일")) p.push("0 이 빠졌다");
+      expectEq(p, "세로 눈금", texts, ["0일", "1일", "2일", "3일", "4일"]);
+      expectEq(p, "눈금 글자 크기", [...new Set(ys.map((t) => t.fontSize))], ["11px"]);
       for (let i = 1; i < ys.length; i++)
         if (ys[i].top < ys[i - 1].bottom - 0.5) p.push(`"${ys[i - 1].text}" · "${ys[i].text}" 가 ${(ys[i - 1].bottom - ys[i].top).toFixed(1)} 겹친다`);
-      if (font === 3 && want.length - 1 >= 4) p.push(`300% 인데 칸을 줄이지 않았다 (${want.join(" · ")})`);
       return p;
     },
   })),

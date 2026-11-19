@@ -109,7 +109,7 @@ export function DayPanel({
         {loading ? (
           <List aria-hidden>
             {[0, 1].map((i) => (
-              <ListItem key={i} prefix={<Skeleton radius='full' className='h-x8 w-[3px]' />} title={<Skeleton text='t5' className='w-32 max-w-full' />} detail={<Skeleton text='t3' className='w-24 max-w-full' />} />
+              <ListItem key={i} prefix={<Skeleton radius='full' className='h-x8 w-[3px]' />} title={<Skeleton text='t5' className='w-[128px] max-w-full' />} detail={<Skeleton text='t3' className='w-[96px] max-w-full' />} />
             ))}
           </List>
         ) : count === 0 && !holiday ? (

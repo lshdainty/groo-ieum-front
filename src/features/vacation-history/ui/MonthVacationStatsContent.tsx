@@ -13,7 +13,7 @@ import {
   chartGridProps,
   chartXAxisProps,
 } from '@/shared/ds/chart'
-import { chartValueIntervals, useAxisWidth, useTickLineHeight } from '@/shared/lib/groo/axisWidth'
+import { chartValueIntervals, useAxisWidth } from '@/shared/lib/groo/axisWidth'
 import type { GetUserMonthlyVacationStatsResp } from '@/entities/vacation'
 import { dayTicks, expectOf, formatUsedTime, monthSeries } from '@/features/vacation-history/lib/vacation-chart'
 
@@ -66,11 +66,10 @@ export const MonthVacationStatsContent = ({
   const unit = { day: t('history.chart.dayUnit'), hour: t('history.chart.hourUnit'), minute: t('history.chart.minuteUnit') }
   const usedTotal = formatUsedTime(bars.reduce((a, m) => a + m.used_time, 0), unit)
   const scheduledTotal = formatUsedTime(bars.reduce((a, m) => a + expectOf(m), 0), unit)
-  // 세로 눈금 — 보이는 계열을 쌓은 높이. 겹치면 칸을 줄인다(그리는 높이 ÷ 눈금 글 줄 높이 — 글자 크기를 따른다)
-  const tickLine = useTickLineHeight()
+  // 세로 눈금 — 보이는 계열을 쌓은 높이. 겹치면 칸을 줄인다(그리는 높이 ÷ 눈금 글 줄 높이 15 — 눈금 글은 글자 크기를 따르지 않는다, groo-design #260)
   const ticks = dayTicks(
     Math.max(0, ...bars.map((m) => (showUsed ? m.used_time : 0) + (showScheduled ? expectOf(m) : 0))),
-    chartValueIntervals(CHART_HEIGHT, tickLine),
+    chartValueIntervals(CHART_HEIGHT),
   )
   const axisWidth = useAxisWidth(ticks.map((n) => t('history.chart.dayAxis', { n })))
   const monthText = (month: unknown) => t('history.chart.monthAxis', { month: String(month) })

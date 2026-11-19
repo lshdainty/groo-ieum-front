@@ -223,7 +223,7 @@ const ReorderList = ({
               data-grip={id}
               aria-label={t('editPanel.grip', { name: nameOf(id) })}
               aria-description={t('editPanel.gripHint')}
-              className='-my-x1_5 -ml-x2_5 flex size-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-r2 text-fg-neutral-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring active:cursor-grabbing'
+              className='-my-x1_5 -ml-x2_5 flex size-[44px] shrink-0 cursor-grab touch-none items-center justify-center rounded-r2 text-fg-neutral-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring active:cursor-grabbing'
               onFocus={() => (focusId.current = id)}
               onBlur={() => {
                 if (focusId.current === id) focusId.current = null
