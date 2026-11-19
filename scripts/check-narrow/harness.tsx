@@ -144,7 +144,19 @@ function YearViewScene() {
   )
 }
 
+// 캘린더 도구 줄 하나 — 폰(768 미만) 또는 ?desktop=1(768 이상 격자 카드 안 맨 위 줄). 보기 Segmented 가 머리 오른쪽 내용 폭인지 본다
+function CalendarToolbarScene() {
+  return (
+    <CalendarProvider users={[]}>
+      <div data-check='toolbar'>
+        <CalendarToolbar desktop={params.get('desktop') === '1'} people={[]} />
+      </div>
+    </CalendarProvider>
+  )
+}
+
 function Scene() {
+  if (scene === 'calendar-toolbar') return <CalendarToolbarScene />
   if (scene === 'year-view') return <YearViewScene />
   if (scene === 'calendar-weekday') return <CalendarWeekdayScene />
   if (scene === 'weekday') return <WeekdayScene />
