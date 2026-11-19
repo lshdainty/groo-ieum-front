@@ -32,6 +32,7 @@ import { YearViewMonth } from '@/features/calendar/ui/year-view/year-view-month'
 import { MissingWorkHistoryWidget } from '@/features/dashboard/ui/widgets/MissingWorkHistoryWidget'
 import type { IEvent } from '@/features/calendar/model/interfaces'
 import { ApprovalSteps } from '@/features/vacation-application/ui/RequestDetail'
+import { UserListSkeleton } from '@/features/admin-authority/ui/UserListSkeleton'
 import type { GetUserRequestedVacationsResp } from '@/entities/vacation'
 
 const params = new URLSearchParams(window.location.search)
@@ -160,6 +161,10 @@ function Scene() {
               </div>
             </DndProviderWrapper>
           </CalendarProvider>
+          {/* 스켈레톤 세 갈래(skeleton.md "크기 — 글은 글줄 높이") — 글 자리 text="tN" 은 커지고, 모양 자리(아이콘 · 검색 칸)는 px 그대로 */}
+          <div data-check='skeleton' style={{ width: 390 }}>
+            <UserListSkeleton />
+          </div>
           <div data-check='steps' style={{ width: 390 }}>
             <ApprovalSteps request={request} />
           </div>

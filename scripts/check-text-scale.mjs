@@ -167,6 +167,16 @@ const measure = (page) =>
       put("홈 달력 제목", "grow", root.querySelector("[data-missing-title]"));
       put("홈 달력 범례", "grow", root.querySelector("[data-missing-legend] span:last-child"));
     }
+    // 스켈레톤 — 글 자리(올 글의 줄 높이 — 커진다) · 모양 자리(px 그대로). 사용자 목록 자리: 아이콘 16 · 제목 t5 · 검색 칸 40 · 줄 제목 t5 · 설명 t3
+    {
+      const root = q("[data-check=skeleton]");
+      const sk = [...root.querySelectorAll("[data-slot=skeleton]")];
+      put("스켈레톤 모양 아이콘 16", "static", sk[0], "box");
+      put("스켈레톤 글 자리 제목 t5", "grow", sk[1], "box");
+      put("스켈레톤 모양 검색 칸 40", "static", sk[2], "box");
+      put("스켈레톤 글 자리 줄 제목 t5", "grow", sk[3], "box");
+      put("스켈레톤 글 자리 줄 설명 t3", "grow", sk[4], "box");
+    }
     // 휴가 신청 결재 단계 — 원 24 · 안의 순번은 원(틀)의 일부라 그대로(#260 — 고리 · 도장 가운데 글과 같다), 체크 아이콘 16
     {
       const root = q("[data-check=steps]");
@@ -207,7 +217,10 @@ const cases = [
           if (a.mode !== "text" && (a.w !== b.w || a.h !== b.h)) p.push(`${name} 상자 ${a.w}×${a.h} → ${b.w}×${b.h}`);
         } else {
           grows += 1;
-          if (Math.abs(b.font - a.font * font) > 0.5) p.push(`${name} 글 ${a.font} → ${b.font}(세 배 ${a.font * font} 이어야)`);
+          // 글 자리 스켈레톤(box)은 높이가 올 글의 줄 높이를 따라 세 배, 나머지는 글자가 세 배
+          if (a.mode === "box") {
+            if (Math.abs(b.h - a.h * font) > 1) p.push(`${name} 높이 ${a.h} → ${b.h}(세 배 ${a.h * font} 이어야)`);
+          } else if (Math.abs(b.font - a.font * font) > 0.5) p.push(`${name} 글 ${a.font} → ${b.font}(세 배 ${a.font * font} 이어야)`);
         }
       }
       if (statics < 30 || grows < 10) p.push(`잰 자리 그대로 ${statics} · 커짐 ${grows} — 무대가 덜 그려졌다`);
@@ -233,6 +246,12 @@ const cases = [
         "그날 목록 깃발 16": [16, 16],
         "결재 단계 원 24 · 순번": [24, 24],
         "결재 단계 체크 16": [16, 16],
+        "스켈레톤 모양 아이콘 16": [16, 16],
+        "스켈레톤 모양 검색 칸 40": [null, 40],
+        "스켈레톤 글 자리 제목 t5": [64, 22],
+        "스켈레톤 글 자리 줄 설명 t3": [144, 18],
+        "스켈레톤 t1-static": [40, 15],
+        "스켈레톤 t1": [40, 15],
       };
       for (const [name, [w, h]] of Object.entries(want)) {
         const x = m[name];
