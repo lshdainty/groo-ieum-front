@@ -274,6 +274,41 @@ const cases = [
     },
   },
 
+  // ── 나무 꺾쇠 · 체크는 이름 첫 줄 가운데(groo-design #263 레시피 — 이음 ds tree-view) ──
+  ...[false, true].map((live) => ({
+    name: `나무 · 300% ${live ? "뜬 뒤" : "처음부터"} — 꺾쇠 16 · 체크 18 은 크기 그대로, 이름 첫 줄 가운데와의 거리가 100% 와 같다`,
+    async run() {
+      const read = (page) =>
+        page.evaluate(() => {
+          const row = document.querySelector("[data-check=tree] [data-slot=tree-view-row]");
+          const label = row.querySelector("[data-slot=tree-view-label]");
+          const range = document.createRange();
+          range.selectNodeContents(label);
+          const rects = [...range.getClientRects()].filter((r) => r.width > 0);
+          const lh = parseFloat(getComputedStyle(label).lineHeight);
+          const firstCenter = label.getBoundingClientRect().top + lh / 2;
+          const at = (sel) => {
+            const r = row.querySelector(sel).getBoundingClientRect();
+            return { off: (r.top + r.bottom) / 2 - firstCenter, w: Math.round(r.width), h: Math.round(r.height) };
+          };
+          return { lines: new Set(rects.map((r) => Math.round(r.top))).size, chevron: at("[data-slot=tree-view-chevron] svg"), check: at("[data-slot=tree-view-check] svg") };
+        });
+      const one = await open({ font: 1 });
+      const a = await read(one.page);
+      await one.ctx.close();
+      const big = await open({ font: 3, live });
+      const b = await read(big.page);
+      await big.ctx.close();
+      const p = [...one.errors, ...big.errors];
+      if (b.lines < 2) p.push(`300% 에서 이름이 ${b.lines} 줄`);
+      for (const k of ["chevron", "check"]) {
+        if (Math.abs(a[k].off - b[k].off) > 0.5) p.push(`${k} 가운데 − 이름 첫 줄 가운데 ${a[k].off.toFixed(1)} → ${b[k].off.toFixed(1)}`);
+        if (a[k].w !== b[k].w || a[k].h !== b[k].h) p.push(`${k} 크기 ${a[k].w}×${a[k].h} → ${b[k].w}×${b[k].h}`);
+      }
+      return p;
+    },
+  })),
+
   // ── 소스 — 화면 · ds 의 rem 숫자 유틸, 걷은 옛 이름 ──
   {
     name: "화면 쪽(앱 · 화면 · 기능 · 엔티티 · 옛 공용 부품) 상자 · 아이콘 · 색 점 · 칸에 rem 숫자 유틸이 없다(size-4 → size-[16px])",

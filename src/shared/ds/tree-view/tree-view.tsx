@@ -127,10 +127,11 @@ const CONTENT = [
   "[transition:scale_var(--motion-duration-pressed-scale)_var(--motion-ease-pressed-scale)]",
   "motion-safe:group-active/tree-row:[scale:calc(1-2/var(--press-basis))]",
 ].join(" ");
-// 꺾쇠 칸 20 × 19 · 아이콘 16 — 표시만(누르는 자리는 줄 전체)
-const CHEVRON_CELL = "flex h-[19px] w-[20px] shrink-0 items-center justify-center text-fg-neutral-subtle";
+// 꺾쇠 칸 20 × 이름 첫 줄 높이(t4 — 100% 에서 19) · 아이콘 16 — 표시만(누르는 자리는 줄 전체).
+// 아이콘은 px 그대로, 칸 높이는 이름 줄 높이를 따라 글자 크기를 키워도 이름 첫 줄 가운데에 선다
+const CHEVRON_CELL = "flex h-[var(--text-t4--line-height)] w-[20px] shrink-0 items-center justify-center text-fg-neutral-subtle";
 const CHEVRON = "size-[16px] shrink-0 [transition:rotate_var(--motion-duration-d6)_var(--motion-ease-easing)] motion-reduce:transition-none";
-const ICON = "flex h-[19px] shrink-0 items-center text-fg-neutral-subtle [&>svg]:size-[16px] [&>svg]:shrink-0";
+const ICON = "flex h-[var(--text-t4--line-height)] shrink-0 items-center text-fg-neutral-subtle [&>svg]:size-[16px] [&>svg]:shrink-0";
 // 이름 — t4 14 / 19 · 400 · fg-neutral, 줄을 바꾼다(단어 단위)
 const LABEL = "min-w-0 flex-1 font-sans text-t4 font-normal text-fg-neutral break-keep [overflow-wrap:break-word]";
 
@@ -188,7 +189,7 @@ function TreeItem({ node, level, posinset, setsize }: { node: TreeNode; level: n
             {node.label}
           </span>
           {ctx.selectionMark && selected && (
-            <span aria-hidden data-slot="tree-view-check" className="flex h-[19px] shrink-0 items-center text-fg-neutral">
+            <span aria-hidden data-slot="tree-view-check" className="flex h-[var(--text-t4--line-height)] shrink-0 items-center text-fg-neutral">
               <Check className="size-[18px]" strokeWidth={2} />
             </span>
           )}

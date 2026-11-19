@@ -21,6 +21,7 @@ import { CARD_FACE_ISSUER, CARD_FACE_NAME, imageFrameIndicatorVariants } from '@
 import { PAGINATION_LABEL } from '@/shared/ds/pagination/pagination-variants'
 import { ITEM_LABEL as SIDE_NAV_ITEM_LABEL } from '@/shared/ds/side-navigation/side-navigation-variants'
 import { Skeleton } from '@/shared/ds/skeleton'
+import { TreeView } from '@/shared/ds/tree-view'
 import { PermissionProvider, UserProvider } from '@/entities/session'
 import { CalendarProvider, useCalendar } from '@/features/calendar/model/calendar-context'
 import { DndProviderWrapper } from '@/features/calendar/ui/dnd/dnd-provider'
@@ -164,6 +165,16 @@ function Scene() {
           {/* 스켈레톤 세 갈래(skeleton.md "크기 — 글은 글줄 높이") — 글 자리 text="tN" 은 커지고, 모양 자리(아이콘 · 검색 칸)는 px 그대로 */}
           <div data-check='skeleton' style={{ width: 390 }}>
             <UserListSkeleton />
+          </div>
+          {/* 나무 — 꺾쇠 · 체크는 px 그대로, 이름 첫 줄 가운데에 선다(groo-design #263 레시피 — 칸 높이 = 이름 줄 높이). 이름은 두 줄이 되게 길게 */}
+          <div data-check='tree' style={{ width: 220 }}>
+            <TreeView
+              aria-label='부서'
+              nodes={[{ id: 'a', label: '경영지원본부 인사총무팀 채용 담당', children: [{ id: 'b', label: '채용' }] }]}
+              selectedId='a'
+              selectionMark
+              defaultExpandedIds={['a']}
+            />
           </div>
           <div data-check='steps' style={{ width: 390 }}>
             <ApprovalSteps request={request} />
