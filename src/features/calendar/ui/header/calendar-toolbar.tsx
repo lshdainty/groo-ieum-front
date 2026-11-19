@@ -33,7 +33,7 @@ const titleOf = (view: TCalendarView, date: Date, ko_: boolean): string => {
 
 /**
  * 도구 줄(G 31) — ‹ 달 글 › · "오늘" · 필터 칩 둘 · 보기 Segmented Control.
- * 폰(768 미만): 달 줄(‹ 달 › + 오른쪽 월 · 목록) 아래 칩 줄. 데스크톱 · 태블릿은 격자 카드 안 맨 위 한 줄이고 좁으면 다음 줄로 넘어간다.
+ * 폰(768 미만): 달 줄(‹ 달 › + 오른쪽 월 · 목록 — 안 들면 아래 줄 오른쪽 끝) 아래 칩 줄. 데스크톱 · 태블릿은 격자 카드 안 맨 위 한 줄이고 좁으면 다음 줄로 넘어간다.
  */
 export function CalendarToolbar({ desktop, people }: { desktop: boolean; people: IUser[] }) {
   const { t, i18n } = useTranslation('calendar')
@@ -57,8 +57,10 @@ export function CalendarToolbar({ desktop, people }: { desktop: boolean; people:
     </div>
   )
 
+  // 머리 오른쪽 자리라 내용 폭 — 모든 칸이 가장 긴 칸 글 + 좌우 24 이고 트랙은 그 칸들 + 8(groo-design segmented-control.md "머리 오른쪽에 둘 때").
+  // 칸 글은 글자 크기를 따르지 않아(t5-static) 큰 글자에서도 폭이 그대로다. 고정 폭(옛 148 · 260)은 영어 "Month" 를 칸 안에서 꺾었다
   const segmented = (
-    <SegmentedControl aria-label={t('view.label')} value={view} onValueChange={(v) => setView(v as TCalendarView)} className={desktop ? 'w-[260px] max-w-full' : 'w-[148px]'}>
+    <SegmentedControl aria-label={t('view.label')} value={view} onValueChange={(v) => setView(v as TCalendarView)} className='w-max max-w-full'>
       {views.map((v) => (
         <SegmentedControlItem key={v} value={v}>
           {t(`view.${v}`)}
@@ -92,7 +94,8 @@ export function CalendarToolbar({ desktop, people }: { desktop: boolean; people:
   }
   return (
     <div data-slot='calendar-toolbar' className='flex flex-col gap-x2 pb-x2'>
-      <div className='flex flex-wrap items-center justify-between gap-x-x2 gap-y-x1 pl-x3 pr-x4'>
+      {/* 달 줄 — 제목 자리(‹ 달 ›)가 머리 폭 절반 이상을 지키고, 남은 폭에 보기 단추가 안 들면 아래 줄 오른쪽 끝으로 내려간다(Card 머리와 같은 결) */}
+      <div className='flex flex-wrap items-center justify-between gap-x-x2 gap-y-x1 pl-x3 pr-x4 [&>:first-child:not(:last-child)]:min-w-[50%] [&>:first-child:not(:last-child)]:flex-1 [&>:last-child:not(:first-child)]:ml-auto'>
         {nav}
         {segmented}
       </div>

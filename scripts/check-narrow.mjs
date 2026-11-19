@@ -299,6 +299,72 @@ const cases = [
     },
   })),
 
+  // ── 캘린더 도구 줄의 보기 Segmented — 머리 오른쪽 자리라 내용 폭(groo-design segmented-control.md "머리 오른쪽에 둘 때" · yaml root.width).
+  //    QA(412 · 100%): 폰 [월 | 목록] 이 148 고정이라 칸 글 자리 46 에 "Month"(약 50)가 "Mont / h" 로 꺾였다. 칸 글은 t5-static 이라 300% 에서도 폭이 같다 ──
+  ...[
+    { lang: "en", width: 412, font: 1 },
+    { lang: "en", width: 412, font: 3 },
+    { lang: "en", width: 360, font: 1 },
+    { lang: "ko", width: 412, font: 1 },
+    { lang: "ko", width: 412, font: 3 },
+    { lang: "en", width: 1280, font: 1, desktop: true },
+    { lang: "en", width: 1280, font: 3, desktop: true },
+    { lang: "ko", width: 1280, font: 1, desktop: true },
+  ].map(({ lang, width, font, desktop }) => ({
+    name: `캘린더 도구 줄 ${desktop ? "넓은 화면" : "폰"} ${lang} ${width} · ${font * 100}% — 보기 Segmented 는 내용 폭((가장 긴 칸 글 + 24) × 칸 수 + 8)이고 칸 글이 한 줄(낱말 안에서 꺾이지 않음) · 머리 오른쪽 끝 · 제목 자리는 머리 폭 절반 이상`,
+    async run() {
+      const { ctx, page, errors } = await open("calendar-toolbar", { width, query: `&lang=${lang}&font=${font}${desktop ? "&desktop=1" : ""}` });
+      await page.waitForTimeout(300);
+      const overflow = await pageOverflow(page);
+      const [s] = await segmentedOf(page, "[data-check=toolbar]");
+      const m = await page.evaluate(() => {
+        const track = document.querySelector("[data-check=toolbar] [data-slot=segmented-control]");
+        const labels = [...track.querySelectorAll("[data-slot=segmented-control-label]")];
+        // 칸 글 한 줄 폭(max-content) — 잠깐 nowrap 으로 잰다
+        const widths = labels.map((l) => {
+          const before = l.style.whiteSpace;
+          l.style.whiteSpace = "nowrap";
+          const w = l.getBoundingClientRect().width;
+          l.style.whiteSpace = before;
+          return w;
+        });
+        const lines = labels.map((l) => Math.round(l.getBoundingClientRect().height / parseFloat(getComputedStyle(l).lineHeight)));
+        const row = track.parentElement.closest(".flex-wrap");
+        const rs = getComputedStyle(row);
+        const rowRect = row.getBoundingClientRect();
+        const contentLeft = rowRect.left + parseFloat(rs.paddingLeft);
+        const contentRight = rowRect.right - parseFloat(rs.paddingRight);
+        const title = row.querySelector("[data-slot=calendar-title]");
+        const nav = title.parentElement;
+        const t = track.getBoundingClientRect();
+        const n = nav.getBoundingClientRect();
+        return {
+          count: labels.length,
+          longest: Math.max(...widths),
+          trackWidth: t.width,
+          trackRight: t.right,
+          contentRight,
+          contentWidth: contentRight - contentLeft,
+          navWidth: n.width,
+          sameLine: Math.abs(t.top - n.top) < n.height && t.top < n.bottom,
+          lines,
+          labelSize: parseFloat(getComputedStyle(labels[0]).fontSize),
+        };
+      });
+      await ctx.close();
+      const p = [...errors];
+      if (overflow > 0) p.push(`페이지가 가로로 ${overflow} 넘친다`);
+      if (s.brokenWords.length) p.push(`칸 글이 낱말 안에서 꺾임: ${s.brokenWords.join(", ")}`);
+      if (m.lines.some((l) => l !== 1)) p.push(`칸 글 줄 수 ${JSON.stringify(m.lines)}(한 줄이어야)`);
+      const want = (Math.ceil(m.longest) + 24) * m.count + 8;
+      if (Math.abs(m.trackWidth - want) > 1.5) p.push(`트랙 폭 ${m.trackWidth.toFixed(1)} ≠ 내용 폭 ${want}(가장 긴 칸 글 ${m.longest.toFixed(1)})`);
+      if (Math.abs(m.trackRight - m.contentRight) > 1) p.push(`머리 오른쪽 끝이 아니다(트랙 오른쪽 ${m.trackRight.toFixed(1)} · 머리 오른쪽 ${m.contentRight.toFixed(1)})`);
+      if (!desktop && m.navWidth + 0.5 < m.contentWidth / 2) p.push(`제목 자리 ${m.navWidth.toFixed(1)} < 머리 반 폭 ${(m.contentWidth / 2).toFixed(1)}`);
+      if (m.labelSize !== 16) p.push(`칸 글 ${m.labelSize}px(t5-static 16 이어야)`);
+      return p;
+    },
+  })),
+
   // ── 날짜 고르기 요일 줄 — 영어는 두 글자 Su ~ Sa, 칸에 들지 않을 때만 한 글자 S ~ S, 줄을 바꾸지 않는다(groo-design #250 · 담다 #641) ──
   ...[
     { lang: "en", width: 390, font: 1, want: "two" },
