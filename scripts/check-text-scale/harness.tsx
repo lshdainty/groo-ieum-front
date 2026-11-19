@@ -23,6 +23,7 @@ import { PAGINATION_LABEL } from '@/shared/ds/pagination/pagination-variants'
 import { ITEM_LABEL as SIDE_NAV_ITEM_LABEL } from '@/shared/ds/side-navigation/side-navigation-variants'
 import { List, ListItem } from '@/shared/ds/list'
 import { Skeleton } from '@/shared/ds/skeleton'
+import { TablePagination } from '@/shared/ds/table-pagination'
 import { TreeView } from '@/shared/ds/tree-view'
 import { PermissionProvider, UserProvider } from '@/entities/session'
 import { CalendarProvider, useCalendar } from '@/features/calendar/model/calendar-context'
@@ -257,6 +258,10 @@ function Scene() {
           </div>
           <div data-check='missing' style={{ width: 390 }}>
             <MissingWorkHistoryWidget />
+          </div>
+          {/* 표 쪽 넘김 줄 — 높이 40 은 최소값(groo-design #268 · table-pagination.yaml root.minHeight). 넓은 자리라 가로로 넘치지 않는다 */}
+          <div data-check='table-pagination' style={{ width: 1200 }}>
+            <TablePagination totalItems={237} />
           </div>
         </div>
         </PermissionProvider>

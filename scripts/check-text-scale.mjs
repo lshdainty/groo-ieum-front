@@ -271,6 +271,33 @@ const cases = [
     },
   },
 
+  // ── 표 쪽 넘김 줄은 최소 높이 40(groo-design #268 — 담다 table-pagination.test "한 줄 최소 40") ──
+  ...[false, true].map((live) => ({
+    name: `표 쪽 넘김 줄 · 300% ${live ? "뜬 뒤" : "처음부터"} — 100% 는 40, 큰 글자에서는 고르기 · 글을 따라 줄이 높아져 안의 것이 줄 밖으로 넘치지 않는다`,
+    async run() {
+      const read = (page) =>
+        page.evaluate(() => {
+          const root = document.querySelector("[data-check=table-pagination] [data-slot=table-pagination]");
+          if (!root) return null;
+          const r = root.getBoundingClientRect();
+          const kids = [...root.children].map((el) => el.getBoundingClientRect());
+          return { h: r.height, over: Math.max(0, ...kids.map((k) => Math.max(r.top - k.top, k.bottom - r.bottom))), tallest: Math.max(...kids.map((k) => k.height)) };
+        });
+      const one = await open({ font: 1 });
+      const at100 = await read(one.page);
+      await one.ctx.close();
+      const big = await open({ font: 3, live });
+      const at300 = await read(big.page);
+      await big.ctx.close();
+      const p = [...one.errors, ...big.errors];
+      if (!at100 || !at300) return [...p, "쪽 넘김 줄이 없다"];
+      if (at100.h !== 40) p.push(`100% 줄 높이 ${at100.h}(40 이어야)`);
+      if (!(at300.tallest > 40)) p.push(`300% 에서 줄 안의 가장 높은 것 ${at300.tallest} — 글이 커지지 않아 시험이 아무것도 재지 않는다`);
+      if (at300.over > 0.5) p.push(`300% 에서 줄 안의 것이 줄 밖으로 ${at300.over.toFixed(1)} 넘친다(줄 높이 ${at300.h} — 고정 높이면 넘친다)`);
+      return p;
+    },
+  })),
+
   // ── 나무 꺾쇠 · 체크는 이름 첫 줄 가운데(groo-design #263 레시피 — 이음 ds tree-view) ──
   ...[false, true].map((live) => ({
     name: `나무 · 300% ${live ? "뜬 뒤" : "처음부터"} — 꺾쇠 16 · 체크 18 은 크기 그대로, 이름 첫 줄 가운데와의 거리가 100% 와 같다`,
