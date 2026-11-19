@@ -167,6 +167,12 @@ const measure = (page) =>
       put("홈 달력 제목", "grow", root.querySelector("[data-missing-title]"));
       put("홈 달력 범례", "grow", root.querySelector("[data-missing-legend] span:last-child"));
     }
+    // 휴가 신청 결재 단계 — 원 24 · 안의 순번은 원(틀)의 일부라 그대로(#260 — 고리 · 도장 가운데 글과 같다), 체크 아이콘 16
+    {
+      const root = q("[data-check=steps]");
+      put("결재 단계 원 24 · 순번", "static", root.querySelector("[data-step='2'] span[aria-hidden]"), "both");
+      put("결재 단계 체크 16", "static", root.querySelector("[data-step='1'] svg"), "box");
+    }
     return out;
   });
 
@@ -225,6 +231,8 @@ const cases = [
         "주 지금 시각 점 12": [12, 12],
         "주 지금 시각 글 · 폭 64": [64, null],
         "그날 목록 깃발 16": [16, 16],
+        "결재 단계 원 24 · 순번": [24, 24],
+        "결재 단계 체크 16": [16, 16],
       };
       for (const [name, [w, h]] of Object.entries(want)) {
         const x = m[name];
@@ -240,7 +248,7 @@ const cases = [
         "phone 요일": 13, "desktop 요일": 13, "phone 날짜 숫자 · 원 26": 14, "desktop 날짜 숫자 · 원 26": 13,
         "phone 공휴일 이름": 11, "desktop 공휴일 이름": 11, "phone 칸 안 일정": 12, "phone \"+N개\"": 12,
         "주 요일 · 날짜": 12, "주 공휴일 이름": 12, "주 시각 눈금": 12, "주 일정": 12, "주 지금 시각 글 · 폭 64": 12,
-        "년 요일": 12, "년 날짜 원 24": 12, "년 \"+N\"": 11, "홈 달력 요일": 12, "홈 달력 날짜 · 원 30": 13,
+        "년 요일": 12, "년 날짜 원 24": 12, "년 \"+N\"": 11, "홈 달력 요일": 12, "홈 달력 날짜 · 원 30": 13, "결재 단계 원 24 · 순번": 12,
       };
       for (const [name, px] of Object.entries(sizes)) if (m[name]?.font !== px) p.push(`${name} 글 ${m[name]?.font}(${px} 이어야)`);
       return p;

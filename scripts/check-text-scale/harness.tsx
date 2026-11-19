@@ -31,6 +31,8 @@ import { CalendarWeekView } from '@/features/calendar/ui/week-and-day-view/calen
 import { YearViewMonth } from '@/features/calendar/ui/year-view/year-view-month'
 import { MissingWorkHistoryWidget } from '@/features/dashboard/ui/widgets/MissingWorkHistoryWidget'
 import type { IEvent } from '@/features/calendar/model/interfaces'
+import { ApprovalSteps } from '@/features/vacation-application/ui/RequestDetail'
+import type { GetUserRequestedVacationsResp } from '@/entities/vacation'
 
 const params = new URLSearchParams(window.location.search)
 if (params.get('font')) document.documentElement.style.fontSize = `${Number(params.get('font')) * 100}%`
@@ -69,6 +71,21 @@ function Pin() {
   }, [setSelectedDate, setHolidays])
   return null
 }
+
+// 휴가 신청 결재 단계 — 끝남(✓) · 지금 차례(2) · 기다림(3)
+const request = {
+  grant_status: 'PROGRESS',
+  current_approver_id: 'a2',
+  approvers: [1, 2, 3].map((n) => ({
+    approval_id: n,
+    approver_id: `a${n}`,
+    approver_name: `결재자${n}`,
+    approval_order: n,
+    approval_status: n === 1 ? 'APPROVED' : 'PENDING',
+    approval_status_name: '',
+    approval_date: n === 1 ? '2026-11-17T09:00:00' : null,
+  })),
+} as unknown as GetUserRequestedVacationsResp
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } })
 const thisMonth = dayjs(DAY)
@@ -143,6 +160,9 @@ function Scene() {
               </div>
             </DndProviderWrapper>
           </CalendarProvider>
+          <div data-check='steps' style={{ width: 390 }}>
+            <ApprovalSteps request={request} />
+          </div>
           <div data-check='missing' style={{ width: 390 }}>
             <MissingWorkHistoryWidget />
           </div>
