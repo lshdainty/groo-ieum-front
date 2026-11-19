@@ -34,8 +34,8 @@ const CalendarTimeline = ({ firstVisibleHour, lastVisibleHour }: IProps) => {
 
   return (
     <div className='pointer-events-none absolute inset-x-0 z-50 border-t border-stroke-brand-solid' style={{ top: `${getCurrentTimePosition()}%` }}>
-      <div className='absolute left-0 top-0 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-bg-brand-solid'></div>
-      <div className='absolute -left-18 flex w-16 -translate-y-1/2 justify-end bg-bg-layer-default pr-1 text-xs font-medium text-fg-brand'>{formatCurrentTime()}</div>
+      <div className='absolute left-0 top-0 size-[12px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-bg-brand-solid'></div>
+      <div className='absolute -left-[72px] flex w-[64px] -translate-y-1/2 justify-end bg-bg-layer-default pr-x1 text-t2-static font-medium text-fg-brand'>{formatCurrentTime()}</div>
     </div>
   )
 }

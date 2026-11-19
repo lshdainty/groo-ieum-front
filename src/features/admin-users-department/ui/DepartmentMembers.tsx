@@ -65,7 +65,7 @@ function MemberRow({
       suffix={
         <>
           {isMain && <Badge variant='weak' tone='neutral'>{t('department.members.main')}</Badge>}
-          {busy ? <ProgressCircle aria-hidden size='24' /> : <ChevronRight aria-hidden className='size-5 text-fg-neutral-subtle' />}
+          {busy ? <ProgressCircle aria-hidden size='24' /> : <ChevronRight aria-hidden className='size-[20px] text-fg-neutral-subtle' />}
         </>
       }
       aria-label={t('department.members.rowFor', { name: user.user_name })}
@@ -88,11 +88,11 @@ function MemberRow({
               </div>
               <div className='flex flex-col gap-x2'>
                 {!isMain && (
-                  <Button variant='neutralWeak' size='large' className='h-auto min-h-12 whitespace-normal break-keep py-x3 text-center' onClick={() => { setSheet(false); onSetMain(user) }}>
+                  <Button variant='neutralWeak' size='large' className='h-auto min-h-[48px] whitespace-normal break-keep py-x3 text-center' onClick={() => { setSheet(false); onSetMain(user) }}>
                     {t('department.members.setMain')}
                   </Button>
                 )}
-                <Button variant='ghost' ghostColor='critical' size='large' className='h-auto min-h-12 whitespace-normal break-keep py-x3 text-center [overflow-wrap:break-word]' onClick={() => { setSheet(false); onRemove(user) }}>
+                <Button variant='ghost' ghostColor='critical' size='large' className='h-auto min-h-[48px] whitespace-normal break-keep py-x3 text-center [overflow-wrap:break-word]' onClick={() => { setSheet(false); onRemove(user) }}>
                   {t('department.members.removeFrom', { dept: deptName })}
                 </Button>
               </div>

@@ -251,12 +251,12 @@ const cases = [
   ...[
     { lang: "en", width: 390, font: 1, want: "two" },
     { lang: "en", width: 320, font: 2, want: "fit" },
-    // 300% — 요일 글은 200% 에서 멈춘다(#258). 처음부터 키운 것과, 날짜 고르기를 연 채 키운 것(QA: 두 글자 요일이 겹쳤다 — 뜬 뒤에도 다시 잰다)
+    // 300% — 요일 글은 글자 크기 설정을 따르지 않는다(달력 칸 안 글 — groo-design #260). 처음부터 키운 것과, 날짜 고르기를 연 채 키운 것(QA: 두 글자 요일이 겹쳤다)
     { lang: "en", width: 320, font: 3, want: "fit" },
     { lang: "en", width: 320, font: 3, want: "fit", live: true },
     { lang: "ko", width: 320, font: 2, want: "ko" },
   ].map(({ lang, width, font, want, live }) => ({
-    name: `요일 ${lang} ${width} · ${font * 100}%${live ? " 뜬 뒤 키움" : ""} — ${{ two: "Su ~ Sa", fit: "칸에 들면 Su ~ Sa · 안 들면 S ~ S", narrow: "S ~ S", ko: "일 ~ 토" }[want]} 한 줄, 칸 안(겹치지 않음)${font > 2 ? ", 글자 200% 에서 멈춤" : ""}`,
+    name: `요일 ${lang} ${width} · ${font * 100}%${live ? " 뜬 뒤 키움" : ""} — ${{ two: "Su ~ Sa", fit: "칸에 들면 Su ~ Sa · 안 들면 S ~ S", narrow: "S ~ S", ko: "일 ~ 토" }[want]} 한 줄, 칸 안(겹치지 않음), 요일 · 날짜 글은 100% 와 같은 크기`,
     async run() {
       const { ctx, page, errors } = await open("weekday", { width, query: `&lang=${lang}${live ? "" : `&font=${font}`}` });
       await page.locator("[data-slot=date-picker-weekday]").first().waitFor();
@@ -269,6 +269,8 @@ const cases = [
       await page.waitForTimeout(300);
       const m = await page.evaluate(() => {
         const cells = [...document.querySelectorAll("[data-slot=date-picker-weekdays] [data-slot=date-picker-weekday]")];
+        const days = [...document.querySelectorAll("[data-slot=date-picker-day]")].map((d) => parseFloat(getComputedStyle(d).fontSize));
+        window.__daySizes = [...new Set(days)];
         return cells.map((cell) => {
           const label = cell.querySelector(":scope > span:first-child");
           const r = label.getBoundingClientRect();
@@ -277,6 +279,7 @@ const cases = [
           return { text: label.textContent, size: parseFloat(getComputedStyle(label).fontSize), lines: Math.round(r.height / lh), inside: r.left >= c.left - 0.5 && r.right <= c.right + 0.5, labelWidth: r.width, cellWidth: c.width };
         });
       });
+      const daySizes = await page.evaluate(() => window.__daySizes);
       await ctx.close();
       const p = [...errors];
       const texts = m.map((x) => x.text);
@@ -291,9 +294,9 @@ const cases = [
         if (x.lines > 1) p.push(`"${x.text}" 가 ${x.lines} 줄`);
         if (!x.inside) p.push(`"${x.text}" 가 칸(${x.cellWidth.toFixed(1)}) 밖으로 나간다(${x.labelWidth.toFixed(1)})`);
       }
-      // 요일 글은 text-t4 14 의 200%(28) 에서 멈춘다(#258)
-      const size = Math.max(...m.map((x) => x.size));
-      if (size > 14 * Math.min(font, 2) + 0.5) p.push(`요일 글 ${size}px — 200% 상한 ${14 * Math.min(font, 2)}px 를 넘는다`);
+      // 요일 글은 text-t4-static 14, 날짜 숫자는 text-t5-static 16 — 글자 크기가 몇 배여도 100% 와 같다(groo-design #260)
+      expectEq(p, "요일 글 크기", [...new Set(m.map((x) => x.size))], [14]);
+      expectEq(p, "날짜 숫자 크기", daySizes, [16]);
       return p;
     },
   })),
@@ -308,7 +311,7 @@ const cases = [
     { lang: "en", width: 1280, font: 1 },
     { lang: "ko", width: 320, font: 2 },
   ].map(({ lang, width, font, live }) => ({
-    name: `캘린더 요일 머리 ${lang} ${width} · ${font * 100}%${live ? " 뜬 뒤 키움" : ""} — ${lang === "ko" ? "일 ~ 토" : "Su ~ Sa, 칸에 안 들면 S ~ S"} · 한 줄 · 두 글자는 칸 안(월 보기는 늘 칸 안) · 세 글자 없음(폰 월 · 넓은 월 · 년)`,
+    name: `캘린더 요일 머리 ${lang} ${width} · ${font * 100}%${live ? " 뜬 뒤 키움" : ""} — ${lang === "ko" ? "일 ~ 토" : "Su ~ Sa, 칸에 안 들면 S ~ S"} · 한 줄 · 칸 안 · 세 글자 없음 · 글 크기는 100% 와 같다(폰 월 · 넓은 월 · 년)`,
     async run() {
       const { ctx, page, errors } = await open("calendar-weekday", { width, query: `&lang=${lang}${live ? "" : `&font=${font}`}` });
       await page.locator("[data-check=year] .grid-cols-7").first().waitFor();
@@ -363,18 +366,12 @@ const cases = [
         expectEq(p, `${r.where} 요일`, texts, want);
         for (const c of r.cells) {
           if (c.lines > 1) p.push(`${r.where} "${c.text}" 가 ${c.lines} 줄`);
-          // 두 글자는 칸에 들 때만 쓰므로 늘 칸 안이다. 한 글자(한국어 포함)보다 더 줄일 꼴은 없다 — 년 보기 작은 달은 320 · 200% 에서
-          // 한 글자도 칸(약 14)보다 넓다(그 칸 배치의 일이라 요일 규칙의 판정에서는 뺀다)
-          // 월 보기(폰 · 넓은) 칸은 200% 상한 글이면 어느 꼴이든 들어야 한다 — 겹치지 않는다
-          if ((want === TWO || r.where !== "year") && (c.left < c.cellLeft - 0.5 || c.right > c.cellRight + 0.5)) p.push(`${r.where} "${c.text}" 가 칸 밖으로 나간다`);
+          // 요일 글은 글자 크기를 따르지 않아(#260) 어느 꼴이든 칸에 든다 — 겹치지 않는다
+          if (c.left < c.cellLeft - 0.5 || c.right > c.cellRight + 0.5) p.push(`${r.where} "${c.text}" 가 칸 밖으로 나간다`);
         }
       }
-      // 요일 머리는 글자 크기 200% 에서 멈춘다(groo-design #258) — 월 보기 text-t3 13 · 년 보기 text-t2 12 의 두 배까지
-      for (const r of rows) {
-        const cap = (r.where === "year" ? 12 : 13) * Math.min(font, 2);
-        const size = Math.max(...r.cells.map((c) => c.size));
-        if (size > cap + 0.5) p.push(`${r.where} 요일 글 ${size}px — 200% 상한 ${cap}px 를 넘는다`);
-      }
+      // 요일 머리는 캘린더 틀이라 글자 크기 설정을 따르지 않는다(groo-design #260) — 월 보기 text-t3-static 13 · 년 보기 text-t2-static 12, 몇 배여도 같다
+      for (const r of rows) expectEq(p, `${r.where} 요일 글 크기`, [...new Set(r.cells.map((c) => c.size))], [r.where === "year" ? 12 : 13]);
       // 넓은 화면 100% 에서는 모든 머리가 두 글자(세 글자로 늘리지 않는다)
       if (lang === "en" && width === 1280)
         for (const r of rows) expectEq(p, `${r.where} 넓은 화면`, r.cells.map((c) => c.text), TWO);
@@ -382,16 +379,18 @@ const cases = [
     },
   })),
 
-  // ── 캘린더 년 보기 한 줄 달 수 — 날짜 칸이 요일 · 날짜 글보다 좁아지면 줄인다(groo-design #257 DESIGN Layout › 지원 폭) ──
+  // ── 캘린더 년 보기 — 한 줄 달 수는 화면 폭으로만(2 · md 3 · lg 4), 작은 달의 요일 · 날짜 · "+N" 은 글자 크기를 따르지 않고(groo-design #260)
+  //    칸 · 원은 px, 달 이름 단추는 버튼 글이라 커진다. 글자를 키워도 달 수를 줄이지 않는다(옛 #257 판정은 걷었다) ──
   ...[
     { width: 320, font: 1, atLoad: true },
-    { width: 320, font: 2, atLoad: true },
-    { width: 320, font: 2, atLoad: false },
     { width: 320, font: 3, atLoad: true },
     { width: 320, font: 3, atLoad: false },
+    { width: 390, font: 3, atLoad: true },
+    { width: 768, font: 3, atLoad: true },
     { width: 1280, font: 1, atLoad: true },
+    { width: 1280, font: 3, atLoad: false },
   ].map(({ width, font, atLoad }) => ({
-    name: `년 보기 ${width} · ${font * 100}% ${atLoad ? "처음부터" : "뜬 뒤"} — 작은 달 요일 · 날짜가 칸 안(200% 에서 멈춤)이고, 한 줄 달 수는 그 글이 드는 가장 큰 수`,
+    name: `년 보기 ${width} · ${font * 100}% ${atLoad ? "처음부터" : "뜬 뒤"} — 한 줄 ${width >= 1280 ? 4 : width >= 768 ? 3 : 2} 달(화면 폭으로만), 작은 달 요일 · 날짜는 100% 크기로 칸 안 · 칸 44 · 원 24, 달 이름은 ${font * 100}%`,
     async run() {
       const { ctx, page, errors } = await open("year-view", { width, query: atLoad && font !== 1 ? `&font=${font}` : "" });
       await page.locator("[data-check=year-view] button").first().waitFor();
@@ -403,20 +402,15 @@ const cases = [
       await page.waitForTimeout(500);
       const m = await page.evaluate(() => {
         const root = document.querySelector("[data-check=year-view]");
-        const grid = root.querySelector(".grid");
+        const grid = root.querySelector("[data-year-grid]") ?? root.querySelector(".grid");
         const months = [...grid.children];
-        const textBox = (el) => {
-          const range = document.createRange();
-          range.selectNodeContents(el);
-          const rects = [...range.getClientRects()].filter((r) => r.width > 0);
-          return rects.length ? { left: Math.min(...rects.map((r) => r.left)), right: Math.max(...rects.map((r) => r.right)), width: Math.max(...rects.map((r) => r.right)) - Math.min(...rects.map((r) => r.left)) } : null;
-        };
         const out = [];
-        const sizes = [];
-        let need = 0;
+        const weekdaySizes = new Set();
+        const daySizes = new Set();
+        const cellHeights = new Set();
+        const circles = new Set();
         for (const month of months) {
           const rows = month.querySelectorAll(".grid-cols-7");
-          // 요일 칸 — 보이는 글(견본 빼고)
           for (const cell of rows[0]?.children ?? []) {
             const text = [...cell.childNodes].find((n) => n.nodeType === Node.TEXT_NODE);
             if (!text) continue;
@@ -424,44 +418,53 @@ const cases = [
             range.selectNodeContents(text);
             const r = [...range.getClientRects()].filter((x) => x.width > 0);
             const c = cell.getBoundingClientRect();
-            sizes.push(parseFloat(getComputedStyle(cell).fontSize));
+            weekdaySizes.add(parseFloat(getComputedStyle(cell).fontSize));
             if (r.length) out.push({ what: `요일 ${text.textContent}`, left: Math.min(...r.map((x) => x.left)), right: Math.max(...r.map((x) => x.right)), cellLeft: c.left, cellRight: c.right });
           }
-          // 날짜 칸 — 날 숫자
           for (const cell of rows[1]?.children ?? []) {
             const num = cell.querySelector("div");
             if (!num) continue;
-            sizes.push(parseFloat(getComputedStyle(num).fontSize));
-            const t = textBox(num);
+            daySizes.add(parseFloat(getComputedStyle(num).fontSize));
+            cellHeights.add(Math.round(cell.getBoundingClientRect().height));
+            circles.add(`${Math.round(num.getBoundingClientRect().width)}x${Math.round(num.getBoundingClientRect().height)}`);
+            const range = document.createRange();
+            range.selectNodeContents(num);
+            const r = [...range.getClientRects()].filter((x) => x.width > 0);
             const c = cell.getBoundingClientRect();
-            if (t) {
-              need = Math.max(need, t.width);
-              out.push({ what: `날 ${num.textContent}`, left: t.left, right: t.right, cellLeft: c.left, cellRight: c.right });
-            }
+            if (r.length) out.push({ what: `날 ${num.textContent}`, left: Math.min(...r.map((x) => x.left)), right: Math.max(...r.map((x) => x.right)), cellLeft: c.left, cellRight: c.right });
           }
         }
-        const gap = parseFloat(getComputedStyle(grid).columnGap) || 0;
-        const month = months[0];
-        const row = month.querySelector(".grid-cols-7");
-        const overhead = month.getBoundingClientRect().width - row.getBoundingClientRect().width;
-        const cellGap = parseFloat(getComputedStyle(row).columnGap) || 0;
         const tops = new Set(months.map((mm) => Math.round(mm.getBoundingClientRect().top)));
-        const columns = Math.round(months.length / tops.size);
-        const cellAt = (c) => ((grid.clientWidth - (c - 1) * gap) / c - overhead - 6 * cellGap) / 7;
-        return { out, columns, need, maxSize: Math.max(...sizes), nextCell: cellAt(columns + 1), preferred: window.innerWidth >= 1280 ? 4 : window.innerWidth >= 768 ? 3 : 2 };
+        const title = months[0].querySelector("button");
+        return {
+          out,
+          columns: Math.round(months.length / tops.size),
+          weekdaySizes: [...weekdaySizes],
+          daySizes: [...daySizes],
+          cellHeights: [...cellHeights],
+          circles: [...circles],
+          titleSize: parseFloat(getComputedStyle(title).fontSize),
+          // 옛 #257 판정의 견본(격자 옆 보이지 않는 글 줄) · 달 수를 정하던 style 이 남지 않는다
+          probe: grid.parentElement.children.length > 1 || !!grid.style.gridTemplateColumns,
+        };
       });
       await ctx.close();
       const p = [...errors];
-      const bad = m.out.filter((x) => x.left < x.cellLeft - 0.5 || x.right > x.cellRight + 0.5);
-      if (bad.length) p.push(`칸 밖으로 나간 글 ${bad.length} 개(${[...new Set(bad.map((x) => x.what))].slice(0, 4).join(", ")})`);
-      if (m.columns > m.preferred) p.push(`한 줄 달 수 ${m.columns} > 넓은 화면 수 ${m.preferred}`);
-      // 하나 더 놓으면 칸에 들지 않아야 한다 — 들 수 있는데 줄이지 않는다
-      if (m.columns < m.preferred && m.nextCell >= m.need) p.push(`한 줄 ${m.columns + 1} 달이어도 칸(${m.nextCell.toFixed(1)})에 글(${m.need.toFixed(1)})이 드는데 ${m.columns} 달로 줄였다`);
-      if (width === 1280 && font === 1 && m.columns !== 4) p.push(`1280 · 100% 에서 한 줄 ${m.columns} 달(4 달이어야)`);
-      // 요일 · 날짜 숫자는 글자 크기 200% 에서 멈춘다(groo-design #258) — text-t2 12 의 두 배 24
-      if (m.maxSize > Math.min(font, 2) * 12 + 0.5) p.push(`요일 · 날짜 글 ${m.maxSize}px — 200% 상한 ${Math.min(font, 2) * 12}px 를 넘는다`);
-      p.push(...[]);
-      return p.length ? p : (console.log(`   · 한 줄 ${m.columns} 달 · 칸에 들어야 하는 글 ${m.need.toFixed(1)}`), p);
+      const want = width >= 1280 ? 4 : width >= 768 ? 3 : 2;
+      if (m.columns !== want) p.push(`한 줄 ${m.columns} 달(${want} 달이어야 — 화면 폭으로만 정한다)`);
+      // 칸 안 — 320 의 두 달 줄은 날짜 칸이 14 라 두 자리 날("28" 약 14.5)이 칸을 조금 넘는다. 년 보기의 원래 반응형 열(옛 판과 같다)이 정한
+      // 폭이라 여기서는 넘친 양만 본다 — 글자 크기가 바뀌어도 넘친 양이 같다(글은 그대로다)
+      const over = Math.max(0, ...m.out.map((x) => Math.max(x.cellLeft - x.left, x.right - x.cellRight)));
+      const limit = width < 360 ? 1 : 0.5;
+      if (over > limit) p.push(`칸 밖으로 ${over.toFixed(1)} 나간 글이 있다(${[...new Set(m.out.filter((x) => x.left < x.cellLeft - limit || x.right > x.cellRight + limit).map((x) => x.what))].slice(0, 4).join(", ")})`);
+      expectEq(p, "요일 글 크기", m.weekdaySizes, [12]);
+      expectEq(p, "날짜 글 크기", m.daySizes, [12]);
+      expectEq(p, "날짜 칸 높이", m.cellHeights, [44]);
+      expectEq(p, "날짜 원", m.circles, ["24x24"]);
+      // 달 이름 단추는 버튼 글(text-t4 14)이라 글자 크기를 따라 커진다
+      expectEq(p, "달 이름 글 크기", m.titleSize, 14 * font);
+      if (m.probe) p.push("옛 한 줄 달 수 견본이 남아 있다");
+      return p;
     },
   })),
 ];

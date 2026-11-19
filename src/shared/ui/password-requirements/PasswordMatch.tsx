@@ -33,7 +33,7 @@ const PasswordMatch = ({ password, confirmPassword, className }: PasswordMatchPr
       )}
       aria-live='polite'
     >
-      <Icon className='h-3.5 w-3.5 shrink-0' aria-hidden />
+      <Icon className='size-[14px] shrink-0' aria-hidden />
       <span>{matched ? t('passwordMatched') : t('passwordMismatch')}</span>
     </p>
   );

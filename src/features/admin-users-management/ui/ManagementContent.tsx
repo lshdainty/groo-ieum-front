@@ -53,7 +53,7 @@ const UsersSkeleton = ({ desktop }: { desktop: boolean }) => {
       </div>
       <Card body='list'>
         <CardHeader>
-          <Skeleton text='t5' className='block w-24' />
+          <Skeleton text='t5' className='block w-[96px]' />
         </CardHeader>
         <Table caption={t('users.listCaption')} rowHeight='rich'>
           <TableHeader>

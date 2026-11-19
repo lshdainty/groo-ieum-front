@@ -32,7 +32,7 @@ const PasswordRequirements = ({ password, className }: PasswordRequirementsProps
               satisfied ? 'text-fg-positive' : 'text-fg-neutral-muted'
             )}
           >
-            <Icon className='h-3.5 w-3.5 shrink-0' aria-hidden />
+            <Icon className='size-[14px] shrink-0' aria-hidden />
             <span>{t(rule.labelKey)}</span>
           </li>
         );

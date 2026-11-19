@@ -25,7 +25,7 @@ const UserList = ({ users, selectedUserId, onSelectUser }: UserListProps) => {
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex shrink-0 flex-col gap-x3 px-x4 pb-x2 pt-x3">
         <h3 className="m-0 flex items-center gap-x2 text-t5 font-bold text-fg-neutral">
-          <UserIcon className="size-4" aria-hidden />
+          <UserIcon className="size-[16px]" aria-hidden />
           {t('authority.users')}
         </h3>
         <Input

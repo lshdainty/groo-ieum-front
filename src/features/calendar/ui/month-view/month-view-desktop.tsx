@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/shared/lib/cn";
 import { formatDayText } from "@/shared/lib/date-text";
 import { useWeekdayFit, WeekdayProbe } from "@/shared/ds/date-picker";
-import { WEEK_GRID_TEXT } from "@/shared/ds/week-grid-text";
 import { calculateMonthEventPositions, getCalendarCells } from "@/features/calendar/lib/helpers";
 import { useCalendar } from "@/features/calendar/model/calendar-context";
 import { DragSelectProvider, useDragSelect } from "@/features/calendar/model/drag-select-context";
@@ -23,12 +22,12 @@ import { useChipMetrics } from "./use-chip-metrics";
 /** 한 칸에 놓을 수 있는 줄 수의 상한 — 접는 것은 칩 자리 높이가 정한다(줄이 넘치면 "+N개") */
 const MAX_ROWS = 100;
 
-/** 칸 104 − 위 4 − 날 숫자 26 − 아래 2 − 줄 사이 2 = 70, 칩 20 · "+N개" 18 · 사이 2 (글자 100% 의 값 — 실제로는 잰다) */
+/** 칸 104 − 위 4 − 날 숫자 26 − 아래 2 − 줄 사이 2 = 70, 칩 20 · "+N개" 18 · 사이 2 (스펙 값 — 실제로는 잰다) */
 const DESKTOP_METRICS: ChipMetrics = { avail: 70, chip: 20, more: 18, gap: 2 };
 
 /**
  * 요일 머리 — 높이 36 · t3 13/18 · fg-neutral-subtle · 아래 1px 선. 일 fg-critical · 토 fg-informative. 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa
- * (넓어도 세 글자로 늘리지 않는다), 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256 — ds useWeekdayFit), 글자는 200% 에서 멈춘다(#258 — ds WEEK_GRID_TEXT)
+ * (넓어도 세 글자로 늘리지 않는다), 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256 — ds useWeekdayFit), 글자 크기 설정을 따르지 않는다(#260 — text-t3-static)
  */
 export function WeekdayHead() {
   const rowRef = useRef<HTMLDivElement>(null);
@@ -37,7 +36,7 @@ export function WeekdayHead() {
     <div
       ref={rowRef}
       aria-hidden
-      className={cn("grid h-x9 grid-cols-7 items-center border-b border-stroke-neutral-subtle text-center text-fg-neutral-subtle", WEEK_GRID_TEXT.t3)}
+      className="grid h-x9 grid-cols-7 items-center border-b border-stroke-neutral-subtle text-center text-fg-neutral-subtle text-t3-static"
     >
       {weekday.weekdays.map((day, index) => (
         <span
@@ -91,10 +90,10 @@ function MonthGrid({ singleDayEvents, multiDayEvents, onEventClick, onCreate }: 
       <div role="group" aria-label={dayjs(selectedDate).format("YYYY-MM")} className="relative grid grid-cols-7">
         {/* 칩 · "+N개" 한 줄의 실제 높이를 재는 보이지 않는 견본 */}
         <div aria-hidden className="pointer-events-none invisible absolute left-0 top-0 w-full">
-          <div ref={chipRef} className="block min-h-x5 px-x1_5 py-x0_5 text-t2 font-medium">
+          <div ref={chipRef} className="block min-h-x5 px-x1_5 py-x0_5 text-t2-static font-medium">
             &nbsp;
           </div>
-          <div ref={moreRef} className="pt-x0_5 text-t2 font-bold">
+          <div ref={moreRef} className="pt-x0_5 text-t2-static font-bold">
             &nbsp;
           </div>
         </div>
@@ -137,9 +136,8 @@ function MonthGrid({ singleDayEvents, multiDayEvents, onEventClick, onCreate }: 
                     onClick={() => (selected ? canCreate && onCreate(date) : setSelectedDate(date))}
                     data-slot="month-day-number"
                     className={cn(
-                      // 원 26(글자 13/18 + 8) — 글자가 커지면 원도 따라 커진다
-                      "grid size-[calc(min(var(--text-t3--line-height),calc(var(--text-t3-static--line-height)_*_2))_+_8px)] shrink-0 place-items-center rounded-full font-medium tabular-nums focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring",
-                      WEEK_GRID_TEXT.t3,
+                      // 원 26 고정(글자 13/18 + 8) — 날짜 숫자는 글자 크기 설정을 따르지 않는다(칸 안 글 — groo-design #260)
+                      "grid size-[26px] shrink-0 place-items-center rounded-full font-medium tabular-nums text-t3-static focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focus-ring",
                       selected
                         ? "bg-bg-neutral-inverted font-bold text-fg-neutral-inverted"
                         : cn(dayTone({ currentMonth, sunday, saturday, holiday: holidayInfo }), today && "bg-bg-neutral-weak font-bold"),
@@ -150,7 +148,7 @@ function MonthGrid({ singleDayEvents, multiDayEvents, onEventClick, onCreate }: 
                   {holidayInfo && (
                     <span
                       data-slot="month-holiday"
-                      className={cn("min-w-0 truncate text-t1 font-medium", dayTone({ currentMonth, sunday, saturday, holiday: holidayInfo }))}
+                      className={cn("min-w-0 truncate text-t1-static font-medium", dayTone({ currentMonth, sunday, saturday, holiday: holidayInfo }))}
                     >
                       {holidayInfo.holiday_name}
                     </span>

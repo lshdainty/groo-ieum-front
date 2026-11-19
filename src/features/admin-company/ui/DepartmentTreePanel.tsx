@@ -13,7 +13,7 @@ import { findDept, flattenDepts, hasChildren, toTreeNodes, type Dept } from '../
 /** 패널 머리 — "부서"(t5 700) + 오른쪽 ⋮ 자리. 머리 위 12 · 아래 8 · 좌 16 · 우 8(T12) */
 export function PanelHeader({ title, id, action }: { title: string; id: string; action?: ReactNode }) {
   return (
-    <div className='flex min-h-11 items-center justify-between gap-x2 pb-x2 pl-x4 pr-x2 pt-x3'>
+    <div className='flex min-h-[44px] items-center justify-between gap-x2 pb-x2 pl-x4 pr-x2 pt-x3'>
       <h2 id={id} className='m-0 min-w-0 text-t5 font-bold text-fg-neutral'>
         {title}
       </h2>
@@ -27,8 +27,8 @@ export function TreeSkeleton() {
   return (
     <div className='px-x2 pb-x4' aria-hidden>
       {[1, 2, 2, 3, 3, 2].map((level, i) => (
-        <div key={i} className='flex min-h-11 items-center gap-x1_5 py-x3 pr-x2' style={{ paddingLeft: `calc(var(--spacing-x2) + ${level - 1} * var(--spacing-x5))` }}>
-          <Skeleton className='size-4 shrink-0' />
+        <div key={i} className='flex min-h-[44px] items-center gap-x1_5 py-x3 pr-x2' style={{ paddingLeft: `calc(var(--spacing-x2) + ${level - 1} * var(--spacing-x5))` }}>
+          <Skeleton className='size-[16px] shrink-0' />
           <Skeleton text='t4' className='block w-3/5' />
         </div>
       ))}

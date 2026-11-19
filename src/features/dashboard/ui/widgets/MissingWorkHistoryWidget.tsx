@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/cn'
 import { useWeekdayFit, WeekdayProbe } from '@/shared/ds/date-picker'
-import { WEEK_GRID_TEXT } from '@/shared/ds/week-grid-text'
 import { Button } from '@/shared/ds/button'
 import { Skeleton } from '@/shared/ds/skeleton'
 import { useUnregisteredWorkDatesQuery } from '@/entities/work'
@@ -32,7 +31,8 @@ export const MissingWorkHistoryWidget = () => {
   const cells: (number | null)[] = [...Array<null>(lead).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)]
   while (cells.length % 7 !== 0) cells.push(null)
   const weeks = Array.from({ length: cells.length / 7 }, (_, i) => cells.slice(i * 7, i * 7 + 7))
-  // 요일 머리 — 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa, 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256)
+  // 요일 머리 — 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa, 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256).
+  // 요일 · 날짜 숫자는 달력 틀이라 글자 크기 설정을 따르지 않는다(#260 — text-t2-static · text-t3-static). 범례 글은 커진다
   const weekdayRowRef = useRef<HTMLTableRowElement>(null)
   const weekday = useWeekdayFit(weekdayRowRef)
 
@@ -57,7 +57,7 @@ export const MissingWorkHistoryWidget = () => {
           <thead>
             <tr ref={weekdayRowRef}>
               {weekday.weekdays.map((w, i) => (
-                <th key={i} scope='col' abbr={weekday.long[i]} className={cn('relative h-x7 whitespace-nowrap p-0 font-normal text-fg-neutral-subtle', WEEK_GRID_TEXT.t2)}>
+                <th key={i} scope='col' abbr={weekday.long[i]} className='relative h-x7 whitespace-nowrap p-0 text-t2-static font-normal text-fg-neutral-subtle'>
                   {w}
                   <WeekdayProbe>{weekday.full[i]}</WeekdayProbe>
                 </th>
@@ -77,8 +77,7 @@ export const MissingWorkHistoryWidget = () => {
                     <td key={di} className='h-x9 p-0 text-center' data-day={d} data-missing={isMissing || undefined}>
                       <span
                         className={cn(
-                          'inline-flex size-[30px] items-center justify-center rounded-full font-medium tabular-nums text-fg-neutral',
-                          WEEK_GRID_TEXT.t3,
+                          'inline-flex size-[30px] items-center justify-center rounded-full text-t3-static font-medium tabular-nums text-fg-neutral',
                           future && 'font-normal text-fg-neutral-subtle',
                           isToday && 'font-bold outline-[1.5px] -outline-offset-[1.5px] outline-stroke-neutral-contrast',
                           isMissing && 'bg-bg-critical-weak font-bold text-fg-critical-contrast',
@@ -113,7 +112,7 @@ const MissingSkeleton = () => (
   <div className='mt-x2 flex flex-col gap-x2'>
     <div className='grid grid-cols-7 gap-x1'>
       {Array.from({ length: 7 }).map((_, i) => (
-        <Skeleton key={i} text='t2' className='block w-full' />
+        <Skeleton key={i} text='t2-static' className='block w-full' />
       ))}
     </div>
     <div className='grid grid-cols-7 gap-x1'>

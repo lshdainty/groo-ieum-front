@@ -11,7 +11,6 @@ import {
 import { formatDayText } from "@/shared/lib/date-text";
 import { cn } from "@/shared/lib/cn";
 import { useWeekdayFit, WeekdayProbe } from "@/shared/ds/date-picker";
-import { WEEK_GRID_TEXT } from "@/shared/ds/week-grid-text";
 
 import type { IEvent } from "@/features/calendar/model/interfaces";
 import { MonthChip, MonthChipSpacer, MonthMore } from "./month-chip";
@@ -22,12 +21,12 @@ import { useChipMetrics } from "./use-chip-metrics";
 /** 한 칸에 놓을 수 있는 줄 수의 상한 — 접는 것은 칩 자리 높이가 정한다(줄이 넘치면 "+N개") */
 const MAX_ROWS = 100;
 
-/** 칸 103 − 위 2 − 날 숫자 26 − 아래 2 = 73, 칩 18 · "+N개" 16 · 사이 2 (글자 100% 의 값 — 실제로는 잰다) */
+/** 칸 103 − 위 2 − 날 숫자 26 − 아래 2 = 73, 칩 18 · "+N개" 16 · 사이 2 (스펙 값 — 실제로는 잰다) */
 const PHONE_METRICS: ChipMetrics = { avail: 73, chip: 18, more: 16, gap: 2 };
 
 /**
  * 요일 줄 — 높이 32 · t3 13/18 · fg-neutral-subtle, 일 fg-critical · 토 fg-brand (I-09 8). 한국어 일 ~ 토 · 영어 두 글자 Su ~ Sa,
- * 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256 — ds useWeekdayFit), 글자는 200% 에서 멈춘다(#258 — ds WEEK_GRID_TEXT)
+ * 칸에 들지 않으면 한 글자 · 줄을 바꾸지 않는다(groo-design #256 — ds useWeekdayFit), 글자 크기 설정을 따르지 않는다(#260 — text-t3-static)
  */
 export function WeekdayRow() {
   const rowRef = useRef<HTMLDivElement>(null);
@@ -36,7 +35,7 @@ export function WeekdayRow() {
     <div
       ref={rowRef}
       aria-hidden
-      className={cn("grid h-x8 shrink-0 grid-cols-7 items-center px-[2px] text-center text-fg-neutral-subtle", WEEK_GRID_TEXT.t3)}
+      className="grid h-x8 shrink-0 grid-cols-7 items-center px-[2px] text-center text-fg-neutral-subtle text-t3-static"
     >
       {weekday.weekdays.map((day, index) => (
         <span
@@ -101,11 +100,11 @@ export function CalendarMonthViewPhone({
         >
           <div
             ref={chipRef}
-            className="block min-h-x4_5 px-[3px] py-px text-t2 font-medium"
+            className="block min-h-x4_5 px-[3px] py-px text-t2-static font-medium"
           >
             &nbsp;
           </div>
-          <div ref={moreRef} className="text-t2 font-bold">
+          <div ref={moreRef} className="text-t2-static font-bold">
             &nbsp;
           </div>
         </div>
@@ -137,9 +136,8 @@ export function CalendarMonthViewPhone({
                   aria-hidden
                   data-slot="month-day-number"
                   className={cn(
-                    // 원 26(글자 14/19 + 7) — 글자가 커지면 원도 따라 커진다
-                    "grid size-[calc(min(var(--text-t4--line-height),calc(var(--text-t4-static--line-height)_*_2))_+_7px)] shrink-0 place-items-center rounded-full font-medium tabular-nums",
-                    WEEK_GRID_TEXT.t4,
+                    // 원 26 고정(글자 14/19 + 7) — 날짜 숫자는 글자 크기 설정을 따르지 않는다(칸 안 글 — groo-design #260)
+                    "grid size-[26px] shrink-0 place-items-center rounded-full font-medium tabular-nums text-t4-static",
                     dayTone({ currentMonth, sunday, saturday, holiday: holidayInfo }),
                     today && "bg-bg-neutral-weak font-bold",
                   )}
@@ -150,7 +148,7 @@ export function CalendarMonthViewPhone({
                   <span
                     data-slot="month-holiday"
                     className={cn(
-                      "min-w-0 truncate text-t1 font-medium",
+                      "min-w-0 truncate text-t1-static font-medium",
                       dayTone({ currentMonth, sunday, saturday, holiday: holidayInfo }),
                     )}
                   >
