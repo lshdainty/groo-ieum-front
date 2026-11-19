@@ -83,7 +83,7 @@ export function EventSheet({
         </ResponsiveDialogBody>
         {inDetail && current && editable ? (
           <ResponsiveDialogFooter>
-            <Button variant='ghost' ghostColor='critical' size='large' onClick={() => onRequestDelete(current)} data-event-delete>
+            <Button variant='ghost' ghostColor='critical' size='large' data-fit='content' onClick={() => onRequestDelete(current)} data-event-delete>
               {tc('delete')}
             </Button>
             <Button variant='neutralSolid' onClick={() => onEdit(current)} data-event-edit>
