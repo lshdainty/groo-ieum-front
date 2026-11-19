@@ -116,7 +116,7 @@ const TreeContext = React.createContext<TreeContextValue | null>(null);
 
 // 줄 — 44 · 위아래 12 · 오른쪽 8 · 모서리 10(왼쪽은 단계마다 style). 호버(웹) · 누름은 bg-layer-default-pressed, 고른 항목은 bg-neutral-weak-pressed 그대로
 const ROW = [
-  "relative flex min-h-11 cursor-pointer rounded-r2_5 py-x3 pr-x2",
+  "relative flex min-h-[44px] cursor-pointer rounded-r2_5 py-x3 pr-x2",
   "[transition:background-color_var(--motion-duration-color-transition)_var(--motion-ease-easing)]",
 ].join(" ");
 const ROW_IDLE = "[@media(hover:hover)]:hover:bg-bg-layer-default-pressed active:bg-bg-layer-default-pressed";
@@ -128,9 +128,9 @@ const CONTENT = [
   "motion-safe:group-active/tree-row:[scale:calc(1-2/var(--press-basis))]",
 ].join(" ");
 // 꺾쇠 칸 20 × 19 · 아이콘 16 — 표시만(누르는 자리는 줄 전체)
-const CHEVRON_CELL = "flex h-[19px] w-5 shrink-0 items-center justify-center text-fg-neutral-subtle";
-const CHEVRON = "size-4 shrink-0 [transition:rotate_var(--motion-duration-d6)_var(--motion-ease-easing)] motion-reduce:transition-none";
-const ICON = "flex h-[19px] shrink-0 items-center text-fg-neutral-subtle [&>svg]:size-4 [&>svg]:shrink-0";
+const CHEVRON_CELL = "flex h-[19px] w-[20px] shrink-0 items-center justify-center text-fg-neutral-subtle";
+const CHEVRON = "size-[16px] shrink-0 [transition:rotate_var(--motion-duration-d6)_var(--motion-ease-easing)] motion-reduce:transition-none";
+const ICON = "flex h-[19px] shrink-0 items-center text-fg-neutral-subtle [&>svg]:size-[16px] [&>svg]:shrink-0";
 // 이름 — t4 14 / 19 · 400 · fg-neutral, 줄을 바꾼다(단어 단위)
 const LABEL = "min-w-0 flex-1 font-sans text-t4 font-normal text-fg-neutral break-keep [overflow-wrap:break-word]";
 

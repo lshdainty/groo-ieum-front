@@ -286,7 +286,7 @@ const HEADER = [
 // 닫기 — 52 투명 상자 · 아이콘 22 fg-neutral-subtle. 아이콘이 위 28 · 오른쪽 24 에 오도록 상자를 (52 − 22) ÷ 2 = 15 만큼 당긴다.
 // 누르면 bg-layer-floating-pressed + 2px 거리 축소(기준 52 → 0.962)
 const CLOSE = [
-  "absolute top-[calc(var(--spacing-x7)-15px+env(safe-area-inset-top))] flex size-13 cursor-pointer items-center justify-center",
+  "absolute top-[calc(var(--spacing-x7)-15px+env(safe-area-inset-top))] flex size-[52px] cursor-pointer items-center justify-center",
   "rounded-r3 border-0 bg-transparent p-0 text-fg-neutral-subtle [&>svg]:size-[22px]",
   "[transition:background-color_var(--motion-duration-color-transition)_var(--motion-ease-easing),scale_var(--motion-duration-pressed-scale)_var(--motion-ease-pressed-scale)]",
   "hover:bg-bg-layer-floating-pressed active:bg-bg-layer-floating-pressed active:[scale:calc(1-2/52)] motion-reduce:active:[scale:1]",

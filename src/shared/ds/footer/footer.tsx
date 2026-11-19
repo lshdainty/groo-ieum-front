@@ -68,7 +68,7 @@ const LINK = [
 ].join(" ");
 const LINK_SIZE: Record<FooterLinkSize, string> = {
   large: "text-t5 font-medium text-fg-neutral hover:text-fg-neutral-subtle active:text-fg-neutral-subtle [&>svg]:size-[14px]",
-  medium: "text-t4 font-medium text-fg-neutral-muted hover:text-fg-neutral active:text-fg-neutral [&>svg]:size-3",
+  medium: "text-t4 font-medium text-fg-neutral-muted hover:text-fg-neutral active:text-fg-neutral [&>svg]:size-[12px]",
 };
 
 // 링크의 기본 크기 — 놓인 자리가 정한다(열 안 large, 그 밖 medium)
