@@ -172,7 +172,7 @@ export function WorkCodeFormDialog({
         </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           {row && sheet && onDelete && !headerAction && (
-            <Button variant='ghost' ghostColor='critical' size='large' disabled={busy} onClick={() => onDelete(row)} data-work-code-delete>
+            <Button variant='ghost' ghostColor='critical' size='large' data-fit='content' disabled={busy} onClick={() => onDelete(row)} data-work-code-delete>
               {tc('delete')}
             </Button>
           )}

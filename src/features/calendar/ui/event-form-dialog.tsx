@@ -323,7 +323,7 @@ export function EventFormDialog({ open, onClose, event, start, fixedUser, onDele
         </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           {editing && onDelete && (
-            <Button variant='ghost' ghostColor='critical' size='large' disabled={busy} onClick={onDelete} data-event-delete>
+            <Button variant='ghost' ghostColor='critical' size='large' data-fit='content' disabled={busy} onClick={onDelete} data-event-delete>
               {tc('delete')}
             </Button>
           )}

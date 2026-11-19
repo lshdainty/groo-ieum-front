@@ -162,7 +162,7 @@ export function HolidayFormDialog({
         </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           {editing && sheet && onDelete && (
-            <Button variant='ghost' ghostColor='critical' size='large' disabled={busy} onClick={() => onDelete(target.row)} data-holiday-delete>
+            <Button variant='ghost' ghostColor='critical' size='large' data-fit='content' disabled={busy} onClick={() => onDelete(target.row)} data-holiday-delete>
               {tc('delete')}
             </Button>
           )}

@@ -337,9 +337,34 @@ function LabelScene() {
   )
 }
 
+// 시트 바닥 왼쪽 [삭제] 는 글자만큼(groo-design #268 · bottom-sheet.md 코드 — data-fit="content"). 바닥은 시트 그대로의 부품(ResponsivePair)이다.
+// 짧은 [저장] 은 한 줄(주 버튼이 남은 폭), 남은 폭에 들지 않는 주 버튼은 위로 쌓이고 [삭제] 는 아래 왼쪽에 글 폭, 주 버튼이 없으면 [삭제] 하나만 왼쪽
+const FIT_LONG = '이 휴가 신청을 저장하고 결재자에게 다시 알리기'
+function FitScene() {
+  const del = (
+    <Button variant='ghost' ghostColor='critical' data-fit='content' data-check='del'>
+      삭제
+    </Button>
+  )
+  return (
+    <div className='flex flex-col gap-x6' style={{ width: 390 }}>
+      <BottomSheetFooter data-check='fit-row'>
+        {del}
+        <Button data-check='main'>저장</Button>
+      </BottomSheetFooter>
+      <BottomSheetFooter data-check='fit-stack'>
+        {del}
+        <Button data-check='main'>{FIT_LONG}</Button>
+      </BottomSheetFooter>
+      <BottomSheetFooter data-check='fit-alone'>{del}</BottomSheetFooter>
+    </div>
+  )
+}
+
 function Scene() {
   if (scene === 'header') return <HeaderScene />
   if (scene === 'label') return <LabelScene />
+  if (scene === 'fit') return <FitScene />
   if (scene === 'boundary-error' || scene === 'boundary-chunk') {
     return (
       <AppHistoryRouter>

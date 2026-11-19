@@ -1243,6 +1243,77 @@ const cases = [
     },
   })),
 
+
+  // ── 시트 바닥 왼쪽 [삭제] 는 글자만큼(groo-design #268 — bottom-sheet.md "머리 · 본문 · 바닥" · 코드, 담다 responsive-pair.test) ──
+  {
+    name: '시트 바닥 [삭제](data-fit="content") — 글 폭이고 주 버튼이 남은 폭, 주 버튼이 들지 않으면 위로 쌓이고 [삭제] 는 아래 왼쪽 글 폭, 혼자면 왼쪽 글 폭',
+    async run() {
+      const { ctx, page, errors } = await open("fit");
+      await page.locator("[data-check=fit-alone] [data-check=del]").waitFor();
+      const m = await page.evaluate(() => {
+        const box = (el) => {
+          const r = el.getBoundingClientRect();
+          return { l: r.left, r: r.right, t: r.top, w: r.width };
+        };
+        const of = (name) => {
+          const row = document.querySelector(`[data-check=${name}]`);
+          const del = row.querySelector("[data-check=del]");
+          const main = row.querySelector("[data-check=main]");
+          const cs = getComputedStyle(row);
+          return {
+            row: { l: row.getBoundingClientRect().left + parseFloat(cs.paddingLeft), r: row.getBoundingClientRect().right - parseFloat(cs.paddingRight) },
+            del: box(del),
+            // 글 폭 — 버튼이 늘지 않았으면 상자 폭이 내용 폭과 같다(max-content)
+            delContent: (() => {
+              const c = del.cloneNode(true);
+              c.style.cssText = "position:absolute;visibility:hidden;width:max-content;flex:none";
+              document.body.appendChild(c);
+              const w = c.getBoundingClientRect().width;
+              c.remove();
+              return w;
+            })(),
+            main: main ? box(main) : null,
+          };
+        };
+        return { row: of("fit-row"), stack: of("fit-stack"), alone: of("fit-alone") };
+      });
+      await ctx.close();
+      const p = [...errors];
+      const near = (a, b) => Math.abs(a - b) <= 0.5;
+      for (const [n, x] of Object.entries(m)) {
+        if (!near(x.del.w, x.delContent)) p.push(`${n} [삭제] 폭 ${x.del.w.toFixed(1)} — 글 폭 ${x.delContent.toFixed(1)} 이어야`);
+        if (!near(x.del.l, x.row.l)) p.push(`${n} [삭제] 가 바닥 왼쪽에 있지 않다(${x.del.l.toFixed(1)} · ${x.row.l.toFixed(1)})`);
+      }
+      const R = m.row;
+      if (!near(R.del.t, R.main.t)) p.push("짧은 [저장] 이 [삭제] 와 한 줄이 아니다");
+      if (!near(R.main.l, R.del.r + 8) || !near(R.main.r, R.row.r)) p.push(`[저장] 이 남은 폭을 채우지 않는다(${R.main.l.toFixed(1)}~${R.main.r.toFixed(1)})`);
+      const S = m.stack;
+      if (!(S.main.t < S.del.t)) p.push("남은 폭에 들지 않는 주 버튼이 위로 쌓이지 않았다");
+      if (!near(S.main.l, S.row.l) || !near(S.main.r, S.row.r)) p.push(`쌓인 주 버튼이 폭 전체가 아니다(${S.main.l.toFixed(1)}~${S.main.r.toFixed(1)})`);
+      return p;
+    },
+  },
+  {
+    name: '화면의 시트 · 반응형 대화상자 바닥에 둔 ghost critical(삭제 · 빼기 · 신청 취소)은 data-fit="content" — 옛 반 폭 덮기(grow-0 · basis-auto 손질)는 0',
+    async run() {
+      const p = [];
+      let seen = 0;
+      for (const file of codeFiles(resolve(ROOT, "src"))) {
+        if (/[\\/]shared[\\/]ds[\\/]|\.demo\./.test(file)) continue;
+        const src = readFileSync(file, "utf8");
+        for (const f of src.matchAll(/<(ResponsiveDialogFooter|BottomSheetFooter)(?=[\s>])[\s\S]*?<\/\1>/g)) {
+          for (const b of f[0].matchAll(/<Button\b[\s\S]*?>/g)) {
+            if (!/ghostColor=['"]critical['"]/.test(b[0])) continue;
+            seen += 1;
+            if (!/data-fit=['"]content['"]/.test(b[0])) p.push(`${file.slice(ROOT.length + 1)}:${src.slice(0, f.index + b.index).split("\n").length} data-fit 없음`);
+          }
+        }
+        if (/grow-0[^'"]*basis-auto|basis-auto[^'"]*grow-0/.test(src)) p.push(`${file.slice(ROOT.length + 1)} 반 폭을 손으로 덮는 grow-0 · basis-auto`);
+      }
+      if (seen < 5) p.push(`바닥 ghost critical 을 ${seen} 개만 찾았다 — 찾는 식이 깨졌다`);
+      return p;
+    },
+  },
 ];
 
 const only = process.argv[2];

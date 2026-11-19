@@ -150,7 +150,7 @@ export function NoticeFormDialog({
         </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           {editing && sheet && onDelete && (
-            <Button variant='ghost' ghostColor='critical' size='large' disabled={busy} onClick={() => onDelete(target.row)} data-notice-delete>
+            <Button variant='ghost' ghostColor='critical' size='large' data-fit='content' disabled={busy} onClick={() => onDelete(target.row)} data-notice-delete>
               {tc('delete')}
             </Button>
           )}

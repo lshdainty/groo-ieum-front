@@ -142,7 +142,8 @@ export function PolicyEditDialog({
             <Button
               variant='ghost'
               ghostColor='critical'
-              className='mr-auto max-[79.99rem]:!grow-0 max-[79.99rem]:!basis-auto'
+              data-fit='content'
+              className='mr-auto'
               disabled={!deletable || busy}
               aria-describedby={deletable ? undefined : 'policy-delete-blocked'}
               onClick={() => setConfirmOpen(true)}

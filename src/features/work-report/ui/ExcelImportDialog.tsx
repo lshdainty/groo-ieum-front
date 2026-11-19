@@ -388,7 +388,7 @@ export function ExcelImportDialog({
               </div>
             </BottomSheetBody>
             <BottomSheetFooter>
-              <Button variant='ghost' ghostColor='critical' size='large' onClick={() => drop(fixingRow.id)} data-import-drop>
+              <Button variant='ghost' ghostColor='critical' size='large' data-fit='content' onClick={() => drop(fixingRow.id)} data-import-drop>
                 {t('rep.xDrop')}
               </Button>
               <Button variant='neutralSolid' onClick={() => setFixingId(null)} data-import-fix-done>
