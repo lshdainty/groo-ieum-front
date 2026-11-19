@@ -246,7 +246,7 @@ export function RequestDetail({
             </ResponsiveDialogFooter>
           ) : mine && r ? (
             <ResponsiveDialogFooter>
-              <Button variant='ghost' ghostColor='critical' data-fit='content' disabled={busy} onClick={() => setCancelTarget(r)} data-cancel-request>
+              <Button variant='ghost' ghostColor='critical' data-fit='content' className='mr-auto' disabled={busy} onClick={() => setCancelTarget(r)} data-cancel-request>
                 {t('req.cancel')}
               </Button>
               <ResponsiveDialogCancel>{tc('close')}</ResponsiveDialogCancel>
