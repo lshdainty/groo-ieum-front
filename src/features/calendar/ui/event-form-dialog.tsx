@@ -10,7 +10,7 @@ import { Field } from '@/shared/ds/field'
 import { Input } from '@/shared/ds/input'
 import { List, ListButtonItem, ListHeader } from '@/shared/ds/list'
 import { ResultSection } from '@/shared/ds/result-section'
-import { Skeleton } from '@/shared/ds/skeleton'
+import { ListRowsSkeleton } from '@/shared/ui/groo/skeleton-rows'
 import { useSnackbar } from '@/shared/ds/snackbar'
 import { formatClock } from '@/shared/lib/date-text'
 import { DayRow } from '@/shared/ui/groo/day-row'
@@ -253,11 +253,8 @@ export function EventFormDialog({ open, onClose, event, start, fixedUser, onDele
         available.isLoadingError ? (
           <ResultSection kind='failure' size='medium' title={t('form.vacationLoadFailed')} description={t('loadFailed.description')} primaryAction={{ label: tc('retry'), onClick: () => void available.refetch(), loading: available.isFetching }} />
         ) : available.isPending && !editing ? (
-          <div className='flex flex-col gap-x3 px-x6'>
-            {[0, 1].map((i) => (
-              <Skeleton key={i} radius='12' className='block h-[56px] w-full' />
-            ))}
-          </div>
+          // 휴가 줄(이름 · 남은 시간) 자리 — 실제 List 줄과 같은 줄에 글 줄만
+          <ListRowsSkeleton count={2} />
         ) : vacationOptions.length === 0 ? (
           <p className='m-0 px-x6 py-x6 text-center text-t4 text-fg-neutral-subtle'>{t('form.noVacation')}</p>
         ) : (

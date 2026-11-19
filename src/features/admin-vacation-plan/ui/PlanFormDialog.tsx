@@ -12,7 +12,7 @@ import { Field } from '@/shared/ds/field'
 import { Input } from '@/shared/ds/input'
 import { ResponsiveMenu, ResponsiveMenuContent, ResponsiveMenuItem, ResponsiveMenuTrigger } from '@/shared/ds/menu'
 import { ResultSection } from '@/shared/ds/result-section'
-import { Skeleton } from '@/shared/ds/skeleton'
+import { SelectBoxRowsSkeleton } from '@/shared/ui/groo/skeleton-rows'
 import { useSnackbar } from '@/shared/ds/snackbar'
 import { Textarea } from '@/shared/ds/textarea'
 import { ConfirmDialog } from '@/shared/ui/confirm'
@@ -167,11 +167,8 @@ export function PlanFormDialog({
       primaryAction={{ label: tc('retry'), onClick: () => void policiesQuery.refetch(), loading: policiesQuery.isFetching }}
     />
   ) : policiesQuery.isPending ? (
-    <div className='flex flex-col gap-x3'>
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} text='t5' className='block h-[64px] w-full' />
-      ))}
-    </div>
+    // 휴가 정책 상자(이름 · 방법 · 종류) 자리 — 실제 Select Box 와 같은 상자에 글 줄만
+    <SelectBoxRowsSkeleton count={4} control='check' />
   ) : all.length === 0 ? (
     <ResultSection size='medium' icon={<FileText />} title={t('adminPolicy.emptyTitle')} description={t('adminPolicy.emptyDescription')} />
   ) : (

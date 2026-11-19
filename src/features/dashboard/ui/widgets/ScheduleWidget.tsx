@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import { Skeleton } from '@/shared/ds/skeleton'
+import { ScheduleSkeleton } from '@/features/work-schedule/ui/ScheduleSkeleton'
 import { useUsersQuery } from '@/entities/user'
 import { ScheduleEmpty } from '@/features/work-schedule/ui/ScheduleEmpty'
 import { ScheduleTable } from '@/features/work-schedule/ui/ScheduleTable'
@@ -15,7 +15,7 @@ export const ScheduleWidget = () => {
 
   return (
     <WidgetFrame id='schedule' body='list'>
-      <WidgetBoundary id='schedule' queries={[query]} fallback={<Skeleton radius='12' className='mx-x6 block h-[200px]' />}>
+      <WidgetBoundary id='schedule' queries={[query]} fallback={<ScheduleSkeleton desktop />}>
         {(query.data ?? []).length === 0 ? (
           <ScheduleEmpty />
         ) : (

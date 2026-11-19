@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/shared/ds/button'
 import { ResultSection } from '@/shared/ds/result-section'
-import { Skeleton } from '@/shared/ds/skeleton'
 import { PersonPicker, type PersonOption } from '@/shared/ui/groo/person-picker'
 import { usePermission } from '@/entities/session'
 import { useUsersQuery } from '@/entities/user'
@@ -71,21 +70,19 @@ export function StaffVacation() {
   return (
     <div className={desktop ? 'flex flex-col gap-x6' : 'flex flex-col gap-x4 pb-x6'} data-staff-vacation>
       <div className={desktop ? 'flex items-center justify-between gap-x4' : 'flex flex-col gap-x3 px-x6'}>
-        {usersQuery.isPending ? (
-          <Skeleton className={desktop ? 'h-[40px] w-[280px]' : 'h-[52px] w-full'} />
-        ) : (
-          <PersonPicker
-            people={people}
-            value={selectedUserId}
-            onValueChange={setSelectedUserId}
-            className={desktop ? 'w-[280px]' : undefined}
-            ariaLabel={t('staff.pickerAria')}
-            placeholder={t('staff.pickerPlaceholder')}
-            surfaceTitle={t('staff.pickerTitle')}
-            searchPlaceholder={t('staff.searchPlaceholder')}
-            emptyTitle={t('staff.searchEmpty')}
-          />
-        )}
+        {/* 사람 고르기 칸은 틀 — 사람 목록이 오기 전엔 막힌 칸으로 그린다(skeleton.md "틀은 먼저") */}
+        <PersonPicker
+          disabled={usersQuery.isPending}
+          people={people}
+          value={selectedUserId}
+          onValueChange={setSelectedUserId}
+          className={desktop ? 'w-[280px]' : undefined}
+          ariaLabel={t('staff.pickerAria')}
+          placeholder={t('staff.pickerPlaceholder')}
+          surfaceTitle={t('staff.pickerTitle')}
+          searchPlaceholder={t('staff.searchPlaceholder')}
+          emptyTitle={t('staff.searchEmpty')}
+        />
         <div className={desktop ? 'flex items-center gap-x2' : 'grid grid-cols-2 gap-x2 [&>*]:w-full'}>{actions}</div>
       </div>
       {selected && (

@@ -167,15 +167,14 @@ const measure = (page) =>
       put("홈 달력 제목", "grow", root.querySelector("[data-missing-title]"));
       put("홈 달력 범례", "grow", root.querySelector("[data-missing-legend] span:last-child"));
     }
-    // 스켈레톤 — 글 자리(올 글의 줄 높이 — 커진다) · 모양 자리(px 그대로). 사용자 목록 자리: 아이콘 16 · 제목 t5 · 검색 칸 40 · 줄 제목 t5 · 설명 t3
+    // 스켈레톤 — 글 자리(올 글의 줄 높이 — 커진다). 사용자 역할 지정 자리: 이름 t8 · 메일 t4 · 부서 값 t4, 틀(저장 단추 · 칸 라벨)은 실제 부품
     {
       const root = q("[data-check=skeleton]");
       const sk = [...root.querySelectorAll("[data-slot=skeleton]")];
-      put("스켈레톤 모양 아이콘 16", "static", sk[0], "box");
-      put("스켈레톤 글 자리 제목 t5", "grow", sk[1], "box");
-      put("스켈레톤 모양 검색 칸 40", "static", sk[2], "box");
-      put("스켈레톤 글 자리 줄 제목 t5", "grow", sk[3], "box");
-      put("스켈레톤 글 자리 줄 설명 t3", "grow", sk[4], "box");
+      put("스켈레톤 글 자리 이름 t8", "grow", sk[0], "box");
+      put("스켈레톤 글 자리 메일 t4", "grow", sk[1], "box");
+      put("스켈레톤 글 자리 부서 값 t4", "grow", sk[2], "box");
+      put("스켈레톤 틀 저장 단추", "grow", [...root.querySelectorAll("button")].find((b) => !b.closest("[data-skeleton-rows]")));
     }
     // 휴가 신청 결재 단계 — 원 24 · 안의 순번은 원(틀)의 일부라 그대로(#260 — 고리 · 도장 가운데 글과 같다), 체크 아이콘 16
     {
@@ -246,10 +245,8 @@ const cases = [
         "그날 목록 깃발 16": [16, 16],
         "결재 단계 원 24 · 순번": [24, 24],
         "결재 단계 체크 16": [16, 16],
-        "스켈레톤 모양 아이콘 16": [16, 16],
-        "스켈레톤 모양 검색 칸 40": [null, 40],
-        "스켈레톤 글 자리 제목 t5": [64, 22],
-        "스켈레톤 글 자리 줄 설명 t3": [144, 18],
+        "스켈레톤 글 자리 이름 t8": [128, 30],
+        "스켈레톤 글 자리 메일 t4": [192, 19],
         "스켈레톤 t1-static": [40, 15],
         "스켈레톤 t1": [40, 15],
       };
@@ -308,6 +305,104 @@ const cases = [
       return p;
     },
   })),
+
+  // ── 블록 스켈레톤(skeleton.md "틀은 먼저, 데이터 자리만 스켈레톤" · "크기 — 글은 글줄 높이") ──
+  // 데이터를 담는 줄 · 상자는 블록 하나로 덮지 않고 실제와 같은 부품(List 줄 · Select Box 상자 · 조직도 상자 · 지표 타일)에 글 줄만 둔다 —
+  // 100% 에서 실제와 높이가 같고, 300%(처음부터 · 뜬 뒤)에서도 실제와 함께 커진다. 틀 부품(검색칸 · 단추 · 칸 라벨)은 스켈레톤이 아니라 실제 부품이다
+  ...[false, true].map((live) => ({
+    name: `블록 스켈레톤 · 300% ${live ? "뜬 뒤" : "처음부터"} — 목록 줄 · 값 줄 · 고르기 상자(라디오 · 체크) · 조직도 상자 · 지표 타일이 100% 에서 실제와 같은 높이, 300% 에서도 실제와 함께 커진다`,
+    async run() {
+      const read = (page) =>
+        page.evaluate(() => {
+          const pick = {
+            list: (el) => el.querySelector("[data-slot=list] > *"),
+            "list-suffix": (el) => el.querySelector("[data-slot=list] > *"),
+            radio: (el) => el.querySelector("[data-slot=select-box-group] > *"),
+            check: (el) => el.querySelector("[data-slot=select-box-group] > *"),
+            org: (el) => el.querySelector("[data-org-box], [data-org-box-skeleton]"),
+            tiles: (el) => el.querySelector("[data-slot=chart-legend-total]")?.closest("button"),
+          };
+          const out = {};
+          for (const box of document.querySelectorAll("[data-pair]")) {
+            const pair = box.getAttribute("data-pair");
+            const el = pick[pair](box);
+            out[pair] ??= {};
+            out[pair][box.getAttribute("data-side")] = el ? Math.round(el.getBoundingClientRect().height * 10) / 10 : null;
+          }
+          return out;
+        });
+      const one = await open({ font: 1 });
+      const a = await read(one.page);
+      await one.ctx.close();
+      const big = await open({ font: 3, live });
+      const b = await read(big.page);
+      await big.ctx.close();
+      const p = [...one.errors, ...big.errors];
+      for (const [pair, x] of Object.entries(a)) {
+        const y = b[pair];
+        if (x.sk == null || x.real == null || y.sk == null || y.real == null) {
+          p.push(`${pair} 자리가 없다 ${JSON.stringify({ x, y })}`);
+          continue;
+        }
+        if (Math.abs(x.sk - x.real) > 0.5) p.push(`${pair} 100% 기다림 ${x.sk} ≠ 실제 ${x.real}`);
+        if (Math.abs(y.sk - y.real) > 1) p.push(`${pair} 300% 기다림 ${y.sk} ≠ 실제 ${y.real}`);
+        if (!(y.sk > x.sk + 1)) p.push(`${pair} 300% 에서 기다림 자리가 커지지 않는다 ${x.sk} → ${y.sk}`);
+      }
+      return p;
+    },
+  })),
+  {
+    name: "틀 부품 자리에 Skeleton 없음 — 사용자 목록 머리 · 검색칸(막힘) · 역할 지정 칸 라벨 · 설명 · 저장 단추(막힘)는 실제 부품",
+    async run() {
+      const { ctx, page, errors } = await open({ font: 1 });
+      const m = await page.evaluate(() => {
+        const list = document.querySelector("[data-pair=list][data-side=sk]");
+        const input = list.querySelector("input");
+        const head = list.querySelector("h3");
+        const role = document.querySelector("[data-check=skeleton]");
+        const save = [...role.querySelectorAll("button")].find((b) => !b.closest("[data-skeleton-rows]"));
+        const label = role.querySelector("[data-slot=field-header]");
+        return {
+          input: input ? { disabled: input.disabled, skeleton: !!input.closest("[data-slot=skeleton]") } : null,
+          head: head ? { text: head.textContent, skeleton: !!head.querySelector("[data-slot=skeleton]") } : null,
+          save: save ? { disabled: save.disabled, text: save.textContent, skeleton: !!save.querySelector("[data-slot=skeleton]") } : null,
+          label: label?.textContent ?? null,
+          fieldSkeletonOutsideRows: [...role.querySelectorAll("[data-slot=field] [data-slot=skeleton]")].filter((el) => !el.closest("[data-skeleton-rows]")).length,
+        };
+      });
+      await ctx.close();
+      const p = [...errors];
+      if (!m.input || !m.input.disabled || m.input.skeleton) p.push(`검색칸 ${JSON.stringify(m.input)}`);
+      if (!m.head || m.head.skeleton || !m.head.text.trim()) p.push(`목록 머리 ${JSON.stringify(m.head)}`);
+      if (!m.save || !m.save.disabled || m.save.skeleton || !m.save.text.trim()) p.push(`저장 단추 ${JSON.stringify(m.save)}`);
+      if (!m.label) p.push("역할 칸 라벨이 없다");
+      if (m.fieldSkeletonOutsideRows) p.push(`역할 칸 머리에 스켈레톤 ${m.fieldSkeletonOutsideRows} 개`);
+      return p;
+    },
+  },
+  {
+    name: "블록 스켈레톤이 다시 들어오지 않는다 — 높이 40 이상 · 폭을 준 Skeleton 은 글 없는 그림 자리(차트 그림)만",
+    run() {
+      // 허용 — 글이 없는 그림 자리(차트 그리는 자리 높이 200), 결정 대기(캘린더 년 보기 열두 달 상자)
+      const ALLOW = [
+        /features\/vacation-history\/ui\/VacationSections\.tsx:.*h-\[200px\]/,
+        /features\/dashboard\/ui\/widgets\/MonthStatsWidget\.tsx:.*h-\[200px\]/,
+        /features\/calendar\/ui\/year-view\/calendar-year-view-skeleton\.tsx:.*h-\[200px\]/,
+      ];
+      const BLOCK = /<Skeleton\b[^>]*className=['"][^'"]*\bh-\[(\d+)px\][^'"]*['"][^>]*>/g;
+      const bad = [];
+      for (const dir of ["src/app", "src/pages", "src/widgets", "src/features", "src/shared/ui"])
+        for (const f of walk(join(ROOT, dir)))
+          readFileSync(f, "utf8").split("\n").forEach((line, i) => {
+            for (const m of line.matchAll(BLOCK)) {
+              if (Number(m[1]) < 40) continue;
+              const at = `${relative(ROOT, f)}:${i + 1} ${m[0]}`;
+              if (!ALLOW.some((re) => re.test(at))) bad.push(at);
+            }
+          });
+      return bad;
+    },
+  },
 
   // ── 소스 — 화면 · ds 의 rem 숫자 유틸, 걷은 옛 이름 ──
   {
