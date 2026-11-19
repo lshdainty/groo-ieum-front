@@ -383,10 +383,12 @@ const cases = [
   {
     name: "블록 스켈레톤이 다시 들어오지 않는다 — 높이 40 이상 · 폭을 준 Skeleton 은 글 없는 그림 자리(차트 그림)만",
     run() {
-      // 허용 — 글이 없는 그림 자리(차트 그리는 자리 높이 200), 결정 대기(캘린더 년 보기 열두 달 상자)
+      // 허용 — 글이 없는 그림 자리(차트 그리는 자리 높이 200)
       const ALLOW = [
         /features\/vacation-history\/ui\/VacationSections\.tsx:.*h-\[200px\]/,
         /features\/dashboard\/ui\/widgets\/MonthStatsWidget\.tsx:.*h-\[200px\]/,
+        // groo-design #266(skeleton.md "예외 — 달력 보기는 격자째 기다립니다") — 년 보기는 달 이름 · 요일 · 날짜까지 열두 달 상자째
+        // 기다린다. 틀만 그리고 칸을 비우면 "일정 없음" 으로 읽힌다. 상자는 px 라 큰 글자에서도 그대로다
         /features\/calendar\/ui\/year-view\/calendar-year-view-skeleton\.tsx:.*h-\[200px\]/,
       ];
       const BLOCK = /<Skeleton\b[^>]*className=['"][^'"]*\bh-\[(\d+)px\][^'"]*['"][^>]*>/g;
@@ -400,6 +402,37 @@ const cases = [
               if (!ALLOW.some((re) => re.test(at))) bad.push(at);
             }
           });
+      return bad;
+    },
+  },
+  {
+    name: "달력 격자 스켈레톤(groo-design #266) — 칸 안 날짜 · 요일 자리는 -static · px, 달력 위 머리는 스켈레톤 밖에서 실제로 그린다",
+    run() {
+      const bad = [];
+      const read = (f) => strip(readFileSync(join(ROOT, f), "utf8"));
+      // 격자 스켈레톤 — 글 자리는 `tN-static`(rem 줄 높이 `tN` 이면 큰 글자에서 칸 안 자리가 커진다), 머리 부품은 들이지 않는다
+      const GRID = [
+        "src/features/calendar/ui/month-view/month-skeleton-desktop.tsx",
+        "src/features/calendar/ui/month-view/month-skeleton-phone.tsx",
+        "src/features/calendar/ui/week-and-day-view/calendar-week-view-skeleton.tsx",
+        "src/features/calendar/ui/year-view/calendar-year-view-skeleton.tsx",
+      ];
+      const missing = read("src/features/dashboard/ui/widgets/MissingWorkHistoryWidget.tsx");
+      const parts = GRID.map((f) => [f, read(f)]);
+      parts.push(["MissingWorkHistoryWidget.tsx MissingSkeleton", missing.slice(missing.indexOf("const MissingSkeleton"))]);
+      for (const [f, src] of parts) {
+        for (const m of src.matchAll(/<Skeleton\b[^>]*\btext=['"](t\d+[^'"]*)['"]/g)) if (!m[1].endsWith("-static")) bad.push(`${f} text="${m[1]}" — 칸 안 자리는 -static`);
+        for (const m of src.matchAll(REM_ARBITRARY)) bad.push(`${f} ${m[0]} — 칸 안 자리는 px`);
+        if (/calendar-toolbar|CalendarToolbar/.test(src)) bad.push(`${f} — 달력 머리를 스켈레톤 안에 들였다`);
+      }
+      // 머리(달 이름 단추 · 이전 · 다음 · 보기 고르기)는 기다리는 갈래 앞에서 늘 그린다
+      const desk = read("src/features/calendar/ui/CalendarDesktop.tsx");
+      if (!/\{toolbar\}\s*\{isLoading \?/.test(desk)) bad.push("CalendarDesktop.tsx — 월 보기 머리({toolbar})가 기다리는 갈래 앞에 없다");
+      if (!/\{toolbar\}\s*<div className='min-h-0 flex-1'>/.test(desk)) bad.push("CalendarDesktop.tsx — 주 · 년 보기 머리({toolbar})가 몸 앞에 없다");
+      const phone = read("src/features/calendar/ui/CalendarPhone.tsx");
+      if (!/<CalendarToolbar desktop=\{false\}[^>]*\/>[\s\S]*?\{isLoading \?/.test(phone)) bad.push("CalendarPhone.tsx — 머리가 기다리는 갈래 앞에 없다");
+      const head = missing.slice(0, missing.indexOf("<WidgetBoundary"));
+      if (!/<Button\b/.test(head)) bad.push("MissingWorkHistoryWidget.tsx — 이전 · 다음 달 단추가 기다림 경계 앞에 없다");
       return bad;
     },
   },
