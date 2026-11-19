@@ -3,7 +3,6 @@ export { RoleDetail } from './ui/RoleDetail';
 export { RoleList } from './ui/RoleList';
 export { RoleManagementPanel } from './ui/RoleManagementPanel';
 export { UserList } from './ui/UserList';
-export { UserListSkeleton } from './ui/UserListSkeleton';
 export { UserManagementPanel } from './ui/UserManagementPanel';
 export { UserRoleAssignment } from './ui/UserRoleAssignment';
 export { UserRoleAssignmentSkeleton } from './ui/UserRoleAssignmentSkeleton';

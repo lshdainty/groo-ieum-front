@@ -165,6 +165,7 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
     </Field>
   )
 
+  // 목록(휴가 종류 · 유효 시작 · 끝)이 오기 전엔 칸을 그대로 그리고 그 목록을 쓰는 고르기 칸만 막는다(skeleton.md "틀은 먼저")
   const typesBlock = listsFailed ? (
     <ResultSection
       kind='failure'
@@ -180,12 +181,6 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
         },
       }}
     />
-  ) : listsPending ? (
-    <div className='flex flex-col gap-x6' data-lists-loading>
-      {Array.from({ length: 3 }).map((_, i) => (
-        <Skeleton key={i} text='t5' className='block h-[40px] w-full' />
-      ))}
-    </div>
   ) : null
 
   const stepTwo = method && f && (
@@ -206,7 +201,7 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
       {typesBlock ?? (
         <>
           <Field label={t('adminPolicy.create.vacationType')} showRequiredIndicator invalid={show('vacationType')} errorMessage={t('adminPolicy.create.vacationTypeRequired')}>
-            <Select value={values.vacationType} onValueChange={(v) => set('vacationType', v)} placeholder={t('adminPolicy.create.vacationTypePlaceholder')} aria-invalid={show('vacationType') || undefined}>
+            <Select value={values.vacationType} onValueChange={(v) => set('vacationType', v)} disabled={vacationTypes.isPending} placeholder={t('adminPolicy.create.vacationTypePlaceholder')} aria-invalid={show('vacationType') || undefined}>
               {typeItems(vacationTypes.data)}
             </Select>
           </Field>
@@ -336,19 +331,22 @@ export function PolicyCreateDialog({ open, onOpenChange }: { open: boolean; onOp
                 }}
               />
             ) : approvalPending ? (
-              <Skeleton text='t5' className='block h-[40px] w-full' data-approval-loading />
+              // 결재 수 칸은 틀 — 부서(결재선 깊이)가 오기 전엔 막힌 칸으로 그리고, 범위에 따라 갈리는 설명 한 줄만 기다린다
+              <Field label={t('adminPolicy.create.approval')} description={<Skeleton text='t4' className='w-[200px] max-w-full' />} disabled data-approval-loading>
+                <QuantityPicker value={0} min={0} max={0} aria-label={t('adminPolicy.create.approval')} />
+              </Field>
             ) : (
               <Field label={t('adminPolicy.create.approval')} description={approvalLimit === 0 ? t('adminPolicy.create.approvalNone') : t('adminPolicy.create.approvalHelp')}>
                 <QuantityPicker value={Math.min(values.approvalCount, approvalLimit)} min={0} max={approvalLimit} onValueChange={(v) => set('approvalCount', v)} aria-label={t('adminPolicy.create.approval')} />
               </Field>
             ))}
           <Field label={t('adminPolicy.create.validityStart')} showRequiredIndicator invalid={show('effectiveType')} errorMessage={t('adminPolicy.create.validityStartRequired')}>
-            <Select value={values.effectiveType} onValueChange={(v) => set('effectiveType', v)} placeholder={t('adminPolicy.create.validityStartPlaceholder')} aria-invalid={show('effectiveType') || undefined}>
+            <Select value={values.effectiveType} onValueChange={(v) => set('effectiveType', v)} disabled={effectiveTypes.isPending} placeholder={t('adminPolicy.create.validityStartPlaceholder')} aria-invalid={show('effectiveType') || undefined}>
               {typeItems(effectiveTypes.data)}
             </Select>
           </Field>
           <Field label={t('adminPolicy.create.validityEnd')} showRequiredIndicator invalid={show('expirationType')} errorMessage={t('adminPolicy.create.validityEndRequired')}>
-            <Select value={values.expirationType} onValueChange={(v) => set('expirationType', v)} placeholder={t('adminPolicy.create.validityEndPlaceholder')} aria-invalid={show('expirationType') || undefined}>
+            <Select value={values.expirationType} onValueChange={(v) => set('expirationType', v)} disabled={expirationTypes.isPending} placeholder={t('adminPolicy.create.validityEndPlaceholder')} aria-invalid={show('expirationType') || undefined}>
               {typeItems(expirationTypes.data)}
             </Select>
           </Field>

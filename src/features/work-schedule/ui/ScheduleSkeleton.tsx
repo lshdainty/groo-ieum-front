@@ -1,13 +1,16 @@
 import { Skeleton } from '@/shared/ds/skeleton'
 
-/** 근무 일정 기다림 — 사람 줄 틀(이름 칸 + 막대 자리). 제목 줄 · 안내 줄은 처음부터 그린다 */
+/**
+ * 근무 일정 기다림 — 사람 줄 틀(이름 칸 + 막대 자리). 제목 줄 · 안내 줄은 처음부터 그린다. 넓은 화면 줄은 실제 표 줄과 같은 최소 높이 64 ·
+ * 위아래 12 라 글자를 키우면 이름 글 줄과 함께 커진다(skeleton.md). 막대(32)는 실제도 높이가 정해진 막대다
+ */
 export const ScheduleSkeleton = ({ desktop }: { desktop: boolean }) => (
   <div aria-hidden className='flex flex-col'>
     {Array.from({ length: 5 }).map((_, i) =>
       desktop ? (
-        <div key={i} className='flex h-[64px] items-center gap-x3 border-b border-stroke-neutral-subtle px-x6 last:border-b-0'>
+        <div key={i} className='flex min-h-[64px] items-center gap-x3 border-b border-stroke-neutral-subtle px-x6 py-x3 last:border-b-0'>
           <Skeleton radius='full' className='block size-[36px] shrink-0' />
-          <div className='flex w-[130px] flex-col gap-x1'>
+          <div className='flex w-[130px] flex-col'>
             <Skeleton text='t4' className='block w-3/5' />
             <Skeleton text='t3' className='block w-4/5' />
           </div>

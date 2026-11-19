@@ -64,14 +64,27 @@ function ChartEmpty() {
   return <ResultSection size='medium' icon={<Building2 />} title={t('department.noDepartments')} />
 }
 
-/** 조직도 자리 — 상자 셋 */
+/** 조직도 상자 자리 — OrgBox 와 같은 상자(폭 184 · 테두리 · 위 3px 줄 · 안쪽 12)에 이름 t4 · 설명 t3 글 줄만(skeleton.md "틀은 먼저") */
+function OrgBoxSkeleton() {
+  return (
+    <div data-org-box-skeleton className='relative w-[184px] overflow-hidden rounded-r3 border border-solid border-stroke-neutral-weak bg-bg-layer-default'>
+      <div className='h-[3px] w-full bg-bg-neutral-weak' />
+      <div className='flex flex-col gap-x1 px-x3 py-x3'>
+        <Skeleton text='t4' className='w-[96px]' />
+        <Skeleton text='t3' className='w-[136px]' />
+      </div>
+    </div>
+  )
+}
+
+/** 조직도 자리 — 상자 셋(회사 아래 둘) */
 export function ChartSkeleton() {
   return (
     <div className='flex flex-col items-center gap-x6 p-x6' aria-hidden>
-      <Skeleton radius='12' className='block h-[64px] w-[184px]' />
+      <OrgBoxSkeleton />
       <div className='flex gap-x4'>
-        <Skeleton radius='12' className='block h-[64px] w-[184px]' />
-        <Skeleton radius='12' className='block h-[64px] w-[184px]' />
+        <OrgBoxSkeleton />
+        <OrgBoxSkeleton />
       </div>
     </div>
   )

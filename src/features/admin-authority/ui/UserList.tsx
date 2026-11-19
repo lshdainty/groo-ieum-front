@@ -4,15 +4,18 @@ import { useTranslation } from "react-i18next";
 
 import { Input } from "@/shared/ds/input";
 import { List, ListButtonItem } from "@/shared/ds/list";
+import { ListRowsSkeleton } from "@/shared/ui/groo/skeleton-rows";
 import { User } from "@/features/admin-authority/types";
 
 interface UserListProps {
   users: User[];
   selectedUserId: string | null;
   onSelectUser: (userId: string) => void;
+  /** 사용자를 받는 중 — 머리 · 검색칸(틀)은 그대로 그리고(검색칸은 막힘) 줄만 기다린다(skeleton.md "틀은 먼저") */
+  loading?: boolean;
 }
 
-const UserList = ({ users, selectedUserId, onSelectUser }: UserListProps) => {
+const UserList = ({ users, selectedUserId, onSelectUser, loading = false }: UserListProps) => {
   const { t } = useTranslation('admin');
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -32,12 +35,15 @@ const UserList = ({ users, selectedUserId, onSelectUser }: UserListProps) => {
           aria-label={t('authority.searchUsers')}
           placeholder={t('authority.searchUsers')}
           prefixIcon={<Search />}
+          disabled={loading}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {filteredUsers.length > 0 ? (
+        {loading ? (
+          <ListRowsSkeleton count={10} />
+        ) : filteredUsers.length > 0 ? (
           <List>
             {filteredUsers.map((user) => (
               <ListButtonItem

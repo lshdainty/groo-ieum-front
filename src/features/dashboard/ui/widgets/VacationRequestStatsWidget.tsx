@@ -1,7 +1,6 @@
-import { Skeleton } from '@/shared/ds/skeleton'
 import { useUser } from '@/entities/session'
 import { useUserRequestedVacationStatsQuery } from '@/entities/vacation'
-import { RequestSummary } from '@/features/vacation-application/ui/RequestSummary'
+import { RequestSummary, RequestSummarySkeleton } from '@/features/vacation-application/ui/RequestSummary'
 import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
 import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
 
@@ -14,7 +13,7 @@ export const VacationRequestStatsWidget = () => {
 
   return (
     <WidgetFrame id='vacation-request-stats'>
-      <WidgetBoundary id='vacation-request-stats' queries={[query]} fallback={<Skeleton radius='12' className='block h-[96px] w-full' />}>
+      <WidgetBoundary id='vacation-request-stats' queries={[query]} fallback={<RequestSummarySkeleton layout='inline' />}>
         {query.data && <RequestSummary stats={query.data} year={year} layout='inline' />}
       </WidgetBoundary>
     </WidgetFrame>

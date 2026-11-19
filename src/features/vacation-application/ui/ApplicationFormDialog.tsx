@@ -12,7 +12,7 @@ import { Input } from '@/shared/ds/input'
 import { List, ListButtonItem, ListHeader, ListItem } from '@/shared/ds/list'
 import { ResultSection } from '@/shared/ds/result-section'
 import { RadioSelectBox, RadioSelectBoxGroup } from '@/shared/ds/select-box'
-import { Skeleton } from '@/shared/ds/skeleton'
+import { ListRowsSkeleton, SelectBoxRowsSkeleton } from '@/shared/ui/groo/skeleton-rows'
 import { useSnackbar } from '@/shared/ds/snackbar'
 import { Textarea } from '@/shared/ds/textarea'
 import { ConfirmDialog } from '@/shared/ui/confirm'
@@ -174,11 +174,8 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
   const stepOne = policiesQuery.isLoadingError ? (
     retryRow(t('req.form.policyFailureTitle'), policiesQuery)
   ) : policiesQuery.isPending ? (
-    <div className='flex flex-col gap-x3'>
-      {[0, 1, 2].map((i) => (
-        <Skeleton key={i} radius='12' className='block h-[72px] w-full' />
-      ))}
-    </div>
+    // 휴가 정책 상자(이름 · 설명) 자리 — 실제 Select Box 와 같은 상자에 글 줄만
+    <SelectBoxRowsSkeleton count={3} control='radio' />
   ) : policies.length === 0 ? (
     <ResultSection size='medium' icon={<CalendarX2 />} title={t('req.form.noPolicy')} />
   ) : (
@@ -296,7 +293,10 @@ const ApplicationFormDialog = ({ open, onClose, onSubmitSuccess }: { open: boole
         {approversQuery.isLoadingError ? (
           retryRow(t('req.form.approversFailureTitle'), approversQuery)
         ) : approversQuery.isPending ? (
-          <Skeleton radius='12' className='block h-[56px] w-full' />
+          // 결재자 줄(단계 · 고른 사람) 자리 — 실제 줄(PickerRow — List 줄)과 같은 줄에 글 줄만. 줄 수는 결재선을 받아야 알아 한 줄
+          <div className='-mx-x6'>
+            <ListRowsSkeleton count={1} detail={false} suffix />
+          </div>
         ) : noApprovalLine ? (
           <Callout tone='critical' data-no-approval-line>{t('req.form.noApprovalLineCallout')}</Callout>
         ) : approversData?.is_auto_approval && policyRequired > 0 ? (

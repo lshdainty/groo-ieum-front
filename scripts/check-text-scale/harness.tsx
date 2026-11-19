@@ -20,6 +20,7 @@ import { ChartTooltipRow } from '@/shared/ds/chart/chart-tooltip-row'
 import { CARD_FACE_ISSUER, CARD_FACE_NAME, imageFrameIndicatorVariants } from '@/shared/ds/image-frame/image-frame-variants'
 import { PAGINATION_LABEL } from '@/shared/ds/pagination/pagination-variants'
 import { ITEM_LABEL as SIDE_NAV_ITEM_LABEL } from '@/shared/ds/side-navigation/side-navigation-variants'
+import { List, ListItem } from '@/shared/ds/list'
 import { Skeleton } from '@/shared/ds/skeleton'
 import { TreeView } from '@/shared/ds/tree-view'
 import { PermissionProvider, UserProvider } from '@/entities/session'
@@ -33,7 +34,13 @@ import { YearViewMonth } from '@/features/calendar/ui/year-view/year-view-month'
 import { MissingWorkHistoryWidget } from '@/features/dashboard/ui/widgets/MissingWorkHistoryWidget'
 import type { IEvent } from '@/features/calendar/model/interfaces'
 import { ApprovalSteps } from '@/features/vacation-application/ui/RequestDetail'
-import { UserListSkeleton } from '@/features/admin-authority/ui/UserListSkeleton'
+import { UserList } from '@/features/admin-authority/ui/UserList'
+import { UserRoleAssignmentSkeleton } from '@/features/admin-authority/ui/UserRoleAssignmentSkeleton'
+import { ChartSkeleton, DepartmentChartPanel } from '@/features/admin-company/ui/DepartmentChartPanel'
+import type { Dept } from '@/features/admin-company/lib/dept-tree'
+import { MonthStatsSkeleton } from '@/features/dashboard/ui/widgets/MonthStatsWidget'
+import { CheckSelectBox, CheckSelectBoxGroup, RadioSelectBox, RadioSelectBoxGroup } from '@/shared/ds/select-box'
+import { ListRowsSkeleton, SelectBoxRowsSkeleton } from '@/shared/ui/groo/skeleton-rows'
 import type { GetUserRequestedVacationsResp } from '@/entities/vacation'
 
 const params = new URLSearchParams(window.location.search)
@@ -88,6 +95,20 @@ const request = {
     approval_date: n === 1 ? '2026-11-17T09:00:00' : null,
   })),
 } as unknown as GetUserRequestedVacationsResp
+
+// 블록 스켈레톤과 견줄 실제 줄
+const people = [
+  { id: 'p1', name: '김이음', email: 'ieum@groo.test', role_codes: [] },
+  { id: 'p2', name: '박그루', email: 'groo@groo.test', role_codes: [] },
+]
+const dept = {
+  department_id: 1,
+  // 300% 에서도 한 줄인 짧은 이름 · 설명 — 줄바꿈 수는 글마다 달라 기다림 자리가 미리 알 수 없다
+  department_name_kr: '인사팀',
+  department_desc: '총무',
+  color_code: 'blue',
+  children: [],
+} as unknown as Dept
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } })
 const thisMonth = dayjs(DAY)
@@ -162,9 +183,59 @@ function Scene() {
               </div>
             </DndProviderWrapper>
           </CalendarProvider>
-          {/* 스켈레톤 세 갈래(skeleton.md "크기 — 글은 글줄 높이") — 글 자리 text="tN" 은 커지고, 모양 자리(아이콘 · 검색 칸)는 px 그대로 */}
+          {/* 스켈레톤 세 갈래(skeleton.md "크기 — 글은 글줄 높이") — 글 자리 text="tN" 은 커지고, 틀(칸 라벨 · 저장 단추)은 실제 부품 */}
           <div data-check='skeleton' style={{ width: 390 }}>
-            <UserListSkeleton />
+            <UserRoleAssignmentSkeleton />
+          </div>
+          {/* 블록 스켈레톤(skeleton.md "틀은 먼저" · "크기 — 글은 글줄 높이") — 기다림 자리와 실제 줄을 나란히. data-pair 의 sk · real 높이를 견준다 */}
+          <div className='grid grid-cols-2 gap-x4' style={{ width: 800 }}>
+            <div data-pair='list' data-side='sk'>
+              <UserList users={[]} selectedUserId={null} onSelectUser={() => {}} loading />
+            </div>
+            <div data-pair='list' data-side='real'>
+              <UserList users={people} selectedUserId={null} onSelectUser={() => {}} />
+            </div>
+            <div data-pair='list-suffix' data-side='sk'>
+              <ListRowsSkeleton count={1} detail={false} suffix />
+            </div>
+            <div data-pair='list-suffix' data-side='real'>
+              <List>
+                <ListItem title='결재 1단계' suffix='김결재' suffixText />
+              </List>
+            </div>
+            <div data-pair='radio' data-side='sk'>
+              <SelectBoxRowsSkeleton count={1} control='radio' />
+            </div>
+            <div data-pair='radio' data-side='real'>
+              <RadioSelectBoxGroup aria-label='정책'>
+                <RadioSelectBox value='a' label='연차 정책' description='매년 1월 1일 · 15일' />
+              </RadioSelectBoxGroup>
+            </div>
+            <div data-pair='check' data-side='sk'>
+              <SelectBoxRowsSkeleton count={1} control='check' />
+            </div>
+            <div data-pair='check' data-side='real'>
+              <CheckSelectBoxGroup aria-label='역할'>
+                <CheckSelectBox label='관리자' description='모든 권한' checked={false} />
+              </CheckSelectBoxGroup>
+            </div>
+            <div data-pair='org' data-side='sk'>
+              <ChartSkeleton />
+            </div>
+            <div data-pair='org' data-side='real'>
+              <DepartmentChartPanel departments={[dept]} />
+            </div>
+            <div data-pair='tiles' data-side='sk'>
+              <MonthStatsSkeleton />
+            </div>
+            <div data-pair='tiles' data-side='real'>
+              <ChartLegendTiles
+                items={[
+                  { key: 'used', label: '쓴 휴가', color: 'blue', total: '12일' },
+                  { key: 'scheduled', label: '예정', color: 'blue', total: '2일', marker: 'outline' },
+                ]}
+              />
+            </div>
           </div>
           {/* 나무 — 꺾쇠 · 체크는 px 그대로, 이름 첫 줄 가운데에 선다(groo-design #263 레시피 — 칸 높이 = 이름 줄 높이). 이름은 두 줄이 되게 길게 */}
           <div data-check='tree' style={{ width: 220 }}>

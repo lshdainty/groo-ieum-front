@@ -9,7 +9,6 @@ import { ResponsiveDialog, ResponsiveDialogBody, ResponsiveDialogCancel, Respons
 import { Field } from '@/shared/ds/field'
 import { ResultSection } from '@/shared/ds/result-section'
 import { Select, SelectItem } from '@/shared/ds/select'
-import { Skeleton } from '@/shared/ds/skeleton'
 import { useSnackbar } from '@/shared/ds/snackbar'
 import { Textarea } from '@/shared/ds/textarea'
 import { useEffectiveTypesQuery, useExpirationTypesQuery } from '@/entities/type'
@@ -117,7 +116,10 @@ export function VacationGrantDialog({
                 errorMessage={t('grantForm.policyRequired')}
               >
                 {policiesQuery.isPending ? (
-                  <Skeleton text='t5' className='block h-[40px] w-full' />
+                  // 고르기 칸은 틀 — 정책이 오기 전엔 막힌 칸으로 그린다(skeleton.md "틀은 먼저")
+                  <Select value='' disabled placeholder={t('grantForm.policyPlaceholder')}>
+                    {null}
+                  </Select>
                 ) : (
                   <Select
                     value={values.policyId}

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/shared/ds/resizable'
 import { ResultSection } from '@/shared/ds/result-section'
-import { LoadingRegion, Skeleton } from '@/shared/ds/skeleton'
+import { LoadingRegion } from '@/shared/ds/skeleton'
 import { useSnackbar } from '@/shared/ds/snackbar'
 import { usePermissionsQuery } from '@/entities/permission'
 import { useDeleteRoleMutation, usePostRoleMutation, usePutRoleMutation, usePutRolePermissionsMutation, useRolesQuery } from '@/entities/role'
@@ -19,16 +19,6 @@ import { changesOf, draftOf, EMPTY_DRAFT, type RoleDraft } from '../lib/role-dra
 import { RoleDetail } from './RoleDetail'
 import { RoleList } from './RoleList'
 
-const PanelSkeleton = () => (
-  <div className='flex flex-col gap-x3 p-x4'>
-    {[0, 1, 2, 3].map((i) => (
-      <Skeleton key={i} text='t5' className='block w-2/3' />
-    ))}
-    {[0, 1, 2].map((i) => (
-      <Skeleton key={`f${i}`} text='t5' className='block h-[40px] w-full' />
-    ))}
-  </div>
-)
 
 /**
  * 역할 탭(I-24 G 32 ~ 35) — 데스크톱: 나눔 상자(왼쪽 목록 · 오른쪽 상세 한 면), 폰: 목록 → 역할을 누르면 그 역할 화면(`?role=코드`, 뒤로 = 목록).
@@ -201,7 +191,8 @@ export const RoleManagementPanel = ({ onDirtyChange, discard }: { onDirtyChange:
       <LoadingRegion
         pending={rolesQ.isPending || permsQ.isPending}
         failed={rolesQ.isLoadingError || permsQ.isLoadingError}
-        fallback={<PanelSkeleton />}
+        // 기다리는 동안은 목록의 틀(머리 · 추가 단추)과 줄 자리 — 블록으로 덮지 않는다(skeleton.md "틀은 먼저")
+        fallback={<RoleList roles={[]} selected={null} creating={false} onSelect={() => undefined} onAdd={() => undefined} loading />}
         failure={
           <ResultSection
             kind='failure'

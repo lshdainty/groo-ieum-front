@@ -1,6 +1,7 @@
 import { BarChart3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { ChartLegendTiles } from '@/shared/ds/chart'
 import { ResultSection } from '@/shared/ds/result-section'
 import { Skeleton } from '@/shared/ds/skeleton'
 import { useCompanyToday, useUser } from '@/entities/session'
@@ -32,10 +33,22 @@ export const MonthStatsWidget = () => {
   )
 }
 
-/** 타일 + 차트 자리(모서리 16) */
-const MonthStatsSkeleton = () => (
-  <div className='flex flex-col gap-x2'>
-    <Skeleton radius='12' className='block h-[56px] w-full' />
-    <Skeleton radius='16' className='block h-[200px] w-full' />
-  </div>
-)
+/**
+ * 지표 타일 + 차트 자리 — 타일은 실제 지표 타일(올해라 "쓴 휴가" · "예정")에 합계 글 줄만 스켈레톤(skeleton.md "틀은 먼저"),
+ * 차트 그림은 글 없는 그림 자리라 높이 200 · 모서리 16 그대로
+ */
+export const MonthStatsSkeleton = () => {
+  const { t } = useTranslation('vacation')
+  const total = <Skeleton text='t5' className='w-[48px]' />
+  return (
+    <div aria-hidden inert className='flex flex-col gap-x2' data-month-stats-skeleton>
+      <ChartLegendTiles
+        items={[
+          { key: 'used', label: t('history.usedVacation'), color: 'blue', total },
+          { key: 'scheduled', label: t('history.chart.scheduled'), color: 'blue', total, marker: 'outline' },
+        ]}
+      />
+      <Skeleton radius='16' className='block h-[200px] w-full' />
+    </div>
+  )
+}

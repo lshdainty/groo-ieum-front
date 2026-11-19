@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
-import { Skeleton } from '@/shared/ds/skeleton'
 import { useCompanyQuery, useCompanyWithDepartmentsQuery } from '@/entities/company'
-import { DepartmentChartPanel } from '@/features/admin-company/ui/DepartmentChartPanel'
+import { ChartSkeleton, DepartmentChartPanel } from '@/features/admin-company/ui/DepartmentChartPanel'
 import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
 import { WidgetScrollBox } from '@/features/dashboard/ui/WidgetScrollBox'
 import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
@@ -18,7 +17,7 @@ export const DepartmentChartWidget = () => {
 
   return (
     <WidgetFrame id='department-chart'>
-      <WidgetBoundary id='department-chart' queries={queries} fallback={<Skeleton radius='12' className='block h-[240px] w-full' />}>
+      <WidgetBoundary id='department-chart' queries={queries} fallback={<ChartSkeleton />}>
         <WidgetScrollBox label={t('widget.departmentChart')}>
           <DepartmentChartPanel departments={departments.data?.departments ?? []} />
         </WidgetScrollBox>

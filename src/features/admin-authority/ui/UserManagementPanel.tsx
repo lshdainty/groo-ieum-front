@@ -1,6 +1,5 @@
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/shared/ds/resizable";
 import { UserList } from "@/features/admin-authority/ui/UserList";
-import { UserListSkeleton } from "@/features/admin-authority/ui/UserListSkeleton";
 import { UserRoleAssignment } from "@/features/admin-authority/ui/UserRoleAssignment";
 import { UserRoleAssignmentSkeleton } from "@/features/admin-authority/ui/UserRoleAssignmentSkeleton";
 import { Authority, Role, User } from "@/features/admin-authority/types";
@@ -117,15 +116,12 @@ const UserManagementPanel = () => {
     return (
       <div className="flex min-h-[28rem] flex-col bg-bg-layer-default">
         <div hidden={!!selectedUser} className="flex min-h-0 flex-1 flex-col">
-          {isLoading ? (
-            <UserListSkeleton />
-          ) : (
-            <UserList
-              users={users}
-              selectedUserId={selectedUserId}
-              onSelectUser={setSelectedUserId}
-            />
-          )}
+          <UserList
+            users={users}
+            selectedUserId={selectedUserId}
+            onSelectUser={setSelectedUserId}
+            loading={isLoading}
+          />
         </div>
         {selectedUser && (
           <div ref={detailRef} className="flex min-h-0 flex-1 flex-col" data-user-detail>
@@ -145,15 +141,12 @@ const UserManagementPanel = () => {
   return (
     <ResizablePanelGroup storageKey="hr-admin-authority-users" className="min-h-[28rem] rounded-r3 border border-solid border-stroke-neutral-subtle bg-bg-layer-default">
       <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="flex flex-col">
-        {isLoading ? (
-          <UserListSkeleton />
-        ) : (
-          <UserList
-            users={users}
-            selectedUserId={selectedUserId}
-            onSelectUser={setSelectedUserId}
-          />
-        )}
+        <UserList
+          users={users}
+          selectedUserId={selectedUserId}
+          onSelectUser={setSelectedUserId}
+          loading={isLoading}
+        />
       </ResizablePanel>
       <ResizableHandle label={t('department.resizeLabel')} />
       <ResizablePanel className="flex flex-col">
