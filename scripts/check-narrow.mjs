@@ -204,6 +204,58 @@ const cases = [
     },
   },
 
+  // ── 이어지는 달 이름(담다 4b215d8e · groo-design #261) — 320 · 300% 영어 "September 2026" 은 한 줄에 들지 않는다. 커지는 글이라
+  //    낱말 사이에서 줄을 바꾸고(잘리지 않음), 그 해 가장 높은 이름 줄을 모든 달 이름 줄의 최소 높이로 쓰며, 보던 달(11월)이 맨 위에 남는다 ──
+  ...[false, true].map((live) => ({
+    name: `이어지는 달 이름 en 320 · 300% ${live ? "뜬 뒤" : "처음부터"} — 잘리지 않고 줄을 바꾸며, 모든 달 이름 줄이 가장 높은 줄 높이 · 보던 달이 맨 위`,
+    async run() {
+      const { ctx, page, errors } = await open("continuous", { width: 320, query: `&h=600&lang=en${live ? "" : "&font=3"}` });
+      await page.locator("[data-slot=date-picker-scroll]").waitFor();
+      await page.waitForTimeout(300);
+      if (live) {
+        await page.evaluate(() => {
+          document.documentElement.style.fontSize = "300%";
+        });
+      }
+      await page.waitForTimeout(500);
+      const m = await page.evaluate(() => {
+        const scroll = document.querySelector("[data-slot=date-picker-scroll]");
+        const labels = [...scroll.querySelectorAll("[data-slot=date-picker-month-label]")];
+        const probe = document.querySelector("[data-slot=date-picker-probe]");
+        const lh = (el) => parseFloat(getComputedStyle(el).lineHeight);
+        const tallest = Math.max(...[...probe.children].map((c) => c.getBoundingClientRect().height));
+        const month = [...scroll.querySelectorAll("[data-slot=date-picker-month]")].find((el) => el.querySelector("[data-month='2026-11']"));
+        return {
+          root: getComputedStyle(document.documentElement).fontSize,
+          probeCount: probe.children.length,
+          tallest,
+          line: lh(labels[0]),
+          labels: labels.map((l) => ({
+            text: l.textContent,
+            nowrap: getComputedStyle(l).whiteSpace === "nowrap",
+            cut: l.scrollWidth > l.clientWidth + 0.5,
+            min: parseFloat(l.style.minHeight) || 0,
+            lines: Math.round(l.getBoundingClientRect().height / lh(l)),
+          })),
+          // 보던 달의 윗변 — 붙박이 요일 줄(48) 바로 아래가 맨 위다
+          viewedTop: month ? month.getBoundingClientRect().top - scroll.getBoundingClientRect().top - (scroll.firstElementChild?.getBoundingClientRect().height ?? 0) : null,
+        };
+      });
+      await ctx.close();
+      const p = [...errors];
+      if (m.root !== "48px") p.push(`문서 글자 ${m.root}`);
+      if (m.probeCount !== 12) p.push(`견본 ${m.probeCount} 줄(열두 달이어야)`);
+      for (const l of m.labels) {
+        if (l.nowrap) p.push(`"${l.text}" 가 한 줄 고정(nowrap)`);
+        if (l.cut) p.push(`"${l.text}" 가 잘린다`);
+        if (Math.abs(l.min - m.tallest) > 0.5) p.push(`"${l.text}" 최소 높이 ${l.min} ≠ 가장 높은 줄 ${m.tallest}`);
+      }
+      if (!(m.tallest > m.line * 1.5)) p.push(`가장 높은 이름 줄 ${m.tallest} 이 한 줄(${m.line}) — 줄을 바꾸지 않았다`);
+      if (m.viewedTop == null || Math.abs(m.viewedTop) > 1) p.push(`보던 달(11월)이 맨 위가 아니다(${m.viewedTop})`);
+      return p;
+    },
+  })),
+
   // ── Field 머리(담다 field.test "머리는 줄바꿈하고 라벨이 반 폭 이상 쥔다") ──
   ...[300, 200].map((width) => ({
     name: `Field 머리 ${width} — 보조 글이 길어도 라벨이 반 폭 이상 쥔다`,

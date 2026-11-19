@@ -15,6 +15,7 @@ import '@/app/config/i18n'
 import '@/index.css'
 import { Badge } from '@/shared/ds/badge'
 import { Button } from '@/shared/ds/button'
+import * as chartDs from '@/shared/ds/chart'
 import { ChartDataTable, ChartDonutCenter, ChartLegendTiles } from '@/shared/ds/chart'
 import { ChartTooltipRow } from '@/shared/ds/chart/chart-tooltip-row'
 import { CARD_FACE_ISSUER, CARD_FACE_NAME, imageFrameIndicatorVariants } from '@/shared/ds/image-frame/image-frame-variants'
@@ -135,6 +136,10 @@ function Scene() {
             <div style={{ width: 200 }}>
               <ChartDonutCenter label='남은 휴가' amount='12일' />
             </div>
+            {/* 도넛 가운데 합계 글 — 들어가는지 재는 쪽과 그리는 쪽이 같이 쓰는 ds 상수(담다 4b215d8e). 이름공간으로 읽어 없으면 빈 클래스 */}
+            <span data-measure='static:도넛 가운데 합계 상수' className={(chartDs as Record<string, unknown>).CHART_DONUT_CENTER_AMOUNT as string | undefined ?? ''}>
+              12일
+            </span>
             <span data-measure='static:쪽 번호' className={PAGINATION_LABEL}>
               12
             </span>
