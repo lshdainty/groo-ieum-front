@@ -10,6 +10,7 @@ import { extendTailwindMerge } from "tailwind-merge";
  *   - `px-x4` · `rounded-r2` 를 여백 · 모서리로 못 읽어, 뒤에서 덮어 쓴 `p-0` · `rounded-full` 과
  *     둘 다 남긴다 — 그러면 어느 쪽이 이길지 CSS 순서가 정한다.
  * 이름은 groo-tokens.css 의 `--spacing-*` · `--radius-*` · `--text-*` 와 같다. 토큰을 더하면 여기도 더한다.
+ * 옛 이름(spacing xs~3xl · radius xs~2xl · 글자 display/title/body/label/caption/badge/overline)은 2026-11-16 걷었다.
  */
 const SPACING = [
   "x0_5",
