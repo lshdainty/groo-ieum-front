@@ -714,6 +714,48 @@ const cases = [
       return p;
     },
   })),
+  // 도넛 범례 줄 — 이름이 줄을 바꿔도 색 네모 · % · 금액은 줄 전체의 세로 가운데(groo-design #269 · chart.md 도넛 범례).
+  // 넓으면 한 줄(flex)에서 셋이 줄 가운데, 좁으면(큰 글자 — 줄 안 16rem 미만) % · 금액이 이름 아래로 내려가고 색 네모는 두 줄에 걸친 가운데
+  ...[
+    { w: 320, font: 1, how: "320 · 100% — 이름 여러 줄, 한 줄 모양" },
+    { w: 390, font: 3, how: "390 · 300% — % · 금액이 이름 아래로 내린 모양" },
+  ].map(({ w, font, how }) => ({
+    name: `도넛 범례 ${how} — ${font === 1 ? "색 네모 · % · 금액이" : "색 네모가"} 줄 전체의 세로 가운데(첫 줄에 붙지 않음)`,
+    async run() {
+      const { ctx, page, errors } = await open("donut", { width: w + 40, query: `&w=${w}&font=${font}` });
+      const got = await page.evaluate(() => {
+        const row = document.querySelector("[data-slot=chart-donut-row]");
+        const mid = (el) => {
+          const r = el.getBoundingClientRect();
+          return (r.top + r.bottom) / 2;
+        };
+        const label = row.querySelector("[data-slot=chart-donut-label]");
+        const lineH = parseFloat(getComputedStyle(label).lineHeight);
+        return {
+          row: mid(row),
+          rowH: row.getBoundingClientRect().height,
+          labelLines: Math.round(label.getBoundingClientRect().height / lineH),
+          display: getComputedStyle(row).display,
+          swatch: mid(row.querySelector("[data-slot=chart-donut-swatch]")),
+          percent: mid(row.querySelector("[data-slot=chart-donut-percent]")),
+          amount: mid(row.querySelector("[data-slot=chart-donut-amount]")),
+        };
+      });
+      await ctx.close();
+      const p = [...errors];
+      if (got.labelLines < 2) p.push(`이름이 ${got.labelLines}줄 — 여러 줄 시험이 안 됐다`);
+      expectEq(p, "줄 모양", got.display, font === 1 ? "flex" : "grid");
+      const off = (what, y) => {
+        if (Math.abs(y - got.row) > 1) p.push(`${what} 가운데 ${y.toFixed(1)} ≠ 줄 가운데 ${got.row.toFixed(1)}(줄 높이 ${got.rowH.toFixed(1)})`);
+      };
+      off("색 네모", got.swatch);
+      if (font === 1) {
+        off("%", got.percent);
+        off("금액", got.amount);
+      }
+      return p;
+    },
+  })),
 ];
 
 const only = process.argv[2];
