@@ -155,13 +155,19 @@ function VacationScene() {
 // 도넛 범례 — 이름이 줄을 바꾸는 긴 줄 하나 + 짧은 줄 하나(groo-design #269 — 색 네모 · % · 금액은 줄 전체의 세로 가운데)
 function DonutLegendScene() {
   const width = Number(params.get('w') ?? 320)
+  // amt — 큰 금액 한 줄(내린 값 줄의 금액 줄바꿈 — Typography v114 "띄어쓰기에서 먼저 넘긴다")
+  const amt = params.get('amt')
   return (
     <div style={{ width }} className='p-x4'>
       <chart.ChartDonutLegend
-        items={[
-          { key: 'long', label: '연차 · 반차 · 반반차 · 대체 휴가 · 경조 휴가 · 공가를 모두 더한 긴 이름', color: 'blue', percent: '41%', amount: '12.5일' },
-          { key: 'short', label: '병가', color: 'red', percent: '9%', amount: '3일' },
-        ]}
+        items={
+          amt
+            ? [{ key: 'big', label: '식비', color: 'blue', percent: '100.0%', amount: amt }]
+            : [
+                { key: 'long', label: '연차 · 반차 · 반반차 · 대체 휴가 · 경조 휴가 · 공가를 모두 더한 긴 이름', color: 'blue', percent: '41%', amount: '12.5일' },
+                { key: 'short', label: '병가', color: 'red', percent: '9%', amount: '3일' },
+              ]
+        }
       />
     </div>
   )
