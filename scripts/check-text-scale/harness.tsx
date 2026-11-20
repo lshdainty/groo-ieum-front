@@ -23,6 +23,7 @@ import { PAGINATION_LABEL } from '@/shared/ds/pagination/pagination-variants'
 import { ITEM_LABEL as SIDE_NAV_ITEM_LABEL } from '@/shared/ds/side-navigation/side-navigation-variants'
 import { List, ListItem } from '@/shared/ds/list'
 import { Skeleton } from '@/shared/ds/skeleton'
+import { Switch } from '@/shared/ds/switch'
 import { TablePagination } from '@/shared/ds/table-pagination'
 import { TreeView } from '@/shared/ds/tree-view'
 import { PermissionProvider, UserProvider } from '@/entities/session'
@@ -252,6 +253,12 @@ function Scene() {
               selectionMark
               defaultExpandedIds={['a']}
             />
+          </div>
+          {/* 스위치 — 트랙 · 엄지는 px 그대로, 라벨이 여러 줄이면 라벨 전체의 세로 가운데에 선다(groo-design #270). 좁은 자리라 100% 에서도 두 줄 */}
+          <div data-check='switch' className='flex flex-col gap-x4' style={{ width: 200 }}>
+            {(['16', '24', '32'] as const).map((size) => (
+              <Switch key={size} data-size={size} size={size} defaultChecked label='휴가 신청이 승인되면 메일로 알림 받기' />
+            ))}
           </div>
           <div data-check='steps' style={{ width: 390 }}>
             <ApprovalSteps request={request} />
