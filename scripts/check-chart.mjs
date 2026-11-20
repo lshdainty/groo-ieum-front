@@ -756,6 +756,57 @@ const cases = [
       return p;
     },
   })),
+  // 도넛 범례 내린 값 줄의 금액 — "칸" 은 % 옆 남은 자리가 아니라 값 줄 전체 폭이다(DESIGN.md Typography v114 "띄어쓰기에서 먼저 넘긴다",
+  // groo-damda-front QA 2026-11-20 412 · 300% "₩10, / 000, / 040,005"). % 옆에 금액이 한 줄로 들지 않으면 금액을 통째로 % 아래 줄
+  // 맨 앞으로 내리고, 금액 낱말이 그 줄보다도 길 때만 쉼표 뒤에서 꺾는다. 들면 % 옆 그대로다
+  ...[
+    { amt: "₩10,000,040,005", how: "줄보다 긴 금액 → % 아래 줄 맨 앞, 쉼표 뒤 두 줄", below: true, lines: 2 },
+    { amt: "10,000원", how: "% 옆에 드는 금액 → % 옆 한 줄 그대로", below: false, lines: 1 },
+  ].map(({ amt, how, below, lines }) => ({
+    name: `도넛 범례 412 · 300% 내린 값 줄 — ${how}`,
+    async run() {
+      const { ctx, page, errors } = await open("donut", { width: 452, query: `&w=412&font=3&amt=${encodeURIComponent(amt)}` });
+      const got = await page.evaluate(() => {
+        const row = document.querySelector("[data-slot=chart-donut-row]");
+        const label = row.querySelector("[data-slot=chart-donut-label]").getBoundingClientRect();
+        const percent = row.querySelector("[data-slot=chart-donut-percent]").getBoundingClientRect();
+        const amount = row.querySelector("[data-slot=chart-donut-amount]");
+        const a = amount.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(amount);
+        const lines = new Set([...range.getClientRects()].map((r) => Math.round(r.top))).size;
+        // 금액 낱말 한 줄 폭 — 같은 글자 꼴로 줄바꿈 없이
+        const probe = document.createElement("span");
+        probe.className = amount.className;
+        probe.style.cssText = "position:absolute;white-space:nowrap;visibility:hidden";
+        probe.textContent = amount.textContent;
+        row.appendChild(probe);
+        const word = probe.getBoundingClientRect().width;
+        probe.remove();
+        return {
+          display: getComputedStyle(row).display,
+          line: row.getBoundingClientRect().right - label.left,
+          word,
+          below: a.top >= percent.bottom - 0.5,
+          sameTop: Math.abs(a.top - percent.top) < 0.5,
+          startOff: a.left - label.left,
+          right: a.right - row.getBoundingClientRect().right,
+          lines,
+        };
+      });
+      await ctx.close();
+      const p = [...errors];
+      expectEq(p, "줄 모양", got.display, "grid");
+      if (below) {
+        if (got.word <= got.line) p.push(`금액 낱말 ${got.word.toFixed(1)} 이 값 줄 ${got.line.toFixed(1)} 보다 짧다 — 시험 금액이 너무 작다`);
+        if (!got.below) p.push("금액이 % 아래 줄로 내려가지 않고 % 옆 남은 칸에 남았다");
+        if (Math.abs(got.startOff) > 0.5) p.push(`금액이 값 줄 맨 앞에서 시작하지 않는다(${got.startOff.toFixed(1)})`);
+      } else if (!got.sameTop) p.push("% 옆에 드는 금액이 아래 줄로 내려갔다");
+      if (got.right > 0.5) p.push(`금액이 줄 밖으로 ${got.right.toFixed(1)} 넘친다`);
+      expectEq(p, "금액 줄 수", got.lines, lines);
+      return p;
+    },
+  })),
 ];
 
 const only = process.argv[2];
