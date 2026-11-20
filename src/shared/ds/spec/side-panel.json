@@ -3,7 +3,7 @@
   "source": "specs/components/side-panel.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "c345c5198b2f"
+    "sha256": "58291a9a6e66"
   },
   "slots": {
     "overlay": "딤 — 패널 뒤 화면 전체. 입력 폼이 아니면 누르면 닫힌다",
