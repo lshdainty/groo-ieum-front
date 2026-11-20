@@ -3,7 +3,7 @@
   "source": "specs/components/result-section.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "f7ff97647430"
+    "sha256": "c345c5198b2f"
   },
   "slots": {
     "root": "묶음 — 놓인 자리 가운데",

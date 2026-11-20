@@ -152,7 +152,23 @@ function VacationScene() {
   )
 }
 
+// 도넛 범례 — 이름이 줄을 바꾸는 긴 줄 하나 + 짧은 줄 하나(groo-design #269 — 색 네모 · % · 금액은 줄 전체의 세로 가운데)
+function DonutLegendScene() {
+  const width = Number(params.get('w') ?? 320)
+  return (
+    <div style={{ width }} className='p-x4'>
+      <chart.ChartDonutLegend
+        items={[
+          { key: 'long', label: '연차 · 반차 · 반반차 · 대체 휴가 · 경조 휴가 · 공가를 모두 더한 긴 이름', color: 'blue', percent: '41%', amount: '12.5일' },
+          { key: 'short', label: '병가', color: 'red', percent: '9%', amount: '3일' },
+        ]}
+      />
+    </div>
+  )
+}
+
 function Scene() {
+  if (scene === 'donut') return <DonutLegendScene />
   if (scene === 'vacation') return <VacationScene />
   if (scene === 'dots') return <DotsScene />
   if (scene === 'xaxis') return <XAxisScene />
