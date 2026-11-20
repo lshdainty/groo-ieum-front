@@ -3,7 +3,7 @@
   "source": "specs/components/progress-circle.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "c345c5198b2f"
+    "sha256": "58291a9a6e66"
   },
   "slots": {
     "root": "원 상자 — 지름 · 두께, 정사각",

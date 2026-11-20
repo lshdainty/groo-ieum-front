@@ -3,7 +3,7 @@
   "source": "specs/components/collapsible.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "c345c5198b2f"
+    "sha256": "58291a9a6e66"
   },
   "slots": {
     "root": "접는 자리 하나 — 트리거 + 펼친 내용. surface card 면 Card 면",

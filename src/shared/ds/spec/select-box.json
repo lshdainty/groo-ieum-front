@@ -3,7 +3,7 @@
   "source": "specs/components/select-box.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "c345c5198b2f"
+    "sha256": "58291a9a6e66"
   },
   "slots": {
     "root": "상자 — 테두리 · 바탕 · 모서리. 펼침을 뺀 전부가 누르는 영역",

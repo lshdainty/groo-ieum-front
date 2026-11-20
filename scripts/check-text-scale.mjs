@@ -333,6 +333,39 @@ const cases = [
     },
   })),
 
+  // ── 스위치는 라벨 전체의 세로 가운데(groo-design #270 — switch.md "글자 크기 설정" · DESIGN.md "상자 · 아이콘 · 원은 px") ──
+  ...[
+    { font: 1, live: false },
+    { font: 3, live: false },
+    { font: 3, live: true },
+  ].map(({ font, live }) => ({
+    name: `스위치 · 좁은 폭 200 · ${font * 100}%${font === 1 ? "" : live ? " 뜬 뒤" : " 처음부터"} — 라벨이 여러 줄이어도 스위치(16 · 24 · 32, px 그대로) 가운데 = 라벨 묶음 가운데`,
+    async run() {
+      const { ctx, page, errors } = await open({ font, live });
+      const rows = await page.evaluate(() =>
+        [...document.querySelectorAll("[data-check=switch] [role=switch]")].map((mark) => {
+          const label = mark.closest("label").querySelector(":scope > span");
+          const range = document.createRange();
+          range.selectNodeContents(label);
+          const lines = new Set([...range.getClientRects()].filter((r) => r.width > 0).map((r) => Math.round(r.top))).size;
+          const m = mark.getBoundingClientRect();
+          const l = label.getBoundingClientRect();
+          return { size: mark.dataset.size, lines, off: (m.top + m.bottom) / 2 - (l.top + l.bottom) / 2, w: m.width, h: m.height };
+        }),
+      );
+      await ctx.close();
+      const p = [...errors];
+      const box = { 16: [26, 16], 24: [38, 24], 32: [52, 32] };
+      if (rows.length !== 3) p.push(`스위치 ${rows.length} 개`);
+      for (const r of rows) {
+        if (r.lines < 2) p.push(`${r.size} 라벨이 ${r.lines} 줄 — 여러 줄 모양을 재지 않는다`);
+        if (Math.abs(r.off) > 0.5) p.push(`${r.size} 스위치 가운데 − 라벨 가운데 ${r.off.toFixed(1)}`);
+        if (r.w !== box[r.size][0] || r.h !== box[r.size][1]) p.push(`${r.size} 스위치 ${r.w}×${r.h}(${box[r.size].join("×")} 이어야)`);
+      }
+      return p;
+    },
+  })),
+
   // ── 블록 스켈레톤(skeleton.md "틀은 먼저, 데이터 자리만 스켈레톤" · "크기 — 글은 글줄 높이") ──
   // 데이터를 담는 줄 · 상자는 블록 하나로 덮지 않고 실제와 같은 부품(List 줄 · Select Box 상자 · 조직도 상자 · 지표 타일)에 글 줄만 둔다 —
   // 100% 에서 실제와 높이가 같고, 300%(처음부터 · 뜬 뒤)에서도 실제와 함께 커진다. 틀 부품(검색칸 · 단추 · 칸 라벨)은 스켈레톤이 아니라 실제 부품이다
