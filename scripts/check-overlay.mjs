@@ -1314,6 +1314,34 @@ const cases = [
       return p;
     },
   },
+  {
+    // dialog.md "머리 · 본문 · 바닥"(대화상자 바닥은 Button small 36) · button.md 모달 footer(삭제는 왼쪽) · bottom-sheet.md(시트 바닥은 large 48).
+    // 크기는 바닥(ResponsiveDialogFooter)이 표면에 맞춰 준다 — 버튼이 size 를 직접 쥐면 1280 이상 대화상자에서도 48 로 남는다(일정 · 업무 보고 폼 · 일정 상세가 이 모양이었다).
+    // 대화상자 바닥은 오른쪽 정렬이라 [삭제] 를 왼쪽에 두려면 mr-auto 가 있어야 한다(시트 바닥에서는 주 버튼이 남은 폭을 채워 0 이 된다).
+    // 시트에서만 그리는 [삭제](`sheet &&` 로 거른 공휴일 · 공지 · 업무 코드 폼)는 대화상자에 오지 않으니 보지 않는다.
+    name: '반응형 대화상자 바닥의 ghost critical 은 size 를 직접 주지 않고(바닥이 정한다 — 대화상자 36 · 시트 48) mr-auto 로 왼쪽에 선다',
+    async run() {
+      const p = [];
+      let seen = 0;
+      for (const file of codeFiles(resolve(ROOT, "src"))) {
+        if (/[\\/]shared[\\/]ds[\\/]|\.demo\./.test(file)) continue;
+        const src = readFileSync(file, "utf8");
+        for (const f of src.matchAll(/<ResponsiveDialogFooter(?=[\s>])[\s\S]*?<\/ResponsiveDialogFooter>/g)) {
+          for (const b of f[0].matchAll(/<Button\b[\s\S]*?>/g)) {
+            if (!/ghostColor=['"]critical['"]/.test(b[0])) continue;
+            const before = f[0].slice(0, b.index);
+            if (/\bsheet\s*&&/.test(before.slice(before.lastIndexOf("{")))) continue;
+            seen += 1;
+            const at = `${file.slice(ROOT.length + 1)}:${src.slice(0, f.index + b.index).split("\n").length}`;
+            if (/\ssize=/.test(b[0])) p.push(`${at} size 를 직접 줌 — 대화상자에서도 그 크기로 남는다`);
+            if (!/className=['"][^'"]*\bmr-auto\b/.test(b[0])) p.push(`${at} mr-auto 없음 — 대화상자 바닥에서 왼쪽에 서지 않는다`);
+          }
+        }
+      }
+      if (seen < 4) p.push(`대화상자에 오는 바닥 ghost critical 을 ${seen} 개만 찾았다 — 찾는 식이 깨졌다`);
+      return p;
+    },
+  },
 ];
 
 const only = process.argv[2];

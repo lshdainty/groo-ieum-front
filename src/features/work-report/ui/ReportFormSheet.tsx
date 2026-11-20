@@ -130,7 +130,7 @@ export function ReportFormSheet({
         </ResponsiveDialogBody>
         <ResponsiveDialogFooter>
           {editing && onDelete && (
-            <Button variant='ghost' ghostColor='critical' size='large' data-fit='content' disabled={busy} onClick={onDelete} data-sheet-delete>
+            <Button variant='ghost' ghostColor='critical' data-fit='content' className='mr-auto' disabled={busy} onClick={onDelete} data-sheet-delete>
               {tc('delete')}
             </Button>
           )}
