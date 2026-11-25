@@ -3,7 +3,7 @@
   "source": "specs/components/snackbar.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "58291a9a6e66"
+    "sha256": "c102308050a8"
   },
   "slots": {
     "region": "자리 — 화면 아래 가운데. 탭 바 · 플로팅 버튼 · 바닥 버튼을 피해 그 위에 섭니다",
