@@ -3,7 +3,7 @@
   "source": "specs/components/select.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "58291a9a6e66"
+    "sha256": "c102308050a8"
   },
   "slots": {
     "trigger": "트리거 — Input Button 과 같은 상자. 누르면 목록이 열린다",

@@ -3,7 +3,7 @@
   "source": "specs/components/input-button.yaml",
   "design": {
     "file": "DESIGN.hr.md",
-    "sha256": "58291a9a6e66"
+    "sha256": "c102308050a8"
   },
   "slots": {
     "root": "상자 — 테두리 · 바탕 · 모서리. 배경 층 버튼이 누르는 영역 전체",

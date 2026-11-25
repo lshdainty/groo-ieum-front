@@ -8,6 +8,7 @@
  *     공휴일 이름 · 칸 안 일정 · "+N개" · 시각 눈금 · 지금 시각) · 원 26 · 년 보기 칸 44 · 원 24 · 홈 미작성 달력 · 그날 목록 깃발 16
  *   · 커지는 쪽(rem) — 버튼 글 · 지표 타일 합계 · 표로 보기 · 툴팁 줄 · 사이드 메뉴 항목 이름 · 년 보기 달 이름 단추 · 홈 달력 제목 · 범례 ·
  *     그날 목록 줄 제목
+ * 사용자 관리 표(groo-design #272) — 300% 에서 열이 넘쳐 표만 가로로 밀리고, 넘김 줄은 표 상자의 보이는 폭에 붙는다(줄이 더 넓으면 줄 폭 · 끝까지 밀면 끝).
  * 300% 를 처음부터 준 것과 뜬 뒤 키운 것에서 그대로 두는 쪽은 100% 와 같고(글자 · 상자 크기), 커지는 쪽은 글자가 세 배다.
  *
  * 화면 쪽 rem 숫자 유틸(`size-4` · `h-2` · `[&_svg]:size-4` · `min-h-11` …)이 다시 들어오지 않게 소스도 훑는다 — 숫자 유틸은 rem 이라
@@ -294,6 +295,83 @@ const cases = [
       if (at100.h !== 40) p.push(`100% 줄 높이 ${at100.h}(40 이어야)`);
       if (!(at300.tallest > 40)) p.push(`300% 에서 줄 안의 가장 높은 것 ${at300.tallest} — 글이 커지지 않아 시험이 아무것도 재지 않는다`);
       if (at300.over > 0.5) p.push(`300% 에서 줄 안의 것이 줄 밖으로 ${at300.over.toFixed(1)} 넘친다(줄 높이 ${at300.h} — 고정 높이면 넘친다)`);
+      return p;
+    },
+  })),
+
+  // ── 표 넘김 줄은 표 상자의 보이는 폭에 붙는다(groo-design #272 사용자 결정 B — 표만 가로로 밀린다) ──
+  ...[false, true].map((live) => ({
+    name: `사용자 관리 표 · 1280 · 300% ${live ? "뜬 뒤" : "처음부터"} — 열이 넘쳐 표를 가로로 밀어도 넘김 줄의 이전 · 다음은 표 상자의 보이는 폭 안에 있다. 줄이 보이는 폭보다 넓으면 줄 폭을 따르고 표를 끝까지 밀 때 끝이 보인다. 100% 는 넘치지 않고 줄이 상자 폭 그대로`,
+    async run() {
+      // 표 상자를 처음(0) · 끝으로 밀며 상자의 보이는 폭과 넘김 줄 · 이전 · 다음의 x 를 읽는다
+      const read = (page, w) =>
+        page.evaluate(async (w) => {
+          const box = document.querySelector(`[data-check=user-table-${w}] [data-slot=table]`);
+          if (!box) return null;
+          const slot = box.querySelector("[data-slot=table-pagination-slot]");
+          const row = box.querySelector("[data-slot=table-pagination]");
+          const prev = box.querySelector("[data-slot=table-pagination-previous]");
+          const next = box.querySelector("[data-slot=table-pagination-next]");
+          if (!slot || !row || !prev || !next) return { missing: true };
+          const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          const at = async (left) => {
+            box.scrollLeft = left;
+            await frame();
+            const b = box.getBoundingClientRect();
+            const x = (el) => {
+              const r = el.getBoundingClientRect();
+              return { l: +(r.left - b.left).toFixed(1), r: +(r.right - b.left).toFixed(1) };
+            };
+            return { scrollLeft: box.scrollLeft, slot: x(slot), prev: x(prev), next: x(next) };
+          };
+          // 줄의 제 폭(max-content) — 자리를 채우는 w-full 이 아니라 줄 안의 것이 차지하는 폭
+          row.style.width = "max-content";
+          const rowNatural = row.getBoundingClientRect().width;
+          row.style.width = "";
+          const start = await at(0);
+          const end = await at(box.scrollWidth);
+          box.scrollLeft = 0;
+          return {
+            visible: box.clientWidth,
+            content: box.scrollWidth,
+            table: box.querySelector("table").getBoundingClientRect().width,
+            rowOver: row.scrollWidth - row.clientWidth,
+            rowWidth: rowNatural,
+            slotPad: parseFloat(getComputedStyle(slot).paddingLeft) + parseFloat(getComputedStyle(slot).paddingRight),
+            start,
+            end,
+          };
+        }, w);
+      const one = await open({ font: 1 });
+      const at100 = await read(one.page, 976);
+      await one.ctx.close();
+      const big = await open({ font: 3, live });
+      const fit = await read(big.page, 976);
+      const wide = await read(big.page, 480);
+      await big.ctx.close();
+      const p = [...one.errors, ...big.errors];
+      if (!at100 || !fit || !wide || at100.missing || fit.missing || wide.missing) return [...p, "사용자 관리 표 · 넘김 줄이 없다"];
+      const inside = (s, v, k) => s[k].l >= -0.5 && s[k].r <= v + 0.5;
+      const near = (a, b) => Math.abs(a - b) <= 0.5;
+      // 100% — 표가 상자에 들어 밀리지 않고, 줄은 상자 폭 그대로(지금과 같다)
+      if (at100.content > at100.visible) p.push(`100% 에서 표가 넘친다(내용 ${at100.content} > 보이는 폭 ${at100.visible}) — 시험 전제가 깨졌다`);
+      if (!near(at100.start.slot.l, 0) || !near(at100.start.slot.r, at100.visible)) p.push(`100% 넘김 줄 x ${at100.start.slot.l} ~ ${at100.start.slot.r}(상자 0 ~ ${at100.visible} 이어야)`);
+      // 300% 976 — 표가 넘치고 줄은 보이는 폭에 든다
+      if (!(fit.content > fit.visible + 1)) p.push(`300% 976 에서 표가 넘치지 않는다(내용 ${fit.content} · 보이는 폭 ${fit.visible}) — 시험이 아무것도 재지 않는다`);
+      if (!(fit.rowWidth + fit.slotPad <= fit.visible + 0.5)) p.push(`300% 976 에서 넘김 줄(제 폭 ${fit.rowWidth} + 여백 ${fit.slotPad})이 보이는 폭 ${fit.visible} 에 들지 않는다 — 시험 전제가 깨졌다`);
+      for (const [k, s] of [["스크롤 0", fit.start], ["끝까지 민 뒤", fit.end]]) {
+        if (!inside(s, fit.visible, "prev") || !inside(s, fit.visible, "next")) p.push(`300% 976 ${k}(scrollLeft ${s.scrollLeft}): 이전 ${s.prev.l}~${s.prev.r} · 다음 ${s.next.l}~${s.next.r} 이 보이는 폭 0 ~ ${fit.visible} 밖`);
+        if (!near(s.slot.l, 0) || !near(s.slot.r, fit.visible)) p.push(`300% 976 ${k}: 넘김 줄 x ${s.slot.l} ~ ${s.slot.r}(보이는 폭 0 ~ ${fit.visible} 에 붙어야)`);
+      }
+      if (!(fit.end.scrollLeft > 0)) p.push("300% 976 에서 표를 밀 수 없다");
+      // 300% 480 — 줄이 보이는 폭보다 넓다: 줄 폭을 따르고(줄 안이 넘치지 않는다) 스크롤 0 에서 왼쪽, 끝까지 밀면 오른쪽 끝이 보이는 폭 끝
+      if (!(wide.rowWidth + wide.slotPad > wide.visible)) p.push(`300% 480 에서 넘김 줄(제 폭 ${wide.rowWidth} + 여백 ${wide.slotPad})이 보이는 폭 ${wide.visible} 보다 넓지 않다 — 시험 전제가 깨졌다`);
+      if (wide.rowOver > 0.5) p.push(`300% 480 에서 넘김 줄 안의 것이 줄 밖으로 ${wide.rowOver} 넘친다(min-w-max)`);
+      if (!near(wide.start.slot.r - wide.start.slot.l, wide.rowWidth + wide.slotPad)) p.push(`300% 480 넘김 줄 자리 폭 ${(wide.start.slot.r - wide.start.slot.l).toFixed(1)}(줄 폭 ${wide.rowWidth} + 여백 ${wide.slotPad} 이어야)`);
+      if (!near(wide.start.slot.l, 0)) p.push(`300% 480 스크롤 0: 넘김 줄 왼쪽 ${wide.start.slot.l}(보이는 폭 왼쪽 0 에 붙어야)`);
+      if (!near(wide.end.slot.r, wide.visible) || !inside(wide.end, wide.visible, "prev") || !inside(wide.end, wide.visible, "next"))
+        p.push(`300% 480 끝까지 민 뒤: 넘김 줄 끝 ${wide.end.slot.r} · 이전 ${wide.end.prev.l}~${wide.end.prev.r} · 다음 ${wide.end.next.l}~${wide.end.next.r}(보이는 폭 끝 ${wide.visible})`);
+      if (process.env.TABLE_PAG_LOG) console.log(JSON.stringify({ live, at100, fit, wide }));
       return p;
     },
   })),
