@@ -80,4 +80,4 @@ export {
 
 // UI
 export { VacationMetrics } from './ui/VacationMetrics'
-export { deltaOf, metricsOf, type Metric } from './model/metrics'
+export { deltaOf, metricLabelsOf, metricsOf, type Metric } from './model/metrics'

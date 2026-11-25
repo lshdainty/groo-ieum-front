@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/shared/lib/cn'
 import { dsMoney, withCommaBreaks } from '@/shared/ds/i18n'
-import { LoadingRegion } from '@/shared/ds/skeleton'
+import { LoadingRegion, Skeleton } from '@/shared/ds/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/ds/tooltip'
 import { useUsersMonthBirthDuesQuery } from '@/entities/dues'
 import { useUsersQuery } from '@/entities/user'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { MATRIX_CELL_MAX, MATRIX_CELL_MIN, MONTH_LABEL_MIN, matrixCellWidth, rowsOf, type Row } from '../lib/dues-matrix'
-import { DuesFailure, DuesMatrixEmpty, MatrixSkeleton } from './DuesResults'
+import { DuesFailure, DuesMatrixEmpty } from './DuesResults'
 import { DuesSection } from './DuesSection'
 
 const useWidth = () => {
@@ -59,6 +59,39 @@ export const DuesBirthMatrix = ({ year }: { year: number }) => {
   )
 }
 
+/** 범례 — 입금 · 아직 · 생일 달. 정해진 글이라 기다리는 동안에도 실제로 그린다(skeleton.md "틀은 먼저, 데이터 자리만 스켈레톤") */
+const MatrixLegend = () => {
+  const { t } = useTranslation('culture')
+  return (
+    <ul className='m-0 mb-x3 flex list-none flex-wrap items-center gap-x4 p-0 text-t3 text-fg-neutral-subtle' data-matrix-legend>
+      <li className='flex items-center gap-x1_5'>
+        <span aria-hidden className='size-x3_5 rounded-r1 bg-bg-brand-solid' />
+        {t('dues.legend.paid')}
+      </li>
+      <li className='flex items-center gap-x1_5'>
+        <span aria-hidden className='size-x3_5 rounded-r1 bg-bg-neutral-weak' />
+        {t('dues.legend.notYet')}
+      </li>
+      <li className='flex items-center gap-x1_5'>
+        <Gift aria-hidden className='size-x3_5' />
+        {t('dues.legend.birthMonth')}
+      </li>
+    </ul>
+  )
+}
+
+/** 생일비 행렬 자리 — 범례는 실제, 사람 줄 셋 자리만 글 줄 스켈레톤 */
+export const MatrixSkeleton = () => (
+  <div>
+    <MatrixLegend />
+    <div className='flex flex-col gap-x2'>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Skeleton key={i} text='t5' className='block w-full' />
+      ))}
+    </div>
+  </div>
+)
+
 export const Matrix = ({ rows, nameColumn: nameWanted }: { rows: Row[]; nameColumn: number }) => {
   const { t } = useTranslation('culture')
   const [ref, width] = useWidth()
@@ -80,20 +113,7 @@ export const Matrix = ({ rows, nameColumn: nameWanted }: { rows: Row[]; nameColu
 
   return (
     <div ref={ref}>
-      <ul className='m-0 mb-x3 flex list-none flex-wrap items-center gap-x4 p-0 text-t3 text-fg-neutral-subtle' data-matrix-legend>
-        <li className='flex items-center gap-x1_5'>
-          <span aria-hidden className='size-x3_5 rounded-r1 bg-bg-brand-solid' />
-          {t('dues.legend.paid')}
-        </li>
-        <li className='flex items-center gap-x1_5'>
-          <span aria-hidden className='size-x3_5 rounded-r1 bg-bg-neutral-weak' />
-          {t('dues.legend.notYet')}
-        </li>
-        <li className='flex items-center gap-x1_5'>
-          <Gift aria-hidden className='size-x3_5' />
-          {t('dues.legend.birthMonth')}
-        </li>
-      </ul>
+      <MatrixLegend />
       <table className='table-fixed border-separate border-spacing-x1' data-matrix style={{ marginLeft: -4, width: nameColumn + cell * 12 + 4 * 14 }}>
         <caption className='sr-only'>{t('dues.monthBirthDuesTitle')}</caption>
         <colgroup>

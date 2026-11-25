@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { useMonthBirthDuesQuery, useYearOperationDuesQuery } from '@/entities/dues'
 import { summaryMetricsOf } from '@/features/culture-dues/lib/dues-summary'
 import { SummaryMetrics } from '@/features/culture-dues/ui/DuesSummary'
-import { SummarySkeleton } from '@/features/culture-dues/ui/DuesResults'
 import { useDesktop } from '@/widgets/layout/lib/use-desktop'
 import { WidgetBoundary } from '@/features/dashboard/ui/WidgetResults'
 import { WidgetFrame } from '@/features/dashboard/ui/WidgetFrame'
@@ -20,7 +19,7 @@ export const TotalDuesWidget = () => {
 
   return (
     <WidgetFrame id='total-dues' body={desktop ? 'content' : 'list'}>
-      <WidgetBoundary id='total-dues' queries={[operation, birth]} fallback={<SummarySkeleton desktop={desktop} />}>
+      <WidgetBoundary id='total-dues' queries={[operation, birth]} fallback={<SummaryMetrics metrics={metrics} desktop={desktop} pending />}>
         <SummaryMetrics metrics={metrics} desktop={desktop} />
       </WidgetBoundary>
     </WidgetFrame>
