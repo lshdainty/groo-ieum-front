@@ -44,7 +44,13 @@ import type { Dept } from '@/features/admin-company/lib/dept-tree'
 import { MonthStatsSkeleton } from '@/features/dashboard/ui/widgets/MonthStatsWidget'
 import { CheckSelectBox, CheckSelectBoxGroup, RadioSelectBox, RadioSelectBoxGroup } from '@/shared/ds/select-box'
 import { ListRowsSkeleton, SelectBoxRowsSkeleton } from '@/shared/ui/groo/skeleton-rows'
-import type { GetUserRequestedVacationsResp } from '@/entities/vacation'
+import type { GetUserRequestedVacationsResp, GetUserVacationStatsResp } from '@/entities/vacation'
+import { VacationMetrics } from '@/entities/vacation'
+import type { GetUsersResp } from '@/entities/user'
+import { UserInfoContent } from '@/features/user-profile/ui/UserInfoContent'
+import { SummaryMetrics } from '@/features/culture-dues/ui/DuesSummary'
+import { MatrixSkeleton } from '@/features/culture-dues/ui/DuesBirthMatrix'
+import { RequestSummary } from '@/features/vacation-application/ui/RequestSummary'
 
 const params = new URLSearchParams(window.location.search)
 if (params.get('font')) document.documentElement.style.fontSize = `${Number(params.get('font')) * 100}%`
@@ -112,6 +118,36 @@ const dept = {
   color_code: 'blue',
   children: [],
 } as unknown as Dept
+
+// 홈 위젯 기다림과 견줄 실제 값 — 증감 없음(기다림 자리에는 증감 줄이 없다)
+const vacationStats = {
+  remain_time: 12,
+  remain_time_str: '12일',
+  used_time: 3,
+  used_time_str: '3일',
+  expect_used_time: 1,
+  expect_used_time_str: '1일',
+  remain_time_gap: 0,
+  remain_time_gap_str: '0일',
+  used_time_gap: 0,
+  used_time_gap_str: '0일',
+} as unknown as GetUserVacationStatsResp
+const me = {
+  user_id: 'ieum',
+  user_name: '김이음',
+  user_email: 'ieum@groo.test',
+  user_birth: null,
+  user_work_time: '9 ~ 6',
+  user_origin_company_name: '그루',
+  main_department_name_kr: '인사팀',
+  profile_url: '',
+} as unknown as GetUsersResp
+const duesMetrics = [
+  { id: 'total', label: '운영비 합계', value: '0원', description: '올해 입금 − 출금' },
+  { id: 'deposit', label: '운영비 입금', value: '0원', description: '올해 입금' },
+  { id: 'withdrawal', label: '운영비 출금', value: '0원', description: '올해 출금' },
+  { id: 'birth', label: '11월 생일비', value: '0원', description: '올해 11월' },
+]
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } })
 const thisMonth = dayjs(DAY)
@@ -242,6 +278,43 @@ function Scene() {
                   { key: 'scheduled', label: '예정', color: 'blue', total: '2일', marker: 'outline' },
                 ]}
               />
+            </div>
+          </div>
+          {/* 홈 위젯 기다림(skeleton.md "틀은 먼저, 데이터 자리만 스켈레톤") — 이름 · 범례 · 상태 이름은 실제 글, 값 자리만 글 줄.
+              data-wait 마다 위젯 하나의 기다리는 모습, data-pair 는 실제 값과 높이를 견준다 */}
+          <div data-check='home-wait' className='grid grid-cols-2 gap-x4' style={{ width: 1200 }}>
+            <div data-wait='vacation-inline' data-pair='metrics-inline' data-side='sk'>
+              <VacationMetrics layout='inline' />
+            </div>
+            <div data-pair='metrics-inline' data-side='real'>
+              <VacationMetrics data={vacationStats} layout='inline' />
+            </div>
+            <div data-wait='vacation-list' data-pair='metrics-list' data-side='sk' style={{ width: 390 }}>
+              <VacationMetrics layout='list' />
+            </div>
+            <div data-pair='metrics-list' data-side='real' style={{ width: 390 }}>
+              <VacationMetrics data={vacationStats} layout='list' />
+            </div>
+            <div data-wait='profile' style={{ width: 320 }}>
+              <UserInfoContent />
+            </div>
+            <div style={{ width: 320 }}>
+              <UserInfoContent user={me} />
+            </div>
+            <div data-wait='dues-inline' data-pair='dues-inline' data-side='sk'>
+              <SummaryMetrics metrics={duesMetrics} desktop pending />
+            </div>
+            <div data-pair='dues-inline' data-side='real'>
+              <SummaryMetrics metrics={duesMetrics} desktop />
+            </div>
+            <div data-wait='dues-list' style={{ width: 390 }}>
+              <SummaryMetrics metrics={duesMetrics} desktop={false} pending />
+            </div>
+            <div data-wait='request-inline'>
+              <RequestSummary year={2026} layout='inline' />
+            </div>
+            <div data-wait='birth-matrix'>
+              <MatrixSkeleton />
             </div>
           </div>
           {/* 나무 — 꺾쇠 · 체크는 px 그대로, 이름 첫 줄 가운데에 선다(groo-design #263 레시피 — 칸 높이 = 이름 줄 높이). 이름은 두 줄이 되게 길게 */}

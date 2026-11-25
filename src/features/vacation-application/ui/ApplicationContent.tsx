@@ -15,7 +15,7 @@ import { ScreenTitle } from '@/shared/ds/top-navigation'
 import { useApplicationContext } from '../model/ApplicationContext'
 import { ApplicationFormDialog } from './ApplicationFormDialog'
 import { ApplicationTable } from './ApplicationTable'
-import { RequestSummary, RequestSummarySkeleton } from './RequestSummary'
+import { RequestSummary } from './RequestSummary'
 
 /** 고른 해 선택지 — 5년 전 ~ 1년 뒤(지금 그대로) */
 const yearOptions = (): number[] => {
@@ -64,7 +64,7 @@ const ApplicationContent = () => {
     <LoadingRegion
       pending={stats.isPending}
       failed={stats.isLoadingError}
-      fallback={<RequestSummarySkeleton layout={layout} />}
+      fallback={<RequestSummary year={year} layout={layout} cols={wide ? 4 : 2} leading={layout === 'band' ? yearSelect : undefined} />}
       failure={summaryFailure}
     >
       {stats.data && <RequestSummary stats={stats.data} year={year} layout={layout} cols={wide ? 4 : 2} leading={layout === 'band' ? yearSelect : undefined} />}

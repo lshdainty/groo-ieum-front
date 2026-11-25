@@ -72,16 +72,6 @@ const ChartSkeleton = ({ size }: { size: number | 'bar' }) => (
   </div>
 )
 
-const MetricsSkeleton = ({ cards }: { cards: boolean }) => {
-  const one = (i: number) => (
-    <div key={i} className='flex flex-col items-start gap-x1'>
-      <Skeleton text='t3' className='block w-1/2' />
-      <Skeleton text='t7' className='block w-3/4' />
-    </div>
-  )
-  return cards ? <div className='grid grid-cols-3 gap-x6'>{[0, 1, 2].map((i) => <Card key={i}>{one(i)}</Card>)}</div> : <div className='flex flex-col gap-x4 px-x6 pt-x2'>{[0, 1, 2].map(one)}</div>
-}
-
 /**
  * 한 사람의 한 해 휴가 현황 구역(I-25 C 11 ~ 16) — 지표 셋 · 유형별 남은 휴가 · 달마다 쓴 휴가 · 휴가 기록.
  * 데스크톱: 지표 카드 셋(나란히 24) → 8 → 유형 | 달마다(나란히 24) → 8 → 기록 카드. 폰: 띠 넷(사이 8 — 첫 띠는 맨 위 `leading`(연도 Select) + 지표).
@@ -123,7 +113,7 @@ export function VacationSections({
   )
 
   const metrics = (cards: boolean) =>
-    region(stats, <MetricsSkeleton cards={cards} />, t('history.metricsFailureTitle'), stats.data && <VacationMetrics data={stats.data} layout={cards ? 'cards' : 'band'} />)
+    region(stats, <VacationMetrics layout={cards ? 'cards' : 'band'} />, t('history.metricsFailureTitle'), stats.data && <VacationMetrics data={stats.data} layout={cards ? 'cards' : 'band'} />)
 
   const typeBody = region(
     types,

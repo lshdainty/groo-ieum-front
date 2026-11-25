@@ -381,6 +381,10 @@ const cases = [
             check: (el) => el.querySelector("[data-slot=select-box-group] > *"),
             org: (el) => el.querySelector("[data-org-box], [data-org-box-skeleton]"),
             tiles: (el) => el.querySelector("[data-slot=chart-legend-total]")?.closest("button"),
+            // 홈 위젯 기다림 — 위젯 본문 전체(이름 · 값 · 설명 줄)
+            "metrics-inline": (el) => el.firstElementChild,
+            "metrics-list": (el) => el.firstElementChild,
+            "dues-inline": (el) => el.firstElementChild,
           };
           const out = {};
           for (const box of document.querySelectorAll("[data-pair]")) {
@@ -411,6 +415,80 @@ const cases = [
       return p;
     },
   })),
+  // ── 홈 위젯 기다림(QA 2026-11-25 — #111 "틀은 실제 부품") — 휴가 현황 · 내 정보 · 회비 현황 · 휴가 신청 통계 · 생일비 행렬 ──
+  // 이름(남은 휴가 · 쓴 휴가 · 쓸 예정 · 아이디 …) · 정해진 설명 · 범례 · 상태 이름은 실제 글이고, 값 자리만 글 줄 스켈레톤이다
+  ...[1, 3].map((font) => ({
+    name: `홈 위젯 기다림 · ${font * 100}% — 이름 · 범례 · 상태 이름은 실제 글(스켈레톤 없음), 값 자리만 글 줄 스켈레톤`,
+    async run() {
+      const { ctx, page, errors } = await open({ font });
+      const got = await page.evaluate(() => {
+        // [이름 자리, 값 자리] — 값 자리가 없는 위젯(범례)은 null
+        const parts = {
+          "vacation-inline": ["[data-slot=card-stat-label]", "[data-slot=card-stat-value]", 3],
+          "vacation-list": ["[data-slot=list-title]", "[data-slot=list-suffix]", 3],
+          profile: ["dt", "dd", 6],
+          "dues-inline": ["[data-slot=card-stat-label], [data-metric] > p", "[data-slot=card-stat-value]", 8],
+          "dues-list": ["[data-slot=list-title], [data-slot=list-detail]", "[data-slot=list-suffix]", 8],
+          "request-inline": ["[data-slot=card-stat-label], [data-status-tag]", "[data-slot=card-stat-value], [data-status-tag]", 9],
+          "birth-matrix": ["[data-matrix-legend] li", null, 3],
+        };
+        const out = {};
+        for (const [id, [labelSel, valueSel, n]] of Object.entries(parts)) {
+          const box = document.querySelector(`[data-wait=${id}]`);
+          if (!box) {
+            out[id] = { missing: true };
+            continue;
+          }
+          const labels = [...box.querySelectorAll(labelSel)];
+          const values = valueSel ? [...box.querySelectorAll(valueSel)] : [];
+          out[id] = {
+            n,
+            // 스켈레톤에는 글이 없다 — 이름 칸의 글은 textContent 그대로. 상태 이름 칸은 이름 글 + 건수 자리라 칸 안 스켈레톤은 값 자리다
+            labels: labels.map((el) => ({
+              text: el.textContent.trim(),
+              covered: !!el.closest("[data-slot=skeleton]") || (!el.matches("[data-status-tag]") && !!el.querySelector("[data-slot=skeleton]")),
+            })),
+            valuesWithout: values.filter((el) => !el.querySelector("[data-slot=skeleton]")).length,
+            values: values.length,
+            // 실제 글로 그린 값이 남아 있지 않다 — 값 자리는 스켈레톤 하나뿐
+            valueText: values.map((el) => (el.matches("[data-status-tag]") ? "" : el.textContent.trim())).filter(Boolean),
+          };
+        }
+        return out;
+      });
+      await ctx.close();
+      const p = [...errors];
+      for (const [id, r] of Object.entries(got)) {
+        if (r.missing) {
+          p.push(`${id} 자리가 없다`);
+          continue;
+        }
+        if (r.labels.length !== r.n) p.push(`${id} 이름 자리 ${r.labels.length}(${r.n} 이어야)`);
+        const empty = r.labels.filter((l) => !l.text).length;
+        const covered = r.labels.filter((l) => l.covered).length;
+        if (empty) p.push(`${id} 글 없는 이름 ${empty}`);
+        if (covered) p.push(`${id} 스켈레톤으로 덮인 이름 ${covered}`);
+        if (r.values && r.valuesWithout) p.push(`${id} 스켈레톤 없는 값 자리 ${r.valuesWithout}/${r.values}`);
+        if (r.valueText.length) p.push(`${id} 값 자리에 글 ${JSON.stringify(r.valueText)}`);
+      }
+      return p;
+    },
+  })),
+  {
+    name: "홈 위젯의 기다림 모습이 실제와 같은 부품이다 — 휴가 현황 · 내 정보 · 회비 현황 · 휴가 신청 통계 · 생일비 행렬의 fallback",
+    run() {
+      const want = {
+        "src/features/dashboard/ui/widgets/VacationStatsWidget.tsx": /fallback=\{<VacationMetrics layout=\{layout\} \/>\}/,
+        "src/features/dashboard/ui/widgets/ProfileWidget.tsx": /fallback=\{<UserInfoContent \/>\}/,
+        "src/features/dashboard/ui/widgets/TotalDuesWidget.tsx": /fallback=\{<SummaryMetrics [^>]*\bpending \/>\}/,
+        "src/features/dashboard/ui/widgets/VacationRequestStatsWidget.tsx": /fallback=\{<RequestSummary year=\{year\} layout='inline' \/>\}/,
+        "src/features/dashboard/ui/widgets/UserBirthDuesWidget.tsx": /fallback=\{<MatrixSkeleton \/>\}/,
+      };
+      const p = [];
+      for (const [f, re] of Object.entries(want)) if (!re.test(readFileSync(join(ROOT, f), "utf8"))) p.push(`${f} — fallback 이 실제 부품의 기다림 모습이 아니다`);
+      return p;
+    },
+  },
   {
     name: "틀 부품 자리에 Skeleton 없음 — 사용자 목록 머리 · 검색칸(막힘) · 역할 지정 칸 라벨 · 설명 · 저장 단추(막힘)는 실제 부품",
     async run() {

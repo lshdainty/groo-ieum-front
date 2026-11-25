@@ -28,6 +28,8 @@ const Stat = ({ id, label, value, sub, delta, size = 'small' }: { id: string; la
  * 신청 요약(I-25 D 19) — 큰 숫자 넷(올해 신청 · 받은 휴가 · 승인율 · 결재까지 평균) + 상태 다섯 Tag Group.
  * 데스크톱 카드(`cols` 4 · 2) · 폰 띠(올해 신청 큰 숫자 + Tag Group + 키-값 셋, 연도 칸 `leading` 이 맨 위) · 홈 위젯(`inline`, 카드 없이 격자).
  * 증감은 ds Delta(▲ 빨강 · ▼ 파랑 — 좋고 나쁨이 아니라 방향), 승인율은 비중 규칙(소수 첫째 자리 · 분모 0 이면 "—").
+ * `stats` 가 없으면 기다리는 모습 — 같은 짜임에 이름 · 정해진 보조 글 · 상태 이름은 실제 글, 서버 값(숫자 · 건수가 든 보조 글)만
+ * 그 글 크기의 글 줄 스켈레톤(skeleton.md "틀은 먼저, 데이터 자리만 스켈레톤"). 0 ~ 1초 시간표는 감싸는 LoadingRegion 이 맡는다.
  */
 export function RequestSummary({
   stats,
@@ -36,7 +38,7 @@ export function RequestSummary({
   cols = 4,
   leading,
 }: {
-  stats: GetUserRequestedVacationStatsResp
+  stats?: GetUserRequestedVacationStatsResp
   year: number
   layout: Layout
   cols?: 2 | 4
@@ -44,8 +46,8 @@ export function RequestSummary({
 }) {
   const { t } = useTranslation('vacation')
   const gt = useGrantTimeText()
-  const total = stats.total_request_count
-  const growth = stats.change_rate
+  const total = stats?.total_request_count ?? 0
+  const growth = stats?.change_rate ?? 0
   const thisYear = year === new Date().getFullYear()
 
   const totalLabel = thisYear ? t('req.sumTotalThisYear') : t('req.sumTotalYear', { year })
@@ -53,31 +55,40 @@ export function RequestSummary({
     growth === 0 ? undefined : (
       <Delta direction={growth > 0 ? 'up' : 'down'} value={formatChangeRate(growth, { sign: 'none' })} text={t('request.sinceLastMonth')} data-request-growth={growth > 0 ? 'up' : 'down'} />
     )
-  const monthSub = t('req.sumThisMonth', { count: stats.current_month_request_count })
-  const rate = total > 0 ? formatShare(stats.approval_rate) : '—'
-  const avg = total > 0 ? t('req.sumAvgValue', { days: stats.average_processing_days.toFixed(1) }) : '—'
+  // 서버 값 자리 — 받은 값, 기다리는 동안은 그 글 크기의 글 줄
+  const wait = (text: 't9' | 't7' | 't5' | 't3', width: string) => <Skeleton text={text} className={`block ${width} max-w-full`} />
+  const value = (got: () => ReactNode, text: 't9' | 't7' | 't5' = 't7') => (stats ? got() : wait(text, 'w-[72px]'))
+  const monthSub = stats ? t('req.sumThisMonth', { count: stats.current_month_request_count }) : wait('t3', 'w-[96px]')
+  const rateSub = stats ? t('req.sumRateSub', { total, approved: stats.approved_count }) : wait('t3', 'w-[128px]')
+  const rate = () => (total > 0 && stats ? formatShare(stats.approval_rate) : '—')
+  const avg = () => (total > 0 && stats ? t('req.sumAvgValue', { days: stats.average_processing_days.toFixed(1) }) : '—')
+  const acquired = () => (stats ? gt(stats.acquired_vacation_time, stats.acquired_vacation_time_str || '0') : '')
+  const count = () => t('req.sumCount', { count: total })
 
   const tags = (
     <TagGroup size='t3' aria-label={t('req.tagsAria')} data-status-tags>
-      {[
-        ['pending', stats.pending_count],
-        ['progress', stats.progress_count],
-        ['approved', stats.approved_count],
-        ['rejected', stats.rejected_count],
-        ['canceled', stats.canceled_count],
-      ].map(([key, n]) => (
+      {(
+        [
+          ['pending', stats?.pending_count],
+          ['progress', stats?.progress_count],
+          ['approved', stats?.approved_count],
+          ['rejected', stats?.rejected_count],
+          ['canceled', stats?.canceled_count],
+        ] as const
+      ).map(([key, n]) => (
         <TagGroupItem key={key} data-status-tag={key}>
-          {t(`status.${key}`)} <b className='font-bold text-fg-neutral tabular-nums'>{n}</b>
+          {t(`status.${key}`)}{' '}
+          {stats ? <b className='font-bold text-fg-neutral tabular-nums'>{n}</b> : <Skeleton text='t3' className='inline-block w-[16px] align-top' />}
         </TagGroupItem>
       ))}
     </TagGroup>
   )
 
   const four = [
-    <Stat key='total' id='total' label={totalLabel} value={t('req.sumCount', { count: total })} sub={monthSub} delta={delta} />,
-    <Stat key='acquired' id='acquired' label={t('req.sumAcquired')} value={gt(stats.acquired_vacation_time, stats.acquired_vacation_time_str || '0')} sub={t('req.sumAcquiredSub')} />,
-    <Stat key='rate' id='rate' label={t('req.sumRate')} value={rate} sub={t('req.sumRateSub', { total, approved: stats.approved_count })} />,
-    <Stat key='avg' id='avg' label={t('req.sumAvg')} value={avg} />,
+    <Stat key='total' id='total' label={totalLabel} value={value(count)} sub={monthSub} delta={delta} />,
+    <Stat key='acquired' id='acquired' label={t('req.sumAcquired')} value={value(acquired)} sub={t('req.sumAcquiredSub')} />,
+    <Stat key='rate' id='rate' label={t('req.sumRate')} value={value(rate)} sub={rateSub} />,
+    <Stat key='avg' id='avg' label={t('req.sumAvg')} value={value(avg)} />,
   ]
 
   if (layout === 'band') {
@@ -85,13 +96,13 @@ export function RequestSummary({
       <div data-request-summary className='flex flex-col'>
         {leading != null && <div className='px-x6 pt-x4'>{leading}</div>}
         <div className={leading != null ? 'px-x6 pt-x2' : 'px-x6 pt-x4'}>
-          <Stat id='total' label={totalLabel} value={t('req.sumCount', { count: total })} sub={monthSub} delta={delta} size='large' />
+          <Stat id='total' label={totalLabel} value={value(count, 't9')} sub={monthSub} delta={delta} size='large' />
         </div>
         <div className='px-x6 pt-x3'>{tags}</div>
         <List className='mt-x1'>
-          <ListItem data-stat='acquired' title={t('req.sumAcquired')} suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{gt(stats.acquired_vacation_time, stats.acquired_vacation_time_str || '0')}</span>} />
-          <ListItem data-stat='rate' title={t('req.sumRate')} detail={t('req.sumRateSub', { total, approved: stats.approved_count })} suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{rate}</span>} align='top' />
-          <ListItem data-stat='avg' title={t('req.sumAvg')} suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{avg}</span>} />
+          <ListItem data-stat='acquired' title={t('req.sumAcquired')} suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{value(acquired, 't5')}</span>} />
+          <ListItem data-stat='rate' title={t('req.sumRate')} detail={rateSub} suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{value(rate, 't5')}</span>} align='top' />
+          <ListItem data-stat='avg' title={t('req.sumAvg')} suffix={<span className='text-t5 font-bold tabular-nums text-fg-neutral'>{value(avg, 't5')}</span>} />
         </List>
       </div>
     )
@@ -106,16 +117,4 @@ export function RequestSummary({
     </div>
   )
   return layout === 'card' ? <Card>{body}</Card> : body
-}
-
-export const RequestSummarySkeleton = ({ layout }: { layout: Layout }) => {
-  const one = (i: number) => (
-    <div key={i} className='flex flex-col items-start gap-x1'>
-      <Skeleton text='t3' className='block w-1/2' />
-      <Skeleton text='t7' className='block w-3/4' />
-    </div>
-  )
-  if (layout === 'band') return <div className='flex flex-col gap-x4 px-x6 pt-x4 pb-x3'>{[0, 1, 2].map(one)}</div>
-  const grid = <div className='grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-x6'>{[0, 1, 2, 3].map(one)}</div>
-  return layout === 'card' ? <Card>{grid}</Card> : grid
 }
