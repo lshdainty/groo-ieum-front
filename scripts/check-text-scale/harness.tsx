@@ -51,6 +51,8 @@ import { UserInfoContent } from '@/features/user-profile/ui/UserInfoContent'
 import { SummaryMetrics } from '@/features/culture-dues/ui/DuesSummary'
 import { MatrixSkeleton } from '@/features/culture-dues/ui/DuesBirthMatrix'
 import { RequestSummary } from '@/features/vacation-application/ui/RequestSummary'
+import { ManagementProvider } from '@/features/admin-users-management/model/ManagementContext'
+import { UserListCard } from '@/features/admin-users-management/ui/UserTable'
 
 const params = new URLSearchParams(window.location.search)
 if (params.get('font')) document.documentElement.style.fontSize = `${Number(params.get('font')) * 100}%`
@@ -148,6 +150,15 @@ const duesMetrics = [
   { id: 'withdrawal', label: '운영비 출금', value: '0원', description: '올해 출금' },
   { id: 'birth', label: '11월 생일비', value: '0원', description: '올해 11월' },
 ]
+
+// 사용자 관리 표 — 쪽 넘김 줄이 생기도록 한 쪽(10)보다 많이(groo-design #272 — 표만 가로로 밀리고 넘김 줄은 보이는 폭에)
+const managedUsers = Array.from({ length: 30 }, (_, i) => ({
+  ...me,
+  user_id: `ieum${i + 1}`,
+  user_name: `김이음${i + 1}`,
+  user_email: `ieum${i + 1}@groo.test`,
+  invitation_status: 'ACTIVE',
+})) as GetUsersResp[]
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } })
 const thisMonth = dayjs(DAY)
@@ -339,6 +350,15 @@ function Scene() {
           <div data-check='missing' style={{ width: 390 }}>
             <MissingWorkHistoryWidget />
           </div>
+          {/* 사용자 관리 표 — 976 은 1280 창의 본문 폭(1280 − 사이드바 240 − 좌우 여백 32 × 2). 300% 에서 열이 넘쳐 표가 가로로 밀린다.
+              좁은 상자(480)는 300% 에서 넘김 줄이 보이는 폭보다 넓어지는 경우(groo-design #272) */}
+          {([976, 480] as const).map((w) => (
+            <div key={w} data-check={`user-table-${w}`} style={{ width: w }}>
+              <ManagementProvider>
+                <UserListCard users={managedUsers} />
+              </ManagementProvider>
+            </div>
+          ))}
           {/* 표 쪽 넘김 줄 — 높이 40 은 최소값(groo-design #268 · table-pagination.yaml root.minHeight). 넓은 자리라 가로로 넘치지 않는다 */}
           <div data-check='table-pagination' style={{ width: 1200 }}>
             <TablePagination totalItems={237} />
